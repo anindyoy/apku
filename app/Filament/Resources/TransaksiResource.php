@@ -2,16 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TransaksiResource\Pages;
-use App\Filament\Resources\TransaksiResource\RelationManagers;
-use App\Models\Transaksi;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\Transaksi;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use App\Filament\Resources\TransaksiResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\TransaksiResource\RelationManagers;
+use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
+use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
+use App\Filament\Resources\TransaksiResource\Pages\CreateTransaksi;
 
 class TransaksiResource extends Resource
 {
@@ -30,6 +40,7 @@ class TransaksiResource extends Resource
                     ->numeric(),
                 Forms\Components\TextInput::make('user_id')
                     ->required()
+                    ->visible(auth()->user()->isSuper())
                     ->numeric(),
                 Forms\Components\TextInput::make('jenis_transaksi_id')
                     ->required()
@@ -53,44 +64,39 @@ class TransaksiResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('buku_kas_id')
+                // Tables\Columns\TextColumn::make('buku_kas.nama_buku')
+                //     ->numeric(),
+                Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('jenis_transaksi_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->visible(auth()->user()->isSuper()),
+                Tables\Columns\TextColumn::make('jenis_transaksi.nama_jenis'),
                 Tables\Columns\TextColumn::make('tanggal')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('nominal')
-                    ->numeric()
-                    ->sortable(),
+                    ->dateTime(),
                 Tables\Columns\TextColumn::make('jenis'),
-                Tables\Columns\TextColumn::make('tujuan_buku_tabungan_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('deskripsi')
+                    ->wrap()->searchable(),
+                // Tables\Columns\TextColumn::make('tujuan_buku_tabungan_id')
+                //     ->numeric(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('nominal')
+                    ->numeric(),
+                TextColumn::make('Saldo'),
             ])
+            ->defaultSort('tanggal', 'desc')
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(auth()->user()->isSuper()),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -105,8 +111,8 @@ class TransaksiResource extends Resource
     {
         return [
             'index' => Pages\ListTransaksis::route('/'),
-            'create' => Pages\CreateTransaksi::route('/create'),
-            'edit' => Pages\EditTransaksi::route('/{record}/edit'),
+            // 'create' => Pages\CreateTransaksi::route('/create'),
+            // 'edit' => Pages\EditTransaksi::route('/{record}/edit'),
         ];
     }
 }

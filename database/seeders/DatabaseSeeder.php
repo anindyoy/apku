@@ -33,6 +33,11 @@ class DatabaseSeeder extends Seeder
         $users = User::factory(10)->create();
 
         foreach ($users as $value) {
+            if ($value->type == 'premium') {
+                $value->masa_aktif = fake()->dateTimeBetween('+3 months', '+1 year');
+                $value->save();
+            }
+
             // CREATE JENIS TRANSAKSI
             $list_tipe = ['pendapatan', 'pengeluaran'];
             $jenis = [
@@ -67,7 +72,7 @@ class DatabaseSeeder extends Seeder
                 $goal = rand(0, 4);
                 $buku = BukuKas::create([
                     'user_id' => $value->id,
-                    'nama_buku' => 'Buku Kas-' . ($i + 1) . ' ' . $value->name,
+                    'nama_buku' => 'Buku Kas-' . ($i + 1) . ' ' . fake()->word(),
                     'saldo' => rand(0, 100),
                     'description' => fake()->sentence(),
                     'goal' => $goal == 4 ? rand(100, 1000) : null,
@@ -85,20 +90,30 @@ class DatabaseSeeder extends Seeder
 
             // CREATE TRANSAKSI
             for ($i = 0; $i < rand(10, 25); $i++) {
-                $default_kas_id = BukuKas::inRandomOrder()->first()->id;
-                $tujuan_kas_id = !rand(0, 3) ? BukuKas::inRandomOrder()->whereNot('id', $default_kas_id)->first()->id : null;
+                $default_kas_id = BukuKas::getRandomBukuKas($value->id)->first()->id;
+
+                $tujuan_kas_id = !rand(0, 3)
+                    ? BukuKas::getRandomBukuKas($value->id)->whereNot('id', $default_kas_id)->first()->id
+                    : null;
 
                 Transaksi::create([
                     'user_id' => $value->id,
                     'jenis_transaksi_id' => JenisTransaksi::inRandomOrder()->first()->id,
-                    'buku_kas_id' => BukuKas::inRandomOrder()->first()->id,
+                    'buku_kas_id' => BukuKas::getRandomBukuKas($value->id)->first()->id,
                     'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
                     'nominal' => rand(1, 100),
-                    'jenis' => rand(0, 1) ? 'debit' : 'kredit',
+                    'jenis' => rand(0, 1) ? 'Pengeluaran' : 'Pemasukan',
                     'deskripsi' => fake()->sentence(),
                     'tujuan_buku_tabungan_id' => $tujuan_kas_id,
                 ]);
             }
         }
     }
+
+    // public function getRandomBukuKas($user_id)
+    // {
+    //     return BukuKas::withoutGlobalScopes()
+    //         ->where('user_id', $user_id)
+    //         ->inRandomOrder();
+    // }
 }

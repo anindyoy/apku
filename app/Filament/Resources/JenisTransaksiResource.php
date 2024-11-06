@@ -19,6 +19,7 @@ class JenisTransaksiResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralLabel = 'Jenis Transaksi';
+    protected static ?string $navigationGroup = 'Pengaturan';
     protected static ?string $slug = 'jenis-transaksi';
 
     public static function form(Form $form): Form

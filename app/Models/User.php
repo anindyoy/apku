@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\BukuKas;
+use App\Models\Transaksi;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -37,7 +38,7 @@ class User extends Authenticatable
     /**
      * Get the attributes that should be cast.
      *
-     * @return array<string, string>
+     * @return array<string, string>CustomSeeder
      */
     protected function casts(): array
     {
@@ -50,5 +51,15 @@ class User extends Authenticatable
     public function buku_kas()
     {
         return $this->hasMany(BukuKas::class);
+    }
+
+    public function transaksi()
+    {
+        return $this->hasMany(Transaksi::class);
+    }
+
+    public function isSuper()
+    {
+        return $this->email == 'super@apku.com';
     }
 }

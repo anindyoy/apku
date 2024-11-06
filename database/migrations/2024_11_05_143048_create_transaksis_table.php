@@ -16,9 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('buku_kas_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('jenis_transaksi_id');
-            $table->date('tanggal');
+            $table->dateTime('tanggal');
             $table->integer('nominal');
-            $table->enum('jenis', ['debit', 'kredit']);
+            $table->integer('saldo_akhir')->nullable();
+            $table->enum('jenis', ['Pengeluaran', 'Pemasukan']);
             $table->text('deskripsi')->nullable();
             $table->unsignedBigInteger('tujuan_buku_tabungan_id')->nullable();
             // $table->enum('jenis_transaksi', ['transfer', 'pendapatan', 'pengeluaran', 'utang', 'piutang']);

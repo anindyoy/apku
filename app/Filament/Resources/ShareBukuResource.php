@@ -2,16 +2,24 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ShareBukuResource\Pages;
-use App\Filament\Resources\ShareBukuResource\RelationManagers;
-use App\Models\ShareBuku;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\ShareBuku;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use App\Filament\Resources\ShareBukuResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\ShareBukuResource\RelationManagers;
+use App\Filament\Resources\ShareBukuResource\Pages\EditShareBuku;
+use App\Filament\Resources\ShareBukuResource\Pages\ListShareBukus;
+use App\Filament\Resources\ShareBukuResource\Pages\CreateShareBuku;
 
 class ShareBukuResource extends Resource
 {
@@ -20,6 +28,7 @@ class ShareBukuResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralLabel = 'Share Buku';
     protected static ?string $slug = 'share-buku';
+    protected static ?string $navigationGroup = 'Pengaturan';
 
     public static function form(Form $form): Form
     {

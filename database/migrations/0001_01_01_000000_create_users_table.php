@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->timestamp('masa_aktif')->nullable();
+            $table->date('masa_aktif')->nullable();
             $table->string('password');
             $table->enum('type', ['premium', 'reguler'])->default('reguler');
             $table->rememberToken();

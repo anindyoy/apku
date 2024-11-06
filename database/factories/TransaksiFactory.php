@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
+use App\Models\BukuKas;
+use App\Models\JenisTransaksi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +19,16 @@ class TransaksiFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::inRandomOrder()->first();
         return [
-            //
+            'user_id' => $user->id,
+            'jenis_transaksi_id' => JenisTransaksi::inRandomOrder()->first()->id,
+            'buku_kas_id' => BukuKas::getRandomBukuKas($user->id)->first()->id,
+            'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
+            'nominal' => rand(1, 100),
+            'jenis' => rand(0, 1) ? 'Pengeluaran' : 'Pemasukan',
+            'deskripsi' => fake()->sentence(),
+            // 'tujuan_buku_tabungan_id' => $tujuan_kas_id,
         ];
     }
 }
