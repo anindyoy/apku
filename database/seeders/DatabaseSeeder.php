@@ -68,6 +68,7 @@ class DatabaseSeeder extends Seeder
                 $buku = BukuKas::create([
                     'user_id' => $value->id,
                     'nama_buku' => 'Buku Kas-' . ($i + 1) . ' ' . $value->name,
+                    'saldo' => rand(0, 100),
                     'description' => fake()->sentence(),
                     'goal' => $goal == 4 ? rand(100, 1000) : null,
                     'tanggal_goal' => $goal == 4 ? fake()->dateTimeBetween('now', '+1 year') : null,

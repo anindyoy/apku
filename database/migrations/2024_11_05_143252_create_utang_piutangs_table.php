@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('utang_piutang', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->date('tanggal_jatuh_tempo')->nullable();
+            $table->date('tanggal_jatuh_teggmpo')->nullable();
             $table->integer('nominal');
             $table->text('deskripsi')->nullable();
             $table->enum('status', ['lunas', 'belum lunas'])->default('belum lunas');

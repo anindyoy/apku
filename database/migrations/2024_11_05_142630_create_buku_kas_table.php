@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('nama_buku');
+            $table->integer('saldo');
             $table->integer('goal')->nullable();
             $table->date('tanggal_goal')->nullable();
             $table->string('description', 200)->nullable();
