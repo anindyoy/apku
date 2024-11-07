@@ -22,8 +22,7 @@ class BukuKas extends Model
 
     public static function getRandomBukuKas($user_id)
     {
-        return self::withoutGlobalScopes()
-            ->where('user_id', $user_id)
+        return self::where('user_id', $user_id)
             ->inRandomOrder();
     }
 }

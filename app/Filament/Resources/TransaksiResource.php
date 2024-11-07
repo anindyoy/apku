@@ -22,6 +22,7 @@ use App\Filament\Resources\TransaksiResource\RelationManagers;
 use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\TransaksiResource\Pages\CreateTransaksi;
+use Filament\Tables\Actions\DeleteAction;
 
 class TransaksiResource extends Resource
 {
@@ -62,6 +63,10 @@ class TransaksiResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $transaksi = Transaksi::inRandomOrder()
+            ->where('user_id', auth()->user()->id)
+            ->first();
+
         return $table
             ->columns([
                 // Tables\Columns\TextColumn::make('buku_kas.nama_buku')
@@ -72,7 +77,14 @@ class TransaksiResource extends Resource
                 Tables\Columns\TextColumn::make('jenis_transaksi.nama_jenis'),
                 Tables\Columns\TextColumn::make('tanggal')
                     ->dateTime(),
-                Tables\Columns\TextColumn::make('jenis'),
+                Tables\Columns\TextColumn::make('jenis')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        // 'draft' => 'gray',
+                        // 'reviewing' => 'warning',
+                        'Pemasukan' => 'success',
+                        'Pengeluaran' => 'danger',
+                    }),
                 Tables\Columns\TextColumn::make('deskripsi')
                     ->wrap()->searchable(),
                 // Tables\Columns\TextColumn::make('tujuan_buku_tabungan_id')
@@ -94,6 +106,7 @@ class TransaksiResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->hidden(auth()->user()->isSuper()),
+                DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

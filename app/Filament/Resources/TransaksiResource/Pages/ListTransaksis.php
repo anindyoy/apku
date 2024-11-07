@@ -13,6 +13,8 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 class ListTransaksis extends ListRecords
 {
     protected static string $resource = TransaksiResource::class;
+    protected static ?string $navigationLabel = 'Transaksi';
+
 
     protected function getHeaderActions(): array
     {

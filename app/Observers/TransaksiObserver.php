@@ -2,16 +2,25 @@
 
 namespace App\Observers;
 
+use App\Models\BukuKas;
 use App\Models\Transaksi;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class TransaksiObserver
+class TransaksiObserver implements ShouldHandleEventsAfterCommit
 {
     /**
      * Handle the Transaksi "created" event.
      */
     public function created(Transaksi $transaksi): void
     {
-        // dd($transaksi);
+        $kas = $transaksi->buku_kas;
+        if ($transaksi->jenis == 'Pengeluaran') {
+            $kas->saldo = $kas->saldo - $transaksi->nominal;
+            $kas->save();
+        } else {
+            $kas->saldo = $kas->saldo + $transaksi->nominal;
+            $kas->save();
+        }
     }
 
     /**
@@ -19,7 +28,14 @@ class TransaksiObserver
      */
     public function updated(Transaksi $transaksi): void
     {
-        //
+        $kas = $transaksi->buku_kas;
+        if ($transaksi->jenis == 'Pengeluaran') {
+            $kas->saldo = $kas->saldo + $transaksi->getOriginal('nominal') - $transaksi->nominal;
+            $kas->save();
+        } else {
+            $kas->saldo = $kas->saldo - $transaksi->getOriginal('nominal') + $transaksi->nominal;
+            $kas->save();
+        }
     }
 
     /**
@@ -27,7 +43,16 @@ class TransaksiObserver
      */
     public function deleted(Transaksi $transaksi): void
     {
-        //
+        $kas = $transaksi->buku_kas;
+
+        if ($transaksi->jenis == 'Pengeluaran') {
+            $kas->saldo = $kas->saldo + $transaksi->nominal;
+            $kas->save();
+        } else {
+            $kas->saldo = $kas->saldo - $transaksi->nominal;
+            $kas->save();
+        }
+
     }
 
     /**
