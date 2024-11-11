@@ -66,38 +66,52 @@ class TransaksiSeeder extends Seeder
                 $buku = BukuKas::create([
                     'user_id' => $value->id,
                     'nama_buku' => 'Buku Kas-' . ($i + 1) . ' ' . fake()->word(),
-                    'saldo' => rand(0, 100),
+                    'saldo' => 0,
                     'description' => fake()->sentence(),
                     'goal' => $goal == 4 ? rand(100, 1000) : null,
                     'tanggal_goal' => $goal == 4 ? fake()->dateTimeBetween('now', '+1 year') : null,
                 ]);
 
-                if (rand(0, 1)) {
-                    ShareBuku::create([
-                        'user_id' => User::inRandomOrder()->whereNot('id', $value->id)->first()->id,
-                        'buku_kas_id' => $buku->id,
-                        'privilege' => rand(0, 1) ? 'editor' : 'viewer',
-                    ]);
-                }
+                Transaksi::create([
+                    'user_id' => $value->id,
+                    'buku_kas_id' => $buku->id,
+                    'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
+                    'nominal' => rand(0, 100),
+                    'jenis' => 'Pemasukan',
+                    'deskripsi' => 'Saldo pertama',
+                    // 'tujuan_buku_tabungan_id' => $tujuan_kas_id,
+                ]);
+
+                // if (rand(0, 1)) {
+                //     ShareBuku::create([
+                //         'user_id' => User::inRandomOrder()->whereNot('id', $value->id)->first()->id,
+                //         'buku_kas_id' => $buku->id,
+                //         'privilege' => rand(0, 1) ? 'editor' : 'viewer',
+                //     ]);
+                // }
             }
 
             // CREATE TRANSAKSI
             for ($i = 0; $i < rand(10, 25); $i++) {
                 $default_kas_id = BukuKas::getRandomBukuKas($value->id)->first()->id;
 
-                $tujuan_kas_id = !rand(0, 3)
-                    ? BukuKas::getRandomBukuKas($value->id)->whereNot('id', $default_kas_id)->first()->id
-                    : null;
+                // $tujuan_kas_id = !rand(0, 3)
+                //     ? BukuKas::getRandomBukuKas($value->id)->whereNot('id', $default_kas_id)->first()->id
+                //     : null;
+
+                $kas_id = BukuKas::getRandomBukuKas($value->id)->first()->id;
+                // Transaksi::where('buku_kas_id', $kas_id)->first()->tanggal;
 
                 Transaksi::create([
                     'user_id' => $value->id,
                     'jenis_transaksi_id' => JenisTransaksi::inRandomOrder()->first()->id,
-                    'buku_kas_id' => BukuKas::getRandomBukuKas($value->id)->first()->id,
-                    'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
+                    'buku_kas_id' => $kas_id,
+                    // 'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
+                    'tanggal' => fake()->dateTimeBetween(Transaksi::where('buku_kas_id', $kas_id)->first()->tanggal, 'now'),
                     'nominal' => rand(1, 100),
                     'jenis' => rand(0, 1) ? 'Pengeluaran' : 'Pemasukan',
                     'deskripsi' => fake()->sentence(),
-                    'tujuan_buku_tabungan_id' => $tujuan_kas_id,
+                    // 'tujuan_buku_tabungan_id' => $tujuan_kas_id,
                 ]);
             }
         }

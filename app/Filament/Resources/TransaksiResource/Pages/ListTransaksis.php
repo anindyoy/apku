@@ -23,19 +23,52 @@ class ListTransaksis extends ListRecords
     protected static string $resource = TransaksiResource::class;
     protected static ?string $navigationLabel = 'Transaksi';
 
+    public function defaultForm($livewire)
+    {
+        return [
+            'buku_kas_id' => BukuKas::where('nama_buku', $livewire->activeTab)->first()->id,
+            'tanggal' => date('d M Y, H:i')
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
         return [
             // Actions\CreateAction::make()->hidden(auth()->user()->isSuper()),
             Action::make('Catat Pemasukan')
-                ->action(function (?Transaksi $record, array $data) {
+                ->action(function ($form, $action, $livewire, array $data, array $arguments) {
                     $data['jenis'] = 'Pemasukan';
                     $data['user_id'] = auth()->user()->id;
                     Transaksi::create($data);
+
                     Notification::make()
                         ->title('Berhasil Catat Pemasukan')
-                        // ->body('')
+                        ->success()
+                        ->send();
+
+                    if ($arguments['another'] ?? false) {
+                        $form->fill($this->defaultForm($livewire));
+                        $action->halt();
+                    }
+
+                    $action->cancel();
+                })
+                ->fillForm(fn($livewire): array => $this->defaultForm($livewire))
+                ->extraModalFooterActions(fn(Action $action): array => [
+                    $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                        ->label('Tambah yang lain'),
+                ])
+                ->form(Transaksi::form())
+                ->color('success')
+                ->icon('heroicon-o-arrow-down-on-square'),
+
+            Action::make('Catat Pengeluaran')
+                ->action(function (?Transaksi $record, array $data) {
+                    $data['jenis'] = 'Pengeluaran';
+                    $data['user_id'] = auth()->user()->id;
+                    Transaksi::create($data);
+                    Notification::make()
+                        ->title('Berhasil Catat Pengeluaran')
                         ->success()
                         ->send();
                 })
@@ -43,7 +76,9 @@ class ListTransaksis extends ListRecords
                     'buku_kas_id' => BukuKas::where('nama_buku', $livewire->activeTab)->first()->id,
                     'tanggal' => now()
                 ])
-                ->form(Transaksi::form()),
+                ->form(Transaksi::form())
+                ->color('danger')
+                ->icon('heroicon-o-arrow-up-on-square'),
         ];
     }
 

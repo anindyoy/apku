@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('buku_kas_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('jenis_transaksi_id');
+            $table->unsignedBigInteger('jenis_transaksi_id')->nullable();
             $table->dateTime('tanggal');
             $table->integer('nominal');
             // $table->integer('saldo_akhir')->nullable();

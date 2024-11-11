@@ -45,6 +45,14 @@ class Transaksi extends Model
     public static function form()
     {
         return [
+            Select::make('jenis')
+                ->options([
+                    'Pemasukan' => 'Pemasukan',
+                    'Pengeluaran' => 'Pengeluaran'
+                ])
+                ->disabled()
+                ->visible(fn($record) => $record),
+
             Grid::make()
                 ->schema([
                     Select::make('buku_kas_id')
@@ -65,7 +73,6 @@ class Transaksi extends Model
                         ->required()
                         ->seconds(false)
                         ->native(false)
-                        // ->default(now())
                         ->displayFormat('d M Y, H:i')
                         ->maxDate(now()),
 

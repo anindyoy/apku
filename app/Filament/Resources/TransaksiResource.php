@@ -50,9 +50,12 @@ class TransaksiResource extends Resource
             ->modifyQueryUsing(
                 fn(Builder $query) => $query->select(
                     'transaksi.*',
-                    DB::raw('SUM(nominal) OVER (PARTITION BY buku_kas_id ORDER BY tanggal) as sisa_saldo')
+                    DB::raw(
+                        'SUM(CASE WHEN jenis = "Pemasukan" THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal) as sisa_saldo'
+                    )
                 )
             )
+            ->paginated([10, 25, 50])
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
@@ -73,7 +76,7 @@ class TransaksiResource extends Resource
                     }),
 
                 Tables\Columns\TextColumn::make('tanggal')
-                    ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),
+                    ->formatStateUsing(fn($state) => date('d M Y, H:i:s', strtotime($state))),
 
                 Tables\Columns\TextColumn::make('jenis_transaksi.nama_jenis')
                     ->label('Kategori'),

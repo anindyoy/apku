@@ -15,10 +15,10 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
     {
         $kas = $transaksi->buku_kas;
         if ($transaksi->jenis == 'Pengeluaran') {
-            $kas->saldo = $kas->saldo - $transaksi->nominal;
+            $kas->saldo -= $transaksi->nominal;
             $kas->save();
         } else {
-            $kas->saldo = $kas->saldo + $transaksi->nominal;
+            $kas->saldo += $transaksi->nominal;
             $kas->save();
         }
     }

@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         //     'password' => Hash::make('superapku'),
         // ]);
 
+        User::factory(10)->create();
+
         $this->call([
             TransaksiSeeder::class
         ]);
