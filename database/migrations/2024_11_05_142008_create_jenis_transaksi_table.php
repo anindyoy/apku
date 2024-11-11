@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('nama_jenis');
-            $table->enum('tipe', ['pendapatan', 'pengeluaran']);
+            $table->enum('tipe', ['Pemasukan', 'Pengeluaran']);
 
             $table->timestamps();
         });

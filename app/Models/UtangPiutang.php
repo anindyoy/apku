@@ -9,4 +9,5 @@ class UtangPiutang extends Model
 {
     /** @use HasFactory<\Database\Factories\UtangPiutangFactory> */
     use HasFactory;
+    protected $guarded = [];
 }

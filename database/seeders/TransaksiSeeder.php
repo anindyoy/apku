@@ -18,7 +18,6 @@ class TransaksiSeeder extends Seeder
      */
     public function run(): void
     {
-
         JenisTransaksi::truncate();
         BukuKas::truncate();
         ShareBuku::truncate();
@@ -33,7 +32,7 @@ class TransaksiSeeder extends Seeder
             }
 
             // CREATE JENIS TRANSAKSI
-            $list_tipe = ['pendapatan', 'pengeluaran'];
+            $list_tipe = ['Pemasukan', 'Pengeluaran'];
             $jenis = [
                 'transfer',
                 'usaha',

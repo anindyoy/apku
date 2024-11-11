@@ -8,11 +8,15 @@ use Filament\Forms\Form;
 use App\Models\Transaksi;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -22,7 +26,6 @@ use App\Filament\Resources\TransaksiResource\RelationManagers;
 use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\TransaksiResource\Pages\CreateTransaksi;
-use Filament\Tables\Actions\DeleteAction;
 
 class TransaksiResource extends Resource
 {
@@ -34,31 +37,7 @@ class TransaksiResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('buku_kas_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->visible(auth()->user()->isSuper())
-                    ->numeric(),
-                Forms\Components\TextInput::make('jenis_transaksi_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DatePicker::make('tanggal')
-                    ->required(),
-                Forms\Components\TextInput::make('nominal')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('jenis')
-                    ->required(),
-                Forms\Components\Textarea::make('deskripsi')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('tujuan_buku_tabungan_id')
-                    ->numeric()
-                    ->default(null),
-            ]);
+        return $form->schema(Transaksi::form());
     }
 
     public static function table(Table $table): Table
@@ -68,27 +47,38 @@ class TransaksiResource extends Resource
             ->first();
 
         return $table
+            ->modifyQueryUsing(
+                fn(Builder $query) => $query->select(
+                    'transaksi.*',
+                    DB::raw('SUM(nominal) OVER (PARTITION BY buku_kas_id ORDER BY tanggal) as sisa_saldo')
+                )
+            )
             ->columns([
-                // Tables\Columns\TextColumn::make('buku_kas.nama_buku')
-                //     ->numeric(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->visible(auth()->user()->isSuper()),
-                Tables\Columns\TextColumn::make('jenis_transaksi.nama_jenis'),
-                Tables\Columns\TextColumn::make('tanggal')
-                    ->dateTime(),
-                Tables\Columns\TextColumn::make('jenis')
-                    ->badge()
+
+                IconColumn::make('jenis')
+                    ->label('Tipe')
+                    ->tooltip(fn($state) => $state)
+                    ->icon(fn(string $state): string => match ($state) {
+                        'Pemasukan' => 'heroicon-o-arrow-down-on-square',
+                        'Pengeluaran' => 'heroicon-o-arrow-up-on-square',
+                    })
                     ->color(fn(string $state): string => match ($state) {
                         // 'draft' => 'gray',
                         // 'reviewing' => 'warning',
                         'Pemasukan' => 'success',
                         'Pengeluaran' => 'danger',
                     }),
+
+                Tables\Columns\TextColumn::make('tanggal')
+                    ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),
+
+                Tables\Columns\TextColumn::make('jenis_transaksi.nama_jenis')
+                    ->label('Kategori'),
                 Tables\Columns\TextColumn::make('deskripsi')
                     ->wrap()->searchable(),
-                // Tables\Columns\TextColumn::make('tujuan_buku_tabungan_id')
-                //     ->numeric(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -97,7 +87,7 @@ class TransaksiResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nominal')
                     ->numeric(),
-                TextColumn::make('Saldo'),
+                TextColumn::make('sisa_saldo'),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([
@@ -109,7 +99,7 @@ class TransaksiResource extends Resource
                 DeleteAction::make()
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                // Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
+use Filament\Tables\Enums\FiltersLayout;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,9 +24,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         App::setLocale('id');
-        // LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-        //     $switch
-        //         ->locales(['id', 'en']); // also accepts a closure
-        // });
+        Table::configureUsing(function (Table $table): void {
+            $table
+                ->striped();
+        });
     }
 }

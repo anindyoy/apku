@@ -52,7 +52,6 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
             $kas->saldo = $kas->saldo - $transaksi->nominal;
             $kas->save();
         }
-
     }
 
     /**

@@ -18,9 +18,10 @@ class JenisTransaksiResource extends Resource
     protected static ?string $model = JenisTransaksi::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $pluralLabel = 'Jenis Transaksi';
+    protected static ?string $pluralLabel = 'Kategori';
+    protected static ?string $modelLabel = 'Kategori';
     protected static ?string $navigationGroup = 'Pengaturan';
-    protected static ?string $slug = 'jenis-transaksi';
+    protected static ?string $slug = 'kategori';
 
     public static function form(Form $form): Form
     {

@@ -14,6 +14,7 @@ class BukuKas extends Model
     /** @use HasFactory<\Database\Factories\BukuKasFactory> */
     use HasFactory;
     protected $table = 'buku_kas';
+    protected $guarded = [];
 
     public function user()
     {
