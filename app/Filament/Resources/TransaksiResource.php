@@ -51,10 +51,11 @@ class TransaksiResource extends Resource
                 fn(Builder $query) => $query->select(
                     'transaksi.*',
                     DB::raw(
-                        'SUM(CASE WHEN jenis = "Pemasukan" THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal) as sisa_saldo'
+                        'SUM(CASE WHEN jenis = "Pemasukan" THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
                     )
                 )
             )
+            ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
@@ -76,12 +77,18 @@ class TransaksiResource extends Resource
                     }),
 
                 Tables\Columns\TextColumn::make('tanggal')
-                    ->formatStateUsing(fn($state) => date('d M Y, H:i:s', strtotime($state))),
+                    ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),
 
                 Tables\Columns\TextColumn::make('jenis_transaksi.nama_jenis')
-                    ->label('Kategori'),
-                Tables\Columns\TextColumn::make('deskripsi')
-                    ->wrap()->searchable(),
+                    ->label('Kategori')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query
+                            ->where('deskripsi', 'like', "%{$search}%");
+                    })
+                    ->description(fn($record) => $record->deskripsi ? 'Deskripsi: ' . $record->deskripsi : '')
+                    ->wrap(),
+                // Tables\Columns\TextColumn::make('deskripsi')
+                //     ->wrap()->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -90,7 +97,7 @@ class TransaksiResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nominal')
                     ->numeric(),
-                TextColumn::make('sisa_saldo'),
+                TextColumn::make('saldo'),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([

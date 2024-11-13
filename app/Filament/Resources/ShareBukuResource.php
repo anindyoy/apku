@@ -28,6 +28,7 @@ class ShareBukuResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralLabel = 'Share Buku';
     protected static ?string $slug = 'share-buku';
+    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $navigationGroup = 'Pengaturan';
 
     public static function form(Form $form): Form

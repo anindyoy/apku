@@ -27,7 +27,7 @@ class ListTransaksis extends ListRecords
     {
         return [
             'buku_kas_id' => BukuKas::where('nama_buku', $livewire->activeTab)->first()->id,
-            'tanggal' => date('d M Y, H:i')
+            'tanggal' => date('d M Y, H:i:s')
         ];
     }
 
@@ -63,18 +63,50 @@ class ListTransaksis extends ListRecords
                 ->icon('heroicon-o-arrow-down-on-square'),
 
             Action::make('Catat Pengeluaran')
-                ->action(function (?Transaksi $record, array $data) {
+                ->action(function (?Transaksi $record, array $data, $livewire, $form, $action, array $arguments) {
+                    // $data['tanggal'] = "2024-11-12 21:27"; // Nilai awal
+
+                    // Ubah string tanggal menjadi timestamp
+                    // $timestamp = strtotime($data['tanggal']);
+
+                    // // Tambahkan 1 detik ke timestamp
+                    // $timestamp += 1;
+
+                    // // Format timestamp kembali menjadi string tanggal
+                    // $data['tanggal'] = date('Y-m-d H:i:s', $timestamp);
+
+                    // $data['tanggal'] = date('Y-m-d H:i:s', strtotime($data['tanggal'] . ' ' . date('s')));
+
+
+                    // dd(
+                    //     $data['tanggal'],
+                    //     // date('Y-m-d H:i:s', strtotime($data['tanggal'])),
+                    // );
+
                     $data['jenis'] = 'Pengeluaran';
                     $data['user_id'] = auth()->user()->id;
+                    $data['tanggal'] = date('d M Y, H:i:s', strtotime($data['tanggal']));
+                    // dd($data);
                     Transaksi::create($data);
                     Notification::make()
                         ->title('Berhasil Catat Pengeluaran')
                         ->success()
                         ->send();
+
+                    if ($arguments['another'] ?? false) {
+                        $form->fill($this->defaultForm($livewire));
+                        $action->halt();
+                    }
+
+                    $action->cancel();
                 })
                 ->fillForm(fn($livewire): array => [
                     'buku_kas_id' => BukuKas::where('nama_buku', $livewire->activeTab)->first()->id,
                     'tanggal' => now()
+                ])
+                ->extraModalFooterActions(fn(Action $action): array => [
+                    $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                        ->label('Tambah yang lain'),
                 ])
                 ->form(Transaksi::form())
                 ->color('danger')

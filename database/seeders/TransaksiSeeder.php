@@ -18,6 +18,10 @@ class TransaksiSeeder extends Seeder
      */
     public function run(): void
     {
+        // dd(
+        //     JenisTransaksi::where('user_id', 4)->inRandomOrder()->first()->id
+        // );
+
         JenisTransaksi::truncate();
         BukuKas::truncate();
         ShareBuku::truncate();
@@ -100,13 +104,11 @@ class TransaksiSeeder extends Seeder
                 //     : null;
 
                 $kas_id = BukuKas::getRandomBukuKas($value->id)->first()->id;
-                // Transaksi::where('buku_kas_id', $kas_id)->first()->tanggal;
 
                 Transaksi::create([
                     'user_id' => $value->id,
-                    'jenis_transaksi_id' => JenisTransaksi::inRandomOrder()->first()->id,
+                    'jenis_transaksi_id' => JenisTransaksi::where('user_id', $value->id)->inRandomOrder()->first()->id,
                     'buku_kas_id' => $kas_id,
-                    // 'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
                     'tanggal' => fake()->dateTimeBetween(Transaksi::where('buku_kas_id', $kas_id)->first()->tanggal, 'now'),
                     'nominal' => rand(1, 100),
                     'jenis' => rand(0, 1) ? 'Pengeluaran' : 'Pemasukan',
