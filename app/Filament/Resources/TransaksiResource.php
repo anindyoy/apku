@@ -26,6 +26,7 @@ use App\Filament\Resources\TransaksiResource\RelationManagers;
 use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\TransaksiResource\Pages\CreateTransaksi;
+use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 
 class TransaksiResource extends Resource
 {
@@ -97,7 +98,7 @@ class TransaksiResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nominal')
                     ->numeric(),
-                TextColumn::make('saldo'),
+                TextColumn::make('saldo')->numeric(),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([
@@ -113,10 +114,10 @@ class TransaksiResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
+    public static function getWidgets(): array
     {
         return [
-            //
+            KasOverview::class
         ];
     }
 

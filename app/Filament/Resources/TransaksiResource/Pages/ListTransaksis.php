@@ -14,12 +14,18 @@ use Filament\Pages\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\TransaksiResource;
+use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords\Tab;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 
 class ListTransaksis extends ListRecords
 {
+    use ExposesTableToWidgets;
+
     protected static string $resource = TransaksiResource::class;
     protected static ?string $navigationLabel = 'Transaksi';
 
@@ -111,6 +117,13 @@ class ListTransaksis extends ListRecords
                 ->form(Transaksi::form())
                 ->color('danger')
                 ->icon('heroicon-o-arrow-up-on-square'),
+        ];
+    }
+
+    public function getHeaderWidgets(): array
+    {
+        return [
+            KasOverview::class
         ];
     }
 
