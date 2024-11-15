@@ -19,15 +19,10 @@ class KasOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        // dd(
-        //     // $this->getPageTableQuery(),
-        //     BukuKas::sum('saldo')o
-        // );
-
         return [
             Stat::make(
                 'Saldo',
-                'Rp ' . number_format($this->getPageTableRecords()->first()?->buku_kas->saldo)
+                'Rp ' . number_format($this->getPageTableRecords()->first()->buku_kas?->saldo)
             )
                 ->description('Semua Buku Kas Rp ' . number_format(BukuKas::sum('saldo'))),
         ];

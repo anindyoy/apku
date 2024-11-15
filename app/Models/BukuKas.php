@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Transaksi;
 use App\Models\Scopes\UserScope;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -22,7 +23,9 @@ class BukuKas extends Model
     {
         parent::boot();
         static::addGlobalScope('order', function (Builder $builder) {
-            $builder->orderBy('nama_buku');
+            $builder->orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
+                ->orderBy('nama_buku')
+            ;
         });
     }
 

@@ -67,6 +67,8 @@ class UserResource extends Resource
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type'),
+                TextColumn::make('buku_kas_count')->counts('buku_kas')
+                    ->label('Total Buku Kas'),
                 TextColumn::make('transaksi_count')->counts('transaksi')
                     ->label('Total Transaksi'),
                 Tables\Columns\TextColumn::make('created_at')

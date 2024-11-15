@@ -65,14 +65,15 @@ class TransaksiSeeder extends Seeder
                 $goal = rand(0, 4);
                 $buku = BukuKas::create([
                     'user_id' => $value->id,
-                    'nama_buku' => 'Buku Kas-' . ($i + 1) . ' ' . fake()->word(),
+                    // 'nama_buku' => 'Buku Kas-' . ($i + 1) . ' ' . fake()->word(),
+                    'nama_buku' => $i == 0 ? 'Kas Utama' : fake()->word(),
                     'saldo' => 0,
                     'description' => fake()->sentence(),
                     'goal' => $goal == 4 ? rand(100, 1000) : null,
                     'tanggal_goal' => $goal == 4 ? fake()->dateTimeBetween('now', '+1 year') : null,
                 ]);
 
-                Transaksi::create([
+                $transaksi = Transaksi::create([
                     'user_id' => $value->id,
                     'buku_kas_id' => $buku->id,
                     'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
@@ -81,6 +82,10 @@ class TransaksiSeeder extends Seeder
                     'deskripsi' => 'Saldo pertama',
                     // 'tujuan_buku_tabungan_id' => $tujuan_kas_id,
                 ]);
+
+                $kas = $transaksi->buku_kas;
+                $kas->saldo += $transaksi->nominal;
+                $kas->save();
 
                 // if (rand(0, 1)) {
                 //     ShareBuku::create([
@@ -101,7 +106,7 @@ class TransaksiSeeder extends Seeder
 
                 $kas_id = BukuKas::getRandomBukuKas($value->id)->first()->id;
 
-                Transaksi::create([
+                $transaksi = Transaksi::create([
                     'user_id' => $value->id,
                     'jenis_transaksi_id' => JenisTransaksi::where('user_id', $value->id)->inRandomOrder()->first()->id,
                     'buku_kas_id' => $kas_id,
@@ -111,6 +116,15 @@ class TransaksiSeeder extends Seeder
                     'deskripsi' => fake()->sentence(),
                     // 'tujuan_buku_tabungan_id' => $tujuan_kas_id,
                 ]);
+
+                $kas = $transaksi->buku_kas;
+                if ($transaksi->jenis == 'Pengeluaran') {
+                    $kas->saldo -= $transaksi->nominal;
+                    $kas->save();
+                } else {
+                    $kas->saldo += $transaksi->nominal;
+                    $kas->save();
+                }
             }
         }
     }
