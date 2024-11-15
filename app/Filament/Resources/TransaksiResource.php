@@ -97,8 +97,10 @@ class TransaksiResource extends Resource
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nominal')
-                    ->numeric(),
-                TextColumn::make('saldo')->numeric(),
+                    ->numeric()
+                    ->prefix('Rp '),
+                TextColumn::make('saldo')->numeric()
+                    ->prefix('Rp '),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([

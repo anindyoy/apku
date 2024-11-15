@@ -13,13 +13,18 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(Transaksi $transaksi): void
     {
-        $kas = $transaksi->buku_kas;
-        if ($transaksi->jenis == 'Pengeluaran') {
-            $kas->saldo -= $transaksi->nominal;
-            $kas->save();
-        } else {
-            $kas->saldo += $transaksi->nominal;
-            $kas->save();
+        if (
+            $transaksi->created_at !=
+            $transaksi->buku_kas->created_at
+        ) {
+            $kas = $transaksi->buku_kas;
+            if ($transaksi->jenis == 'Pengeluaran') {
+                $kas->saldo -= $transaksi->nominal;
+                $kas->save();
+            } else {
+                $kas->saldo += $transaksi->nominal;
+                $kas->save();
+            }
         }
     }
 
