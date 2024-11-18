@@ -42,7 +42,12 @@ class Transaksi extends Model
         return $this->belongsTo(BukuKas::class);
     }
 
-    public static function form()
+    public function asal_buku_tabungan()
+    {
+        return $this->belongsTo(BukuKas::class);
+    }
+
+    public static function form($transfer = false)
     {
         return [
             Select::make('jenis')
@@ -57,11 +62,19 @@ class Transaksi extends Model
                 ->schema([
                     Select::make('buku_kas_id')
                         ->label('Buku Kas')
+                        ->live()
                         ->relationship('buku_kas', 'nama_buku')
                         ->required(),
 
+                    Select::make('buku_kas_id_tujuan')
+                        ->label('Buku Kas Tujuan')
+                        ->relationship('buku_kas', 'nama_buku', fn($query, $get) => $query->whereNot('id', $get('buku_kas_id')))
+                        ->required()
+                        ->visible($transfer),
+
                     Select::make('jenis_transaksi_id')
                         ->label('Kategori')
+                        ->hidden($transfer)
                         ->relationship(
                             'jenis_transaksi',
                             'nama_jenis',

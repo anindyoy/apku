@@ -18,7 +18,7 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
             $transaksi->buku_kas->created_at
         ) {
             $kas = $transaksi->buku_kas;
-            if ($transaksi->jenis == 'Pengeluaran') {
+            if (in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])) {
                 $kas->saldo -= $transaksi->nominal;
                 $kas->save();
             } else {

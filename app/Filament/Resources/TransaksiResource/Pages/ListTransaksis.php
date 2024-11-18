@@ -4,8 +4,11 @@ namespace App\Filament\Resources\TransaksiResource\Pages;
 
 use App\Models\BukuKas;
 use App\Models\Transaksi;
+use Illuminate\Support\Arr;
 use Filament\Pages\Actions\Action;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Grid;
+use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -14,13 +17,11 @@ use Filament\Pages\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\TransaksiResource;
-use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords\Tab;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Arr;
+use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 
 class ListTransaksis extends ListRecords
 {
@@ -40,7 +41,47 @@ class ListTransaksis extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // Actions\CreateAction::make()->hidden(auth()->user()->isSuper()),
+            Action::make('Transfer saldo')
+                ->tooltip('Transfer saldo ke kas lain')
+                ->action(function ($form, $action, $livewire, array $data, array $arguments) {
+                    DB::transaction(function () use ($data) {
+                        $data['user_id'] = auth()->user()->id;
+                        $tujuan_id = $data['buku_kas_id_tujuan'];
+                        $asal_id = $data['buku_kas_id'];
+
+                        unset($data['buku_kas_id_tujuan']);
+
+                        $data['jenis'] = 'Transfer Pengeluaran';
+                        $data['tujuan_buku_tabungan_id'] = $tujuan_id;
+                        Transaksi::create($data);
+
+                        $data['jenis'] = 'Transfer Pemasukan';
+                        $data['buku_kas_id'] = $tujuan_id;
+                        $data['asal_buku_tabungan_id'] = $asal_id;
+                        Transaksi::create($data);
+                    });
+
+                    Notification::make()
+                        ->title('Berhasil Transfer Saldo')
+                        ->success()
+                        ->send();
+
+                    if ($arguments['another'] ?? false) {
+                        $form->fill($this->defaultForm($livewire));
+                        $action->halt();
+                    }
+
+                    $action->cancel();
+                })
+                ->fillForm(fn($livewire): array => $this->defaultForm($livewire))
+                ->extraModalFooterActions(fn(Action $action): array => [
+                    $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                        ->label('Tambah yang lain'),
+                ])
+                ->form(Transaksi::form(true))
+                ->color('primary')
+                ->icon('heroicon-o-arrow-path-rounded-square'),
+
             Action::make('Catat Pemasukan')
                 ->action(function ($form, $action, $livewire, array $data, array $arguments) {
                     $data['jenis'] = 'Pemasukan';
@@ -70,29 +111,10 @@ class ListTransaksis extends ListRecords
 
             Action::make('Catat Pengeluaran')
                 ->action(function (?Transaksi $record, array $data, $livewire, $form, $action, array $arguments) {
-                    // $data['tanggal'] = "2024-11-12 21:27"; // Nilai awal
-
-                    // Ubah string tanggal menjadi timestamp
-                    // $timestamp = strtotime($data['tanggal']);
-
-                    // // Tambahkan 1 detik ke timestamp
-                    // $timestamp += 1;
-
-                    // // Format timestamp kembali menjadi string tanggal
-                    // $data['tanggal'] = date('Y-m-d H:i:s', $timestamp);
-
-                    // $data['tanggal'] = date('Y-m-d H:i:s', strtotime($data['tanggal'] . ' ' . date('s')));
-
-
-                    // dd(
-                    //     $data['tanggal'],
-                    //     // date('Y-m-d H:i:s', strtotime($data['tanggal'])),
-                    // );
-
                     $data['jenis'] = 'Pengeluaran';
                     $data['user_id'] = auth()->user()->id;
                     $data['tanggal'] = date('d M Y, H:i:s', strtotime($data['tanggal']));
-                    // dd($data);
+
                     Transaksi::create($data);
                     Notification::make()
                         ->title('Berhasil Catat Pengeluaran')

@@ -19,9 +19,10 @@ return new class extends Migration
             $table->dateTime('tanggal');
             $table->integer('nominal');
             // $table->integer('saldo_akhir')->nullable();
-            $table->enum('jenis', ['Pengeluaran', 'Pemasukan']);
+            $table->enum('jenis', ['Pengeluaran', 'Pemasukan', 'Transfer Pemasukan', 'Transfer Pengeluaran']);
             $table->text('deskripsi')->nullable();
             $table->unsignedBigInteger('tujuan_buku_tabungan_id')->nullable();
+            $table->unsignedBigInteger('asal_buku_tabungan_id')->nullable();
             // $table->enum('jenis_transaksi', ['transfer', 'pendapatan', 'pengeluaran', 'utang', 'piutang']);
 
             $table->timestamps();

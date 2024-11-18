@@ -43,10 +43,6 @@ class TransaksiResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $transaksi = Transaksi::inRandomOrder()
-            ->where('user_id', auth()->user()->id)
-            ->first();
-
         return $table
             ->modifyQueryUsing(
                 fn(Builder $query) => $query->select(
@@ -69,36 +65,55 @@ class TransaksiResource extends Resource
                     ->icon(fn(string $state): string => match ($state) {
                         'Pemasukan' => 'heroicon-o-arrow-down-on-square',
                         'Pengeluaran' => 'heroicon-o-arrow-up-on-square',
+                        'Transfer Pemasukan' => 'heroicon-o-arrow-path-rounded-square',
+                        'Transfer Pengeluaran' => 'heroicon-o-arrow-path-rounded-square',
                     })
                     ->color(fn(string $state): string => match ($state) {
-                        // 'draft' => 'gray',
-                        // 'reviewing' => 'warning',
                         'Pemasukan' => 'success',
                         'Pengeluaran' => 'danger',
+                        'Transfer Pemasukan' => 'primary',
+                        'Transfer Pengeluaran' => 'primary',
                     }),
 
                 Tables\Columns\TextColumn::make('tanggal')
                     ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),
 
-                Tables\Columns\TextColumn::make('jenis_transaksi.nama_jenis')
+                Tables\Columns\TextColumn::make('kategori')
                     ->label('Kategori')
+                    ->getStateUsing(function ($record) {
+                        if (!in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
+                            $text = $record->jenis_transaksi?->nama_jenis;
+                        }
+
+                        if ($record->jenis == 'Transfer Pemasukan') {
+                            $text = 'Transfer dari ' . $record->asal_buku_tabungan->nama_buku;
+                        }
+
+                        if ($record->jenis == 'Transfer Pengeluaran') {
+                            $text = 'Transfer ke ' . $record->tujuan_buku_tabungan->nama_buku;
+                        }
+
+                        return $text;
+                    })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query
                             ->where('deskripsi', 'like', "%{$search}%");
                     })
                     ->description(fn($record) => $record->deskripsi ? 'Deskripsi: ' . $record->deskripsi : '')
                     ->wrap(),
-                // Tables\Columns\TextColumn::make('deskripsi')
-                //     ->wrap()->searchable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('nominal')
                     ->numeric()
                     ->prefix('Rp '),
+
                 TextColumn::make('saldo')->numeric()
                     ->prefix('Rp '),
             ])
