@@ -152,20 +152,12 @@ class ListTransaksis extends ListRecords
     public function getTabs(): array
     {
         $kas = BukuKas::all();
-        // dd($kas);
 
         $tab = [];
         foreach ($kas as $key => $value) {
             $tab[$value->nama_buku] = Tab::make()
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('buku_kas_id', $value->id));
         }
-        // return [
-        //     'all' => Tab::make(),
-        //     'active' => Tab::make()
-        //         ->modifyQueryUsing(fn(Builder $query) => $query->where('active', true)),
-        //     'inactive' => Tab::make()
-        //         ->modifyQueryUsing(fn(Builder $query) => $query->where('active', false)),
-        // ];
 
         return $tab;
     }
