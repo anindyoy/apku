@@ -59,6 +59,7 @@ class JenisTransaksi extends Model
     {
         return [
             CreateAction::make()
+                ->hidden(auth()->user()->isSuper())
                 ->model(self::class)
                 ->mutateFormDataUsing(function (array $data) use ($type): array {
                     $data['user_id'] = auth()->id();
@@ -73,18 +74,17 @@ class JenisTransaksi extends Model
 
     public static function actions($type)
     {
-        $color = $type == 'Peneluaran' ? 'danger' : 'success';
-
         return [
             EditAction::make()
-                ->color($color)
+                ->hidden(auth()->user()->isSuper())
                 ->modalWidth(MaxWidth::Small)
                 ->form(self::form()),
 
             DeleteAction::make()
-                ->visible(fn($record) => !$record->transaksi_count),
+                ->visible(fn($record) => !$record->transaksi_count && !auth()->user()->isSuper()),
 
             Action::make('Hapus')
+                ->hidden(auth()->user()->isSuper())
                 ->modalWidth(MaxWidth::Small)
                 ->form(function ($record) use ($type) {
                     return [
@@ -104,10 +104,6 @@ class JenisTransaksi extends Model
                 )
                 ->action(function ($data, $record) {
                     DB::transaction(function () use ($data, $record) {
-                        // dd(
-                        //     $data['kategori']
-                        //     // Transaksi::whereJenisTransaksiId($record->id)->get()
-                        // );
                         Transaksi::whereJenisTransaksiId($record->id)
                             ->update(['jenis_transaksi_id' => $data['kategori']]);
 
