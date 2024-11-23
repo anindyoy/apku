@@ -23,11 +23,13 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        // dd(auth()->user());
         return $panel
             ->default()
             ->id('admin')
@@ -41,10 +43,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                // Pages\Dashboard::class,
-                ListTransaksis::class
-            ])
+            ->pages(
+                // auth()->user()->isSuper() ? [ListUsers::class] : [ListTransaksis::class]
+                [
+                    // Pages\Dashboard::class,
+                    ListTransaksis::class
+                ]
+            )
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,

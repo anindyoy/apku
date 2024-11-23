@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\WilayahSeeder;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\TransaksiSeeder;
 
@@ -15,18 +16,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::truncate();
+        User::truncate();
 
-        // User::factory()->create([
-        //     'name' => 'Super User',
-        //     'email' => 'super@apku.com',
-        //     'password' => Hash::make('superapku'),
-        // ]);
+        User::factory()->create([
+            'name' => 'Super User',
+            'email' => 'super@apku.com',
+            'password' => Hash::make('superapku'),
+        ]);
 
-        // User::factory(10)->create();
+        User::factory(10)->create();
 
-        // $this->call([
-        //     TransaksiSeeder::class
-        // ]);
+        $this->call([
+            TransaksiSeeder::class,
+            WilayahSeeder::class
+        ]);
     }
 }

@@ -23,14 +23,17 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $type = fake()->randomElement(['premium', 'reguler']);
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'hp' => '08' . rand(100000000, 999999999),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'type' => fake()->randomElement(['premium', 'reguler']),
-
+            'type' => $type,
+            'masa_aktif' => $type === 'premium'
+                ? fake()->dateTimeBetween('+1 week', '+1 year') : null,
         ];
     }
 

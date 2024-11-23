@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('hp', 100)->nullable();
+            $table->string('penggunaan', 100)->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('provinsi', 30)->nullable();
+            $table->string('kota', 30)->nullable();
             $table->date('masa_aktif')->nullable();
             $table->string('password');
             $table->enum('type', ['premium', 'reguler'])->default('reguler');
