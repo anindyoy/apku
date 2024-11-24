@@ -29,12 +29,15 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        // dd(auth()->user());
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile()
+            ->registration()
+            ->emailVerification()
+            ->passwordReset()
             ->plugins([
                 SpotlightPlugin::make(),
             ])

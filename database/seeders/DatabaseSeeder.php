@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Super User',
             'email' => 'super@apku.com',
             'password' => Hash::make('superapku'),
+            'role' => 'super',
         ]);
 
         User::factory(10)->create();

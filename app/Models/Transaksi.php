@@ -5,15 +5,18 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\BukuKas;
 use App\Models\JenisTransaksi;
+use App\Models\Scopes\UserScope;
 use Filament\Forms\Components\Grid;
 use App\Observers\TransaksiObserver;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ScopedBy([UserScope::class])]
 #[ObservedBy([TransaksiObserver::class])]
 class Transaksi extends Model
 {

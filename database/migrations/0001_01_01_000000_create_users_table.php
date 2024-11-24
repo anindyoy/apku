@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('kota', 30)->nullable();
             $table->date('masa_aktif')->nullable();
             $table->string('password');
+            $table->string('role', 20)->default('user');
             $table->enum('type', ['premium', 'reguler'])->default('reguler');
             $table->rememberToken();
             $table->timestamps();
