@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,10 @@ class UtangPiutangFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::notSuper()->inRandomOrder()->first()->id,
+            'kepada' => fake()->name(),
+            'tipe' => rand(0, 1) ? 'utang' : 'piutang',
+            'sambung_kas' => rand(0, 1)
         ];
     }
 }

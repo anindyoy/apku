@@ -17,8 +17,14 @@ class BukuKasFactory extends Factory
      */
     public function definition(): array
     {
+        $goal = rand(0, 4);
         return [
-            // 'user_id' => d
+            'user_id' => User::inRandomOrder()->notSuper()->first()->id,
+            'nama_buku' => fake()->word(),
+            'saldo' => 0,
+            'description' => fake()->sentence(),
+            'goal' => $goal == 4 ? rand(100, 1000) : null,
+            'tanggal_goal' => $goal == 4 ? fake()->dateTimeBetween('now', '+1 year') : null,
         ];
     }
 }

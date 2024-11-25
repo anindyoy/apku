@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-#[ObservedBy([UserObserver::class])]
+// #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -94,5 +94,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function isSuper()
     {
         return $this->role == 'super';
+    }
+
+    public function scopeNotSuper($query)
+    {
+        return $query->whereNot('id', 1);
     }
 }

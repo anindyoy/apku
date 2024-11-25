@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('utang_piutang', function (Blueprint $table) {
+        Schema::create('utang_piutang_detail', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->enum('tipe', ['utang', 'piutang']);
-            $table->string('kepada')->nullable();
-            $table->boolean('sambung_kas')->default(false);
+            $table->unsignedBigInteger('utang_piutang_id');
+            $table->integer('nominal');
+            $table->enum('tipe', ['tambah', 'kurang']);
+            $table->string('deskripsi')->nullable();
+            $table->dateTime('tanggal');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('utang_piutangs');
+        //
     }
 };
