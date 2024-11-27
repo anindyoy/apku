@@ -40,7 +40,8 @@ class PiutangResource extends Resource
     {
         return $table
             ->modifyQueryUsing(
-                fn(Builder $query) => $query->piutang()
+                fn(Builder $query) => $query->piutang() 
+                    ->selectRawNominalAndLastAcitivityDate()
             )
             ->columns(UtangPiutang::tableColumns())
             ->filters([

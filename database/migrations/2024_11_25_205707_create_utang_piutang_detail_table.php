@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('nominal');
             $table->enum('tipe', ['tambah', 'kurang']);
             $table->string('deskripsi')->nullable();
-            $table->dateTime('tanggal');
+            // $table->dateTime('tanggal');
             $table->timestamps();
         });
     }

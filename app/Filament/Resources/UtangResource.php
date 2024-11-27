@@ -8,6 +8,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\UtangPiutang;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\EditAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -39,6 +40,7 @@ class UtangResource extends Resource
         return $table
             ->modifyQueryUsing(
                 fn(Builder $query) => $query->utang()
+                    ->selectRawNominalAndLastAcitivityDate()
             )
             ->columns(UtangPiutang::tableColumns())
             ->filters([
