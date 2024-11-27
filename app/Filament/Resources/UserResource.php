@@ -57,24 +57,36 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
+                    ->description(fn($record) => 'Email: ' . $record->email)
+                    ->searchable(['name', 'email']),
+
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('masa_aktif')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('type'),
-                TextColumn::make('buku_kas_count')->counts('buku_kas')
+
+                Tables\Columns\TextColumn::make('type')
+                    ->description(fn($record) => $record->masa_aktif ? ('Masa aktif: ' . $record->masa_aktif) : null),
+
+                TextColumn::make('buku_kas_count')
+                    ->counts('buku_kas')
+                    ->sortable()
                     ->label('Total Buku Kas'),
-                TextColumn::make('transaksi_count')->counts('transaksi')
+
+                TextColumn::make('transaksi_count')
+                    ->counts('transaksi')
+                    ->sortable()
                     ->label('Total Transaksi'),
+
+                TextColumn::make('utang_piutang_count')
+                    ->counts('utang_piutang')
+                    ->sortable()
+                    ->label('Total Utang Piutang'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

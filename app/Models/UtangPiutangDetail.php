@@ -17,4 +17,14 @@ class UtangPiutangDetail extends Model
     {
         return $this->belongsTo(UtangPiutang::class);
     }
+
+    public function scopeKurang($query)
+    {
+        return $query->whereTipe('kurang');
+    }
+
+    public function scopeTambah($query)
+    {
+        return $query->whereTipe('tambah');
+    }
 }

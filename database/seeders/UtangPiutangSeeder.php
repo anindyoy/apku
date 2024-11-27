@@ -22,12 +22,12 @@ class UtangPiutangSeeder extends Seeder
         $users = User::whereNot('id', 1)->get();
 
         foreach ($users as $value) {
-            for ($i = 0; $i < rand(0, 3); $i++) {
+            for ($i = 0; $i < rand(2, 5); $i++) {
                 $utang = UtangPiutang::factory()->create([
                     'user_id' => $value->id,
                 ]);
 
-                for ($j = 0; $j < rand(1, 5); $j++) {
+                for ($j = 0; $j < rand(3, 7); $j++) {
                     UtangPiutangDetail::factory()->create([
                         'utang_piutang_id' => $utang->id
                     ]);

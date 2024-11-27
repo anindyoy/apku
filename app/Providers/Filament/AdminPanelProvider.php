@@ -34,6 +34,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->navigationGroups([
+                'Utang Piutang',
+                'Pengaturan',
+            ])
             ->profile()
             ->registration()
             ->emailVerification()

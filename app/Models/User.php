@@ -5,6 +5,7 @@ namespace App\Models;
 use Filament\Panel;
 use App\Models\BukuKas;
 use App\Models\Transaksi;
+use App\Models\UtangPiutang;
 use App\Observers\UserObserver;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
@@ -89,6 +90,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class);
+    }
+
+    public function utang_piutang()
+    {
+        return $this->hasMany(UtangPiutang::class);
     }
 
     public function isSuper()
