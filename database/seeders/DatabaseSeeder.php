@@ -8,6 +8,7 @@ use App\Models\BukuKas;
 use App\Models\UtangPiutang;
 use App\Models\JenisTransaksi;
 use Illuminate\Database\Seeder;
+use Database\Seeders\UserSeeder;
 use Database\Seeders\WilayahSeeder;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\TransaksiSeeder;
@@ -21,25 +22,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::truncate();
-
-        // User::factory()->create([
-        //     'name' => 'Super User',
-        //     'email' => 'super@apku.com',
-        //     'password' => Hash::make('superapku'),
-        //     'role' => 'super',
-        // ]);
-
-        // User::factory(10)->create();
-
-
-        // JenisTransaksi::truncate();
-        // $this->call([JenisTransaksiSeeder::class]);
-
-        $this->call([TransaksiSeeder::class]);
-
-        $this->call([WilayahSeeder::class]);
-
-        $this->call([UtangPiutangSeeder::class]);
+        $this->call([
+            UserSeeder::class,
+            JenisTransaksiSeeder::class,
+            TransaksiSeeder::class,
+            WilayahSeeder::class,
+            UtangPiutangSeeder::class,
+        ]);
     }
 }

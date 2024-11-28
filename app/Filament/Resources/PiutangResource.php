@@ -31,30 +31,24 @@ class PiutangResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                //
-            ]);
+        
+            ->schema(UtangPiutang::formSchema())
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->modifyQueryUsing(
-                fn(Builder $query) => $query->piutang() 
+                fn(Builder $query) => $query->piutang()
                     ->selectRawNominalAndLastAcitivityDate()
             )
+            ->searchPlaceholder('Cari nama..')
             ->columns(UtangPiutang::tableColumns())
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
-            ]);
+            ->actions(UtangPiutang::tableActions());
     }
 
     public static function getRelations(): array
@@ -68,8 +62,8 @@ class PiutangResource extends Resource
     {
         return [
             'index' => Pages\ListPiutangs::route('/'),
-            'create' => Pages\CreatePiutang::route('/create'),
-            'edit' => Pages\EditPiutang::route('/{record}/edit'),
+            // 'create' => Pages\CreatePiutang::route('/create'),
+            // 'edit' => Pages\EditPiutang::route('/{record}/edit'),
         ];
     }
 }

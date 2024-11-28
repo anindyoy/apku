@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\PiutangResource\Pages;
 
-use App\Filament\Resources\PiutangResource;
 use Filament\Actions;
+use App\Models\UtangPiutang;
+use Filament\Pages\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Resources\PiutangResource;
 
 class ListPiutangs extends ListRecords
 {
@@ -12,8 +14,6 @@ class ListPiutangs extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\CreateAction::make(),
-        ];
+        return UtangPiutang::headerActions('piutang');
     }
 }

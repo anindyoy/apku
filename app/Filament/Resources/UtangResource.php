@@ -10,6 +10,8 @@ use App\Models\UtangPiutang;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -30,9 +32,8 @@ class UtangResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                //
-            ]);
+            ->schema(UtangPiutang::formSchema())
+            ->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -42,18 +43,12 @@ class UtangResource extends Resource
                 fn(Builder $query) => $query->utang()
                     ->selectRawNominalAndLastAcitivityDate()
             )
+            ->searchPlaceholder('Cari nama..')
             ->columns(UtangPiutang::tableColumns())
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
-            ]);
+            ->actions(UtangPiutang::tableActions());
     }
 
     public static function getRelations(): array
@@ -67,8 +62,8 @@ class UtangResource extends Resource
     {
         return [
             'index' => Pages\ListUtangs::route('/'),
-            'create' => Pages\CreateUtang::route('/create'),
-            'edit' => Pages\EditUtang::route('/{record}/edit'),
+            // 'create' => Pages\CreateUtang::route('/create'),
+            // 'edit' => Pages\EditUtang::route('/{record}/edit'),
         ];
     }
 }

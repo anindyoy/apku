@@ -14,6 +14,8 @@ class JenisTransaksiSeeder extends Seeder
      */
     public function run(): void
     {
+        JenisTransaksi::truncate();
+
         // CREATE JENIS TRANSAKSI
         $list_tipe = ['Pemasukan', 'Pengeluaran'];
         $jenis = [

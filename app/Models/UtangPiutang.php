@@ -5,11 +5,19 @@ namespace App\Models;
 use App\Models\User;
 use App\Models\Scopes\UserScope;
 use App\Models\UtangPiutangDetail;
-use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\DB;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Filament\Pages\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -31,27 +39,12 @@ class UtangPiutang extends Model
         return $this->hasMany(UtangPiutangDetail::class);
     }
 
-    public function scopeSelectRawNominalAndLastAcitivityDate($query)
+    public static function tableActions()
     {
-        return $query->select(
-            '*',
-
-            DB::raw('(
-            SELECT SUM(CASE WHEN tipe = "kurang" THEN nominal ELSE 0 END) -
-                   SUM(CASE WHEN tipe = "tambah" THEN nominal ELSE 0 END)
-            FROM utang_piutang_detail
-            WHERE utang_piutang_id = utang_piutang.id
-        ) as nominal'),
-
-            DB::raw('(
-            SELECT created_at
-            FROM utang_piutang_detail
-            WHERE utang_piutang_id = utang_piutang.id
-            ORDER BY created_at DESC
-            LIMIT 1
-        ) as last_activity_date') // Alias for clarity
-
-        );
+        return [
+            EditAction::make(),
+            DeleteAction::make()
+        ];
     }
 
     public static function tableColumns()
@@ -81,9 +74,13 @@ class UtangPiutang extends Model
                     )
                 ),
 
-            TextColumn::make('kepada'),
+            TextColumn::make('kepada')
+                ->description(
+                    fn($record) => $record->tempo ? ('Jatuh tempo: ' . date('d M Y', strtotime($record->tempo))) : null
+                )
+                ->searchable(),
 
-            TextColumn::make('deskripsi'),
+            TextColumn::make('deskripsi')->wrap(),
 
             TextColumn::make('nominal')
                 ->numeric()
@@ -91,15 +88,61 @@ class UtangPiutang extends Model
         ];
     }
 
-    // public function getNominalAttribute()
-    // {
-    //     $kurangSum = $this->utang_piutang_detail()->kurang()->sum('nominal');
-    //     $tambahSum = $this->utang_piutang_detail()->tambah()->sum('nominal');
+    public static function formSchema()
+    {
+        return [
+            TextInput::make('kepada')->required(),
+            TextInput::make('nominal')->required(),
 
-    //     return $this->tipe === 'piutang' ? $kurangSum - $tambahSum : $tambahSum - $kurangSum;
-    // }
+            DateTimePicker::make('created_at')
+                ->default(now())
+                ->maxDate(now())
+                ->label('Tanggal')
+                ->native(false),
 
+            Toggle::make('jatuh_tempo')
+                ->dehydrated(false)
+                ->live(),
 
+            DateTimePicker::make('tempo')
+                ->minDate(now()->addDay())
+                ->required()
+                ->native(false)
+                ->visible(fn($get) => $get('jatuh_tempo')),
+
+            Textarea::make('deskripsi'),
+        ];
+    }
+
+    public static function headerActions($tipe)
+    {
+        return [
+            CreateAction::make()
+                ->hidden(auth()->user()->isSuper())
+                ->mutateFormDataUsing(function (array $data) use ($tipe): array {
+                    $data['user_id'] = auth()->id();
+                    $data['tipe'] = $tipe;
+                    unset($data['nominal']);
+
+                    return $data;
+                })
+                ->after(function ($record, $livewire) {
+                    $data = $livewire->mountedActionsData[0];
+                    UtangPiutangDetail::create([
+                        'utang_piutang_id' => $record->id,
+                        'nominal' => $data['nominal'],
+                        'tipe' => 'tambah',
+                        'deskripsi' => $data['deskripsi'] ?? '',
+                        'created_at' => $record->created_at,
+                    ]);
+                })
+                ->modalWidth(MaxWidth::Small),
+        ];
+    }
+
+    /*
+    SCOPES
+    */
     public function scopeUtang($query)
     {
         return $query->whereTipe('utang');
@@ -108,5 +151,29 @@ class UtangPiutang extends Model
     public function scopePiutang($query)
     {
         return $query->whereTipe('piutang');
+    }
+
+    public function scopeSelectRawNominalAndLastAcitivityDate($query)
+    {
+        return $query->select(
+            '*',
+
+            DB::raw('(
+            SELECT SUM(CASE WHEN tipe = "kurang" THEN nominal ELSE 0 END) -
+                   SUM(CASE WHEN tipe = "tambah" THEN nominal ELSE 0 END)
+            FROM utang_piutang_detail
+            WHERE utang_piutang_id = utang_piutang.id
+        ) as nominal'),
+
+            DB::raw('(
+            SELECT created_at
+            FROM utang_piutang_detail
+            WHERE utang_piutang_id = utang_piutang.id
+            ORDER BY created_at DESC
+            LIMIT 1
+        ) as last_activity_date')
+
+        )
+            ->orderby('last_activity_date', 'desc');
     }
 }

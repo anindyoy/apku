@@ -2,8 +2,12 @@
 
 namespace App\Filament\Resources\UtangResource\Pages;
 
-use App\Filament\Resources\UtangResource;
 use Filament\Actions;
+use App\Models\UtangPiutangDetail;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Pages\Actions\CreateAction;
+use App\Filament\Resources\UtangResource;
+use App\Models\UtangPiutang;
 use Filament\Resources\Pages\ListRecords;
 
 class ListUtangs extends ListRecords
@@ -12,8 +16,6 @@ class ListUtangs extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\CreateAction::make(),
-        ];
+        return UtangPiutang::headerActions('utang');
     }
 }

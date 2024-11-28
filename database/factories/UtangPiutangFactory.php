@@ -21,7 +21,10 @@ class UtangPiutangFactory extends Factory
             'user_id' => User::notSuper()->inRandomOrder()->first()->id,
             'kepada' => fake()->name(),
             'tipe' => rand(0, 1) ? 'utang' : 'piutang',
-            'sambung_kas' => rand(0, 1)
+            'sambung_kas' => rand(0, 1),
+            'tempo' => rand(0, 1) ? fake()->dateTimeBetween('+1 day', '+1 month') : null,
+            'created_at' => fake()->dateTimeBetween('-3 months', 'now'),
+            'deskripsi' => fake()->optional()->sentence(),
         ];
     }
 }

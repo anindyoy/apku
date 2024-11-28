@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->enum('tipe', ['utang', 'piutang']);
-            $table->string('kepada')->nullable();
+            $table->string('kepada', 150);
+            $table->string('deskripsi')->nullable();
             $table->boolean('sambung_kas')->default(false);
+            $table->date('tempo')->nullable();
             $table->timestamps();
         });
     }

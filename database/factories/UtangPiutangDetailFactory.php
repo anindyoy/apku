@@ -22,7 +22,6 @@ class UtangPiutangDetailFactory extends Factory
             'nominal' => rand(1, 100) . '000',
             'tipe' => rand(0, 1) ? 'tambah' : 'kurang',
             'deskripsi' => fake()->optional()->sentence(),
-            // 'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
             'created_at' => fake()->dateTimeBetween('-3 weeks', 'now'),
         ];
     }
