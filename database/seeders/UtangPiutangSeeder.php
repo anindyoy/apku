@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\UtangPiutang;
 use Illuminate\Database\Seeder;
 use App\Models\UtangPiutangDetail;
-use Database\Factories\UtangPiutangDetailFactory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class UtangPiutangSeeder extends Seeder
@@ -28,7 +27,7 @@ class UtangPiutangSeeder extends Seeder
                 ]);
 
                 $total = rand(1, 10) . '0000';
-                $jumlah_data = rand(3, 7);
+                $jumlah_data = rand(2, 3);
                 $nominals = []; // Array to store nominal values
                 $remaining = $total; // Keep track of the remaining amount
 

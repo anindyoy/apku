@@ -50,10 +50,6 @@ class TransaksiResource extends Resource
             ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->numeric()
-                    ->visible(auth()->user()->isSuper()),
-
                 IconColumn::make('jenis')
                     ->label('Tipe')
                     ->tooltip(fn($state) => $state)
@@ -69,6 +65,10 @@ class TransaksiResource extends Resource
                         'Transfer Pemasukan' => 'primary',
                         'Transfer Pengeluaran' => 'primary',
                     }),
+
+                Tables\Columns\TextColumn::make('user.name')
+                    ->numeric()
+                    ->visible(auth()->user()->isSuper()),
 
                 Tables\Columns\TextColumn::make('tanggal')
                     ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),

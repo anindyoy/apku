@@ -2,23 +2,16 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use App\Models\Piutang;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\UtangPiutang;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\EditAction;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\PiutangResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\PiutangResource\RelationManagers;
 use App\Filament\Resources\PiutangResource\Pages\EditPiutang;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Filament\Resources\PiutangResource\Pages\CreatePiutang;
+use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
 
 class PiutangResource extends Resource
 {
@@ -31,7 +24,7 @@ class PiutangResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-        
+
             ->schema(UtangPiutang::formSchema())
             ->columns(1);
     }
@@ -62,6 +55,7 @@ class PiutangResource extends Resource
     {
         return [
             'index' => Pages\ListPiutangs::route('/'),
+            'detail' => UtangPiutangDetail::route('/{record}/detail'),
             // 'create' => Pages\CreatePiutang::route('/create'),
             // 'edit' => Pages\EditPiutang::route('/{record}/edit'),
         ];

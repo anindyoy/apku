@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Scopes\UserScope;
 use App\Models\UtangPiutangDetail;
 use Illuminate\Support\Facades\DB;
+use Filament\Tables\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Textarea;
@@ -42,15 +43,26 @@ class UtangPiutang extends Model
     public static function tableActions()
     {
         return [
-            EditAction::make(),
+            Action::make('Detail')
+                ->tooltip('Lihat detail')
+                ->hiddenLabel()
+                ->icon('heroicon-o-magnifying-glass')
+                ->url(
+                    fn(?Model $record): string => $record->tipe == 'utang'
+                        ? url('/admin/utangs/' . $record->id . '/detail')
+                        : url('/admin/piutangs/' . $record->id . '/detail')
+                ),
+
             DeleteAction::make()
+                ->tooltip('Hapus')
+                ->hiddenLabel()
         ];
     }
 
     public static function tableColumns()
     {
         return [
-            TextColumn::make('id'),
+            // TextColumn::make('id'),
 
             IconColumn::make('status')
                 ->tooltip(fn($record) => $record->nominal <= 0 ? 'Selesai' : 'Belum selesai')
@@ -85,6 +97,16 @@ class UtangPiutang extends Model
             TextColumn::make('nominal')
                 ->numeric()
                 ->prefix('Rp '),
+        ];
+    }
+
+    public static function stat($data)
+    {
+        return [
+            Stat::make(
+                'Total ' . ucfirst($data->first()?->tipe),
+                'Rp ' . number_format($data->sum('nominal'))
+            ),
         ];
     }
 
@@ -159,8 +181,9 @@ class UtangPiutang extends Model
             '*',
 
             DB::raw('(
-            SELECT SUM(CASE WHEN tipe = "kurang" THEN nominal ELSE 0 END) -
-                   SUM(CASE WHEN tipe = "tambah" THEN nominal ELSE 0 END)
+            SELECT
+                   SUM(CASE WHEN tipe = "tambah" THEN nominal ELSE 0 END) -
+                   SUM(CASE WHEN tipe = "kurang" THEN nominal ELSE 0 END)
             FROM utang_piutang_detail
             WHERE utang_piutang_id = utang_piutang.id
         ) as nominal'),
@@ -172,7 +195,6 @@ class UtangPiutang extends Model
             ORDER BY created_at DESC
             LIMIT 1
         ) as last_activity_date')
-
         )
             ->orderby('last_activity_date', 'desc');
     }
