@@ -120,6 +120,7 @@ class TransaksiResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->hidden(auth()->user()->isSuper()),
                 DeleteAction::make()
+                    ->hidden(auth()->user()->isSuper())
             ])
             ->bulkActions([
                 // Tables\Actions\DeleteBulkAction::make(),

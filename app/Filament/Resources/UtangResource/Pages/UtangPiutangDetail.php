@@ -5,13 +5,21 @@ namespace App\Filament\Resources\UtangResource\Pages;
 use Filament\Tables\Table;
 use App\Models\UtangPiutang;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use App\Filament\Resources\UtangResource;
+use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Contracts\Support\Htmlable;
+use Filament\Actions\Action as ActionsAction;
+use Filament\Forms\Components\DateTimePicker;
 use App\Models\UtangPiutangDetail as DataModel;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
@@ -27,11 +35,13 @@ class UtangPiutangDetail extends Page implements HasTable
     protected static string $view = 'filament.resources.utang-resource.pages.utang-piutang-detail';
 
     public $record,
+        $parent,
         $activeTab;
 
     public function mount($record)
     {
         $this->record = $record;
+        $this->parent = UtangPiutang::find($this->record);
     }
 
     public function getHeaderWidgets(): array
@@ -43,14 +53,62 @@ class UtangPiutangDetail extends Page implements HasTable
         ];
     }
 
+    protected function getHeaderActions(): array
+    {
+        $utang = $this->parent;
+        $utang_detail = $utang->utang_piutang_detail->first();
+
+        return [
+            ActionsAction::make('ubah')
+                ->fillForm(fn(): array => [
+                    'kepada' => $utang->kepada,
+                    'created_at' => $utang->created_at,
+                    'jatuh_tempo' => $utang->tempo ? true : false,
+                    'tempo' => $utang->tempo,
+                    'nominal' => $utang_detail->nominal,
+                    'deskripsi' => $utang->deskripsi,
+                ])
+                ->modalWidth(MaxWidth::Small)
+                ->form(UtangPiutang::formSchema())
+                ->action(function ($data) use ($utang_detail, $utang): void {
+                    DB::transaction(function () use ($data, $utang_detail, $utang) {
+                        $utang->kepada = $data['kepada'];
+                        $utang->created_at = $data['created_at'];
+                        $utang->tempo = $data['tempo'] ?? null;
+                        $utang->deskripsi = $data['deskripsi'];
+                        $utang->save();
+
+                        $utang_detail->nominal = $data['nominal'];
+                        $utang_detail->created_at = $data['created_at'];
+                        $utang_detail->save();
+
+                        Notification::make()
+                            ->title('Berhasil mengubah data')
+                            ->success()
+                            ->send();
+                    });
+                })
+        ];
+    }
+
     public function getTitle(): string | Htmlable
     {
-        $data = UtangPiutang::find($this->record);
+        $data = $this->parent;
         return ucfirst($data->tipe) . ' kepada ' . $data->kepada;
+    }
+
+    public function getSubheading(): ?string
+    {
+        return $this->parent->tempo
+            ? 'Jatuh tempo: ' . date('d M Y', strtotime($this->parent->tempo))
+            : null;
     }
 
     public function table(Table $table)
     {
+        $utang = $this->parent;
+        // $utang_detail = $utang->utang_piutang_detail->first();
+
         return $table
             ->headerActions([
                 Action::make('tambah')
@@ -83,9 +141,63 @@ class UtangPiutangDetail extends Page implements HasTable
                     )
                     ->latest()
             )
+            ->actions([
+                Action::make('ubah')
+                    ->hiddenLabel()
+                    ->tooltip('Ubah')
+                    ->modalHeading(
+                        fn($record) => 'Ubah '
+                            . ucfirst($utang->tipe)
+                            . ' '
+                            . (ucfirst($record->tipe) == 'tambah' ? 'Ditambah' : 'Dibayar')
+                    )
+                    ->icon('heroicon-o-pencil')
+                    ->fillForm(fn($record): array => [
+                        'created_at' => $record->created_at,
+                        'nominal' => $record->nominal,
+                        'deskripsi' => $record->deskripsi,
+                    ])
+                    ->modalWidth(MaxWidth::Small)
+                    ->form([
+                        TextInput::make('nominal')->required(),
+
+                        DateTimePicker::make('created_at')
+                            ->default(now())
+                            ->maxDate(now())
+                            ->label('Tanggal')
+                            ->native(false)
+                            ->closeOnDateSelection(),
+
+                        Textarea::make('deskripsi'),
+                    ])
+                    ->action(function ($record, $data) {
+                        $record->nominal = $data['nominal'];
+                        $record->created_at = $data['created_at'];
+                        $record->deskripsi = $data['deskripsi'];
+                        $record->save();
+
+                        if ($record->id == $this->parent->utang_piutang_detail->first()->id) {
+                            $this->parent->created_at = $data['created_at'];
+                            $this->parent->save();
+                        }
+
+                        Notification::make()
+                            ->title('Berhasil mengubah data')
+                            ->success()
+                            ->send();
+                    })
+                    ->hidden(auth()->user()->isSuper()),
+                DeleteAction::make()
+                    ->hiddenLabel()
+                    ->tooltip('Hapus')
+                    ->hidden(auth()->user()->isSuper())
+            ])
             ->columns([
                 IconColumn::make('tipe')
-                    ->tooltip(fn($state) => $state)
+                    ->tooltip(fn(string $state): string => match ($state) {
+                        'tambah' => 'Ditambah',
+                        'kurang' => 'Dibayar',
+                    })
                     ->icon(fn(string $state): string => match ($state) {
                         'tambah' => 'heroicon-o-plus-circle',
                         'kurang' => 'heroicon-o-minus-circle',

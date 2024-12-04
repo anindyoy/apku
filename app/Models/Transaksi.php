@@ -89,6 +89,7 @@ class Transaksi extends Model
                         ->required()
                         ->seconds(false)
                         ->native(false)
+                        ->closeOnDateSelection()
                         ->displayFormat('d M Y, H:i')
                         ->maxDate(now()),
 

@@ -120,7 +120,8 @@ class UtangPiutang extends Model
                 ->default(now())
                 ->maxDate(now())
                 ->label('Tanggal')
-                ->native(false),
+                ->native(false)
+                ->closeOnDateSelection(),
 
             Toggle::make('jatuh_tempo')
                 ->dehydrated(false)
@@ -130,6 +131,7 @@ class UtangPiutang extends Model
                 ->minDate(now()->addDay())
                 ->required()
                 ->native(false)
+                ->closeOnDateSelection()
                 ->visible(fn($get) => $get('jatuh_tempo')),
 
             Textarea::make('deskripsi'),

@@ -44,6 +44,7 @@ class UtangPiutangDetail extends Model
                 ->required()
                 ->seconds(false)
                 ->native(false)
+                ->closeOnDateSelection()
                 ->default(now())
                 ->displayFormat('d M Y, H:i')
                 ->maxDate(now()),
