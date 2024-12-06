@@ -30,7 +30,7 @@ class UtangPiutangDetail extends Page implements HasTable
 {
     use InteractsWithTable, ExposesTableToWidgets;
 
-    protected static string $resource = UtangResourcee::class;
+    protected static string $resource = UtangResource::class;
 
     protected static string $view = 'filament.resources.utang-resource.pages.utang-piutang-detail';
 
