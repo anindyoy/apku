@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Toggle;
+use App\Observers\UtangPiutangObserver;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -21,8 +21,10 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 #[ScopedBy([UserScope::class])]
+#[ObservedBy([UtangPiutangObserver::class])]
 class UtangPiutang extends Model
 {
     /** @use HasFactory<\Database\Factories\UtangPiutangFactory> */

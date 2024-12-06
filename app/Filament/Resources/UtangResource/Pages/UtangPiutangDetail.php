@@ -30,7 +30,7 @@ class UtangPiutangDetail extends Page implements HasTable
 {
     use InteractsWithTable, ExposesTableToWidgets;
 
-    protected static string $resource = UtangResource::class;
+    protected static string $resource = UtangResourcee::class;
 
     protected static string $view = 'filament.resources.utang-resource.pages.utang-piutang-detail';
 
@@ -87,7 +87,21 @@ class UtangPiutangDetail extends Page implements HasTable
                             ->success()
                             ->send();
                     });
+                }),
+
+            ActionsAction::make('hapus')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->action(function () {
+                    $tipe = $this->parent->tipe;
+                    $this->parent->delete();
+                    redirect(url('/admin/' . $tipe . 's'));
+                    Notification::make()
+                        ->title('Berhasil menghapus data')
+                        ->success()
+                        ->send();
                 })
+                ->icon('heroicon-m-trash')
         ];
     }
 
@@ -187,6 +201,7 @@ class UtangPiutangDetail extends Page implements HasTable
                             ->send();
                     })
                     ->hidden(auth()->user()->isSuper()),
+
                 DeleteAction::make()
                     ->hiddenLabel()
                     ->tooltip('Hapus')
