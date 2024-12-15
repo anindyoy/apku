@@ -32,7 +32,7 @@ class TransaksiSeeder extends Seeder
                     'nama_buku' => $i == 0 ? 'Kas Utama' : fake()->word(),
                 ]);
 
-                $transaksi = Transaksi::factory()->make([
+                $transaksi = Transaksi::factory()->create([
                     'user_id' => $value->id,
                     'buku_kas_id' => $buku->id,
                     'jenis' => 'Pemasukan',
@@ -46,12 +46,23 @@ class TransaksiSeeder extends Seeder
             // CREATE TRANSAKSI
             for ($i = 0; $i < rand(10, 25); $i++) {
                 $kas = BukuKas::getRandomBukuKas($value->id)->first();
+                $jenis = rand(0, 3) != 3 ? 'Pengeluaran' : 'Pemasukan';
+                $jenis_transaksi_id = JenisTransaksi::whereUserId($value->id)
+                    ->whereTipe($jenis)
+                    ->inRandomOrder()
+                    ->first()
+                    ->id;
 
                 $transaksi = Transaksi::factory()->create([
                     'user_id' => $value->id,
                     'buku_kas_id' => $kas->id,
-                    'jenis' => 'Pemasukan',
-                    'deskripsi' => 'Saldo pertama',
+                    'tanggal' => fake()->dateTimeBetween(
+                        $kas->transaksi()->first()->tanggal,
+                        'now'
+                    ),
+                    'jenis_transaksi_id' => $jenis_transaksi_id,
+                    'jenis' => $jenis,
+                    'deskripsi' => fake()->optional()->words(rand(2, 5), true)
                 ]);
 
                 if ($transaksi->jenis == 'Pengeluaran') {

@@ -105,7 +105,6 @@ class ListTransaksis extends ListRecords
                 ->action(function (?Transaksi $record, array $data, $livewire, $form, $action, array $arguments) {
                     $data['jenis'] = 'Pengeluaran';
                     $data['user_id'] = auth()->user()->id;
-                    $data['tanggal'] = date('d M Y, H:i:s', strtotime($data['tanggal']));
 
                     Transaksi::create($data);
                     Notification::make()

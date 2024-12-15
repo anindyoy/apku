@@ -34,13 +34,17 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
     public function updated(Transaksi $transaksi): void
     {
         $kas = $transaksi->buku_kas;
-        if ($transaksi->jenis == 'Pengeluaran') {
+        if (in_array($transaksi->jenis, ['Transfer Pengeluaran', 'Pengeluaran'])) {
             $kas->saldo = $kas->saldo + $transaksi->getOriginal('nominal') - $transaksi->nominal;
             $kas->save();
         } else {
             $kas->saldo = $kas->saldo - $transaksi->getOriginal('nominal') + $transaksi->nominal;
             $kas->save();
         }
+
+        // if ($transaksi->jenis == 'Transfer Pemasukan') {
+        //     Transaksi::where('tujuan_buku_tabungan_id', $transaksi->asal_buku_tabungan_id);
+        // }
     }
 
     /**

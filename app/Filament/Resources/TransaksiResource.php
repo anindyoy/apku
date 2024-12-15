@@ -43,7 +43,7 @@ class TransaksiResource extends Resource
                 fn(Builder $query) => $query->select(
                     'transaksi.*',
                     DB::raw(
-                        'SUM(CASE WHEN jenis = "Pemasukan" THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
+                        'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
                     )
                 )
             )
@@ -119,6 +119,7 @@ class TransaksiResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->hidden(auth()->user()->isSuper()),
+
                 DeleteAction::make()
                     ->hidden(auth()->user()->isSuper())
             ])

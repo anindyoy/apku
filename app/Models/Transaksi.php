@@ -56,7 +56,9 @@ class Transaksi extends Model
             Select::make('jenis')
                 ->options([
                     'Pemasukan' => 'Pemasukan',
-                    'Pengeluaran' => 'Pengeluaran'
+                    'Pengeluaran' => 'Pengeluaran',
+                    'Transfer Pemasukan' => 'Transfer Pemasukan',
+                    'Transfer Pengeluaran' => 'Transfer Pengeluaran',
                 ])
                 ->disabled()
                 ->visible(fn($record) => $record),
@@ -77,7 +79,7 @@ class Transaksi extends Model
 
                     Select::make('jenis_transaksi_id')
                         ->label('Kategori')
-                        ->hidden($transfer)
+                        ->hidden(fn(Model $record) => $transfer || $record->jenis == 'Transfer Pemasukan' || in_array($record->jenis, ['Transfer Pengeluaran', 'Transfer Pemasukan']))
                         ->relationship(
                             'jenis_transaksi',
                             'nama_jenis',
