@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\UtangResource\Pages;
+namespace App\Filament\Pages;
 
+use Filament\Pages\Page;
 use Filament\Tables\Table;
 use App\Models\UtangPiutang;
-use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
@@ -15,7 +15,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use App\Filament\Resources\UtangResource;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Actions\Action as ActionsAction;
@@ -30,32 +29,31 @@ class UtangPiutangDetail extends Page implements HasTable
 {
     use InteractsWithTable, ExposesTableToWidgets;
 
-    protected static string $resource = UtangResource::class;
+    protected static string $view = 'filament.pages.utang-piutang-detail';
+    protected static ?string $slug = 'utang-piutang-detail/{id}';
+    protected static bool $shouldRegisterNavigation = false;
+    public UtangPiutangDetail $record;
 
-    protected static string $view = 'filament.resources.utang-resource.pages.utang-piutang-detail';
-
-    public $record,
-        $parent,
+    public
         $activeTab;
 
-    public function mount($record)
+    public function mount($id): void
     {
-        $this->record = $record;
-        $this->parent = UtangPiutang::find($this->record);
+        $this->record = UtangPiutang::find($id);
     }
 
     public function getHeaderWidgets(): array
     {
         return [
             UtangPiutangDetailOverview::make([
-                'record' => $this->record,
+                'record' => $this->record->id,
             ])
         ];
     }
 
     protected function getHeaderActions(): array
     {
-        $utang = $this->parent;
+        $utang = $this->record;
         $utang_detail = $utang->utang_piutang_detail->first();
 
         return [
@@ -93,8 +91,8 @@ class UtangPiutangDetail extends Page implements HasTable
                 ->color('danger')
                 ->requiresConfirmation()
                 ->action(function () {
-                    $tipe = $this->parent->tipe;
-                    $this->parent->delete();
+                    $tipe = $this->record->tipe;
+                    $this->record->delete();
                     redirect(url('/admin/' . $tipe . 's'));
                     Notification::make()
                         ->title('Berhasil menghapus data')
@@ -107,20 +105,20 @@ class UtangPiutangDetail extends Page implements HasTable
 
     public function getTitle(): string | Htmlable
     {
-        $data = $this->parent;
-        return ucfirst($data->tipe) . ' kepada ' . $data->kepada;
+        $data = $this->record ?? null;
+        return $data ? (ucfirst($data->tipe) . ' kepada ' . $data->kepada) : '';
     }
 
     public function getSubheading(): ?string
     {
-        return $this->parent->tempo
-            ? 'Jatuh tempo: ' . date('d M Y', strtotime($this->parent->tempo))
+        return $this->record->tempo
+            ? 'Jatuh tempo: ' . date('d M Y', strtotime($this->record->tempo))
             : null;
     }
 
     public function table(Table $table)
     {
-        $utang = $this->parent;
+        $utang = $this->record;
         // $utang_detail = $utang->utang_piutang_detail->first();
 
         return $table
@@ -190,9 +188,9 @@ class UtangPiutangDetail extends Page implements HasTable
                         $record->deskripsi = $data['deskripsi'];
                         $record->save();
 
-                        if ($record->id == $this->parent->utang_piutang_detail->first()->id) {
-                            $this->parent->created_at = $data['created_at'];
-                            $this->parent->save();
+                        if ($record->id == $this->record->utang_piutang_detail->first()->id) {
+                            $this->record->created_at = $data['created_at'];
+                            $this->record->save();
                         }
 
                         Notification::make()

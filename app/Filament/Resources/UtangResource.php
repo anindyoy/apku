@@ -13,6 +13,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Pages\UtangPiutangDetail;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\UtangResource\Pages;
@@ -21,7 +22,6 @@ use App\Filament\Resources\UtangResource\Pages\EditUtang;
 use App\Filament\Resources\UtangResource\Pages\ListUtangs;
 use App\Filament\Resources\UtangResource\RelationManagers;
 use App\Filament\Resources\UtangResource\Pages\CreateUtang;
-use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
 use App\Filament\Resources\UtangResource\Widgets\UtangPiutangOverview;
 
 class UtangResource extends Resource
@@ -64,7 +64,7 @@ class UtangResource extends Resource
     {
         return [
             'index' => Pages\ListUtangs::route('/'),
-            'detail' => UtangPiutangDetail::route('/{record}/detail'),
+            // 'detail' => UtangPiutangDetail::route('/{record}/detail'),
             // 'create' => Pages\CreateUtang::route('/create'),
             // 'edit' => Pages\EditUtang::route('/{record}/edit'),
         ];

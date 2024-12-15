@@ -49,10 +49,13 @@ class UtangPiutang extends Model
                 ->tooltip('Lihat detail')
                 ->hiddenLabel()
                 ->icon('heroicon-o-magnifying-glass')
+                // ->url(
+                //     fn(?Model $record): string => $record->tipe == 'utang'
+                //         ? url('/admin/utangs/' . $record->id . '/detail')
+                //         : url('/admin/piutangs/' . $record->id . '/detail')
+                // ),
                 ->url(
-                    fn(?Model $record): string => $record->tipe == 'utang'
-                        ? url('/admin/utangs/' . $record->id . '/detail')
-                        : url('/admin/piutangs/' . $record->id . '/detail')
+                    fn(?Model $record): string => url('/admin/utang-piutang-detail/' . $record->id)
                 ),
 
             DeleteAction::make()

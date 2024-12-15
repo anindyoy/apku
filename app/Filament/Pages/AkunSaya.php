@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\User;
 use App\Models\Wilayah;
 use Filament\Forms\Form;
 use Filament\Pages\Page;

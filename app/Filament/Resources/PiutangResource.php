@@ -7,11 +7,11 @@ use Filament\Tables\Table;
 use App\Models\UtangPiutang;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Pages\UtangPiutangDetail;
 use App\Filament\Resources\PiutangResource\Pages;
 use App\Filament\Resources\PiutangResource\Pages\EditPiutang;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Filament\Resources\PiutangResource\Pages\CreatePiutang;
-use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
 
 class PiutangResource extends Resource
 {
@@ -55,7 +55,7 @@ class PiutangResource extends Resource
     {
         return [
             'index' => Pages\ListPiutangs::route('/'),
-            'detail' => UtangPiutangDetail::route('/{record}/detail'),
+            // 'detail' => UtangPiutangDetail::route('/{record}/detail'),
             // 'create' => Pages\CreatePiutang::route('/create'),
             // 'edit' => Pages\EditPiutang::route('/{record}/edit'),
         ];
