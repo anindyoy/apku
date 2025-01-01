@@ -18,6 +18,10 @@ class CustomSeeder extends Seeder
      */
     public function run(): void
     {
+        dd(
+            // uuid(),
+            uniqid()
+        );
         // Transaksi::factory()->count(3)->make();
 
         $user = User::whereHas('buku_kas')

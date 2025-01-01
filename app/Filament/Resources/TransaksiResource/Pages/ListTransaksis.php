@@ -43,11 +43,15 @@ class ListTransaksis extends ListRecords
 
                         unset($data['buku_kas_id_tujuan']);
 
+                        $transfer_code = uniqid();
+
                         $data['jenis'] = 'Transfer Pengeluaran';
+                        $data['transfer_code'] = $transfer_code;
                         $data['tujuan_buku_tabungan_id'] = $tujuan_id;
                         Transaksi::create($data);
 
                         $data['jenis'] = 'Transfer Pemasukan';
+                        $data['transfer_code'] = $transfer_code;
                         $data['buku_kas_id'] = $tujuan_id;
                         $data['asal_buku_tabungan_id'] = $asal_id;
                         Transaksi::create($data);
