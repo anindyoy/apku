@@ -55,15 +55,16 @@ class TransaksiSeeder extends Seeder
                     }
 
                     $transfer_code = uniqid(); // Generate a unique transfer code
-                    $nominal = rand(1000, min($kas->saldo, $tujuanKas->saldo));
+                    $nominal = rand(1, 100);
+                    $tanggal = fake()->dateTimeBetween(
+                        $kas->transaksi()->first()->tanggal,
+                        'now'
+                    );
 
                     Transaksi::create([
                         'user_id' => $value->id,
                         'buku_kas_id' => $kas->id,
-                        'tanggal' => fake()->dateTimeBetween(
-                            $kas->transaksi()->first()->tanggal,
-                            'now'
-                        ),
+                        'tanggal' => $tanggal,
                         'nominal' => $nominal,
                         'jenis' => 'Transfer Pengeluaran',
                         'transfer_code' => $transfer_code,
@@ -74,10 +75,7 @@ class TransaksiSeeder extends Seeder
                     Transaksi::create([
                         'user_id' => $value->id,
                         'buku_kas_id' => $tujuanKas->id,
-                        'tanggal' => fake()->dateTimeBetween(
-                            $tujuanKas->transaksi()->first()->tanggal,
-                            'now'
-                        ),
+                        'tanggal' => $tanggal,
                         'nominal' => $nominal,
                         'jenis' => 'Transfer Pemasukan',
                         'transfer_code' => $transfer_code,

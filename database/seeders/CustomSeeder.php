@@ -18,27 +18,24 @@ class CustomSeeder extends Seeder
      */
     public function run(): void
     {
-        dd(
-            // uuid(),
-            uniqid()
-        );
+        $this->recalculateKas(2);
         // Transaksi::factory()->count(3)->make();
 
-        $user = User::whereHas('buku_kas')
-            ->inRandomOrder()->first()->id;
+        // $user = User::whereHas('buku_kas')
+        //     ->inRandomOrder()->first()->id;
 
-        Transaksi::create([
-            'user_id' => $user,
-            'jenis_transaksi_id' => JenisTransaksi::inRandomOrder()->first()->id,
-            'buku_kas_id' => 9,
-            // 'buku_kas_id' => BukuKas::getRandomBukuKas($user)->first()->id,
-            'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
-            'nominal' => rand(1, 100),
-            // 'jenis' => rand(0, 1) ? 'Pengeluaran' : 'Pemasukan',
-            'jenis' => 'Pemasukan',
-            'deskripsi' => fake()->sentence(),
-            // 'tujuan_buku_tabungan_id' => $tujuan_kas_id,
-        ]);
+        // Transaksi::create([
+        //     'user_id' => $user,
+        //     'jenis_transaksi_id' => JenisTransaksi::inRandomOrder()->first()->id,
+        //     'buku_kas_id' => 9,
+        //     // 'buku_kas_id' => BukuKas::getRandomBukuKas($user)->first()->id,
+        //     'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
+        //     'nominal' => rand(1, 100),
+        //     // 'jenis' => rand(0, 1) ? 'Pengeluaran' : 'Pemasukan',
+        //     'jenis' => 'Pemasukan',
+        //     'deskripsi' => fake()->sentence(),
+        //     // 'tujuan_buku_tabungan_id' => $tujuan_kas_id,
+        // ]);
 
         // foreach (User::all() as $key => $value) {
         //     if ($value->type == 'premium') {
@@ -51,5 +48,31 @@ class CustomSeeder extends Seeder
         //     $value->nama_buku = fake()->word();
         //     $value->save();
         // }
+    }
+
+    private function recalculateKas($user_id = null)
+    {
+        if (!$user_id) {
+            $kas = BukuKas::all();
+        } else {
+            $kas = BukuKas::where('user_id', $user_id)->get();
+        }
+
+        foreach ($kas as $key => $value) {
+            $saldo = null;
+            foreach ($value->transaksi as $key => $value1) {
+                if (in_array(
+                    $value1->jenis,
+                    ['Transfer Pemasukan', 'Pemasukan']
+                )) {
+                    $saldo += $value1->nominal;
+                } else {
+                    $saldo -= $value1->nominal;
+                }
+            }
+
+            $value->saldo = $saldo;
+            $value->save();
+        }
     }
 }

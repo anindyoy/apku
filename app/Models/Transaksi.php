@@ -88,7 +88,7 @@ class Transaksi extends Model
                         ->relationship(
                             'jenis_transaksi',
                             'nama_jenis',
-                            fn($query) => $query->where('tipe', 'Pemasukan')
+                            fn($query, $record) => $query->where('tipe', $record->jenis)
                         )
                         ->required(),
 

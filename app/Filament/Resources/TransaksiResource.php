@@ -122,6 +122,42 @@ class TransaksiResource extends Resource
 
                 DeleteAction::make()
                     ->hidden(auth()->user()->isSuper())
+                    ->after(function ($record) {
+                        $kas = $record->buku_kas;
+                        if (in_array($record->jenis, ['Transfer Pengeluaran', 'Transfer Pemasukan'])) {
+                            $kas = $record->buku_kas;
+
+                            if ($record->jenis === 'Transfer Pengeluaran') {
+                                $kas->saldo = $kas->saldo + $record->nominal;
+                            } else if ($record->jenis === 'Transfer Pemasukan') {
+                                $kas->saldo = $kas->saldo - $record->nominal;
+                            }
+
+                            $kas->save();
+
+                            $relatedTransaction = Transaksi::where('transfer_code', $record->transfer_code)->first();
+
+                            if ($relatedTransaction) {
+                                $relatedKas = $relatedTransaction->buku_kas;
+
+                                if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
+                                    $relatedKas->saldo += $relatedTransaction->nominal;
+                                } else
+                                    $relatedKas->saldo -= $relatedTransaction->nominal;
+
+                                $relatedKas->save();
+                                $relatedTransaction->delete();
+                            }
+                        } else if (in_array($record->jenis, ['Pengeluaran', 'Pemasukan'])) {
+                            if ($record->jenis == 'Pengeluaran') {
+                                $kas->saldo = $kas->saldo + $record->nominal;
+                            } else {
+                                $kas->saldo = $kas->saldo - $record->nominal;
+                            }
+
+                            $kas->save();
+                        }
+                    })
             ])
             ->bulkActions([
                 // Tables\Actions\DeleteBulkAction::make(),
