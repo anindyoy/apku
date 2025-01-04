@@ -118,7 +118,31 @@ class TransaksiResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->hidden(auth()->user()->isSuper()),
+                    ->hidden(auth()->user()->isSuper())
+                    ->before(function ($record, $livewire) {
+                        if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
+                            $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
+                            $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
+                            $selisih = $nominal_baru - $record->nominal;
+
+                            foreach ($relatedTransactions as $relatedTransaction) {
+                                $relatedKas = $relatedTransaction->buku_kas;
+
+                                if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
+                                    $relatedKas->saldo -= $selisih;
+                                } else if ($relatedTransaction->jenis === 'Transfer Pemasukan') {
+                                    $relatedKas->saldo += $selisih;
+                                }
+
+                                $relatedKas->save();
+
+                                if ($relatedTransaction->id != $record->id) {
+                                    $relatedTransaction->nominal = $nominal_baru;
+                                    $relatedTransaction->save();
+                                }
+                            }
+                        }
+                    }),
 
                 DeleteAction::make()
                     ->hidden(auth()->user()->isSuper())
