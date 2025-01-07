@@ -21,6 +21,18 @@ class ListTransaksis extends ListRecords
 
     protected static string $resource = TransaksiResource::class;
     protected static ?string $navigationLabel = 'Transaksi';
+    public $list_kas = [];
+
+    public function mount(): void
+    {
+        if (!in_array($this->activeTab, BukuKas::pluck('nama_buku')->toArray())) {
+            $this->activeTab = null;
+        }
+
+        $this->authorizeAccess();
+
+        $this->loadDefaultActiveTab();
+    }
 
     public function defaultForm($livewire)
     {
@@ -151,7 +163,9 @@ class ListTransaksis extends ListRecords
         $tab = [];
         foreach ($kas as $key => $value) {
             $tab[$value->nama_buku] = Tab::make()
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('buku_kas_id', $value->id));
+                ->modifyQueryUsing(
+                    fn(Builder $query) => $query->where('buku_kas_id', $value->id)
+                );
         }
 
         return $tab;

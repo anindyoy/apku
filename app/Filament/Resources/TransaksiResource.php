@@ -94,7 +94,10 @@ class TransaksiResource extends Resource
                         return $query
                             ->where('deskripsi', 'like', "%{$search}%");
                     })
-                    ->description(fn($record) => $record->deskripsi ? 'Deskripsi: ' . $record->deskripsi : '')
+                    ->description(
+                        fn($record) => $record->deskripsi
+                            ? ('Deskripsi: ' . $record->deskripsi) : ''
+                    )
                     ->wrap(),
 
                 Tables\Columns\TextColumn::make('created_at')
