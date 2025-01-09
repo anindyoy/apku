@@ -33,7 +33,8 @@ class PiutangDetail extends Page implements HasTable
     protected static string $view = 'filament.resources.piutang-resource.pages.piutang-detail';
 
     public $code,
-        $parent;
+        $parent,
+        $activeTab;
 
     public function mount($record)
     {

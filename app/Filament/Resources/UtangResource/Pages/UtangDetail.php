@@ -34,7 +34,8 @@ class UtangDetail extends Page implements HasTable
     protected static string $view = 'filament.resources.utang-resource.pages.utang-detail';
 
     public $code,
-        $parent;
+        $parent,
+        $activeTab;
 
     public function mount($record)
     {
