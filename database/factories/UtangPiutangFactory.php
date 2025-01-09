@@ -19,6 +19,7 @@ class UtangPiutangFactory extends Factory
     {
         return [
             'user_id' => User::notSuper()->inRandomOrder()->first()->id,
+            'code' => uniqid(),
             'kepada' => fake()->name(),
             'tipe' => rand(0, 1) ? 'utang' : 'piutang',
             'sambung_kas' => rand(0, 1),

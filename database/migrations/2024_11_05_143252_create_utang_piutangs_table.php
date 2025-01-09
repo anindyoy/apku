@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('utang_piutang', function (Blueprint $table) {
             $table->id();
+            $table->string('code', 30)->nullable();
             $table->unsignedBigInteger('user_id');
             $table->enum('tipe', ['utang', 'piutang']);
             $table->string('kepada', 150);

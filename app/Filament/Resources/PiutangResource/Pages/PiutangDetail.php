@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\UtangResource\Pages;
+namespace App\Filament\Resources\PiutangResource\Pages;
 
 use Filament\Tables\Table;
 use App\Models\UtangPiutang;
@@ -14,9 +14,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use App\Filament\Resources\UtangResource;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Contracts\Support\Htmlable;
+use App\Filament\Resources\PiutangResource;
 use Filament\Actions\Action as ActionsAction;
 use Filament\Forms\Components\DateTimePicker;
 use App\Models\UtangPiutangDetail as DataModel;
@@ -25,13 +25,12 @@ use Filament\Pages\Concerns\ExposesTableToWidgets;
 use App\Filament\Widgets\UtangPiutangDetailOverview;
 use App\Models\UtangPiutangDetail as ModelsUtangPiutangDetail;
 
-class UtangPiutangDetail extends Page implements HasTable
+class PiutangDetail extends Page implements HasTable
 {
     use InteractsWithTable, ExposesTableToWidgets;
+    protected static string $resource = PiutangResource::class;
 
-    protected static string $resource = UtangResource::class;
-
-    protected static string $view = 'filament.resources.utang-resource.pages.utang-piutang-detail';
+    protected static string $view = 'filament.resources.piutang-resource.pages.piutang-detail';
 
     public $code,
         $parent,
@@ -54,28 +53,28 @@ class UtangPiutangDetail extends Page implements HasTable
 
     protected function getHeaderActions(): array
     {
-        $utang = $this->parent;
-        $utang_detail = $utang->utang_piutang_detail->first();
+        $parent = $this->parent;
+        $utang_detail = $parent->utang_piutang_detail->first();
 
         return [
             ActionsAction::make('ubah')
                 ->fillForm(fn(): array => [
-                    'kepada' => $utang->kepada,
-                    'created_at' => $utang->created_at,
-                    'jatuh_tempo' => $utang->tempo ? true : false,
-                    'tempo' => $utang->tempo,
+                    'kepada' => $parent->kepada,
+                    'created_at' => $parent->created_at,
+                    'jatuh_tempo' => $parent->tempo ? true : false,
+                    'tempo' => $parent->tempo,
                     'nominal' => $utang_detail->nominal,
-                    'deskripsi' => $utang->deskripsi,
+                    'deskripsi' => $parent->deskripsi,
                 ])
                 ->modalWidth(MaxWidth::Small)
                 ->form(UtangPiutang::formSchema())
-                ->action(function ($data) use ($utang_detail, $utang): void {
-                    DB::transaction(function () use ($data, $utang_detail, $utang) {
-                        $utang->kepada = $data['kepada'];
-                        $utang->created_at = $data['created_at'];
-                        $utang->tempo = $data['tempo'] ?? null;
-                        $utang->deskripsi = $data['deskripsi'];
-                        $utang->save();
+                ->action(function ($data) use ($utang_detail, $parent): void {
+                    DB::transaction(function () use ($data, $utang_detail, $parent) {
+                        $parent->kepada = $data['kepada'];
+                        $parent->created_at = $data['created_at'];
+                        $parent->tempo = $data['tempo'] ?? null;
+                        $parent->deskripsi = $data['deskripsi'];
+                        $parent->save();
 
                         $utang_detail->nominal = $data['nominal'];
                         $utang_detail->created_at = $data['created_at'];
@@ -119,8 +118,8 @@ class UtangPiutangDetail extends Page implements HasTable
 
     public function table(Table $table)
     {
-        $utang = $this->parent;
-        // $utang_detail = $utang->utang_piutang_detail->first();
+        $parent = $this->parent;
+        // $utang_detail = $parent->utang_piutang_detail->first();
 
         return $table
             ->headerActions([
@@ -128,7 +127,7 @@ class UtangPiutangDetail extends Page implements HasTable
                     ->label('Tambah Piutang')
                     ->hidden(auth()->user()->isSuper())
                     ->action(
-                        fn($data) => ModelsUtangPiutangDetail::action($data, $utang->id, 'tambah')
+                        fn($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'tambah')
                     )
                     ->icon('heroicon-o-plus-circle')
                     ->modalWidth(MaxWidth::Small)
@@ -139,7 +138,7 @@ class UtangPiutangDetail extends Page implements HasTable
                     ->label('Piutang dibayar')
                     ->hidden(auth()->user()->isSuper())
                     ->action(
-                        fn($data) => ModelsUtangPiutangDetail::action($data, $utang->id, 'kurang')
+                        fn($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'kurang')
                     )
                     ->color('success')
                     ->icon('heroicon-o-minus-circle')
@@ -148,7 +147,7 @@ class UtangPiutangDetail extends Page implements HasTable
                     ->form(ModelsUtangPiutangDetail::form()),
             ])
             ->query(
-                DataModel::whereUtangPiutangId($utang->id)
+                DataModel::whereUtangPiutangId($parent->id)
                     ->selectRaw(
                         "*, SUM(CASE WHEN tipe = 'kurang' THEN -nominal ELSE nominal END) OVER (ORDER BY created_at) as running_balance"
                     )
@@ -160,7 +159,7 @@ class UtangPiutangDetail extends Page implements HasTable
                     ->tooltip('Ubah')
                     ->modalHeading(
                         fn($record) => 'Ubah '
-                            . ucfirst($utang->tipe)
+                            . ucfirst($parent->tipe)
                             . ' '
                             . (ucfirst($record->tipe) == 'tambah' ? 'Ditambah' : 'Dibayar')
                     )

@@ -51,8 +51,8 @@ class UtangPiutang extends Model
                 ->icon('heroicon-o-magnifying-glass')
                 ->url(
                     fn(?Model $record): string => $record->tipe == 'utang'
-                        ? url('/admin/utangs/' . $record->id . '/detail')
-                        : url('/admin/piutangs/' . $record->id . '/detail')
+                        ? url('/admin/utangs/' . $record->code . '/detail')
+                        : url('/admin/piutangs/' . $record->code . '/detail')
                 ),
 
             DeleteAction::make()
@@ -147,6 +147,7 @@ class UtangPiutang extends Model
                 ->hidden(auth()->user()->isSuper())
                 ->mutateFormDataUsing(function (array $data) use ($tipe): array {
                     $data['user_id'] = auth()->id();
+                    $data['code'] = uniqid();
                     $data['tipe'] = $tipe;
                     unset($data['nominal']);
 
@@ -179,7 +180,7 @@ class UtangPiutang extends Model
         return $query->whereTipe('piutang');
     }
 
-    public function scopeSelectRawNominalAndLastAcitivityDate($query)
+    public function scopeselectRawNominalAndLastActivityDate($query)
     {
         return $query->select(
             '*',

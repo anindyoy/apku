@@ -11,6 +11,7 @@ use App\Filament\Resources\PiutangResource\Pages;
 use App\Filament\Resources\PiutangResource\Pages\EditPiutang;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Filament\Resources\PiutangResource\Pages\CreatePiutang;
+use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
 use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
 
 class PiutangResource extends Resource
@@ -34,7 +35,7 @@ class PiutangResource extends Resource
         return $table
             ->modifyQueryUsing(
                 fn(Builder $query) => $query->piutang()
-                    ->selectRawNominalAndLastAcitivityDate()
+                    ->selectRawNominalAndLastActivityDate()
             )
             ->searchPlaceholder('Cari nama..')
             ->columns(UtangPiutang::tableColumns())
@@ -55,7 +56,7 @@ class PiutangResource extends Resource
     {
         return [
             'index' => Pages\ListPiutangs::route('/'),
-            'detail' => UtangPiutangDetail::route('/{record}/detail'),
+            'detail' => PiutangDetail::route('/{record}/detail'),
             // 'create' => Pages\CreatePiutang::route('/create'),
             // 'edit' => Pages\EditPiutang::route('/{record}/edit'),
         ];
