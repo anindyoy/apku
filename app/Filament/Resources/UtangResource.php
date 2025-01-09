@@ -11,7 +11,7 @@ use App\Filament\Resources\UtangResource\Pages;
 use App\Filament\Resources\UtangResource\Pages\EditUtang;
 use App\Filament\Resources\UtangResource\Pages\ListUtangs;
 use App\Filament\Resources\UtangResource\Pages\CreateUtang;
-use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
+use App\Filament\Resources\UtangResource\Pages\UtangDetail;
 
 class UtangResource extends Resource
 {
@@ -53,7 +53,7 @@ class UtangResource extends Resource
     {
         return [
             'index' => Pages\ListUtangs::route('/'),
-            'detail' => UtangPiutangDetail::route('/{record}/detail'),
+            'detail' => UtangDetail::route('/{record}/detail'),
             // 'create' => Pages\CreateUtang::route('/create'),
             // 'edit' => Pages\EditUtang::route('/{record}/edit'),
         ];

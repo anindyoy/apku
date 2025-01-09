@@ -12,7 +12,6 @@ use App\Filament\Resources\PiutangResource\Pages\EditPiutang;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Filament\Resources\PiutangResource\Pages\CreatePiutang;
 use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
-use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
 
 class PiutangResource extends Resource
 {

@@ -25,17 +25,16 @@ use Filament\Pages\Concerns\ExposesTableToWidgets;
 use App\Filament\Widgets\UtangPiutangDetailOverview;
 use App\Models\UtangPiutangDetail as ModelsUtangPiutangDetail;
 
-class UtangPiutangDetail extends Page implements HasTable
+class UtangDetail extends Page implements HasTable
 {
     use InteractsWithTable, ExposesTableToWidgets;
 
     protected static string $resource = UtangResource::class;
 
-    protected static string $view = 'filament.resources.utang-resource.pages.utang-piutang-detail';
+    protected static string $view = 'filament.resources.utang-resource.pages.utang-detail';
 
     public $code,
-        $parent,
-        $activeTab;
+        $parent;
 
     public function mount($record)
     {
@@ -120,7 +119,6 @@ class UtangPiutangDetail extends Page implements HasTable
     public function table(Table $table)
     {
         $utang = $this->parent;
-        // $utang_detail = $utang->utang_piutang_detail->first();
 
         return $table
             ->headerActions([
