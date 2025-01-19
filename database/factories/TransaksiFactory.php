@@ -25,7 +25,7 @@ class TransaksiFactory extends Factory
             // 'user_id' => $user->id,
             // 'jenis_transaksi_id' => JenisTransaksi::whereUserId($user->id)->inRandomOrder()->first()->id,
             // 'buku_kas_id' => BukuKas::getRandomBukuKas($user->id)->first()->id,
-            'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
+            'tanggal' => fake()->dateTimeBetween('-3 months', 'now'),
             'nominal' => rand(1, 100),
             'jenis' => $jenis,
             'deskripsi' => fake()->optional()->sentence(),

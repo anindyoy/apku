@@ -7,18 +7,23 @@ use App\Models\JenisTransaksi;
 use App\Models\ShareBuku;
 use App\Models\Transaksi;
 use App\Models\User;
+use App\Traits\TransactionSeederTrait;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class CustomSeeder extends Seeder
 {
+    use TransactionSeederTrait;
+
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        $this->recalculateKas(2);
+        $this->seedTransactions(2, 30);
+
+        // $this->recalculateKas(2);
         // Transaksi::factory()->count(3)->make();
 
         // $user = User::whereHas('buku_kas')

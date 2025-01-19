@@ -1,54 +1,134 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Pages;
 
-use Filament\Tables;
-use Filament\Forms\Form;
+use App\Models\BukuKas;
+use Filament\Pages\Page;
 use App\Models\Transaksi;
 use Filament\Tables\Table;
-use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Resources\Components\Tab;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Resources\Concerns\HasTabs;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use App\Filament\Resources\TransaksiResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\TransaksiResource\RelationManagers;
-use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
-use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Filament\Resources\TransaksiResource\Pages\CreateTransaksi;
-use App\Filament\Resources\TransaksiResource\Pages\CustomTransaksi;
 
-class TransaksiResource extends Resource
+class DataTransaksi extends Page implements HasTable, HasForms
 {
-    protected static ?string $model = Transaksi::class;
+    use InteractsWithTable, InteractsWithForms, HasTabs, ExposesTableToWidgets;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $pluralLabel = 'Transaksi';
-    protected static ?string $slug = 'transaksi';
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    public static function form(Form $form): Form
+    protected static string $view = 'filament.pages.data-transaksi';
+
+    public $kas_id;
+    public $bulan;
+    public $tahun;
+    public $tahun_awal;
+    public $list_kas;
+    public $kas_aktif;
+    public $id_kas_aktif;
+    public $saldo_kas;
+
+    protected $listeners = [
+        'refresh' => '$refresh'
+    ];
+
+    public function mount()
     {
-        return $form->schema(Transaksi::form());
+        $this->bulan = date('m');
+        $this->tahun = date('Y');
+        $this->tahun_awal = date(
+            'Y',
+            strtotime(Transaksi::orderBy('tanggal', 'asc')->first()->tanggal)
+        );
+
+        if (!in_array($this->activeTab, BukuKas::pluck('nama_buku')->toArray())) {
+            $this->activeTab = null;
+        }
+
+        $this->list_kas = BukuKas::all();
+        $this->kas_aktif = BukuKas::first();
+        $this->id_kas_aktif = $this->kas_aktif->id;
+
+        $this->loadDefaultActiveTab();
     }
 
-    public static function table(Table $table): Table
+    protected function getViewData(): array
     {
+        // dd(BukuKas::sum('saldo'));
+        return [
+            'saldo' => number_format($this->kas_aktif->saldo),
+            'total_saldo' => number_format(BukuKas::sum('saldo')),
+        ];
+    }
+
+    public function editKas($id)
+    {
+        $this->kas_aktif = BukuKas::find($id);
+        $this->dispatch('refresh');
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            // KasOverview::class,
+        ];
+    }
+
+    // public function updatedKasAktif()
+    // {
+    //     dd($this->kas_aktif);
+    //     $this->resetPage();
+    // }
+
+    public function table(Table $table): Table
+    {
+        // $query = Transaksi::query()->select(
+        //     'transaksi.*',
+        //     DB::raw(
+        //         '(CASE
+        //         WHEN ROW_NUMBER() OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) = 1
+        //         THEN (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id)
+        //         ELSE (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id) +
+        //             SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)
+        //     END) as saldo'
+        //     )
+        // )
+        //     ->whereMonth('tanggal', $this->bulan)
+        //     ->whereYear('tanggal', $this->tahun)
+        //     ->where('buku_kas_id', $this->kas_aktif->id);
+
         return $table
-            ->modifyQueryUsing(
-                fn(Builder $query) => $query->select(
-                    'transaksi.*',
-                    DB::raw(
-                        'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
-                    )
-                )
-            )
+            // ->query(
+            //     fn() => Transaksi::query()->select(
+            //         'transaksi.*',
+            //         DB::raw(
+            //             // 'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
+            //             '(CASE
+            //             WHEN ROW_NUMBER() OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) = 1
+            //             THEN (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id)
+            //             ELSE (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id) +
+            //                 SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)
+            //         END) as saldo'
+            //         )
+            //     )
+            // )
+            // ->modifyQueryUsing(
+            //     fn(Builder $query) => $query
+            //         ->whereMonth('tanggal', $this->bulan)
+            //         ->whereYear('tanggal', $this->tahun)
+            //         ->where('buku_kas_id', $this->kas_aktif->id)
+            // )
+            ->query($query)
             ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
             ->columns([
@@ -68,14 +148,14 @@ class TransaksiResource extends Resource
                         'Transfer Pengeluaran' => 'primary',
                     }),
 
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->visible(auth()->user()->isSuper()),
 
-                Tables\Columns\TextColumn::make('tanggal')
+                TextColumn::make('tanggal')
                     ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),
 
-                Tables\Columns\TextColumn::make('kategori')
+                TextColumn::make('kategori')
                     ->label('Kategori')
                     ->getStateUsing(function ($record) {
                         if (!in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
@@ -102,15 +182,15 @@ class TransaksiResource extends Resource
                     )
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('nominal')
+                TextColumn::make('nominal')
                     ->numeric()
                     ->prefix('Rp '),
 
@@ -122,7 +202,7 @@ class TransaksiResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->hidden(auth()->user()->isSuper())
                     ->before(function ($record, $livewire) {
                         if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
@@ -187,26 +267,6 @@ class TransaksiResource extends Resource
                             $kas->save();
                         }
                     })
-            ])
-            ->bulkActions([
-                // Tables\Actions\DeleteBulkAction::make(),
             ]);
-    }
-
-    public static function getWidgets(): array
-    {
-        return [
-            KasOverview::class
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            // 'index' => CustomTransaksi::route('/'),
-            'index' => Pages\ListTransaksis::route('/'),
-            // 'create' => Pages\CreateTransaksi::route('/create'),
-            // 'edit' => Pages\EditTransaksi::route('/{record}/edit'),
-        ];
     }
 }

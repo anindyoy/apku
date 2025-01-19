@@ -11,6 +11,8 @@ use Illuminate\Database\Seeder;
 
 class TransaksiSeeder extends Seeder
 {
+    use TransactionSeederTrait;
+
     /**
      * Run the database seeds.
      */
@@ -41,7 +43,8 @@ class TransaksiSeeder extends Seeder
             }
 
             // CREATE TRANSAKSI
-            for ($i = 0; $i < rand(10, 25); $i++) {
+            $this->seedTransactions($value->id);
+            // for ($i = 0; $i < rand(15, 25); $i++) {
                 $kas = BukuKas::getRandomBukuKas($value->id)->first();
                 $jenisRandom = rand(0, 5);
 
@@ -116,7 +119,7 @@ class TransaksiSeeder extends Seeder
                         $kas->save();
                     }
                 }
-            }
+            // }
         }
     }
 }

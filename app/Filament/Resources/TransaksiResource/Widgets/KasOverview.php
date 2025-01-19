@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\TransaksiResource\Widgets;
 
+use App\Models\BukuKas;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Models\BukuKas;
 
 class KasOverview extends BaseWidget
 {
@@ -19,6 +19,7 @@ class KasOverview extends BaseWidget
 
     protected function getStats(): array
     {
+        // dd($this->getPageTableRecords()->first());
         return [
             Stat::make(
                 'Saldo',
