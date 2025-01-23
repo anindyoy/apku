@@ -13,20 +13,40 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(Transaksi $transaksi): void
     {
-        if (
-            $transaksi->created_at !=
-            $transaksi->buku_kas->created_at
-        ) {
-            $kas = $transaksi->buku_kas;
-            if (in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])) {
-                $kas->saldo -= $transaksi->nominal;
-                $kas->save();
-            } else {
-                $kas->saldo += $transaksi->nominal;
-                $kas->save();
-            }
-        }
+        // JIKA TIDAK MENGGUNAKAN KOLOM SALDO DI TRANSAKSI ============
+        // if (
+        //     $transaksi->created_at !=
+        //     $transaksi->buku_kas->created_at
+        // ) {
+        //     $kas = $transaksi->buku_kas;
+        //     if (in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])) {
+        //         $kas->saldo -= $transaksi->nominal;
+        //         $kas->save();
+        //     } else {
+        //         $kas->saldo += $transaksi->nominal;
+        //         $kas->save();
+        //     }
+        // }
+
+        // JIKA MENGGUNAKAN KOLOM SALDO DI TRANSAKSI ============
+        $bukuKas = $transaksi->buku_kas;
+        $saldoAwal = $bukuKas->saldo;
+        $saldoAkhir = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+            ? $saldoAwal + $transaksi->nominal
+            : $saldoAwal - $transaksi->nominal;
+
+        // Simpan saldo ke transaksi
+        $transaksi->saldo_awal = $saldoAwal;
+        $transaksi->saldo_akhir = $saldoAkhir;
+        $transaksi->save();
+
+        // Perbarui saldo buku kas
+        $bukuKas->saldo = $saldoAkhir;
+        $bukuKas->save();
+
+        $this->updateFutureTransactions($transaksi);
     }
+
 
     /**
      * Handle the Transaksi "updated" event.

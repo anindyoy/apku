@@ -33,10 +33,10 @@ class TransaksiResource extends Resource
     protected static ?string $slug = 'transaksi';
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function form(Form $form): Form
-    {
-        return $form->schema(Transaksi::form());
-    }
+    // public static function form(Form $form): Form
+    // {
+    //     return $form->schema(Transaksi::form());
+    // }
 
     public static function table(Table $table): Table
     {

@@ -23,6 +23,8 @@ return new class extends Migration
             $table->text('deskripsi')->nullable();
             $table->unsignedBigInteger('tujuan_buku_tabungan_id')->nullable();
             $table->unsignedBigInteger('asal_buku_tabungan_id')->nullable();
+            $table->integer('saldo_awal')->nullable();
+            $table->integer('saldo_akhir')->nullable();
 
             $table->timestamps();
         });

@@ -50,7 +50,7 @@ class Transaksi extends Model
         return $this->belongsTo(BukuKas::class);
     }
 
-    public static function form($transfer = false)
+    public static function form($jenis)
     {
         return [
             Select::make('jenis')
@@ -68,27 +68,35 @@ class Transaksi extends Model
                     Select::make('buku_kas_id')
                         ->label('Buku Kas')
                         ->live()
-                        ->relationship('buku_kas', 'nama_buku')
+                        ->relationship(
+                            'buku_kas',
+                            'nama_buku',
+                            fn($query, $get) => $query->orderBy('id')
+                        )
                         ->required(),
 
                     Select::make('buku_kas_id_tujuan')
                         ->label('Buku Kas Tujuan')
-                        ->relationship('buku_kas', 'nama_buku', fn($query, $get) => $query->whereNot('id', $get('buku_kas_id')))
+                        ->relationship(
+                            'buku_kas',
+                            'nama_buku',
+                            fn($query, $get) => $query->whereNot('id', $get('buku_kas_id'))
+                        )
                         ->required()
-                        ->visible($transfer),
+                        ->visible($jenis == 'transfer'),
 
                     Select::make('jenis_transaksi_id')
                         ->label('Kategori')
                         ->hidden(
-                            fn($record = null) => $transfer || in_array(
-                                $record->jenis,
-                                ['Transfer Pemasukan', 'Transfer Pengeluaran']
-                            )
+                            fn($livewire) => $livewire->mountedTableActions[0] == 'Transfer saldo'
                         )
                         ->relationship(
                             'jenis_transaksi',
                             'nama_jenis',
-                            fn($query, $record) => $query->where('tipe', $record->jenis)
+                            fn($query, $livewire) => $query->whereTipe(
+                                $livewire->mountedTableActions[0] == 'Catat Pengeluaran'
+                                    ? 'pengeluaran' : 'pemasukan'
+                            )
                         )
                         ->required(),
 

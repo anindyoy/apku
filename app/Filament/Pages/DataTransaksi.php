@@ -7,23 +7,28 @@ use Filament\Pages\Page;
 use App\Models\Transaksi;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Resources\Components\Tab;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Notifications\Notification;
 use Filament\Resources\Concerns\HasTabs;
+use App\Traits\UpdatesFutureTransactions;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
-use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 
 class DataTransaksi extends Page implements HasTable, HasForms
 {
-    use InteractsWithTable, InteractsWithForms, HasTabs, ExposesTableToWidgets;
+    use InteractsWithTable,
+        InteractsWithForms,
+        HasTabs,
+        ExposesTableToWidgets,
+        UpdatesFutureTransactions;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
@@ -64,7 +69,6 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
     protected function getViewData(): array
     {
-        // dd(BukuKas::sum('saldo'));
         return [
             'saldo' => number_format($this->kas_aktif->saldo),
             'total_saldo' => number_format(BukuKas::sum('saldo')),
@@ -77,60 +81,128 @@ class DataTransaksi extends Page implements HasTable, HasForms
         $this->dispatch('refresh');
     }
 
-    protected function getHeaderWidgets(): array
+    public function defaultForm()
     {
         return [
-            // KasOverview::class,
+            'buku_kas_id' => $this->id_kas_aktif,
+            'tanggal' => date('d M Y, H:i:s')
         ];
     }
 
-    // public function updatedKasAktif()
-    // {
-    //     dd($this->kas_aktif);
-    //     $this->resetPage();
-    // }
-
     public function table(Table $table): Table
     {
-        // $query = Transaksi::query()->select(
-        //     'transaksi.*',
-        //     DB::raw(
-        //         '(CASE
-        //         WHEN ROW_NUMBER() OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) = 1
-        //         THEN (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id)
-        //         ELSE (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id) +
-        //             SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)
-        //     END) as saldo'
-        //     )
-        // )
-        //     ->whereMonth('tanggal', $this->bulan)
-        //     ->whereYear('tanggal', $this->tahun)
-        //     ->where('buku_kas_id', $this->kas_aktif->id);
+        $query = Transaksi::whereMonth('tanggal', $this->bulan)
+            ->whereYear('tanggal', $this->tahun)
+            ->where('buku_kas_id', $this->kas_aktif->id);
 
         return $table
-            // ->query(
-            //     fn() => Transaksi::query()->select(
-            //         'transaksi.*',
-            //         DB::raw(
-            //             // 'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
-            //             '(CASE
-            //             WHEN ROW_NUMBER() OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) = 1
-            //             THEN (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id)
-            //             ELSE (SELECT saldo FROM buku_kas WHERE id = transaksi.buku_kas_id) +
-            //                 SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)
-            //         END) as saldo'
-            //         )
-            //     )
-            // )
-            // ->modifyQueryUsing(
-            //     fn(Builder $query) => $query
-            //         ->whereMonth('tanggal', $this->bulan)
-            //         ->whereYear('tanggal', $this->tahun)
-            //         ->where('buku_kas_id', $this->kas_aktif->id)
-            // )
             ->query($query)
             ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
+            ->headerActions([
+                Action::make('Transfer saldo')
+                    ->tooltip('Transfer saldo ke kas lain')
+                    ->action(function ($form, $action, array $data, array $arguments) {
+                        DB::transaction(function () use ($data) {
+                            $data['user_id'] = auth()->user()->id;
+                            $tujuan_id = $data['buku_kas_id_tujuan'];
+                            $asal_id = $data['buku_kas_id'];
+
+                            unset($data['buku_kas_id_tujuan']);
+
+                            $transfer_code = uniqid();
+
+                            $data['jenis'] = 'Transfer Pengeluaran';
+                            $data['transfer_code'] = $transfer_code;
+                            $data['tujuan_buku_tabungan_id'] = $tujuan_id;
+                            Transaksi::create($data);
+
+                            $data['jenis'] = 'Transfer Pemasukan';
+                            $data['transfer_code'] = $transfer_code;
+                            $data['buku_kas_id'] = $tujuan_id;
+                            $data['asal_buku_tabungan_id'] = $asal_id;
+                            Transaksi::create($data);
+                        });
+
+                        Notification::make()
+                            ->title('Berhasil Transfer Saldo')
+                            ->success()
+                            ->send();
+
+                        if ($arguments['another'] ?? false) {
+                            $form->fill($this->defaultForm());
+                            $action->halt();
+                        }
+
+                        $action->cancel();
+                    })
+                    ->fillForm(fn($livewire): array => $this->defaultForm())
+                    ->extraModalFooterActions(fn(Action $action): array => [
+                        $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                            ->label('Tambah yang lain'),
+                    ])
+                    ->form(Transaksi::form('transfer'))
+                    ->color('primary')
+                    ->icon('heroicon-o-arrow-path-rounded-square'),
+
+                Action::make('Catat Pemasukan')
+                    ->action(function ($form, $action, array $data, array $arguments) {
+                        $data['jenis'] = 'Pemasukan';
+                        $data['user_id'] = auth()->user()->id;
+                        Transaksi::create($data);
+
+                        Notification::make()
+                            ->title('Berhasil Catat Pemasukan')
+                            ->success()
+                            ->send();
+
+                        if ($arguments['another'] ?? false) {
+                            $form->fill($this->defaultForm());
+                            $action->halt();
+                        }
+
+                        $action->cancel();
+                    })
+                    ->fillForm(fn($livewire): array => $this->defaultForm())
+                    ->extraModalFooterActions(fn(Action $action): array => [
+                        $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                            ->label('Tambah yang lain'),
+                    ])
+                    ->form(Transaksi::form('pemasukan'))
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-down-on-square'),
+
+                Action::make('Catat Pengeluaran')
+                    ->action(function (?Transaksi $record, array $data, $form, $action, array $arguments) {
+                        $data['jenis'] = 'Pengeluaran';
+                        $data['user_id'] = auth()->user()->id;
+
+                        Transaksi::create($data);
+
+                        Notification::make()
+                            ->title('Berhasil Catat Pengeluaran')
+                            ->success()
+                            ->send();
+
+                        if ($arguments['another'] ?? false) {
+                            $form->fill($this->defaultForm());
+                            $action->halt();
+                        }
+
+                        $action->cancel();
+                    })
+                    ->fillForm(fn(): array => [
+                        'buku_kas_id' => $this->id_kas_aktif,
+                        'tanggal' => now()
+                    ])
+                    ->extraModalFooterActions(fn(Action $action): array => [
+                        $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                            ->label('Tambah yang lain'),
+                    ])
+                    ->form(Transaksi::form('pengeluaran'))
+                    ->color('danger')
+                    ->icon('heroicon-o-arrow-up-on-square'),
+            ])
             ->columns([
                 IconColumn::make('jenis')
                     ->label('Tipe')
@@ -194,7 +266,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
                     ->numeric()
                     ->prefix('Rp '),
 
-                TextColumn::make('saldo')->numeric()
+                TextColumn::make('saldo_akhir')->numeric()
                     ->prefix('Rp '),
             ])
             ->defaultSort('tanggal', 'desc')
