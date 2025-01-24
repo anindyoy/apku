@@ -8,6 +8,7 @@ use App\Models\Transaksi;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
@@ -44,7 +45,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
     public $saldo_kas;
 
     protected $listeners = [
-        'refresh' => '$refresh'
+        'refresh' => '$refresh',
     ];
 
     public function mount()
@@ -89,6 +90,11 @@ class DataTransaksi extends Page implements HasTable, HasForms
         ];
     }
 
+    public function refreshTable()
+    {
+        $this->dispatch('refresh');
+    }
+
     public function table(Table $table): Table
     {
         $query = Transaksi::whereMonth('tanggal', $this->bulan)
@@ -99,6 +105,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
             ->query($query)
             ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
+            ->deferLoading()
             ->headerActions([
                 Action::make('Transfer saldo')
                     ->tooltip('Transfer saldo ke kas lain')
@@ -136,7 +143,8 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
                         $action->cancel();
                     })
-                    ->fillForm(fn($livewire): array => $this->defaultForm())
+                    ->modalWidth(MaxWidth::Large)
+                    ->fillForm(fn(): array => $this->defaultForm())
                     ->extraModalFooterActions(fn(Action $action): array => [
                         $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                             ->label('Tambah yang lain'),
@@ -163,7 +171,8 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
                         $action->cancel();
                     })
-                    ->fillForm(fn($livewire): array => $this->defaultForm())
+                    ->modalWidth(MaxWidth::Large)
+                    ->fillForm(fn(): array => $this->defaultForm())
                     ->extraModalFooterActions(fn(Action $action): array => [
                         $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                             ->label('Tambah yang lain'),
@@ -191,6 +200,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
                         $action->cancel();
                     })
+                    ->modalWidth(MaxWidth::Large)
                     ->fillForm(fn(): array => [
                         'buku_kas_id' => $this->id_kas_aktif,
                         'tanggal' => now()

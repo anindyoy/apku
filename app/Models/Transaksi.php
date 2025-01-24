@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\BukuKas;
 use App\Models\JenisTransaksi;
@@ -102,10 +103,19 @@ class Transaksi extends Model
 
                     DateTimePicker::make('tanggal')
                         ->required()
+                        ->live()
+                        ->helperText(function ($state) {
+                            $date = \Carbon\Carbon::parse($state);
+                            if ($date->diffInMonths(now()) > 2) {
+                                return 'Tanggal transaksi di masa lampau, waktu proses tambah data akan lebih lama.';
+                            }
+                            return null;
+                        })
                         ->seconds(false)
                         ->native(false)
                         ->closeOnDateSelection()
                         ->displayFormat('d M Y, H:i')
+                        ->minDate(now()->subYear())
                         ->maxDate(now()),
 
                     TextInput::make('nominal')
