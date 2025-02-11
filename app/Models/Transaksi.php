@@ -51,7 +51,7 @@ class Transaksi extends Model
         return $this->belongsTo(BukuKas::class);
     }
 
-    public static function form($jenis)
+    public static function form($jenis = null)
     {
         return [
             Select::make('jenis')
@@ -62,7 +62,9 @@ class Transaksi extends Model
                     'Transfer Pengeluaran' => 'Transfer Pengeluaran',
                 ])
                 ->disabled()
-                ->visible(fn($record) => $record),
+                ->visible(
+                    fn($record) => $record
+                ),
 
             Grid::make()
                 ->schema([
@@ -89,14 +91,16 @@ class Transaksi extends Model
                     Select::make('jenis_transaksi_id')
                         ->label('Kategori')
                         ->hidden(
-                            fn($livewire) => $livewire->mountedTableActions[0] == 'Transfer saldo'
+                            fn($livewire, $record) => $livewire->form_action == 'transfer'
+                                || ($record && in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran']))
                         )
                         ->relationship(
                             'jenis_transaksi',
                             'nama_jenis',
-                            fn($query, $livewire) => $query->whereTipe(
+                            fn($query, $get, $livewire) => $query->whereTipe(
                                 $livewire->mountedTableActions[0] == 'Catat Pengeluaran'
-                                    ? 'pengeluaran' : 'pemasukan'
+                                    || $get('jenis') == 'Pengeluaran'
+                                    ? 'Pengeluaran' : 'Pemasukan'
                             )
                         )
                         ->required(),
@@ -120,6 +124,7 @@ class Transaksi extends Model
 
                     TextInput::make('nominal')
                         ->required()
+                        ->prefix('Rp')
                         ->numeric(),
 
                     TextInput::make('deskripsi')

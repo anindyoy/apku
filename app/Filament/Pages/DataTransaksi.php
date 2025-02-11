@@ -2,7 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use Closure;
 use App\Models\BukuKas;
+use Filament\Forms\Form;
 use Filament\Pages\Page;
 use App\Models\Transaksi;
 use Filament\Tables\Table;
@@ -42,6 +44,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
     public $list_kas;
     public $kas_aktif;
     public $id_kas_aktif;
+    public $form_action;
     public $saldo_kas;
 
     protected $listeners = [
@@ -50,7 +53,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
     public function mount()
     {
-        $this->bulan = date('m');
+        $this->bulan = date('n');
         $this->tahun = date('Y');
         $this->tahun_awal = date(
             'Y',
@@ -82,8 +85,9 @@ class DataTransaksi extends Page implements HasTable, HasForms
         $this->dispatch('refresh');
     }
 
-    public function defaultForm()
+    public function defaultForm($action = null)
     {
+        $this->form_action = $action;
         return [
             'buku_kas_id' => $this->id_kas_aktif,
             'tanggal' => date('d M Y, H:i:s')
@@ -93,6 +97,11 @@ class DataTransaksi extends Page implements HasTable, HasForms
     public function refreshTable()
     {
         $this->dispatch('refresh');
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form->schema(Transaksi::form());
     }
 
     public function table(Table $table): Table
@@ -144,7 +153,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
                         $action->cancel();
                     })
                     ->modalWidth(MaxWidth::Large)
-                    ->fillForm(fn(): array => $this->defaultForm())
+                    ->fillForm(fn(): array => $this->defaultForm('transfer'))
                     ->extraModalFooterActions(fn(Action $action): array => [
                         $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                             ->label('Tambah yang lain'),
@@ -285,12 +294,72 @@ class DataTransaksi extends Page implements HasTable, HasForms
             ])
             ->actions([
                 EditAction::make()
+                    ->modalWidth(MaxWidth::Large)
+                    ->form(Transaksi::form())
                     ->hidden(auth()->user()->isSuper())
                     ->before(function ($record, $livewire) {
+                        // $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
+                        // $selisih = $nominal_baru - $record->nominal;
+                        // $bukuKas = $record->buku_kas;
+
+                        // $saldoAkhir = !in_array($record->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+                        //     ? $record->saldo_akhir + $selisih
+                        //     : $record->saldo_akhir - $selisih;
+
+                        // // Simpan saldo ke transaksi
+                        // $record->saldo_akhir = $saldoAkhir;
+                        // $record->save();
+
+                        // // Perbarui saldo buku kas
+                        // $bukuKas->saldo = $saldoAkhir;
+                        // $bukuKas->save();
+
+                        // if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
+                        //     $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
+
+                        //     foreach ($relatedTransactions as $relatedTransaction) {
+                        //         $relatedKas = $relatedTransaction->buku_kas;
+
+                        //         if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
+                        //             $relatedKas->saldo -= $selisih;
+                        //         } else if ($relatedTransaction->jenis === 'Transfer Pemasukan') {
+                        //             $relatedKas->saldo += $selisih;
+                        //         }
+
+                        //         $relatedKas->save();
+
+                        //         if ($relatedTransaction->id != $record->id) {
+                        //             $relatedTransaction->nominal = $nominal_baru;
+                        //             $relatedTransaction->save();
+                        //         }
+                        //     }
+                        // }
+
+                        // $this->updateFutureTransactions($record, 'update', $record->nominal);
+
+                        $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
+                        $selisih = $nominal_baru - $record->nominal;
+                        $bukuKas = $record->buku_kas;
+
+                        // Simpan nominal lama sebelum diubah
+                        $oldNominal = $record->nominal;
+
+                        // Perbarui nominal dan saldo akhir transaksi
+                        $saldoAkhir = !in_array($record->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+                            ? $record->saldo_akhir + $selisih
+                            : $record->saldo_akhir - $selisih;
+
+                        $record->nominal = $nominal_baru;
+                        $record->saldo_akhir = $saldoAkhir;
+                        $record->save();
+
+                        // Perbarui saldo buku kas
+                        $bukuKas->saldo = $saldoAkhir;
+                        $bukuKas->save();
+
+                        // Jika transaksi terkait dengan transfer, perbarui transaksi terkait
                         if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
                             $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
-                            $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
-                            $selisih = $nominal_baru - $record->nominal;
 
                             foreach ($relatedTransactions as $relatedTransaction) {
                                 $relatedKas = $relatedTransaction->buku_kas;
@@ -299,8 +368,8 @@ class DataTransaksi extends Page implements HasTable, HasForms
                                     $relatedKas->saldo -= $selisih;
                                 } else if ($relatedTransaction->jenis === 'Transfer Pemasukan') {
                                     $relatedKas->saldo += $selisih;
-                                }
 
+                                }
                                 $relatedKas->save();
 
                                 if ($relatedTransaction->id != $record->id) {
@@ -309,6 +378,10 @@ class DataTransaksi extends Page implements HasTable, HasForms
                                 }
                             }
                         }
+
+                        // Panggil updateFutureTransactions dengan parameter yang sesuai
+                        $this->updateFutureTransactions($record, 'update', $oldNominal);
+                        $this->dispatch('refresh');
                     }),
 
                 DeleteAction::make()
@@ -348,6 +421,8 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
                             $kas->save();
                         }
+
+                        $this->updateFutureTransactions($record);
                     })
             ]);
     }

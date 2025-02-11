@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
 use App\Models\ShareBuku;
 use App\Models\Transaksi;
-use App\Models\User;
-use App\Traits\TransactionSeederTrait;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\JenisTransaksi;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\TransactionSeederTrait;
 
 class CustomSeeder extends Seeder
 {
@@ -21,7 +21,7 @@ class CustomSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->seedTransactions(2, 30);
+        $this->seederTransaction();
 
         // $this->recalculateKas(2);
         // Transaksi::factory()->count(3)->make();
@@ -53,6 +53,35 @@ class CustomSeeder extends Seeder
         //     $value->nama_buku = fake()->word();
         //     $value->save();
         // }
+    }
+
+    private function seederTransaction()
+    {
+        $userId = 2; // The ID of the user you want to seed transactions for
+
+        // // Example 1: Seed 30 transactions starting from the 1st of the current month
+        $this->seedTransactions($userId, 20, date('Y-m-1'));
+
+        // // Example 2: Seed transactions between specific dates
+        // $startDate = now()->subMonths(3);  // 3 months ago
+        // $endDate = now()->subMonth();    // 1 month ago
+        // $this->seedTransactions($userId, null, $startDate, $endDate);
+
+        // // Example 3:  Seed a specific number of transactions within a date range
+        // $startDate = '2024-01-01';
+        // $endDate = '2024-02-29';
+        // $jumlah = 50; // Seed 50 transactions
+        // $this->seedTransactions($userId, $jumlah, $startDate, $endDate);
+
+        // // Example 4:  Seed a random number of transactions (default behavior) starting from a specific date:
+        // $startDate = '2024-03-15';
+        // $this->seedTransactions($userId, null, $startDate); // End date will be calculated
+
+        // // Example 5: Using Carbon objects directly
+        // $startDate = \Carbon\Carbon::createFromDate(2024, 04, 01);
+        // $endDate = \Carbon\Carbon::createFromDate(2024, 04, 30);
+        // $this->seedTransactions($userId, null, $startDate, $endDate);
+
     }
 
     private function recalculateKas($user_id = null)

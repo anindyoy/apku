@@ -18,12 +18,12 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Filament\Resources\UserResource\Pages\ListUsers;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -41,6 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ->profile()
             ->registration()
             ->emailVerification()
+            ->sidebarCollapsibleOnDesktop()
             ->passwordReset()
             ->plugins([
                 SpotlightPlugin::make(),
@@ -51,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages(
-                // auth()->user()->isSuper() ? [ListUsers::class] : [ListTransaksis::class]
+                // [auth()->user()->isSuper() ? ListUsers::class : ListTransaksis::class]
                 [
                     // Pages\Dashboard::class,
                     ListTransaksis::class

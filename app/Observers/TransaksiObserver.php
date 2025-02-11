@@ -4,30 +4,17 @@ namespace App\Observers;
 
 use App\Models\BukuKas;
 use App\Models\Transaksi;
+use App\Traits\UpdatesFutureTransactions;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class TransaksiObserver implements ShouldHandleEventsAfterCommit
 {
+    use UpdatesFutureTransactions;
     /**
      * Handle the Transaksi "created" event.
      */
     public function created(Transaksi $transaksi): void
     {
-        // JIKA TIDAK MENGGUNAKAN KOLOM SALDO DI TRANSAKSI ============
-        // if (
-        //     $transaksi->created_at !=
-        //     $transaksi->buku_kas->created_at
-        // ) {
-        //     $kas = $transaksi->buku_kas;
-        //     if (in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])) {
-        //         $kas->saldo -= $transaksi->nominal;
-        //         $kas->save();
-        //     } else {
-        //         $kas->saldo += $transaksi->nominal;
-        //         $kas->save();
-        //     }
-        // }
-
         // JIKA MENGGUNAKAN KOLOM SALDO DI TRANSAKSI ============
         $bukuKas = $transaksi->buku_kas;
         $saldoAwal = $bukuKas->saldo;
@@ -47,41 +34,38 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
         $this->updateFutureTransactions($transaksi);
     }
 
-
-    /**
-     * Handle the Transaksi "updated" event.
-     */
-    // public function updated(Transaksi $transaksi): void
-    // {
-    //     $kas = $transaksi->buku_kas;
-    //     if (in_array($transaksi->jenis, ['Transfer Pengeluaran', 'Pengeluaran'])) {
-    //         $kas->saldo = $kas->saldo + $transaksi->getOriginal('nominal') - $transaksi->nominal;
-    //         $kas->save();
-    //     } else {
-    //         $kas->saldo = $kas->saldo - $transaksi->getOriginal('nominal') + $transaksi->nominal;
-    //         $kas->save();
-    //     }
-    // }
-
     public function updated(Transaksi $transaksi): void
     {
-        if (in_array($transaksi->jenis, ['Pengeluaran', 'Pemasukan']) && $transaksi->isDirty('nominal')) {
-            $kas = $transaksi->buku_kas;
-            // Handle non-transfer transactions
-            if ($transaksi->jenis == 'Pengeluaran') {
-                $kas->saldo = $kas->saldo + $transaksi->getOriginal('nominal') - $transaksi->nominal;
-            } else {
-                $kas->saldo = $kas->saldo - $transaksi->getOriginal('nominal') + $transaksi->nominal;
-            }
-            $kas->save();
-        }
+        // if (in_array($transaksi->jenis, ['Pengeluaran', 'Pemasukan']) && $transaksi->isDirty('nominal')) {
+        //     $kas = $transaksi->buku_kas;
+        //     // Handle non-transfer transactions
+        //     if ($transaksi->jenis == 'Pengeluaran') {
+        //         $kas->saldo = $kas->saldo + $transaksi->getOriginal('nominal') - $transaksi->nominal;
+        //     } else {
+        //         $kas->saldo = $kas->saldo - $transaksi->getOriginal('nominal') + $transaksi->nominal;
+        //     }
+        //     $kas->save();
+        // }
     }
 
 
     /**
      * Handle the Transaksi "deleted" event.
      */
-    public function deleted(Transaksi $transaksi): void {}
+    public function deleted(Transaksi $transaksi): void
+    {
+        // $bukuKas = $transaksi->buku_kas;
+        // $penyesuaian = in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+        //     ? -$transaksi->nominal
+        //     : $transaksi->nominal;
+
+        // // Perbarui saldo buku kas
+        // $bukuKas->saldo += $penyesuaian;
+        // $bukuKas->save();
+
+        // // Perbarui saldo transaksi setelahnya
+        // $this->updateFutureTransactions($transaksi, $penyesuaian);
+    }
 
     /**
      * Handle the Transaksi "restored" event.

@@ -1,43 +1,9 @@
-<?php
-
-namespace App\Traits;
-
-use App\Models\Transaksi;
-
-trait UpdatesFutureTransactions
-{
-    // public function updateFutureTransactions(Transaksi $transaksi)
-    // {
-    //     $futureTransactions = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
-    //         ->where('tanggal', '>', $transaksi->tanggal)
-    //         ->orderBy('tanggal')
-    //         ->get();
-
-    //     $saldo = $transaksi->saldo_akhir;
-
-    //     foreach ($futureTransactions as $futureTransaction) {
-    //         $futureTransaction->saldo_awal = $saldo;
-
-    //         $saldo = !in_array($futureTransaction->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
-    //             ? $saldo + $futureTransaction->nominal
-    //             : $saldo - $futureTransaction->nominal;
-
-    //         $futureTransaction->saldo_akhir = $saldo;
-    //         $futureTransaction->save();
-    //     }
-
-    //     // Perbarui saldo buku kas dengan saldo transaksi terakhir
-    //     if ($futureTransactions->isNotEmpty()) {
-    //         $transaksi->buku_kas->saldo = $saldo;
-    //         $transaksi->buku_kas->save();
-    //     }
-    // }
-
-    public function updateFutureTransactions(
+public function updateFutureTransactions(
         Transaksi $transaksi,
         string $action = 'create',
         $oldNominal = null
-    ) {        // Get the previous transaction to determine the starting balance
+    ) {
+        // Get the previous transaction to determine the starting balance
         $previousTransaction = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
             ->when($action !== 'create', function ($query) use ($transaksi) {
                 return $query->where('id', '!=', $transaksi->id);
@@ -114,4 +80,48 @@ trait UpdatesFutureTransactions
 
         $bukuKas->save();
     }
+
+code di atas ada pada class trait
+
+kemudian kode berikut ada di method class lain untuk merubah data transaksi
+
+$nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
+$selisih = $nominal_baru - $record->nominal;
+$bukuKas = $record->buku_kas;
+
+$saldoAkhir = !in_array($record->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+    ? $record->saldo_akhir + $selisih
+    : $record->saldo_akhir - $selisih;
+
+// Simpan saldo ke transaksi
+$record->saldo_akhir = $saldoAkhir;
+$record->save();
+
+// Perbarui saldo buku kas
+$bukuKas->saldo = $saldoAkhir;
+$bukuKas->save();
+
+if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
+    $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
+
+    foreach ($relatedTransactions as $relatedTransaction) {
+        $relatedKas = $relatedTransaction->buku_kas;
+
+        if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
+            $relatedKas->saldo -= $selisih;
+        } else if ($relatedTransaction->jenis === 'Transfer Pemasukan') {
+            $relatedKas->saldo += $selisih;
+        }
+
+        $relatedKas->save();
+
+        if ($relatedTransaction->id != $record->id) {
+            $relatedTransaction->nominal = $nominal_baru;
+            $relatedTransaction->save();
+        }
+    }
 }
+
+$this->updateFutureTransactions($record, 'update', $record->nominal);
+
+sesuaikan penggunaan method updateFutureTransactions

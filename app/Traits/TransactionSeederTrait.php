@@ -2,22 +2,38 @@
 
 namespace App\Traits;
 
+use Carbon\Carbon;
 use App\Models\BukuKas;
 use App\Models\Transaksi;
 use App\Models\JenisTransaksi;
 
 trait TransactionSeederTrait
 {
-    public function seedTransactions($user_id, $jumlah = null, $startDate = null)
+    public function seedTransactions($user_id, $jumlah = null, $startDate = null, $endDate = null)
     {
-        $lastDate = $startDate ?? now()->subDays(rand(30, 60));
+        // Use provided start date or generate one within the last 2 months
+        $startDate = $startDate ? Carbon::parse($startDate) : now()->subDays(rand(30, 60)); // Ensure Carbon object
+
+        //  Now you can safely use copy()
+        $endDate = $endDate ? Carbon::parse($endDate) : $startDate->copy()->addDays($jumlah ?? rand(15, 25));
+        
+        // Ensure endDate does not exceed the current date
+        if ($endDate->gt(now())) {
+            $endDate = now();
+        }
+
+        $currentDate = $startDate->copy();
 
         for ($i = 0; $i < ($jumlah ?? rand(15, 25)); $i++) {
             $kas = BukuKas::getRandomBukuKas($user_id)->first();
             $jenisRandom = rand(0, 5);
 
-            // Increment the date for each transaction
-            $lastDate = $lastDate->addMinutes(rand(10, 1440)); // Add between 10 minutes to 1 day
+            // Ensure the current date is within the specified range
+            if ($currentDate->gt($endDate)) {
+                break; // Stop if we've exceeded the end date
+            }
+
+            $currentDate = $currentDate->addMinutes(rand(10, 1440));
 
             if ($jenisRandom > 4) { // Transfer transaction
                 $tujuanKas = BukuKas::getRandomBukuKas($user_id)
@@ -34,7 +50,7 @@ trait TransactionSeederTrait
                 Transaksi::create([
                     'user_id' => $user_id,
                     'buku_kas_id' => $kas->id,
-                    'tanggal' => $lastDate,
+                    'tanggal' => $currentDate,
                     'nominal' => $nominal,
                     'jenis' => 'Transfer Pengeluaran',
                     'transfer_code' => $transfer_code,
@@ -45,7 +61,7 @@ trait TransactionSeederTrait
                 Transaksi::create([
                     'user_id' => $user_id,
                     'buku_kas_id' => $tujuanKas->id,
-                    'tanggal' => $lastDate,
+                    'tanggal' => $currentDate,
                     'nominal' => $nominal,
                     'jenis' => 'Transfer Pemasukan',
                     'transfer_code' => $transfer_code,
@@ -68,7 +84,7 @@ trait TransactionSeederTrait
                 $transaksi = Transaksi::factory()->create([
                     'user_id' => $user_id,
                     'buku_kas_id' => $kas->id,
-                    'tanggal' => $lastDate,
+                    'tanggal' => $currentDate,
                     'nominal' => rand(1, 100),
                     'jenis' => $jenis,
                     'jenis_transaksi_id' => $jenis_transaksi_id,
