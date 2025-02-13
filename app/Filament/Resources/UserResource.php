@@ -96,8 +96,8 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
+                Impersonate::make()->visible(auth()->user()->isSuper()),
                 Tables\Actions\EditAction::make(),
-                Impersonate::make()->visible(auth()->user()->isSuper())
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

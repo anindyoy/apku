@@ -45,6 +45,21 @@ class TransaksiSeeder extends Seeder
 
             // CREATE TRANSAKSI
             $this->seedTransactions($value->id, $value->id == 2 ? 50 : null);
+            
+            if ($value->id == 2) {
+                $currentMonth = now()->month;
+                $currentYear = now()->year;
+
+                $hasCurrentMonthTransaction = Transaksi::where('user_id', $value->id)
+                    ->whereMonth('tanggal', $currentMonth)
+                    ->whereYear('tanggal', $currentYear)
+                    ->exists();
+
+                if (!$hasCurrentMonthTransaction) {
+                    $this->seedTransactions($value->id, 10, now()->startOfMonth()); // Seed additional transactions for the current month
+                }
+            }
+
             // for ($i = 0; $i < rand(15, 25); $i++) {
 
             // $kas = BukuKas::getRandomBukuKas($value->id)->first();

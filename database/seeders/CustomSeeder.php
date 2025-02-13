@@ -23,6 +23,8 @@ class CustomSeeder extends Seeder
     {
         $this->seederTransaction();
 
+        // $this->hapusSetiapTransaksi();
+
         // $this->recalculateKas(2);
         // Transaksi::factory()->count(3)->make();
 
@@ -53,6 +55,19 @@ class CustomSeeder extends Seeder
         //     $value->nama_buku = fake()->word();
         //     $value->save();
         // }
+    }
+
+    private function hapusSetiapTransaksi()
+    {
+        // hapus semua transaksi user tertentu kecuali transaksi pertama setiap buku kas
+        Transaksi::where('user_id', 2)
+            ->whereNotIn('id', function ($query) {
+                $query->selectRaw('MIN(id)')
+                    ->from('transaksi')
+                    ->where('user_id', 2)
+                    ->groupBy('buku_kas_id');
+            })
+            ->delete();
     }
 
     private function seederTransaction()

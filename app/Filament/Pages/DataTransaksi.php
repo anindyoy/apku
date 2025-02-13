@@ -288,7 +288,12 @@ class DataTransaksi extends Page implements HasTable, HasForms
                 TextColumn::make('saldo_akhir')->numeric()
                     ->prefix('Rp '),
             ])
-            ->defaultSort('tanggal', 'desc')
+            // ->defaultSort('tanggal', 'desc')
+            ->defaultSort(function (Builder $query): Builder {
+                return $query
+                    ->orderBy('tanggal', 'desc')
+                    ->orderBy('id', 'desc');
+            })
             ->filters([
                 //
             ])

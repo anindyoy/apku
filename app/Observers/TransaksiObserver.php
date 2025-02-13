@@ -13,16 +13,49 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
     /**
      * Handle the Transaksi "created" event.
      */
+    // public function created(Transaksi $transaksi): void
+    // {
+    //     // // JIKA MENGGUNAKAN KOLOM SALDO DI TRANSAKSI ============
+    //     $bukuKas = $transaksi->buku_kas;
+    //     $saldoAwal = $bukuKas->saldo;
+    //     $saldoAkhir = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+    //         ? $saldoAwal + $transaksi->nominal
+    //         : $saldoAwal - $transaksi->nominal;
+
+    //     // Simpan saldo ke transaksi
+    //     $transaksi->saldo_awal = $saldoAwal;
+    //     $transaksi->saldo_akhir = $saldoAkhir;
+    //     $transaksi->save();
+
+    //     // Perbarui saldo buku kas
+    //     $bukuKas->saldo = $saldoAkhir;
+    //     $bukuKas->save();
+
+    //     $this->updateFutureTransactions($transaksi);
+    // }
+
     public function created(Transaksi $transaksi): void
     {
-        // JIKA MENGGUNAKAN KOLOM SALDO DI TRANSAKSI ============
+        // Ambil buku kas yang terkait dengan transaksi
         $bukuKas = $transaksi->buku_kas;
-        $saldoAwal = $bukuKas->saldo;
+
+        // Cari transaksi sebelumnya berdasarkan tanggal dan buku kas yang sama
+        $previousTransaction = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
+            ->where('tanggal', '<=', $transaksi->tanggal)
+            ->where('id', '!=', $transaksi->id)
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Hitung saldo awal berdasarkan transaksi sebelumnya atau 0 jika tidak ada
+        $saldoAwal = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
+
+        // Hitung saldo akhir berdasarkan jenis transaksi
         $saldoAkhir = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
             ? $saldoAwal + $transaksi->nominal
             : $saldoAwal - $transaksi->nominal;
 
-        // Simpan saldo ke transaksi
+        // Simpan saldo awal dan akhir ke transaksi
         $transaksi->saldo_awal = $saldoAwal;
         $transaksi->saldo_akhir = $saldoAkhir;
         $transaksi->save();
@@ -30,7 +63,8 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
         // Perbarui saldo buku kas
         $bukuKas->saldo = $saldoAkhir;
         $bukuKas->save();
-
+        
+        // Perbarui transaksi yang ada setelah tanggal transaksi yang baru
         $this->updateFutureTransactions($transaksi);
     }
 
