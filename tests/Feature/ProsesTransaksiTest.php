@@ -34,13 +34,6 @@ test('tambah data transaksi pemasukan pada tanggal saat ini, dan saldo kasnya se
 
     $bukuKas->refresh();
 
-    // dd(
-    //     $transaksi_sebelumnya->nominal,
-    //     $transaksi_sebelumnya->saldo_akhir,
-    //     $nominal,
-    //     $bukuKas->saldo
-    // );
-
     expect($bukuKas->saldo)
         ->toBe($transaksi_sebelumnya->saldo_akhir + $nominal);
 })->group('create_transaksi');
@@ -61,7 +54,7 @@ test('tambah data transaksi pemasukan pada tanggal 5 bulan ini, dan saldo kasnya
         ->first();
 
     $nominal = rand(10, 100);
-    $tanggal = now()->startOfMonth()->addDays(4); // Tanggal 5 bulan ini
+    $tanggal = now()->startOfMonth()->addDays(2); // Tanggal 5 bulan ini
 
     Livewire::actingAs($user)
         ->test(DataTransaksi::class)

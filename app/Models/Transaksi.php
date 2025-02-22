@@ -115,7 +115,6 @@ class Transaksi extends Model
                             }
                             return null;
                         })
-                        ->seconds(false)
                         ->native(false)
                         ->closeOnDateSelection()
                         ->displayFormat('d M Y, H:i:s')

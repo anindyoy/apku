@@ -94,12 +94,85 @@ trait UpdatesFutureTransactions
     //     $bukuKas->save();
     // }
 
+    // public function updateFutureTransactions(
+    //     Transaksi $transaksi,
+    //     string $action = 'create',
+    //     $oldNominal = null
+    // ) {
+    //     // Ambil transaksi sebelumnya berdasarkan tanggal dan buku kas yang sama
+    //     $previousTransaction = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
+    //         ->when($action !== 'create', function ($query) use ($transaksi) {
+    //             return $query->where('id', '!=', $transaksi->id);
+    //         })
+    //         ->where('tanggal', '<=', $transaksi->tanggal)
+    //         ->orderBy('tanggal', 'desc')
+    //         ->orderBy('created_at', 'desc')
+    //         ->first();
+
+    //     // Ambil transaksi yang ada setelah tanggal transaksi yang baru
+    //     $futureTransactions = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
+    //         ->when($action !== 'create', function ($query) use ($transaksi) {
+    //             return $query->where('id', '!=', $transaksi->id);
+    //         })
+    //         ->where('tanggal', '>', $transaksi->tanggal)
+    //         ->orderBy('tanggal')
+    //         ->orderBy('created_at')
+    //         ->get();
+
+    //     // dd($futureTransactions->pluck('id'));
+
+    //     // Jika transaksi adalah yang terakhir berdasarkan tanggal, hentikan eksekusi
+    //     if ($futureTransactions->isEmpty()) {
+    //         return;
+    //     }
+
+    //     // Set saldo awal berdasarkan transaksi sebelumnya atau 0 jika tidak ada
+    //     $saldo = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
+
+    //     // Jika action adalah update, balikkan dampak nominal lama
+    //     if ($action === 'update' && $oldNominal !== null) {
+    //         $saldo = in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+    //             ? $saldo + $oldNominal  // Tambahkan kembali nominal lama untuk pengeluaran
+    //             : $saldo - $oldNominal;  // Kurangi nominal lama untuk pemasukan
+    //     }
+
+    //     // Hitung saldo akhir berdasarkan jenis transaksi
+    //     $saldo = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+    //         ? $saldo + $transaksi->nominal
+    //         : $saldo - $transaksi->nominal;
+
+    //     // Jika action adalah update, simpan saldo awal dan akhir ke transaksi yang diupdate
+    //     if ($action === 'update') {
+    //         $transaksi->saldo_awal = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
+    //         $transaksi->saldo_akhir = $saldo;
+    //         $transaksi->save();
+    //     }
+
+    //     // Perbarui setiap transaksi yang ada setelah tanggal transaksi yang baru
+    //     foreach ($futureTransactions as $futureTransaction) {
+    //         // dd($saldo);
+    //         $futureTransaction->saldo_awal = $saldo;
+
+    //         // Hitung saldo akhir berdasarkan jenis transaksi
+    //         $saldo = !in_array($futureTransaction->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+    //             ? $saldo + $futureTransaction->nominal
+    //             : $saldo - $futureTransaction->nominal;
+
+    //         $futureTransaction->saldo_akhir = $saldo;
+    //         $futureTransaction->save();
+    //     }
+
+    //     // Perbarui saldo buku kas
+    //     $bukuKas = $transaksi->buku_kas;
+    //     $bukuKas->saldo = $saldo;
+    //     $bukuKas->save();
+    // }
+
     public function updateFutureTransactions(
         Transaksi $transaksi,
         string $action = 'create',
         $oldNominal = null
     ) {
-        // Ambil transaksi sebelumnya berdasarkan tanggal dan buku kas yang sama
         $previousTransaction = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
             ->when($action !== 'create', function ($query) use ($transaksi) {
                 return $query->where('id', '!=', $transaksi->id);
@@ -109,7 +182,6 @@ trait UpdatesFutureTransactions
             ->orderBy('created_at', 'desc')
             ->first();
 
-        // Ambil transaksi yang ada setelah tanggal transaksi yang baru
         $futureTransactions = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
             ->when($action !== 'create', function ($query) use ($transaksi) {
                 return $query->where('id', '!=', $transaksi->id);
@@ -119,49 +191,63 @@ trait UpdatesFutureTransactions
             ->orderBy('created_at')
             ->get();
 
-        // Set saldo awal berdasarkan transaksi sebelumnya atau 0 jika tidak ada
+
+        if ($futureTransactions->isEmpty() && $action !== 'delete') {
+            $bukuKas = $transaksi->buku_kas;
+            $saldo = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
+
+            $saldo = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+                ? $saldo + $transaksi->nominal
+                : $saldo - $transaksi->nominal;
+            $bukuKas->saldo = $saldo;
+
+            $bukuKas->save();
+            return;
+        }
+
         $saldo = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
 
-        // Jika action adalah update, balikkan dampak nominal lama
         if ($action === 'update' && $oldNominal !== null) {
             $saldo = in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
-                ? $saldo + $oldNominal  // Tambahkan kembali nominal lama untuk pengeluaran
-                : $saldo - $oldNominal;  // Kurangi nominal lama untuk pemasukan
+                ? $saldo + $oldNominal
+                : $saldo - $oldNominal;
         }
 
-        // Hitung saldo akhir berdasarkan jenis transaksi
-        $saldo = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
-            ? $saldo + $transaksi->nominal
-            : $saldo - $transaksi->nominal;
 
-        // Jika action adalah update, simpan saldo awal dan akhir ke transaksi yang diupdate
-        if ($action === 'update') {
-            $transaksi->saldo_awal = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
-            $transaksi->saldo_akhir = $saldo;
-            $transaksi->save();
+        if ($action !== 'delete') {
+            $saldo = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
+                ? $saldo + $transaksi->nominal
+                : $saldo - $transaksi->nominal;
+
+
+            if ($action === 'update') {
+                $transaksi->saldo_awal = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
+                $transaksi->saldo_akhir = $saldo;
+                $transaksi->save();
+            }
         }
 
-        // Perbarui setiap transaksi yang ada setelah tanggal transaksi yang baru
+        dd(
+            $futureTransactions,
+            $transaksi->delete()
+        );
         foreach ($futureTransactions as $futureTransaction) {
+
             $futureTransaction->saldo_awal = $saldo;
 
-            // Hitung saldo akhir berdasarkan jenis transaksi
             $saldo = !in_array($futureTransaction->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
                 ? $saldo + $futureTransaction->nominal
                 : $saldo - $futureTransaction->nominal;
 
             $futureTransaction->saldo_akhir = $saldo;
-            $futureTransaction->save();
+            $futureTransaction->saveQuietly();
         }
 
-        // Jika transaksi adalah yang terakhir berdasarkan tanggal, hentikan eksekusi
-        if ($futureTransactions->isEmpty()) {
-            return;
-        }
 
-        // Perbarui saldo buku kas
-        $bukuKas = $transaksi->buku_kas;
-        $bukuKas->saldo = $saldo;
-        $bukuKas->save();
+        if ($futureTransactions->isNotEmpty() || $action === 'delete') {
+            $bukuKas = $transaksi->buku_kas;
+            $bukuKas->saldo = $saldo;
+            $bukuKas->save();
+        }
     }
 }

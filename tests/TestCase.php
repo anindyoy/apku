@@ -9,7 +9,7 @@ use App\Filament\Pages\AkunSaya;
 use App\Filament\Pages\Kategori;
 use Filament\Pages\Auth\Register;
 use App\Filament\Resources\UserResource\Pages\EditUser;
-use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Filament\Resources\UserResourcne\Pages\ListUsers;
 use App\Filament\Resources\UtangResource\Pages\ListUtangs;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;

@@ -79,7 +79,7 @@
                 </select>
 
                 <button class="px-2 py-1 text-white bg-gray-500 rounded-lg" x-on:click="nextMonth()"
-                    x-show="selectedMonth != currentMonth && selectedYear != currentYear">→</button>
+                    x-show="selectedMonth != currentMonth || selectedYear != currentYear">→</button>
 
             </span>
         </div>

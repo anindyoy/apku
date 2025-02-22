@@ -1,2 +1,3 @@
 jika input transaksi ke tanggal masa lalu, dan ada transaksi pada tanggal setelahnya, penghitungan saldo akhir model transaksinya masih salah
 
+update:
