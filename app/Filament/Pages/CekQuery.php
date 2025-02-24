@@ -22,9 +22,6 @@ class CekQuery extends Page
     {
         $user_id = 2;
         $kas_id = 1;
-        $tanggal = 13;
-        $tanggal_awal = date('Y-m-' . $tanggal);
-        $tanggal_akhir = date('Y-m-' . $tanggal + 1);
 
         $transaksi_ke_3_terakhir = Transaksi::where('user_id', $user_id)
             ->where('buku_kas_id', $kas_id)
@@ -33,8 +30,13 @@ class CekQuery extends Page
             ->first()
             ->tanggal;
 
-        // dd($transaksi_ke_3_terakhir);
+        // dd(
+        //     $transaksi_ke_3_terakhir
+        // );
 
+        // $tanggal = 13;
+        // $tanggal_awal = date('Y-m-' . $tanggal);
+        // $tanggal_akhir = date('Y-m-' . $tanggal + 1);
         // $transaksi_terakhir = Transaksi::where('user_id', $user_id)
         //     ->where('buku_kas_id', $kas_id)
         //     ->where('tanggal', '>=', $tanggal_awal)
@@ -43,7 +45,11 @@ class CekQuery extends Page
         //     ->first()
         //     ->tanggal;
 
-        $new_tanggal = date('Y-m-d H:i:s', strtotime($transaksi_ke_3_terakhir . ' +1 minute'));
+        $new_tanggal = date(
+            'Y-m-d H:i:s',
+            strtotime($transaksi_ke_3_terakhir . ' +' . rand(1, 10) . ' minutes')
+        );
+
         $jenis = "Pemasukan";
 
         Transaksi::create([
