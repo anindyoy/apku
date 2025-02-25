@@ -4,9 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\BukuKas;
-use App\Models\ShareBuku;
 use App\Models\Transaksi;
-use App\Models\JenisTransaksi;
 use Illuminate\Database\Seeder;
 use App\Traits\TransactionSeederTrait;
 

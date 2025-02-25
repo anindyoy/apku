@@ -29,16 +29,16 @@ test('tambah data transaksi pemasukan pada tanggal saat ini', function () {
         ->assertHasNoErrors();
 
     $bukuKas->refresh();
-    $transaksi_sebelumnya = Transaksi::where('user_id', $user_id)
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
         ->where('buku_kas_id', $bukuKas->id)
         ->latest()
         ->first();
 
     expect($bukuKas->saldo)
-        ->toBe($transaksi_sebelumnya->saldo_akhir);
+        ->toBe($transaksi_terakhir->saldo_akhir);
 })->group('create_transaksi');
 
-test('tambah data transaksi pemasukan pada tanggal 5 bulan ini', function () {
+test('tambah data transaksi pemasukan pada tanggal 2 bulan ini', function () {
     $user_id = 2;
     $user = User::find($user_id);
 
@@ -58,25 +58,17 @@ test('tambah data transaksi pemasukan pada tanggal 5 bulan ini', function () {
             'jenis_transaksi_id' => $jenisTransaksi->id,
             'nominal' => $nominal,
             'tanggal' => $tanggal,
+            'deskripsi' => 'testing'
         ])
         ->assertHasNoErrors();
 
     $bukuKas->refresh();
-    $transaksi_sebelumnya = Transaksi::where('user_id', $user_id)
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
         ->where('buku_kas_id', $bukuKas->id)
-        ->latest()
+        ->latest('tanggal')
         ->first();
 
-    try {
-        expect($bukuKas->saldo)
-            ->toBe($transaksi_sebelumnya->saldo_akhir);
-    } catch (\Throwable $th) {
-        dd(
-            $th->getMessage(),
-            $nominal,
-            $tanggal,
-            $transaksi_sebelumnya->saldo_akhir,
-            $bukuKas->saldo
-        );
-    }
+    expect($transaksi_terakhir->saldo_akhir)
+        ->toBe($bukuKas->saldo);
 })->group('create_transaksi');
+
