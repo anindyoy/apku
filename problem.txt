@@ -1,3 +1,8 @@
-jika input transaksi ke tanggal masa lalu, dan ada transaksi pada tanggal setelahnya, penghitungan saldo akhir model transaksinya masih salah
+perlu refactor class UpdatesFutureTransactions
+
+perlu refactor file testing data transaksi
+
+sesuaikan lagi code di samping, jika transaksi yang di hapus berada di tengah2 list data transaksi berdasarkan sort tanggal, maka sesuaikan setiap saldo awal dan akhir setiap transaksi yang berada setelah transaksi yang dihapus dengan menggunakan class updateFutureTransactions
 
 update:
+

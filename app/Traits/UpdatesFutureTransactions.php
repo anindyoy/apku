@@ -25,41 +25,42 @@ trait UpdatesFutureTransactions
             ->orderBy('created_at')
             ->get();
 
-        // Cek jika $futureTransactions tidak kosong dan action-nya adalah create
         if (!empty($futureTransactions) && $action === 'create') {
-            // Inisialisasi previousTransaction dengan transaksi saat ini
             $previousTransaction = $transaksi;
 
             foreach ($futureTransactions as $futureTransaction) {
-                // Update saldo awal futureTransaction dengan saldo akhir dari transaksi sebelumnya
                 $futureTransaction->saldo_awal = $previousTransaction->saldo_akhir;
 
-                // Hitung ulang saldo akhir berdasarkan saldo awal yang baru
                 if (in_array($futureTransaction->jenis_transaksi, ['Pengeluaran', 'Transfer Pengeluaran'])) {
                     $futureTransaction->saldo_akhir = $futureTransaction->saldo_awal - $futureTransaction->nominal;
-                } else { // kredit
+                } else {
                     $futureTransaction->saldo_akhir = $futureTransaction->saldo_awal + $futureTransaction->nominal;
                 }
 
-                // Simpan perubahan
                 $futureTransaction->save();
-
-                // Update previousTransaction untuk iterasi berikutnya
                 $previousTransaction = $futureTransaction;
             }
         }
 
-        if ($futureTransactions->isEmpty() && $action !== 'delete') {
-            $bukuKas = $transaksi->buku_kas;
-            $saldo = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
+        if ($futureTransactions->isNotEmpty() && $action === 'delete') {
+            $previousTransaction = $transaksi;
 
-            $saldo = !in_array($transaksi->jenis_transaksi, ['Pengeluaran', 'Transfer Pengeluaran'])
-                ? $saldo + $transaksi->nominal
-                : $saldo - $transaksi->nominal;
-            $bukuKas->saldo = $saldo;
+            foreach ($futureTransactions as $futureTransaction) {
+                if ($action === 'delete') {
+                    $futureTransaction->saldo_awal = $previousTransaction->saldo_awal;
+                } else {
+                    $futureTransaction->saldo_awal = $previousTransaction->saldo_akhir;
+                }
 
-            $bukuKas->save();
-            return;
+                if (in_array($futureTransaction->jenis_transaksi, ['Pengeluaran', 'Transfer Pengeluaran'])) {
+                    $futureTransaction->saldo_akhir = $futureTransaction->saldo_awal - $futureTransaction->nominal;
+                } else {
+                    $futureTransaction->saldo_akhir = $futureTransaction->saldo_awal + $futureTransaction->nominal;
+                }
+
+                $futureTransaction->save();
+                $previousTransaction = $futureTransaction;
+            }
         }
 
         $saldo = $previousTransaction ? $previousTransaction->saldo_akhir : 0;

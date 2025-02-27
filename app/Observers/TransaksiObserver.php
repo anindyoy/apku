@@ -36,10 +36,8 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
 
     public function created(Transaksi $transaksi): void
     {
-        // Ambil buku kas yang terkait dengan transaksi
         $bukuKas = $transaksi->buku_kas;
 
-        // Cari transaksi sebelumnya berdasarkan tanggal dan buku kas yang sama
         $previousTransaction = Transaksi::where('buku_kas_id', $transaksi->buku_kas_id)
             ->where('tanggal', '<=', $transaksi->tanggal)
             ->where('id', '!=', $transaksi->id)
@@ -47,24 +45,19 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
             ->orderBy('created_at', 'desc')
             ->first();
 
-        // Hitung saldo awal berdasarkan transaksi sebelumnya atau 0 jika tidak ada
         $saldoAwal = $previousTransaction ? $previousTransaction->saldo_akhir : 0;
 
-        // Hitung saldo akhir berdasarkan jenis transaksi
         $saldoAkhir = !in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
             ? $saldoAwal + $transaksi->nominal
             : $saldoAwal - $transaksi->nominal;
 
-        // Simpan saldo awal dan akhir ke transaksi
         $transaksi->saldo_awal = $saldoAwal;
         $transaksi->saldo_akhir = $saldoAkhir;
         $transaksi->save();
 
-        // Perbarui saldo buku kas
         $bukuKas->saldo = $saldoAkhir;
         $bukuKas->save();
-        
-        // Perbarui transaksi yang ada setelah tanggal transaksi yang baru
+
         $this->updateFutureTransactions($transaksi);
     }
 

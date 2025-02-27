@@ -302,132 +302,26 @@ class DataTransaksi extends Page implements HasTable, HasForms
                     ->modalWidth(MaxWidth::Large)
                     ->form(Transaksi::form())
                     ->hidden(auth()->user()->isSuper())
-                    ->before(function ($record, $livewire) {
-                        // $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
-                        // $selisih = $nominal_baru - $record->nominal;
-                        // $bukuKas = $record->buku_kas;
-
-                        // $saldoAkhir = !in_array($record->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
-                        //     ? $record->saldo_akhir + $selisih
-                        //     : $record->saldo_akhir - $selisih;
-
-                        // // Simpan saldo ke transaksi
-                        // $record->saldo_akhir = $saldoAkhir;
-                        // $record->save();
-
-                        // // Perbarui saldo buku kas
-                        // $bukuKas->saldo = $saldoAkhir;
-                        // $bukuKas->save();
-
-                        // if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
-                        //     $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
-
-                        //     foreach ($relatedTransactions as $relatedTransaction) {
-                        //         $relatedKas = $relatedTransaction->buku_kas;
-
-                        //         if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
-                        //             $relatedKas->saldo -= $selisih;
-                        //         } else if ($relatedTransaction->jenis === 'Transfer Pemasukan') {
-                        //             $relatedKas->saldo += $selisih;
-                        //         }
-
-                        //         $relatedKas->save();
-
-                        //         if ($relatedTransaction->id != $record->id) {
-                        //             $relatedTransaction->nominal = $nominal_baru;
-                        //             $relatedTransaction->save();
-                        //         }
-                        //     }
-                        // }
-
-                        // $this->updateFutureTransactions($record, 'update', $record->nominal);
-
-                        $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
-                        $selisih = $nominal_baru - $record->nominal;
-                        $bukuKas = $record->buku_kas;
-
-                        // Simpan nominal lama sebelum diubah
-                        $oldNominal = $record->nominal;
-
-                        // Perbarui nominal dan saldo akhir transaksi
-                        $saldoAkhir = !in_array($record->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
-                            ? $record->saldo_akhir + $selisih
-                            : $record->saldo_akhir - $selisih;
-
-                        $record->nominal = $nominal_baru;
-                        $record->saldo_akhir = $saldoAkhir;
-                        $record->save();
-
-                        // Perbarui saldo buku kas
-                        $bukuKas->saldo = $saldoAkhir;
-                        $bukuKas->save();
-
-                        // Jika transaksi terkait dengan transfer, perbarui transaksi terkait
-                        if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
-                            $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
-
-                            foreach ($relatedTransactions as $relatedTransaction) {
-                                $relatedKas = $relatedTransaction->buku_kas;
-
-                                if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
-                                    $relatedKas->saldo -= $selisih;
-                                } else if ($relatedTransaction->jenis === 'Transfer Pemasukan') {
-                                    $relatedKas->saldo += $selisih;
-
-                                }
-                                $relatedKas->save();
-
-                                if ($relatedTransaction->id != $record->id) {
-                                    $relatedTransaction->nominal = $nominal_baru;
-                                    $relatedTransaction->save();
-                                }
-                            }
-                        }
-
-                        // Panggil updateFutureTransactions dengan parameter yang sesuai
-                        $this->updateFutureTransactions($record, 'update', $oldNominal);
-                        $this->dispatch('refresh');
-                    }),
+                    ->before(function ($record, $livewire) {}),
 
                 DeleteAction::make()
                     ->hidden(auth()->user()->isSuper())
                     ->after(function ($record) {
-                        $kas = $record->buku_kas;
-                        if (in_array($record->jenis, ['Transfer Pengeluaran', 'Transfer Pemasukan'])) {
-                            $kas = $record->buku_kas;
+                        $lastTransaction = Transaksi::where('buku_kas_id', $record->buku_kas_id)
+                            ->where('tanggal', '<', $record->tanggal)
+                            ->orderBy('tanggal', 'desc')
+                            ->first();
 
-                            if ($record->jenis === 'Transfer Pengeluaran') {
-                                $kas->saldo = $kas->saldo + $record->nominal;
-                            } else if ($record->jenis === 'Transfer Pemasukan') {
-                                $kas->saldo = $kas->saldo - $record->nominal;
-                            }
+                        $isLastTransaction = !Transaksi::where('buku_kas_id', $record->buku_kas_id)
+                            ->where('tanggal', '>', $record->tanggal)
+                            ->exists();
 
-                            $kas->save();
-
-                            $relatedTransaction = Transaksi::where('transfer_code', $record->transfer_code)->first();
-
-                            if ($relatedTransaction) {
-                                $relatedKas = $relatedTransaction->buku_kas;
-
-                                if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
-                                    $relatedKas->saldo += $relatedTransaction->nominal;
-                                } else
-                                    $relatedKas->saldo -= $relatedTransaction->nominal;
-
-                                $relatedKas->save();
-                                $relatedTransaction->delete();
-                            }
-                        } else if (in_array($record->jenis, ['Pengeluaran', 'Pemasukan'])) {
-                            if ($record->jenis == 'Pengeluaran') {
-                                $kas->saldo = $kas->saldo + $record->nominal;
-                            } else {
-                                $kas->saldo = $kas->saldo - $record->nominal;
-                            }
-
-                            $kas->save();
-                        }
-
-                        $this->updateFutureTransactions($record);
+                        // dd($isLastTransaction && $lastTransaction);
+                        if ($isLastTransaction && $lastTransaction) {
+                            $record->buku_kas->saldo = $lastTransaction->saldo_akhir;
+                            $record->buku_kas->save();
+                        } else
+                            $this->updateFutureTransactions($record, 'delete');
                     })
             ]);
     }

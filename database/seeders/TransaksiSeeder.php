@@ -49,12 +49,13 @@ class TransaksiSeeder extends Seeder
                 $currentYear = now()->year;
 
                 $hasCurrentMonthTransaction = Transaksi::where('user_id', $value->id)
+                    ->whereBukuKasId(1)
                     ->whereMonth('tanggal', $currentMonth)
                     ->whereYear('tanggal', $currentYear)
-                    ->exists();
+                    ->count();
 
-                if (!$hasCurrentMonthTransaction) {
-                    $this->seedTransactions($value->id, 10, now()->startOfMonth()); // Seed additional transactions for the current month
+                if ($hasCurrentMonthTransaction < 5) {
+                    $this->seedTransactions($value->id, 5, now()->startOfMonth());
                 }
             }
         }

@@ -19,16 +19,61 @@ class TransaksiFactory extends Factory
      */
     public function definition(): array
     {
-        // $user = User::inRandomOrder()->notSuper()->first();
-        $jenis = rand(0, 1) ? 'Pengeluaran' : 'Pemasukan';
+        $user = User::inRandomOrder()->notSuper()->first();
+
         return [
-            // 'user_id' => $user->id,
-            // 'jenis_transaksi_id' => JenisTransaksi::whereUserId($user->id)->inRandomOrder()->first()->id,
-            // 'buku_kas_id' => BukuKas::getRandomBukuKas($user->id)->first()->id,
-            'tanggal' => fake()->dateTimeBetween('-3 months', 'now'),
+            'user_id' => $user->id,
+            'jenis_transaksi_id' => JenisTransaksi::whereUserId($user->id)->inRandomOrder()->first()->id,
+            'buku_kas_id' => BukuKas::whereUserId($user->id)->inRandomOrder()->first()->id,
+            'tanggal' => $this->faker->dateTimeBetween('-3 months', 'now'),
             'nominal' => rand(1, 100),
-            'jenis' => $jenis,
-            'deskripsi' => fake()->optional()->sentence(),
+            'deskripsi' => 'data seeder',
+            'jenis' => $this->faker->randomElement(['Pemasukan', 'Pengeluaran']),
         ];
+    }
+
+    /**
+     * Indicate that the transaction is for income.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function pemasukan()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'jenis' => 'Pemasukan',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the transaction is for expense.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function pengeluaran()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'jenis' => 'Pengeluaran',
+            ];
+        });
+    }
+
+    /**
+     * Set the user ID for this transaction.
+     *
+     * @param int $userId
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function forUser($userId)
+    {
+        return $this->state(function (array $attributes) use ($userId) {
+            return [
+                'user_id' => $userId,
+                'jenis_transaksi_id' => JenisTransaksi::whereUserId($userId)->inRandomOrder()->first()->id,
+                'buku_kas_id' => BukuKas::whereUserId($userId)->inRandomOrder()->first()->id,
+            ];
+        });
     }
 }

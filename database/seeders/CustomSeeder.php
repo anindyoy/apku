@@ -24,7 +24,36 @@ class CustomSeeder extends Seeder
         // $this->createTransaksiLama();
         // $this->seederTransaction();
         // $this->hapusSetiapTransaksi();
-        $this->recalculateKas(2);
+        // $this->recalculateKas(2);
+
+        // $transaksiPemasukan = Transaksi::factory()->create([
+        //     'user_id' => 2,
+        //     'buku_kas_id' => 1,
+        //     'jenis' => 'Pemasukan'
+        // ]);
+
+        // // Membuat transaksi dengan jenis 'Pengeluaran'
+        // $transaksiPengeluaran = Transaksi::factory()->create([
+        //     'user_id' => 2,
+        //     'buku_kas_id' => 1,
+        //     'jenis' => 'Pengeluaran'
+        // ]);
+
+        $transaksiPemasukan = Transaksi::factory()
+            ->forUser(2)
+            ->pemasukan()
+            ->create([
+                'buku_kas_id' => 1,
+            ]);
+
+        $transaksiPengeluaran = Transaksi::factory()
+            ->forUser(2)
+            ->pengeluaran()
+            ->create([
+                'buku_kas_id' => 1,
+            ]);
+
+
     }
 
     private function createTransaksiLama()
@@ -108,5 +137,7 @@ class CustomSeeder extends Seeder
             $value->saldo = $saldo;
             $value->save();
         }
+
+        $this->command->info('Saldo Kas Recalculated.');
     }
 }

@@ -14,9 +14,9 @@ trait TransactionSeederTrait
         // Use provided start date or generate one within the last 2 months
         $startDate = $startDate ? Carbon::parse($startDate) : now()->subDays(rand(30, 60)); // Ensure Carbon object
 
-        //  Now you can safely use copy()
+        //  Now you can safely use copyTransaksiSeeder()
         $endDate = $endDate ? Carbon::parse($endDate) : $startDate->copy()->addDays($jumlah ?? rand(15, 25));
-        
+
         // Ensure endDate does not exceed the current date
         if ($endDate->gt(now())) {
             $endDate = now();
