@@ -53,7 +53,35 @@ class CustomSeeder extends Seeder
         //         'buku_kas_id' => 1,
         //     ]);
 
-        
+        $this->editJenisTransaksi();
+    }
+
+    private function editJenisTransaksi()
+    {
+        $transaksis = Transaksi::where('user_id', 2)
+            ->whereNotIn(
+                'jenis_transaksi_id',
+                JenisTransaksi::where('user_id', 2)->pluck('id')
+            )
+            ->get();
+
+        $processedCount = 0; // Counter untuk jumlah data yang berhasil diproses
+
+        foreach ($transaksis as $key => $value) {
+            $jenisTransaksi = JenisTransaksi::where('user_id', 2)
+                ->whereTipe($value->jenis)
+                ->inRandomOrder()
+                ->first();
+
+            if ($jenisTransaksi) {
+                $value->jenis_transaksi_id = $jenisTransaksi->id;
+                $value->save();
+                $processedCount++; // Tambahkan counter jika berhasil diproses
+            }
+        }
+
+        // Tampilkan informasi jumlah data yang berhasil diproses
+        $this->command->info("Jumlah data yang berhasil diproses: $processedCount");
     }
 
     private function createTransaksiLama()

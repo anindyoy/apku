@@ -18,26 +18,37 @@ class JenisTransaksiSeeder extends Seeder
 
         // CREATE JENIS TRANSAKSI
         $list_tipe = ['Pemasukan', 'Pengeluaran'];
+
+        // Jenis transaksi yang lebih realistis untuk setiap tipe
         $jenis = [
-            'transfer',
-            'usaha',
-            'investasi',
-            'rumah_tangga',
-            'pendidikan',
-            'hiburan',
-            'gaji',
-            'bonus',
-            'hadiah',
-            'transportasi',
-            'kesehatan',
-            'lainnya'
+            'Pemasukan' => [
+                'Gaji',
+                'Bonus',
+                'Hadiah',
+                'Investasi',
+                'Penjualan',
+                'Pendapatan Usaha',
+                'Lainnya'
+            ],
+            'Pengeluaran' => [
+                'Belanja Rumah Tangga',
+                'Transportasi',
+                'Pendidikan',
+                'Kesehatan',
+                'Hiburan',
+                'Tagihan Listrik',
+                'Tagihan Air',
+                'Cicilan',
+                'Donasi',
+                'Lainnya'
+            ]
         ];
 
         $users = User::whereNot('id', 1)->get();
 
         foreach ($users as $value) {
-            foreach ($list_tipe as $key => $tipe) {
-                $jenisRandom = fake()->randomElements($jenis, rand(3, 5));
+            foreach ($list_tipe as $tipe) {
+                $jenisRandom = fake()->randomElements($jenis[$tipe], rand(3, 5));
                 foreach ($jenisRandom as $value3) {
                     JenisTransaksi::create([
                         'user_id' => $value->id,
