@@ -12,92 +12,138 @@ trait TransactionSeederTrait
     public function seedTransactions($user_id, $jumlah = null, $startDate = null, $endDate = null)
     {
         $startDate = $startDate ? Carbon::parse($startDate) : now()->subDays(rand(30, 60));
-
         $endDate = $endDate ? Carbon::parse($endDate) : $startDate->copy()->addDays($jumlah ?? rand(15, 25));
 
         if ($endDate->gt(now())) {
             $endDate = now();
         }
 
-        $kas = BukuKas::getRandomBukuKas($user_id)->first();
+        // Ambil semua buku kas berdasarkan user_id
+        $bukuKasList = BukuKas::where('user_id', $user_id)->get();
 
-        $lastSaldoPertama = Transaksi::where('buku_kas_id', $kas->id)
-            ->where('deskripsi', 'Saldo pertama')
-            ->first();
+        foreach ($bukuKasList as $kas) {
+            // Jika user_id adalah 2 dan buku_kas_id adalah 1, pastikan minimal ada 20 transaksi
+            if ($user_id == 2 && $kas->id == 1) {
+                $existingTransactionsCount = Transaksi::where('user_id', $user_id)
+                    ->where('buku_kas_id', $kas->id)
+                    ->count();
 
-        $currentDate = $lastSaldoPertama ? Carbon::parse($lastSaldoPertama->tanggal)->addMinutes(1) : $startDate->copy();
+                if ($existingTransactionsCount < 20) {
+                    $missingTransactions = 20 - $existingTransactionsCount;
 
-        for ($i = 0; $i < ($jumlah ?? rand(15, 25)); $i++) {
-            if ($currentDate->gt($endDate)) {
-                break;
+                    for ($i = 0; $i < $missingTransactions; $i++) {
+                        $currentDate = now()->addMinutes(rand(10, 1440));
+
+                        $jenis = rand(0, 1) ? 'Pemasukan' : 'Pengeluaran';
+                        $jenis_transaksi_id = JenisTransaksi::whereUserId($user_id)
+                            ->whereTipe($jenis)
+                            ->inRandomOrder()
+                            ->first()
+                            ->id;
+
+                        $transaksi = Transaksi::factory()->create([
+                            'user_id' => $user_id,
+                            'buku_kas_id' => $kas->id,
+                            'tanggal' => $currentDate,
+                            'nominal' => rand(1, 100),
+                            'jenis' => $jenis,
+                            'jenis_transaksi_id' => $jenis_transaksi_id,
+                            'deskripsi' => fake()->sentence,
+                        ]);
+
+                        if ($jenis == 'Pemasukan') {
+                            $kas->saldo += $transaksi->nominal;
+                        } else {
+                            $kas->saldo -= $transaksi->nominal;
+                        }
+
+                        $kas->save();
+                    }
+                }
             }
 
-            $currentDate = $currentDate->addMinutes(rand(10, 1440));
+            // Pastikan setiap buku kas memiliki minimal 10 transaksi
+            $existingTransactionsCount = Transaksi::where('user_id', $user_id)
+                ->where('buku_kas_id', $kas->id)
+                ->count();
 
-            $jenisRandom = rand(0, 5);
+            if ($existingTransactionsCount < 10) {
+                $missingTransactions = 10 - $existingTransactionsCount;
 
-            if ($jenisRandom > 4) {
-                $tujuanKas = BukuKas::getRandomBukuKas($user_id)
-                    ->where('id', '!=', $kas->id)
-                    ->first();
+                for ($i = 0; $i < $missingTransactions; $i++) {
+                    $currentDate = now()->addMinutes(rand(10, 1440));
 
-                if (!$tujuanKas) {
-                    continue;
+                    $jenis = rand(0, 1) ? 'Pemasukan' : 'Pengeluaran';
+                    $jenis_transaksi_id = JenisTransaksi::whereUserId($user_id)
+                        ->whereTipe($jenis)
+                        ->inRandomOrder()
+                        ->first()
+                        ->id;
+
+                    $transaksi = Transaksi::factory()->create([
+                        'user_id' => $user_id,
+                        'buku_kas_id' => $kas->id,
+                        'tanggal' => $currentDate,
+                        'nominal' => rand(1, 100),
+                        'jenis' => $jenis,
+                        'jenis_transaksi_id' => $jenis_transaksi_id,
+                        'deskripsi' => fake()->sentence,
+                    ]);
+
+                    if ($jenis == 'Pemasukan') {
+                        $kas->saldo += $transaksi->nominal;
+                    } else {
+                        $kas->saldo -= $transaksi->nominal;
+                    }
+
+                    $kas->save();
+                }
+            }
+
+            // Seed additional transactions based on the provided parameters
+            $lastSaldoPertama = Transaksi::where('buku_kas_id', $kas->id)
+                ->where('deskripsi', 'Saldo pertama')
+                ->first();
+
+            $currentDate = $lastSaldoPertama ? Carbon::parse($lastSaldoPertama->tanggal)->addMinutes(1) : $startDate->copy();
+
+            for ($i = 0; $i < ($jumlah ?? rand(15, 25)); $i++) {
+                if ($currentDate->gt($endDate)) {
+                    break;
                 }
 
-                $transfer_code = uniqid();
-                $nominal = rand(1, 100);
+                $currentDate = $currentDate->addMinutes(rand(10, 1440));
 
-                Transaksi::create([
-                    'user_id' => $user_id,
-                    'buku_kas_id' => $kas->id,
-                    'tanggal' => $currentDate,
-                    'nominal' => $nominal,
-                    'jenis' => 'Transfer Pengeluaran',
-                    'transfer_code' => $transfer_code,
-                    'tujuan_buku_tabungan_id' => $tujuanKas->id,
-                    'deskripsi' => 'Transfer ke ' . $tujuanKas->nama_buku,
-                ]);
+                $jenisRandom = rand(0, 5);
 
-                Transaksi::create([
-                    'user_id' => $user_id,
-                    'buku_kas_id' => $tujuanKas->id,
-                    'tanggal' => $currentDate,
-                    'nominal' => $nominal,
-                    'jenis' => 'Transfer Pemasukan',
-                    'transfer_code' => $transfer_code,
-                    'asal_buku_tabungan_id' => $kas->id,
-                    'deskripsi' => 'Transfer dari ' . $kas->nama_buku,
-                ]);
-
-                $kas->saldo -= $nominal;
-                $kas->save();
-                $tujuanKas->saldo += $nominal;
-                $tujuanKas->save();
-            } else {
-                $jenis = ($jenisRandom % 2 == 0) ? 'Pengeluaran' : 'Pemasukan';
-                $jenis_transaksi_id = JenisTransaksi::whereUserId($user_id)
-                    ->whereTipe($jenis)
-                    ->inRandomOrder()
-                    ->first()
-                    ->id;
-
-                $transaksi = Transaksi::factory()->create([
-                    'user_id' => $user_id,
-                    'buku_kas_id' => $kas->id,
-                    'tanggal' => $currentDate,
-                    'nominal' => rand(1, 100),
-                    'jenis' => $jenis,
-                    'jenis_transaksi_id' => $jenis_transaksi_id,
-                    'deskripsi' => fake()->sentence,
-                ]);
-
-                if ($jenis == 'Pemasukan') {
-                    $kas->saldo += $transaksi->nominal;
+                if ($jenisRandom > 4) {
+                    // Handle transfer transactions (commented out for now)
                 } else {
-                    $kas->saldo -= $transaksi->nominal;
+                    $jenis = ($jenisRandom % 2 == 0) ? 'Pengeluaran' : 'Pemasukan';
+                    $jenis_transaksi_id = JenisTransaksi::whereUserId($user_id)
+                        ->whereTipe($jenis)
+                        ->inRandomOrder()
+                        ->first()
+                        ->id;
+
+                    $transaksi = Transaksi::factory()->create([
+                        'user_id' => $user_id,
+                        'buku_kas_id' => $kas->id,
+                        'tanggal' => $currentDate,
+                        'nominal' => rand(1, 100),
+                        'jenis' => $jenis,
+                        'jenis_transaksi_id' => $jenis_transaksi_id,
+                        'deskripsi' => fake()->sentence,
+                    ]);
+
+                    if ($jenis == 'Pemasukan') {
+                        $kas->saldo += $transaksi->nominal;
+                    } else {
+                        $kas->saldo -= $transaksi->nominal;
+                    }
+
+                    $kas->save();
                 }
-                $kas->save();
             }
         }
     }

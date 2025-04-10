@@ -108,12 +108,14 @@ class DataTransaksi extends Page implements HasTable, HasForms
     {
         $query = Transaksi::where('buku_kas_id', $this->kas_aktif->id);
 
-        if (app()->environment('local')) {
-            $query->where('tanggal', '>=', now()->subMonths(3));
-        } else {
-            $query->whereMonth('tanggal', $this->bulan)
-                ->whereYear('tanggal', $this->tahun);
-        }
+        // if (app()->environment('local')) {
+        //     $query->where('tanggal', '>=', now()->subMonths(3));
+        // } else {
+        //     $query->whereMonth('tanggal', $this->bulan)
+        //         ->whereYear('tanggal', $this->tahun);
+        // }
+        $query->whereMonth('tanggal', $this->bulan)
+            ->whereYear('tanggal', $this->tahun);
 
         return $table
             ->query($query)

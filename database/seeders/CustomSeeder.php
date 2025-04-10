@@ -39,21 +39,21 @@ class CustomSeeder extends Seeder
         //     'jenis' => 'Pengeluaran'
         // ]);
 
-        $transaksiPemasukan = Transaksi::factory()
-            ->forUser(2)
-            ->pemasukan()
-            ->create([
-                'buku_kas_id' => 1,
-            ]);
+        // Transaksi::factory()
+        //     ->forUser(2)
+        //     ->pemasukan()
+        //     ->create([
+        //         'buku_kas_id' => 1,
+        //     ]);
 
-        $transaksiPengeluaran = Transaksi::factory()
-            ->forUser(2)
-            ->pengeluaran()
-            ->create([
-                'buku_kas_id' => 1,
-            ]);
+        // Transaksi::factory()
+        //     ->forUser(2)
+        //     ->pengeluaran()
+        //     ->create([
+        //         'buku_kas_id' => 1,
+        //     ]);
 
-
+        
     }
 
     private function createTransaksiLama()
