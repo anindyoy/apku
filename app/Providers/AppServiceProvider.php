@@ -6,6 +6,7 @@ use Filament\Tables\Table;
 use Filament\Support\Assets\Js;
 use Filament\Support\Assets\Css;
 use Filament\Actions\CreateAction;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\ServiceProvider;
 use Filament\Tables\Enums\FiltersLayout;
@@ -33,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
             $table
                 ->striped();
         });
+
+        DB::prohibitDestructiveCommands(app()->isProduction());
 
         FilamentAsset::register([
             Js::make('custom-script', 'https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js'),

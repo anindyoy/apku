@@ -37,8 +37,15 @@ test('tambah data transaksi pemasukan pada tanggal saat ini', function () {
         ->latest()
         ->first();
 
-    expect($bukuKas->saldo)
-        ->toBe($transaksi_terakhir->saldo_akhir);
+    $transaksi_sebelumnya = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->where('tanggal', '<', $transaksi_terakhir->tanggal)
+        ->latest('tanggal')
+        ->first();
+
+    $expected_saldo = $transaksi_sebelumnya ? $transaksi_sebelumnya->saldo_akhir + $nominal : $nominal;
+
+    expect($bukuKas->saldo)->toBe($expected_saldo);
 })->group('create_pemasukan_now');
 
 test('tambah data transaksi pemasukan ke tengah tanggal transaksi yang sudah ada', function () {
@@ -59,7 +66,7 @@ test('tambah data transaksi pemasukan ke tengah tanggal transaksi yang sudah ada
         ->skip(rand(2, 5))
         ->first();
 
-    $tanggal = Carbon::parse($transaksi_terakhir->tanggal)->addMinutes(10);
+    $tanggal = date('Y-m-d H:i:s', strtotime($transaksi_terakhir->tanggal . ' +10 minutes'));
 
     Livewire::actingAs($user)
         ->test(DataTransaksi::class)
@@ -92,7 +99,6 @@ test('hapus data transaksi pemasukan', function () {
         ->inRandomOrder()
         ->first();
 
-    // Create a transaction to delete/*  */
     Livewire::actingAs($user)
         ->test(DataTransaksi::class)
         ->callTableAction('Catat Pemasukan', data: [
@@ -107,7 +113,6 @@ test('hapus data transaksi pemasukan', function () {
         ->latest('tanggal')
         ->first();
 
-    // Delete the transaction
     Livewire::actingAs($user)
         ->test(DataTransaksi::class)
         ->callTableAction(DeleteAction::class, $transaksi_terakhir)
@@ -141,9 +146,8 @@ test('hapus data transaksi pemasukan yang ada di tengah tanggal transaksi yang s
         ->skip(rand(2, 5))
         ->first();
 
-    $tanggal = Carbon::parse($transaksi_terakhir->tanggal)->addMinutes(10);
+    $tanggal = date('Y-m-d H:i:s', strtotime($transaksi_terakhir->tanggal . ' +10 minutes'));
 
-    // Create a transaction to delete/*  */
     Livewire::actingAs($user)
         ->test(DataTransaksi::class)
         ->callTableAction('Catat Pemasukan', data: [
@@ -159,7 +163,6 @@ test('hapus data transaksi pemasukan yang ada di tengah tanggal transaksi yang s
         ->latest('tanggal')
         ->first();
 
-    // Delete the transaction
     Livewire::actingAs($user)
         ->test(DataTransaksi::class)
         ->callTableAction(DeleteAction::class, $transaksi_terakhir)
@@ -174,3 +177,165 @@ test('hapus data transaksi pemasukan yang ada di tengah tanggal transaksi yang s
     expect($bukuKas->saldo)
         ->toBe($transaksi_terakhir->saldo_akhir);
 })->group('delete_pemasukan_now');
+
+test('tambah data transaksi pengeluaran pada tanggal saat ini', function () {
+    $user_id = 2;
+    $user = User::find($user_id);
+
+    $bukuKas = BukuKas::where('user_id', $user->id)->first();
+
+    $jenisTransaksi = JenisTransaksi::where('user_id', $user->id)
+        ->where('tipe', 'Pengeluaran')
+        ->inRandomOrder()
+        ->first();
+
+    $nominal = rand(1, 10) . '0';
+
+    Livewire::actingAs($user)
+        ->test(DataTransaksi::class)
+        ->callTableAction('Catat Pengeluaran', data: [
+            'jenis_transaksi_id' => $jenisTransaksi->id,
+            'nominal' => $nominal,
+            'deskripsi' => 'testing'
+        ])
+        ->assertHasNoErrors();
+
+    $bukuKas->refresh();
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->latest()
+        ->first();
+
+    expect($bukuKas->saldo)
+        ->toBe($transaksi_terakhir->saldo_akhir);
+})->group('create_pengeluaran_now');
+
+test('tambah data transaksi pengeluaran ke tengah tanggal transaksi yang sudah ada', function () {
+    $user_id = 2;
+    $user = User::find($user_id);
+
+    $bukuKas = BukuKas::where('user_id', $user->id)->first();
+
+    $jenisTransaksi = JenisTransaksi::where('user_id', $user->id)
+        ->where('tipe', 'Pengeluaran')
+        ->inRandomOrder()
+        ->first();
+
+    $nominal = rand(1, 10) . '0';
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->orderBy('tanggal', 'desc')
+        ->skip(rand(2, 5))
+        ->first();
+
+    $tanggal = date('Y-m-d H:i:s', strtotime($transaksi_terakhir->tanggal . ' +10 minutes'));
+
+    Livewire::actingAs($user)
+        ->test(DataTransaksi::class)
+        ->callTableAction('Catat Pengeluaran', data: [
+            'jenis_transaksi_id' => $jenisTransaksi->id,
+            'nominal' => $nominal,
+            'tanggal' => $tanggal,
+            'deskripsi' => 'testing'
+        ])
+        ->assertHasNoErrors();
+
+    $bukuKas->refresh();
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->latest('tanggal')
+        ->first();
+
+    expect($transaksi_terakhir->saldo_akhir)
+        ->toBe($bukuKas->saldo);
+})->group('create_pengeluaran_past');
+
+test('hapus data transaksi pengeluaran', function () {
+    $user_id = 2;
+    $user = User::find($user_id);
+    $bukuKas = BukuKas::where('user_id', $user->id)->first();
+    $nominal = rand(1, 10) . '0';
+
+    $jenisTransaksi = JenisTransaksi::where('user_id', $user->id)
+        ->where('tipe', 'Pengeluaran')
+        ->inRandomOrder()
+        ->first();
+
+    Livewire::actingAs($user)
+        ->test(DataTransaksi::class)
+        ->callTableAction('Catat Pengeluaran', data: [
+            'jenis_transaksi_id' => $jenisTransaksi->id,
+            'nominal' => $nominal,
+        ])
+        ->assertHasNoErrors();
+
+    $bukuKas->refresh();
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->latest('tanggal')
+        ->first();
+
+    Livewire::actingAs($user)
+        ->test(DataTransaksi::class)
+        ->callTableAction(DeleteAction::class, $transaksi_terakhir)
+        ->assertHasNoErrors();
+
+    $bukuKas->refresh();
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->latest('tanggal')
+        ->first();
+
+    expect($bukuKas->saldo)
+        ->toBe($transaksi_terakhir->saldo_akhir);
+})->group('delete_pengeluaran_now');
+
+test('hapus data transaksi pengeluaran yang ada di tengah tanggal transaksi yang sudah ada', function () {
+    $user_id = 2;
+    $user = User::find($user_id);
+
+    $bukuKas = BukuKas::where('user_id', $user->id)->first();
+
+    $jenisTransaksi = JenisTransaksi::where('user_id', $user->id)
+        ->where('tipe', 'Pengeluaran')
+        ->inRandomOrder()
+        ->first();
+
+    $nominal = rand(1, 10) . '0';
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->orderBy('tanggal', 'desc')
+        ->skip(rand(2, 5))
+        ->first();
+
+    $tanggal = date('Y-m-d H:i:s', strtotime($transaksi_terakhir->tanggal . ' +10 minutes'));
+
+    Livewire::actingAs($user)
+        ->test(DataTransaksi::class)
+        ->callTableAction('Catat Pengeluaran', data: [
+            'jenis_transaksi_id' => $jenisTransaksi->id,
+            'nominal' => $nominal,
+            'tanggal' => $tanggal,
+        ])
+        ->assertHasNoErrors();
+
+    $bukuKas->refresh();
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->latest('tanggal')
+        ->first();
+
+    Livewire::actingAs($user)
+        ->test(DataTransaksi::class)
+        ->callTableAction(DeleteAction::class, $transaksi_terakhir)
+        ->assertHasNoErrors();
+
+    $bukuKas->refresh();
+    $transaksi_terakhir = Transaksi::where('user_id', $user_id)
+        ->where('buku_kas_id', $bukuKas->id)
+        ->latest('tanggal')
+        ->first();
+
+    expect($bukuKas->saldo)
+        ->toBe($transaksi_terakhir->saldo_akhir);
+})->group('delete_pengeluaran_past');

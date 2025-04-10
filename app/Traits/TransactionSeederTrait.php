@@ -11,40 +11,41 @@ trait TransactionSeederTrait
 {
     public function seedTransactions($user_id, $jumlah = null, $startDate = null, $endDate = null)
     {
-        // Use provided start date or generate one within the last 2 months
-        $startDate = $startDate ? Carbon::parse($startDate) : now()->subDays(rand(30, 60)); // Ensure Carbon object
+        $startDate = $startDate ? Carbon::parse($startDate) : now()->subDays(rand(30, 60));
 
-        //  Now you can safely use copyTransaksiSeeder()
         $endDate = $endDate ? Carbon::parse($endDate) : $startDate->copy()->addDays($jumlah ?? rand(15, 25));
 
-        // Ensure endDate does not exceed the current date
         if ($endDate->gt(now())) {
             $endDate = now();
         }
 
-        $currentDate = $startDate->copy();
+        $kas = BukuKas::getRandomBukuKas($user_id)->first();
+
+        $lastSaldoPertama = Transaksi::where('buku_kas_id', $kas->id)
+            ->where('deskripsi', 'Saldo pertama')
+            ->first();
+
+        $currentDate = $lastSaldoPertama ? Carbon::parse($lastSaldoPertama->tanggal)->addMinutes(1) : $startDate->copy();
 
         for ($i = 0; $i < ($jumlah ?? rand(15, 25)); $i++) {
-            $kas = BukuKas::getRandomBukuKas($user_id)->first();
-            $jenisRandom = rand(0, 5);
-
-            // Ensure the current date is within the specified range
             if ($currentDate->gt($endDate)) {
-                break; // Stop if we've exceeded the end date
+                break;
             }
 
             $currentDate = $currentDate->addMinutes(rand(10, 1440));
 
-            if ($jenisRandom > 4) { // Transfer transaction
+            $jenisRandom = rand(0, 5);
+
+            if ($jenisRandom > 4) {
                 $tujuanKas = BukuKas::getRandomBukuKas($user_id)
                     ->where('id', '!=', $kas->id)
                     ->first();
 
                 if (!$tujuanKas) {
-                    continue; // Skip if no other BukuKas found for transfer
+                    continue;
                 }
 
-                $transfer_code = uniqid(); // Generate a unique transfer code
+                $transfer_code = uniqid();
                 $nominal = rand(1, 100);
 
                 Transaksi::create([
@@ -73,7 +74,7 @@ trait TransactionSeederTrait
                 $kas->save();
                 $tujuanKas->saldo += $nominal;
                 $tujuanKas->save();
-            } else { // Regular transaction (Pemasukan/Pengeluaran)
+            } else {
                 $jenis = ($jenisRandom % 2 == 0) ? 'Pengeluaran' : 'Pemasukan';
                 $jenis_transaksi_id = JenisTransaksi::whereUserId($user_id)
                     ->whereTipe($jenis)

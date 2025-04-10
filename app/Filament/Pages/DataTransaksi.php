@@ -106,9 +106,14 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
     public function table(Table $table): Table
     {
-        $query = Transaksi::whereMonth('tanggal', $this->bulan)
-            ->whereYear('tanggal', $this->tahun)
-            ->where('buku_kas_id', $this->kas_aktif->id);
+        $query = Transaksi::where('buku_kas_id', $this->kas_aktif->id);
+
+        if (app()->environment('local')) {
+            $query->where('tanggal', '>=', now()->subMonths(3));
+        } else {
+            $query->whereMonth('tanggal', $this->bulan)
+                ->whereYear('tanggal', $this->tahun);
+        }
 
         return $table
             ->query($query)
@@ -223,6 +228,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
                     ->icon('heroicon-o-arrow-up-on-square'),
             ])
             ->columns([
+                TextColumn::make('id')->visible(app()->isLocal()),
                 IconColumn::make('jenis')
                     ->label('Tipe')
                     ->tooltip(fn($state) => $state)
@@ -288,7 +294,6 @@ class DataTransaksi extends Page implements HasTable, HasForms
                 TextColumn::make('saldo_akhir')->numeric()
                     ->prefix('Rp '),
             ])
-            // ->defaultSort('tanggal', 'desc')
             ->defaultSort(function (Builder $query): Builder {
                 return $query
                     ->orderBy('tanggal', 'desc')
