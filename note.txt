@@ -2,3 +2,115 @@ update:
 
 
 problem:
+
+
+testing problem result
+
+   FAILED  Tests\Feature\ProsesTransaksiTest > tambah data transaksi pemasukan pada tanggal saat ini
+  Failed asserting that 341 is identical to -300.
+
+  at tests\Feature\ProsesTransaksiTest.php:48
+     44▕         ->first();
+     45▕
+     46▕     $expected_saldo = $transaksi_sebelumnya ? $transaksi_sebelumnya->saldo_akhir + $nominal : $nominal;
+     47▕
+  ➜  48▕     expect($bukuKas->saldo)->toBe($expected_saldo);
+     49▕ })->group('create_pemasukan_now');
+     50▕
+     51▕ test('tambah data transaksi pemasukan ke tengah tanggal transaksi yang sudah ada', function () {
+     52▕     $user_id = 2;
+
+  1   tests\Feature\ProsesTransaksiTest.php:48
+
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ProsesTransaksiTest > tambah data transaksi pemasukan ke tengah tanggal transaksi yang sudah ada
+  Component has errors: "mountedTableActionsData.0.tanggal"
+Failed asserting that false is true.
+
+  at vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+    105▕     {
+    106▕         $errors = $this->errors();
+    107▕
+    108▕         if (empty($keys)) {
+  ➜ 109▕             PHPUnit::assertTrue($errors->isEmpty(), 'Component has errors: "'.implode('", "', $errors->keys()).'"');
+    110▕
+    111▕             return $this;
+    112▕         }
+    113▕
+
+  1   vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+  2   tests\Feature\ProsesTransaksiTest.php:79
+
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ProsesTransaksiTest > hapus data transaksi pemasukan yang ada di tengah tanggal transaksi yang sudah ada
+  Component has errors: "mountedTableActionsData.0.tanggal"
+Failed asserting that false is true.
+
+  at vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+    105▕     {
+    106▕         $errors = $this->errors();
+    107▕
+    108▕         if (empty($keys)) {
+  ➜ 109▕             PHPUnit::assertTrue($errors->isEmpty(), 'Component has errors: "'.implode('", "', $errors->keys()).'"');
+    110▕
+    111▕             return $this;
+    112▕         }
+    113▕
+
+  1   vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+  2   tests\Feature\ProsesTransaksiTest.php:158
+
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ProsesTransaksiTest > tambah data transaksi pengeluaran pada tanggal saat ini
+  Failed asserting that 314 is identical to -310.
+
+  at tests\Feature\ProsesTransaksiTest.php:210
+    206▕         ->latest()
+    207▕         ->first();
+    208▕
+    209▕     expect($bukuKas->saldo)
+  ➜ 210▕         ->toBe($transaksi_terakhir->saldo_akhir);
+    211▕ })->group('create_pengeluaran_now');
+    212▕
+    213▕ test('tambah data transaksi pengeluaran ke tengah tanggal transaksi yang sudah ada', function () {
+    214▕     $user_id = 2;
+
+  1   tests\Feature\ProsesTransaksiTest.php:210
+
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ProsesTransaksiTest > tambah data transaksi pengeluaran ke tengah tanggal transaksi yang sudah ada
+  Component has errors: "mountedTableActionsData.0.tanggal"
+Failed asserting that false is true.
+
+  at vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+    105▕     {
+    106▕         $errors = $this->errors();
+    107▕
+    108▕         if (empty($keys)) {
+  ➜ 109▕             PHPUnit::assertTrue($errors->isEmpty(), 'Component has errors: "'.implode('", "', $errors->keys()).'"');
+    110▕
+    111▕             return $this;
+    112▕         }
+    113▕
+
+  1   vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+  2   tests\Feature\ProsesTransaksiTest.php:241
+
+  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ProsesTransaksiTest > hapus data transaksi pengeluaran yang ada di tengah tanggal transaksi yang sudah ada
+  Component has errors: "mountedTableActionsData.0.tanggal"
+Failed asserting that false is true.
+
+  at vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+    105▕     {
+    106▕         $errors = $this->errors();
+    107▕
+    108▕         if (empty($keys)) {
+  ➜ 109▕             PHPUnit::assertTrue($errors->isEmpty(), 'Component has errors: "'.implode('", "', $errors->keys()).'"');
+    110▕
+    111▕             return $this;
+    112▕         }
+    113▕
+
+  1   vendor\livewire\livewire\src\Features\SupportValidation\TestsValidation.php:109
+  2   tests\Feature\ProsesTransaksiTest.php:320

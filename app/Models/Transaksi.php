@@ -26,6 +26,17 @@ class Transaksi extends Model
     protected $guarded = [];
     protected $table = 'transaksi';
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (auth()->check() && is_null($model->user_id)) {
+                $model->user_id = auth()->id(); // Set user_id ke ID user yang sedang login
+            }
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

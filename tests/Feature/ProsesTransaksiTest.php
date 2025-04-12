@@ -1,6 +1,5 @@
 <?php
 
-use Carbon\Carbon;
 use App\Models\User;
 use Livewire\Livewire;
 use App\Models\BukuKas;
@@ -45,7 +44,28 @@ test('tambah data transaksi pemasukan pada tanggal saat ini', function () {
 
     $expected_saldo = $transaksi_sebelumnya ? $transaksi_sebelumnya->saldo_akhir + $nominal : $nominal;
 
-    expect($bukuKas->saldo)->toBe($expected_saldo);
+    try {
+        expect($bukuKas->saldo)->toBe($expected_saldo);
+    } catch (Exception $e) {
+        $errorMessage = sprintf(
+            "Test failed: Expected saldo to be %s but got %s. Additional data: %s",
+            $expected_saldo,
+            $bukuKas->saldo,
+            json_encode([
+                'jenis_transaksi_id' => $jenisTransaksi->id,
+                'nominal' => $nominal,
+                'deskripsi' => 'testing',
+            ])
+        );
+        dump([
+            'jenis_transaksi_id' => $jenisTransaksi->id,
+            'nominal' => $nominal,
+            'deskripsi' => 'testing',
+            'expected_saldo' => $expected_saldo,
+            'actual_saldo' => $bukuKas->saldo,
+        ]);
+        throw new Exception($errorMessage, 0, $e);
+    }
 })->group('create_pemasukan_now');
 
 test('tambah data transaksi pemasukan ke tengah tanggal transaksi yang sudah ada', function () {
@@ -88,7 +108,7 @@ test('tambah data transaksi pemasukan ke tengah tanggal transaksi yang sudah ada
         ->toBe($bukuKas->saldo);
 })->group('create_pemasukan_past');
 
-test('hapus data transaksi pemasukan', function () {
+test('hapus data transaksi pemasukan pada tanggal saat ini', function () {
     $user_id = 2;
     $user = User::find($user_id);
     $bukuKas = BukuKas::where('user_id', $user->id)->first();
@@ -176,7 +196,7 @@ test('hapus data transaksi pemasukan yang ada di tengah tanggal transaksi yang s
 
     expect($bukuKas->saldo)
         ->toBe($transaksi_terakhir->saldo_akhir);
-})->group('delete_pemasukan_now');
+})->group('delete_pemasukan_past');
 
 test('tambah data transaksi pengeluaran pada tanggal saat ini', function () {
     $user_id = 2;
@@ -250,7 +270,7 @@ test('tambah data transaksi pengeluaran ke tengah tanggal transaksi yang sudah a
         ->toBe($bukuKas->saldo);
 })->group('create_pengeluaran_past');
 
-test('hapus data transaksi pengeluaran', function () {
+test('hapus data transaksi pengeluaran pada tanggal saat ini', function () {
     $user_id = 2;
     $user = User::find($user_id);
     $bukuKas = BukuKas::where('user_id', $user->id)->first();

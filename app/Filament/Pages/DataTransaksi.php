@@ -106,7 +106,8 @@ class DataTransaksi extends Page implements HasTable, HasForms
 
     public function table(Table $table): Table
     {
-        $query = Transaksi::where('buku_kas_id', $this->kas_aktif->id);
+        $query = Transaksi::with('jenis_transaksi')
+            ->where('buku_kas_id', $this->kas_aktif->id);
 
         // if (app()->environment('local')) {
         //     $query->where('tanggal', '>=', now()->subMonths(3));
@@ -127,7 +128,6 @@ class DataTransaksi extends Page implements HasTable, HasForms
                     ->tooltip('Transfer saldo ke kas lain')
                     ->action(function ($form, $action, array $data, array $arguments) {
                         DB::transaction(function () use ($data) {
-                            $data['user_id'] = auth()->user()->id;
                             $tujuan_id = $data['buku_kas_id_tujuan'];
                             $asal_id = $data['buku_kas_id'];
 
@@ -172,7 +172,6 @@ class DataTransaksi extends Page implements HasTable, HasForms
                 Action::make('Catat Pemasukan')
                     ->action(function ($form, $action, array $data, array $arguments) {
                         $data['jenis'] = 'Pemasukan';
-                        $data['user_id'] = auth()->user()->id;
                         Transaksi::create($data);
 
                         Notification::make()
@@ -200,7 +199,6 @@ class DataTransaksi extends Page implements HasTable, HasForms
                 Action::make('Catat Pengeluaran')
                     ->action(function (?Transaksi $record, array $data, $form, $action, array $arguments) {
                         $data['jenis'] = 'Pengeluaran';
-                        $data['user_id'] = auth()->user()->id;
 
                         Transaksi::create($data);
 
@@ -252,9 +250,11 @@ class DataTransaksi extends Page implements HasTable, HasForms
                     ->visible(auth()->user()->isSuper()),
 
                 TextColumn::make('tanggal')
+                    ->color(fn($record) => $record->jenis == 'Pengeluaran' ? 'danger' : 'success')
                     ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),
 
                 TextColumn::make('kategori')
+                    ->color(fn($record) => $record->jenis == 'Pengeluaran' ? 'danger' : 'success')
                     ->label('Kategori')
                     ->getStateUsing(function ($record) {
                         if (!in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
@@ -282,18 +282,22 @@ class DataTransaksi extends Page implements HasTable, HasForms
                     ->wrap(),
 
                 TextColumn::make('created_at')
+                    ->color(fn($record) => $record->jenis == 'Pengeluaran' ? 'danger' : 'success')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
+                    ->color(fn($record) => $record->jenis == 'Pengeluaran' ? 'danger' : 'success')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('nominal')
+                    ->color(fn($record) => $record->jenis == 'Pengeluaran' ? 'danger' : 'success')
                     ->numeric()
                     ->prefix('Rp '),
 
                 TextColumn::make('saldo_akhir')->numeric()
+                    ->color(fn($record) => $record->jenis == 'Pengeluaran' ? 'danger' : 'success')
                     ->prefix('Rp '),
             ])
             ->defaultSort(function (Builder $query): Builder {
