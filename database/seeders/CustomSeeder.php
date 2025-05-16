@@ -22,9 +22,9 @@ class CustomSeeder extends Seeder
     public function run(): void
     {
         // $this->createTransaksiLama();
-        // $this->seederTransaction();
-        // $this->hapusSetiapTransaksi();
+        $this->seederTransaction();
         // $this->recalculateKas(2);
+        // $this->hapusSetiapTransaksi();
 
         // $transaksiPemasukan = Transaksi::factory()->create([
         //     'user_id' => 2,
@@ -53,7 +53,7 @@ class CustomSeeder extends Seeder
         //         'buku_kas_id' => 1,
         //     ]);
 
-        $this->editJenisTransaksi();
+        // $this->editJenisTransaksi();
     }
 
     private function editJenisTransaksi()
@@ -117,11 +117,11 @@ class CustomSeeder extends Seeder
         $userId = 2; // The ID of the user you want to seed transactions for
 
         // // Example 1: Seed 30 transactions starting from the 1st of the current month
-        $this->seedTransactions($userId, 20, date('Y-m-1'));
+        // $this->seedTransactions($userId, 10, date('Y-m-1'));
 
         // // Example 2: Seed transactions between specific dates
-        // $startDate = now()->subMonths(3);  // 3 months ago
-        // $endDate = now()->subMonth();    // 1 month ago
+        // $startDate = date('Y-m-1');  // 3 months ago
+        // $endDate = now();    // 1 month ago
         // $this->seedTransactions($userId, null, $startDate, $endDate);
 
         // // Example 3:  Seed a specific number of transactions within a date range
@@ -139,6 +139,33 @@ class CustomSeeder extends Seeder
         // $endDate = \Carbon\Carbon::createFromDate(2024, 04, 30);
         // $this->seedTransactions($userId, null, $startDate, $endDate);
 
+        // dd(now()->subDays(rand(0, now()->day - 1))->toDateString());
+        // Transaksi::factory()->count(10)->create([
+        //     // 'user_id' => $userId,
+        //     // 'buku_kas_id' => 1
+        // ])
+        //     ->forUser($userId)
+        //     ->each(function ($transaksi) {
+        //         $transaksi->update([
+        //             'tanggal' => now()->subDays(rand(0, now()->day - 1))->toDateString(),
+        //             'nominal' => rand(1, 100),
+        //         ]);
+        //     });
+
+        Transaksi::factory()->count(10)->forUser(2)->create([
+            'buku_kas_id' => 1
+        ])
+            ->each(function ($transaksi) {
+                $transaksi->update([
+                    'tanggal' => now()->subDays(rand(0, now()->day - 1))->setTime(
+                        rand(0, 23),
+                        rand(0, 59),
+                        rand(0, 59)
+                    )->toDateTimeString(),
+                ]);
+            });
+
+        $this->recalculateKas(2);
     }
 
     private function recalculateKas($user_id = null)

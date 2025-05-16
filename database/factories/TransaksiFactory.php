@@ -24,9 +24,8 @@ class TransaksiFactory extends Factory
         return [
             'user_id' => $user->id,
             'jenis_transaksi_id' => JenisTransaksi::whereUserId($user->id)->inRandomOrder()->first()->id,
-            'buku_kas_id' => fn(array $attributes) => $attributes['buku_kas_id']
-                ?? BukuKas::whereUserId($attributes['user_id'])->inRandomOrder()->first()->id,
             'tanggal' => $this->faker->dateTimeBetween('-3 months', 'now'),
+            'buku_kas_id' => BukuKas::whereUserId($user->id)->inRandomOrder()->first()->id,
             'nominal' => rand(1, 100),
             'deskripsi' => 'data seeder',
             'jenis' => $this->faker->randomElement(['Pemasukan', 'Pengeluaran']),
@@ -72,13 +71,16 @@ class TransaksiFactory extends Factory
         return $this->state(function (array $attributes) use ($userId) {
             $data = [
                 'user_id' => $userId,
-                'jenis_transaksi_id' => JenisTransaksi::whereUserId($userId)->inRandomOrder()->first()->id,
-            ];
+                'jenis_transaksi_id' => function (array $attributes) use ($userId) {
+                    $jenisTransaksi = JenisTransaksi::where('user_id', $userId)
+                        ->where('tipe', $attributes['jenis'])
+                        ->inRandomOrder()
+                        ->first();
 
-            // Hanya tambahkan buku_kas_id jika tidak ada di attributes
-            if (!isset($attributes['buku_kas_id'])) {
-                $data['buku_kas_id'] = BukuKas::whereUserId($userId)->inRandomOrder()->first()->id;
-            }
+                    return $jenisTransaksi->id;
+                },
+                'buku_kas_id' => BukuKas::whereUserId($userId)->inRandomOrder()->first()->id,
+            ];
 
             return $data;
         });
