@@ -17,14 +17,22 @@ class TransaksiSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('🗑️  Truncating tables...');
         BukuKas::truncate();
         Transaksi::truncate();
 
         $users = User::whereNot('id', 1)->get();
+        $this->command->info("👥 Found {$users->count()} users to seed");
+        $this->command->newLine();
 
         foreach ($users as $value) {
+            $this->command->info("📊 Processing User ID: {$value->id}");
+
             // CREATE BUKU KAS & TRANSAKSI PERTAMA
-            for ($i = 0; $i < rand(2, 4); $i++) {
+            $bukuKasCount = rand(2, 4);
+            $this->command->line("   Creating {$bukuKasCount} Buku Kas...");
+
+            for ($i = 0; $i < $bukuKasCount; $i++) {
                 $buku = BukuKas::factory()->create([
                     'user_id' => $value->id,
                     'nama_buku' => $i == 0 ? 'Kas Utama' : fake()->word(),
@@ -42,7 +50,9 @@ class TransaksiSeeder extends Seeder
             }
 
             // CREATE TRANSAKSI
-            $this->seedTransactions($value->id, $value->id == 2 ? 50 : null);
+            $transactionCount = $value->id == 2 ? 50 : null;
+            $this->command->line("   Creating transactions...");
+            $this->seedTransactions($value->id, $transactionCount);
 
             if ($value->id == 2) {
                 $currentMonth = now()->month;
@@ -55,9 +65,26 @@ class TransaksiSeeder extends Seeder
                     ->count();
 
                 if ($hasCurrentMonthTransaction < 5) {
+                    $this->command->line("   Adding current month transactions...");
                     $this->seedTransactions($value->id, 5, now()->startOfMonth());
                 }
             }
+
+            $this->command->newLine();
         }
+
+        // Summary
+        $totalBukuKas = BukuKas::count();
+        $totalTransaksi = Transaksi::count();
+
+        $this->command->info("✅ Seeding completed successfully!");
+        $this->command->table(
+            ['Metric', 'Count'],
+            [
+                ['Users Processed', $users->count()],
+                ['Buku Kas Created', $totalBukuKas],
+                ['Transactions Created', $totalTransaksi],
+            ]
+        );
     }
 }

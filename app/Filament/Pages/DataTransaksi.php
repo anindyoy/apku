@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use Closure;
 use App\Models\BukuKas;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -57,7 +56,7 @@ class DataTransaksi extends Page implements HasTable, HasForms
         $this->tahun = date('Y');
         $this->tahun_awal = date(
             'Y',
-            strtotime(Transaksi::orderBy('tanggal', 'asc')->first()->tanggal)
+            strtotime(Transaksi::orderBy('tanggal', 'asc')->first()?->tanggal)
         );
 
         if (!in_array($this->activeTab, BukuKas::pluck('nama_buku')->toArray())) {

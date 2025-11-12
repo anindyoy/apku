@@ -21,7 +21,15 @@ trait TransactionSeederTrait
         // Ambil semua buku kas berdasarkan user_id
         $bukuKasList = BukuKas::where('user_id', $user_id)->get();
 
+        // Create progress bar for buku kas
+        $progressBar = $this->command->getOutput()->createProgressBar($bukuKasList->count());
+        $progressBar->setFormat('   %current%/%max% [%bar%] %percent:3s%% %message%');
+        $progressBar->setMessage('Processing Buku Kas...');
+        $progressBar->start();
+
         foreach ($bukuKasList as $kas) {
+            $progressBar->setMessage("Buku Kas: {$kas->nama_buku}");
+
             // Jika user_id adalah 2 dan buku_kas_id adalah 1, pastikan minimal ada 20 transaksi
             if ($user_id == 2 && $kas->id == 1) {
                 $existingTransactionsCount = Transaksi::where('user_id', $user_id)
@@ -145,6 +153,11 @@ trait TransactionSeederTrait
                     $kas->save();
                 }
             }
+
+            $progressBar->advance();
         }
+
+        $progressBar->finish();
+        $this->command->newLine();
     }
 }
