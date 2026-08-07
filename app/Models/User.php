@@ -106,4 +106,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return $query->whereNot('id', 1);
     }
+
+    public function scopeSuper($query)
+    {
+        return $query->where('id', 1);
+    }
 }

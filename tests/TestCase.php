@@ -16,9 +16,21 @@ use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 abstract class TestCase extends BaseTestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Run seeders after migration
+        if (app()->environment('testing')) {
+            $this->seed();
+        }
+    }
     public function renderTest($page, $record = false)
     {
         $pageClass = [
@@ -28,7 +40,7 @@ abstract class TestCase extends BaseTestCase
             'transaksi' => ListTransaksis::class,
             'piutang' => ListPiutangs::class,
             'utang' => ListUtangs::class,
-            'detail_piutang' => UtangPiutangDetail::class,
+            'detail_piutang' => \App\Filament\Resources\UtangResource\Pages\UtangDetail::class,
             'register' => Register::class,
             'user' => ListUsers::class,
             'edit_user' => EditUser::class,
@@ -41,7 +53,8 @@ abstract class TestCase extends BaseTestCase
 
         $user = User::inRandomOrder()
             ->when(
-                !in_array($page, ['user', 'edit_user']), // Combine conditions
+                in_array($page, ['user', 'edit_user']), // These pages need super user
+                fn($query) => $query->super(),
                 fn($query) => $query->notSuper()
             )
             ->first();

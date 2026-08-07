@@ -4,13 +4,13 @@ namespace App\Filament\Resources\TransaksiResource\Pages;
 
 use App\Models\BukuKas;
 use App\Models\Transaksi;
-use Filament\Pages\Actions\Action;
+use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
 use Filament\Pages\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\TransaksiResource;
-use Filament\Resources\Pages\ListRecords\Tab;
+// Tab class removed for Filament v5 compatibility
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
@@ -156,18 +156,17 @@ class ListTransaksis extends ListRecords
         ];
     }
 
-    public function getTabs(): array
-    {
-        $kas = BukuKas::all();
-
-        $tab = [];
-        foreach ($kas as $key => $value) {
-            $tab[$value->nama_buku] = Tab::make()
-                ->modifyQueryUsing(
-                    fn(Builder $query) => $query->where('buku_kas_id', $value->id)
-                );
-        }
-
-        return $tab;
-    }
+    // Tabs disabled for Filament v5 compatibility
+    // public function getTabs(): array
+    // {
+    //     $kas = BukuKas::all();
+    //     $tab = [];
+    //     foreach ($kas as $key => $value) {
+    //         $tab[$value->nama_buku] = Tab::make()
+    //             ->modifyQueryUsing(
+    //                 fn(Builder $query) => $query->where('buku_kas_id', $value->id)
+    //             );
+    //     }
+    //     return $tab;
+    // }
 }

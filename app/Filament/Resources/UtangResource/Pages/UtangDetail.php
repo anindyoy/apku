@@ -7,7 +7,6 @@ use App\Models\UtangPiutang;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Filament\Actions\Action;
-use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -45,6 +44,10 @@ class UtangDetail extends Page implements HasTable
 
     public function getHeaderWidgets(): array
     {
+        if (!$this->parent) {
+            return [];
+        }
+
         return [
             UtangPiutangDetailOverview::make([
                 'record' => $this->parent->id,
@@ -55,7 +58,18 @@ class UtangDetail extends Page implements HasTable
     protected function getHeaderActions(): array
     {
         $utang = $this->parent;
-        $utang_detail = $utang->utang_piutang_detail->first();
+
+        // If parent is null, return empty array
+        if (!$utang) {
+            return [];
+        }
+
+        $utang_detail = $utang->utang_piutang_detail->first() ?? null;
+
+        // If no detail found, return empty array
+        if (!$utang_detail) {
+            return [];
+        }
 
         return [
             ActionsAction::make('ubah')
@@ -67,7 +81,7 @@ class UtangDetail extends Page implements HasTable
                     'nominal' => $utang_detail->nominal,
                     'deskripsi' => $utang->deskripsi,
                 ])
-                ->modalWidth(MaxWidth::Small)
+                ->modalWidth('small') // Filament v5 uses string
                 ->form(UtangPiutang::formSchema())
                 ->action(function ($data) use ($utang_detail, $utang): void {
                     DB::transaction(function () use ($data, $utang_detail, $utang) {
@@ -106,20 +120,31 @@ class UtangDetail extends Page implements HasTable
 
     public function getTitle(): string | Htmlable
     {
+        if (!$this->parent) {
+            return 'Detail Utang/Piutang';
+        }
+
         $data = $this->parent;
         return ucfirst($data->tipe) . ' kepada ' . $data->kepada;
     }
 
     public function getSubheading(): ?string
     {
-        return $this->parent->tempo
-            ? 'Jatuh tempo: ' . date('d M Y', strtotime($this->parent->tempo))
-            : null;
+        if (!$this->parent || !$this->parent->tempo) {
+            return null;
+        }
+
+        return 'Jatuh tempo: ' . date('d M Y', strtotime($this->parent->tempo));
     }
 
     public function table(Table $table)
     {
         $utang = $this->parent;
+
+        // If parent is null, return empty query
+        if (!$utang) {
+            return $table->query(DataModel::where('id', 0));
+        }
 
         return $table
             ->headerActions([
@@ -130,7 +155,6 @@ class UtangDetail extends Page implements HasTable
                         fn($data) => ModelsUtangPiutangDetail::action($data, $utang->id, 'tambah')
                     )
                     ->icon('heroicon-o-plus-circle')
-                    ->modalWidth(MaxWidth::Small)
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
 
@@ -142,7 +166,6 @@ class UtangDetail extends Page implements HasTable
                     )
                     ->color('success')
                     ->icon('heroicon-o-minus-circle')
-                    ->modalWidth(MaxWidth::Small)
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
             ])
@@ -169,7 +192,6 @@ class UtangDetail extends Page implements HasTable
                         'nominal' => $record->nominal,
                         'deskripsi' => $record->deskripsi,
                     ])
-                    ->modalWidth(MaxWidth::Small)
                     ->form([
                         TextInput::make('nominal')->required(),
 

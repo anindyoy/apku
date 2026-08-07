@@ -17,6 +17,21 @@ class Pemasukan extends Component implements HasTable, HasForms
 {
     use InteractsWithTable, InteractsWithForms;
 
+    // Add required Livewire properties for Filament Actions
+    public array $mountedActions = [];
+    public array $mountedAction = [];
+
+    // Add required methods for Filament Actions
+    public function cacheMountedActions(): void
+    {
+        // Required for Filament Actions compatibility
+    }
+
+    public function getOriginallyMountedActionIndex(): ?int
+    {
+        return null;
+    }
+
     public function table(Table $table): Table
     {
         return $table

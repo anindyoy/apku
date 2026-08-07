@@ -106,7 +106,7 @@ class BukuKasResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
 
                 // DeleteAction::make()
                 //     ->hidden(fn($record) => $record->transaksi->count()),

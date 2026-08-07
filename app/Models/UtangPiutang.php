@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use Filament\Support\Enums\MaxWidth;
+// use Filament\Support\Enums\MaxWidth; // Removed for Filament v5
 use Filament\Forms\Components\Toggle;
 use App\Observers\UtangPiutangObserver;
 use Filament\Forms\Components\Textarea;
@@ -163,7 +163,7 @@ class UtangPiutang extends Model
                         'created_at' => $record->created_at,
                     ]);
                 })
-                ->modalWidth(MaxWidth::Small),
+                ->modalWidth('small'), // Filament v5 uses string
         ];
     }
 

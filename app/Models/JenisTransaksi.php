@@ -10,7 +10,7 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Support\Enums\MaxWidth;
+// use Filament\Support\Enums\MaxWidth; // Removed for Filament v5
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -66,7 +66,7 @@ class JenisTransaksi extends Model
                     $data['tipe'] = $type;
                     return $data;
                 })
-                ->modalWidth(MaxWidth::Small)
+                ->modalWidth('small') // Filament v5 uses string
                 ->color($type == 'Pengeluaran' ? 'danger' : 'success')
                 ->form(self::form())
         ];
@@ -77,7 +77,7 @@ class JenisTransaksi extends Model
         return [
             EditAction::make()
                 ->hidden(auth()->user()->isSuper())
-                ->modalWidth(MaxWidth::Small)
+                ->modalWidth('small') // Filament v5 uses string
                 ->form(self::form()),
 
             DeleteAction::make()
@@ -85,7 +85,7 @@ class JenisTransaksi extends Model
 
             Action::make('Hapus')
                 ->hidden(auth()->user()->isSuper())
-                ->modalWidth(MaxWidth::Small)
+                ->modalWidth('small') // Filament v5 uses string
                 ->form(function ($record) use ($type) {
                     return [
                         Select::make('kategori')

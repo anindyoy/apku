@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\BukuKas;
 use App\Models\JenisTransaksi;
 use App\Models\Scopes\UserScope;
-use Filament\Forms\Components\Grid;
 use App\Observers\TransaksiObserver;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Model;
@@ -63,8 +62,9 @@ class Transaksi extends Model
                 ->disabled()
                 ->visible(fn($record) => $record),
 
-            Grid::make()
-                ->schema([
+            // Section wrapper removed for Filament v5 compatibility
+            // Using direct schema without wrapper
+            [
                     Select::make('buku_kas_id')
                         ->label('Buku Kas')
                         ->live()
@@ -106,8 +106,7 @@ class Transaksi extends Model
 
                     TextInput::make('deskripsi')
                         ->columnSpanFull(),
-                ])
-                ->columns(2),
+            ],
         ];
     }
 }
