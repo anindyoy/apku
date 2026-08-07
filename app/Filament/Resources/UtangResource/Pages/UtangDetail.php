@@ -6,7 +6,7 @@ use Filament\Tables\Table;
 use App\Models\UtangPiutang;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
@@ -15,7 +15,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use App\Filament\Resources\UtangResource;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Actions\DeleteAction;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Actions\Action as ActionsAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -31,7 +31,7 @@ class UtangDetail extends Page implements HasTable
 
     protected static string $resource = UtangResource::class;
 
-    protected static string $view = 'filament.resources.utang-resource.pages.utang-detail';
+    protected string $view = 'filament.resources.utang-resource.pages.utang-detail';
 
     public $code,
         $parent,

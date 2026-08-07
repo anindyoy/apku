@@ -2,19 +2,20 @@
 
 namespace App\Filament\Resources;
 
+use BackedEnum;
 use Filament\Tables;
-use Filament\Forms\Form;
 use App\Models\Transaksi;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Resources\TransaksiResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TransaksiResource\RelationManagers;
@@ -27,13 +28,13 @@ class TransaksiResource extends Resource
 {
     protected static ?string $model = Transaksi::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $pluralLabel = 'Transaksi';
     protected static ?string $slug = 'transaksi';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema(Transaksi::form());
+        return $schema->schema(Transaksi::form());
     }
 
     public static function table(Table $table): Table
@@ -120,7 +121,7 @@ class TransaksiResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->hidden(auth()->user()->isSuper())
                     ->before(function ($record, $livewire) {
                         if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
@@ -187,7 +188,7 @@ class TransaksiResource extends Resource
                     })
             ])
             ->bulkActions([
-                // Tables\Actions\DeleteBulkAction::make(),
+                // DeleteBulkAction::make(),
             ]);
     }
 

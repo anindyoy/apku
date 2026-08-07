@@ -6,7 +6,7 @@ use Filament\Tables\Table;
 use App\Models\UtangPiutang;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
@@ -14,7 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Actions\DeleteAction;
 use Illuminate\Contracts\Support\Htmlable;
 use App\Filament\Resources\PiutangResource;
 use Filament\Actions\Action as ActionsAction;
@@ -30,7 +30,7 @@ class PiutangDetail extends Page implements HasTable
     use InteractsWithTable, ExposesTableToWidgets;
     protected static string $resource = PiutangResource::class;
 
-    protected static string $view = 'filament.resources.piutang-resource.pages.piutang-detail';
+    protected string $view = 'filament.resources.piutang-resource.pages.piutang-detail';
 
     public $code,
         $parent,

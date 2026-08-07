@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms\Form;
+use BackedEnum;
+use UnitEnum;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use App\Models\UtangPiutang;
 use Filament\Resources\Resource;
@@ -16,13 +18,13 @@ use App\Filament\Resources\UtangResource\Pages\UtangDetail;
 class UtangResource extends Resource
 {
     protected static ?string $model = UtangPiutang::class;
-    protected static ?string $navigationGroup = 'Utang Piutang';
+    protected static string | UnitEnum | null $navigationGroup = 'Utang Piutang';
     protected static ?string $modelLabel = 'Utang';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema(UtangPiutang::formSchema())
             ->columns(1);
     }

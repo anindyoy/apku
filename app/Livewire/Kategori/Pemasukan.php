@@ -6,10 +6,10 @@ use Livewire\Component;
 use Filament\Tables\Table;
 use App\Models\JenisTransaksi;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Actions\CreateAction;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 

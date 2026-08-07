@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
+use UnitEnum;
 use App\Models\JenisTransaksi;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
@@ -14,7 +16,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 
 class Kategori extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationGroup = 'Pengaturan';
-    protected static string $view = 'filament.pages.kategori';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
+    protected string $view = 'filament.pages.kategori';
 }

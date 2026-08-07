@@ -7,7 +7,7 @@ use Livewire\Livewire;
 use App\Models\UtangPiutang;
 use App\Filament\Pages\AkunSaya;
 use App\Filament\Pages\Kategori;
-use Filament\Pages\Auth\Register;
+use Filament\Auth\Pages\Register;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UtangResource\Pages\ListUtangs;

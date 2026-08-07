@@ -57,7 +57,6 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
         }
     }
 
-
     /**
      * Handle the Transaksi "deleted" event.
      */

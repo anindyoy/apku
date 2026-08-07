@@ -2,11 +2,13 @@
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
+use UnitEnum;
 use App\Models\User;
 use App\Models\Wilayah;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
-use Filament\Forms\Components\Card;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
@@ -19,9 +21,9 @@ class AkunSaya extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static string $view = 'filament.pages.akun-saya';
-    protected static ?string $navigationGroup = 'Pengaturan';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected string $view = 'filament.pages.akun-saya';
+    protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
 
     public ?array $data = [];
 
@@ -30,11 +32,11 @@ class AkunSaya extends Page implements HasForms
         $this->form->fill(auth()->user()->toArray());
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
-                Card::make()
+                Section::make()
                     ->schema([
                         TextInput::make('name')
                             ->label('Nama')
