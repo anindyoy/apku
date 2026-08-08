@@ -63,7 +63,7 @@ jobs:
           DB_PASSWORD: root
 
       - name: Cache TIA Data
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .pest-tia
           key: tia-${{ github.sha }}
@@ -80,7 +80,7 @@ jobs:
           DB_PASSWORD: root
 
       - name: Upload TIA Cache
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tia-cache
