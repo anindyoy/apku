@@ -74,6 +74,12 @@ $env:XDEBUG_MODE="off"; php artisan test --coverage-html "tests/coverage/" --tia
 - Coverage memperluas edges yang bisa direkam, sehingga TIA perlu baseline terpisah
 - Setelah baseline terbentuk, coverage runs akan reuse baseline tersebut
 
+**Catatan penting:**
+- Pesan `"Running in TIA mode, however TIA is skipped as an active coverage report narrows the edges it could record"` adalah **normal dan diharapkan** saat menjalankan TIA + Coverage. TIA reuse baseline yang sudah direkam.
+- **JANGAN** menambahkan `<server name="XDEBUG_MODE" value="coverage"/>` di `phpunit.xml` karena akan membuat SEMUA run dianggap coverage run dan TIA selalu di-skip (tidak bisa build baseline).
+- Pastikan `xdebug.mode=coverage` diset di `php.ini` PHP yang digunakan (bukan environment variable).
+- Setelah menambahkan Xdebug di `php.ini`, **restart terminal** agar konfigurasi terbaca.
+
 #### TIA dengan Parallel (TANPA Coverage):
 ```bash
 # TIA + Parallel untuk kecepatan maksimal
@@ -145,6 +151,29 @@ Default location: `C:\Users\ACER\.pest\tia\apku-07daa8a98201950f`
    # Enable di php.ini
    zend_extension=xdebug
    xdebug.mode=coverage
+   ```
+
+   **Install Xdebug untuk Laravel Herd (Windows):**
+   ```bash
+   # 1. Cek versi PHP yang digunakan
+   php -v
+   # Contoh output: PHP 8.4.12 (cli) (NTS Visual C++ 2022 x64)
+
+   # 2. Download Xdebug DLL yang sesuai dari https://xdebug.org/download
+   #    Pilih versi yang cocok dengan PHP version, NTS/TS, dan VS version
+   #    Contoh untuk PHP 8.4 NTS VS17 (64 bit):
+   curl -L -o "C:\Users\<USERNAME>\.config\herd\bin\php84\ext\php_xdebug.dll" \
+     "https://xdebug.org/files/php_xdebug-3.5.3-8.4-nts-vs17-x86_64.dll"
+
+   # 3. Edit php.ini di C:\Users\<USERNAME>\.config\herd\bin\php84\php.ini
+   #    Tambahkan setelah zend_extension=opcache:
+   zend_extension=xdebug
+   xdebug.mode=coverage
+   xdebug.start_with_request=no
+
+   # 4. Verifikasi Xdebug aktif
+   php -v
+   # Output harus menampilkan: with Xdebug v3.5.3
    ```
 
    **Install PCOV (alternatif lebih ringan):**
