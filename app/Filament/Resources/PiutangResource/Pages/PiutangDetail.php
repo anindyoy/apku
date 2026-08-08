@@ -7,7 +7,6 @@ use App\Models\UtangPiutang;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Filament\Actions\Action;
-use Filament\Support\Enums\MaxWidth;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -66,7 +65,7 @@ class PiutangDetail extends Page implements HasTable
                     'nominal' => $utang_detail->nominal,
                     'deskripsi' => $parent->deskripsi,
                 ])
-                ->modalWidth(MaxWidth::Small)
+                ->modalWidth('small')
                 ->form(UtangPiutang::formSchema())
                 ->action(function ($data) use ($utang_detail, $parent): void {
                     DB::transaction(function () use ($data, $utang_detail, $parent) {
@@ -129,7 +128,7 @@ class PiutangDetail extends Page implements HasTable
                         fn($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'tambah')
                     )
                     ->icon('heroicon-o-plus-circle')
-                    ->modalWidth(MaxWidth::Small)
+                    ->modalWidth('small')
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
 
@@ -141,7 +140,7 @@ class PiutangDetail extends Page implements HasTable
                     )
                     ->color('success')
                     ->icon('heroicon-o-minus-circle')
-                    ->modalWidth(MaxWidth::Small)
+                    ->modalWidth('small')
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
             ])
@@ -168,7 +167,7 @@ class PiutangDetail extends Page implements HasTable
                         'nominal' => $record->nominal,
                         'deskripsi' => $record->deskripsi,
                     ])
-                    ->modalWidth(MaxWidth::Small)
+                    ->modalWidth('small')
                     ->form([
                         TextInput::make('nominal')->required(),
 
