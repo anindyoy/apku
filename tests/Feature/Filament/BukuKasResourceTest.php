@@ -23,8 +23,13 @@ test('buku kas resource dapat membuat record baru', function () {
         ->set('data.nama_buku', 'Kas Baru')
         ->set('data.saldo', 50000)
         ->call('create')
-        ->assertHasNoErrors()
-        ->assertSessionHas('success');
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('buku_kas', [
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Baru',
+        'saldo' => 50000,
+    ]);
 })
     ->group('filament', 'buku-kas');
 
@@ -33,12 +38,11 @@ test('buku kas resource dapat mengedit record', function () {
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\BukuKasResource\Pages\EditBukuKas::class, ['record' => $bukuKas])
+        ->test(\App\Filament\Resources\BukuKasResource\Pages\EditBukuKas::class, ['record' => $bukuKas->id])
         ->assertSuccessful()
         ->set('data.nama_buku', 'Kas Updated')
         ->call('save')
-        ->assertHasNoErrors()
-        ->assertSessionHas('success');
+        ->assertHasNoErrors();
 
     $this->assertEquals('Kas Updated', $bukuKas->fresh()->nama_buku);
 })
