@@ -62,51 +62,47 @@ class Transaksi extends Model
                 ->disabled()
                 ->visible(fn($record) => $record),
 
-            // Section wrapper removed for Filament v5 compatibility
-            // Using direct schema without wrapper
-            [
-                    Select::make('buku_kas_id')
-                        ->label('Buku Kas')
-                        ->live()
-                        ->relationship('buku_kas', 'nama_buku')
-                        ->required(),
+            Select::make('buku_kas_id')
+                ->label('Buku Kas')
+                ->live()
+                ->relationship('buku_kas', 'nama_buku')
+                ->required(),
 
-                    Select::make('buku_kas_id_tujuan')
-                        ->label('Buku Kas Tujuan')
-                        ->relationship('buku_kas', 'nama_buku', fn($query, $get) => $query->whereNot('id', $get('buku_kas_id')))
-                        ->required()
-                        ->visible($transfer),
+            Select::make('buku_kas_id_tujuan')
+                ->label('Buku Kas Tujuan')
+                ->relationship('buku_kas', 'nama_buku', fn($query, $get) => $query->whereNot('id', $get('buku_kas_id')))
+                ->required()
+                ->visible($transfer),
 
-                    Select::make('jenis_transaksi_id')
-                        ->label('Kategori')
-                        ->hidden(
-                            fn($record = null) => $transfer || in_array(
-                                $record->jenis,
-                                ['Transfer Pemasukan', 'Transfer Pengeluaran']
-                            )
-                        )
-                        ->relationship(
-                            'jenis_transaksi',
-                            'nama_jenis',
-                            fn($query, $record) => $query->where('tipe', $record->jenis)
-                        )
-                        ->required(),
+            Select::make('jenis_transaksi_id')
+                ->label('Kategori')
+                ->hidden(
+                    fn($record = null) => $transfer || in_array(
+                        $record->jenis,
+                        ['Transfer Pemasukan', 'Transfer Pengeluaran']
+                    )
+                )
+                ->relationship(
+                    'jenis_transaksi',
+                    'nama_jenis',
+                    fn($query, $record) => $query->where('tipe', $record->jenis)
+                )
+                ->required(),
 
-                    DateTimePicker::make('tanggal')
-                        ->required()
-                        ->seconds(false)
-                        ->native(false)
-                        ->closeOnDateSelection()
-                        ->displayFormat('d M Y, H:i')
-                        ->maxDate(now()),
+            DateTimePicker::make('tanggal')
+                ->required()
+                ->seconds(false)
+                ->native(false)
+                ->closeOnDateSelection()
+                ->displayFormat('d M Y, H:i')
+                ->maxDate(now()),
 
-                    TextInput::make('nominal')
-                        ->required()
-                        ->numeric(),
+            TextInput::make('nominal')
+                ->required()
+                ->numeric(),
 
-                    TextInput::make('deskripsi')
-                        ->columnSpanFull(),
-            ],
+            TextInput::make('deskripsi')
+                ->columnSpanFull(),
         ];
     }
 }
