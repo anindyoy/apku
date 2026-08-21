@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\JenisTransaksi;
 use App\Models\UtangPiutang;
+use App\Models\UtangPiutangDetail;
 use Livewire\Livewire;
 
 // ==================== UTANG RESOURCE ====================
@@ -9,14 +9,17 @@ use Livewire\Livewire;
 test('utang resource dapat menampilkan halaman list', function () {
     $user = createRegularUserWithBukuKas();
 
-    $jenis = JenisTransaksi::factory()->create(['nama_jenis' => 'Utang Test']);
-
-    UtangPiutang::factory()->create([
+    $utang = UtangPiutang::factory()->create([
         'user_id' => $user->id,
-        'jenis_transaksi_id' => $jenis->id,
         'tipe' => 'utang',
-        'nama' => 'Test Utang',
+        'kepada' => 'Test Utang',
+    ]);
+
+    // Buat detail untuk nominal (nominal dihitung dari utang_piutang_detail)
+    UtangPiutangDetail::factory()->create([
+        'utang_piutang_id' => $utang->id,
         'nominal' => 300000,
+        'tipe' => 'tambah',
     ]);
 
     Livewire::actingAs($user)
@@ -29,18 +32,14 @@ test('utang resource dapat menampilkan halaman list', function () {
 test('utang resource dapat menampilkan halaman detail', function () {
     $user = createRegularUserWithBukuKas();
 
-    $jenis = JenisTransaksi::factory()->create(['nama_jenis' => 'Utang Test']);
-
     $utang = UtangPiutang::factory()->create([
         'user_id' => $user->id,
-        'jenis_transaksi_id' => $jenis->id,
         'tipe' => 'utang',
-        'nama' => 'Test Utang',
-        'nominal' => 300000,
+        'kepada' => 'Test Utang',
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utang])
+        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
         ->assertSee('Test Utang');
 })
