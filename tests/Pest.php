@@ -17,6 +17,25 @@ pest()->extend(Tests\TestCase::class)
 
 /*
 |--------------------------------------------------------------------------
+| Hooks: Tests\Feature\Filament
+|--------------------------------------------------------------------------
+|
+| Hook ini hanya berlaku untuk test di dalam tests/Feature/Filament.
+| Helper bersama (createRegularUserWithBukuKas, createSuperUser) berada
+| di tests/Helpers/Filament.php yang di-load otomatis oleh Pest.
+|
+*/
+
+beforeEach(function () {
+    $this->seed([
+        \Database\Seeders\UserSeeder::class,
+        \Database\Seeders\JenisTransaksiSeeder::class,
+        \Database\Seeders\WilayahSeeder::class,
+    ]);
+})->in('Feature/Filament');
+
+/*
+|--------------------------------------------------------------------------
 | Expectations
 |--------------------------------------------------------------------------
 |
