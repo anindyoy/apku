@@ -97,10 +97,14 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                EditAction::make(),
-                Impersonate::make()->visible(auth()->user()->isSuper())
-            ])
+            ->actions(array_merge(
+                [
+                    EditAction::make(),
+                ],
+                class_exists(Impersonate::class)
+                    ? [Impersonate::make()->visible(auth()->user()->isSuper())]
+                    : [],
+            ))
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
