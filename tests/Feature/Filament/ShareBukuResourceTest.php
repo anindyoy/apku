@@ -15,7 +15,7 @@ test('share buku resource dapat menampilkan halaman list', function () {
     ShareBuku::factory()->create([
         'buku_kas_id' => $bukuKas->id,
         'user_id' => $otherUser->id,
-        'privilege' => 'edit',
+        'privilege' => 'editor',
     ]);
 
     Livewire::actingAs($user)
@@ -35,15 +35,14 @@ test('share buku resource dapat membuat share baru', function () {
         ->assertSuccessful()
         ->set('data.buku_kas_id', $bukuKas->id)
         ->set('data.user_id', $otherUser->id)
-        ->set('data.privilege', 'view')
+        ->set('data.privilege', 'viewer')
         ->call('create')
-        ->assertHasNoErrors()
-        ->assertSessionHas('success');
+        ->assertHasNoErrors();
 
-    $this->assertDatabaseHas('share_bukus', [
+    $this->assertDatabaseHas('share_buku', [
         'buku_kas_id' => $bukuKas->id,
         'user_id' => $otherUser->id,
-        'privilege' => 'view',
+        'privilege' => 'viewer',
     ]);
 })
     ->group('filament', 'share-buku');

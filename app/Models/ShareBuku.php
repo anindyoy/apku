@@ -12,6 +12,7 @@ class ShareBuku extends Model
     /** @use HasFactory<\Database\Factories\ShareBukuFactory> */
     use HasFactory;
     protected $table = 'share_buku';
+    protected $guarded = [];
 
     public function user()
     {
