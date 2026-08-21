@@ -65,7 +65,7 @@ class PiutangDetail extends Page implements HasTable
                     'nominal' => $utang_detail->nominal,
                     'deskripsi' => $parent->deskripsi,
                 ])
-                ->modalWidth('small')
+                ->modalWidth('sm')
                 ->form(UtangPiutang::formSchema())
                 ->action(function ($data) use ($utang_detail, $parent): void {
                     DB::transaction(function () use ($data, $utang_detail, $parent) {
@@ -128,7 +128,7 @@ class PiutangDetail extends Page implements HasTable
                         fn($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'tambah')
                     )
                     ->icon('heroicon-o-plus-circle')
-                    ->modalWidth('small')
+                    ->modalWidth('sm')
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
 
@@ -140,7 +140,7 @@ class PiutangDetail extends Page implements HasTable
                     )
                     ->color('success')
                     ->icon('heroicon-o-minus-circle')
-                    ->modalWidth('small')
+                    ->modalWidth('sm')
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
             ])
@@ -167,7 +167,7 @@ class PiutangDetail extends Page implements HasTable
                         'nominal' => $record->nominal,
                         'deskripsi' => $record->deskripsi,
                     ])
-                    ->modalWidth('small')
+                    ->modalWidth('sm')
                     ->form([
                         TextInput::make('nominal')->required(),
 

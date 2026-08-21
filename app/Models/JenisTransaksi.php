@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 #[ScopedBy([UserScope::class])]
 class JenisTransaksi extends Model
 {
-    /** @use HasFactory<\Database\Factories\JenisCatatanFactory> */
+    /** @use HasFactory<\Database\Factories\JenisTransaksiFactory> */
     use HasFactory;
     protected $table = 'jenis_transaksi';
     protected $guarded = [];

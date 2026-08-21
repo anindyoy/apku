@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\JenisTransaksi;
 use App\Models\UtangPiutang;
 use Livewire\Livewire;
 
@@ -9,14 +8,10 @@ use Livewire\Livewire;
 test('piutang resource dapat menampilkan halaman list', function () {
     $user = createRegularUserWithBukuKas();
 
-    $jenis = JenisTransaksi::factory()->create(['nama_jenis' => 'Piutang Test']);
-
     UtangPiutang::factory()->create([
         'user_id' => $user->id,
-        'jenis_transaksi_id' => $jenis->id,
         'tipe' => 'piutang',
-        'nama' => 'Test Piutang',
-        'nominal' => 500000,
+        'kepada' => 'Test Piutang',
     ]);
 
     Livewire::actingAs($user)
@@ -29,18 +24,14 @@ test('piutang resource dapat menampilkan halaman list', function () {
 test('piutang resource dapat menampilkan halaman detail', function () {
     $user = createRegularUserWithBukuKas();
 
-    $jenis = JenisTransaksi::factory()->create(['nama_jenis' => 'Piutang Test']);
-
     $piutang = UtangPiutang::factory()->create([
         'user_id' => $user->id,
-        'jenis_transaksi_id' => $jenis->id,
         'tipe' => 'piutang',
-        'nama' => 'Test Piutang',
-        'nominal' => 500000,
+        'kepada' => 'Test Piutang',
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\PiutangResource\Pages\PiutangDetail::class, ['record' => $piutang])
+        ->test(\App\Filament\Resources\PiutangResource\Pages\PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
         ->assertSee('Test Piutang');
 })
