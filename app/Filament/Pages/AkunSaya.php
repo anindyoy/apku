@@ -109,11 +109,12 @@ class AkunSaya extends Page implements HasForms
             'hp' => $data['hp'],
             'provinsi' => $data['provinsi'],
             'kota' => $data['kota'],
-            'penggunaan' => $data['Penggunaan'],
+            'penggunaan' => $data['penggunaan'],
         ];
 
-        if ($data['password']) {
-            $new['password'] = Hash::make($data['password']);
+        // Password sudah di-hash oleh dehydrateStateUsing di form field
+        if (! empty($data['password'])) {
+            $new['password'] = $data['password'];
         }
 
         auth()->user()->update($new);
