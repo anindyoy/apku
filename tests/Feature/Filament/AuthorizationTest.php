@@ -8,7 +8,8 @@ use Livewire\Livewire;
 test('regular user tidak dapat mengakses user management', function () {
     $user = createRegularUserWithBukuKas();
 
-    $this->get(route('filament.admin.resources.users.index'))
+    $this->actingAs($user)
+        ->get(route('filament.admin.resources.users.index'))
         ->assertForbidden();
 })
     ->group('filament', 'authorization');
