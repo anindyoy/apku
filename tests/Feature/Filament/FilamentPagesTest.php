@@ -1,6 +1,7 @@
 <?php
 
 use Livewire\Livewire;
+use Illuminate\Support\Facades\DB;
 
 // ==================== PAGES ====================
 
@@ -14,6 +15,12 @@ test('halaman akun saya dapat ditampilkan', function () {
     ->group('filament', 'pages');
 
 test('halaman akun saya dapat mengupdate profil', function () {
+    // Seed minimal wilayah data for Select options
+    DB::table('wilayah')->insert([
+        ['kode' => '32', 'nama' => 'JAWA BARAT'],
+        ['kode' => '32.73', 'nama' => 'KOTA BANDUNG'],
+    ]);
+
     $user = createRegularUserWithBukuKas();
 
     Livewire::actingAs($user)
@@ -34,6 +41,12 @@ test('halaman akun saya dapat mengupdate profil', function () {
     ->group('filament', 'pages');
 
 test('halaman akun saya dapat mengubah password', function () {
+    // Seed minimal wilayah data for Select options
+    DB::table('wilayah')->insert([
+        ['kode' => '32', 'nama' => 'JAWA BARAT'],
+        ['kode' => '32.73', 'nama' => 'KOTA BANDUNG'],
+    ]);
+
     $user = createRegularUserWithBukuKas();
 
     Livewire::actingAs($user)
