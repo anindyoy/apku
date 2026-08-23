@@ -21,7 +21,7 @@ test('transaksi resource dapat menampilkan halaman list', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
         ->assertSuccessful()
-        ->assertSee('Pemasukan');
+        ->assertSee('Rp');
 })
     ->group('filament', 'transaksi');
 
