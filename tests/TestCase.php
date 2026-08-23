@@ -15,7 +15,6 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 abstract class TestCase extends BaseTestCase
@@ -65,7 +64,7 @@ abstract class TestCase extends BaseTestCase
                 'edit_user' => User::inRandomOrder()->first()->id,
                 'detail_piutang' => UtangPiutang::whereUserId($user->id)
                     ->inRandomOrder()
-                    ->first()->id,
+                    ->first()->code,
                 default => null,
             };
         }

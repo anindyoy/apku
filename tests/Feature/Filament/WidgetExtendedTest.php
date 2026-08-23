@@ -31,7 +31,7 @@ test('widget utang piutang detail - tampilkan total sisa utang', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utangPiutang])
+        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utangPiutang->code])
         ->assertSuccessful();
 })
     ->group('filament', 'widgets');
@@ -83,7 +83,7 @@ test('widget utang piutang detail - tanpa detail tampilkan total 0', function ()
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utangPiutang])
+        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utangPiutang->code])
         ->assertSuccessful();
 })
     ->group('filament', 'widgets');

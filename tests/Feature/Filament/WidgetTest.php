@@ -14,7 +14,7 @@ test('widget utang piutang detail dapat ditampilkan', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utangPiutang])
+        ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utangPiutang->code])
         ->assertSuccessful();
 })
     ->group('filament', 'widgets');
