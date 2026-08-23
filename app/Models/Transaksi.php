@@ -77,15 +77,15 @@ class Transaksi extends Model
             Select::make('jenis_transaksi_id')
                 ->label('Kategori')
                 ->hidden(
-                    fn($record = null) => $transfer || in_array(
+                    fn($record = null) => $transfer || ($record && in_array(
                         $record->jenis,
                         ['Transfer Pemasukan', 'Transfer Pengeluaran']
-                    )
+                    ))
                 )
                 ->relationship(
                     'jenis_transaksi',
                     'nama_jenis',
-                    fn($query, $record) => $query->where('tipe', $record->jenis)
+                    fn($query, $record) => $record ? $query->where('tipe', $record->jenis) : $query
                 )
                 ->required(),
 

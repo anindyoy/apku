@@ -5,7 +5,7 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use App\Filament\Resources\UtangResource\Pages\UtangPiutangDetail;
+use App\Filament\Resources\UtangResource\Pages\UtangDetail;
 use App\Models\UtangPiutangDetail as ModelsUtangPiutangDetail;
 
 class UtangPiutangDetailOverview extends BaseWidget
@@ -16,7 +16,7 @@ class UtangPiutangDetailOverview extends BaseWidget
 
     protected function getTablePage(): string
     {
-        return UtangPiutangDetail::class;
+        return UtangDetail::class;
     }
 
     protected function getStats(): array
