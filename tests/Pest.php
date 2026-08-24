@@ -30,7 +30,6 @@ beforeEach(function () {
     $this->seed([
         \Database\Seeders\UserSeeder::class,
         \Database\Seeders\JenisTransaksiSeeder::class,
-        \Database\Seeders\WilayahSeeder::class,
     ]);
 })->in('Feature/Filament');
 

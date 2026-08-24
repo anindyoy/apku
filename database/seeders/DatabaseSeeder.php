@@ -9,7 +9,6 @@ use App\Models\UtangPiutang;
 use App\Models\JenisTransaksi;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
-use Database\Seeders\WilayahSeeder;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\TransaksiSeeder;
 use Database\Seeders\UtangPiutangSeeder;
@@ -26,7 +25,6 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             JenisTransaksiSeeder::class,
             TransaksiSeeder::class,
-            WilayahSeeder::class,
             UtangPiutangSeeder::class,
         ]);
     }

@@ -5,12 +5,12 @@ namespace App\Filament\Pages;
 use BackedEnum;
 use UnitEnum;
 use App\Models\User;
-use App\Models\Wilayah;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -51,22 +51,9 @@ class AkunSaya extends Page implements HasForms
                             ->tel()->required()
                             ->numeric(),
 
-                        Select::make('provinsi')
-                            ->required()
-                            ->options(Wilayah::getDaftarProvinsi())
-                            ->searchable()->preload()
-                            ->live(),
-
-                        Select::make('kota')
-                            ->required()
-                            ->disabled(fn($get) => ! $get('provinsi'))
-                            ->label('Kota/Kabupaten')
-                            ->options(function ($get) {
-                                if ($get('provinsi')) {
-                                    return Wilayah::getDaftarKotaByProvinsi($get('provinsi'));
-                                } else return Wilayah::getDaftarKota();
-                            })
-                            ->searchable(),
+                        Textarea::make('alamat')
+                            ->rows(3)
+                            ->columnSpanFull(),
 
                         Select::make('penggunaan')
                             ->options([
@@ -107,8 +94,7 @@ class AkunSaya extends Page implements HasForms
             'name' => $data['name'],
             'email' => $data['email'],
             'hp' => $data['hp'],
-            'provinsi' => $data['provinsi'],
-            'kota' => $data['kota'],
+            'alamat' => $data['alamat'],
             'penggunaan' => $data['penggunaan'],
         ];
 
