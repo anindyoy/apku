@@ -11,7 +11,7 @@ class UtangPiutangObserver
      */
     public function created(UtangPiutang $utangPiutang): void
     {
-        //
+        return;
     }
 
     /**
@@ -19,7 +19,7 @@ class UtangPiutangObserver
      */
     public function updated(UtangPiutang $utangPiutang): void
     {
-        //
+        return;
     }
 
     /**
@@ -35,7 +35,7 @@ class UtangPiutangObserver
      */
     public function restored(UtangPiutang $utangPiutang): void
     {
-        //
+        return;
     }
 
     /**
@@ -43,6 +43,6 @@ class UtangPiutangObserver
      */
     public function forceDeleted(UtangPiutang $utangPiutang): void
     {
-        //
+        return;
     }
 }

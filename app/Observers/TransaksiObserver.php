@@ -67,7 +67,7 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
      */
     public function restored(Transaksi $transaksi): void
     {
-        //
+        return;
     }
 
     /**
@@ -75,6 +75,6 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
      */
     public function forceDeleted(Transaksi $transaksi): void
     {
-        //
+        return;
     }
 }

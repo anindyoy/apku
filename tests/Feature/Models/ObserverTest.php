@@ -217,3 +217,37 @@ test('utang piutang observer - created event tidak error', function () {
     ]);
 })
     ->group('models', 'observers');
+
+// ==================== OBSERVER STUB METHODS (restored / forceDeleted) ====================
+
+test('transaksi observer - restored method dapat dipanggil', function () {
+    $observer = new \App\Observers\TransaksiObserver();
+    $transaksi = Transaksi::factory()->make();
+
+    $result = $observer->restored($transaksi);
+    $this->assertNull($result);
+})->group('models', 'observers');
+
+test('transaksi observer - forceDeleted method dapat dipanggil', function () {
+    $observer = new \App\Observers\TransaksiObserver();
+    $transaksi = Transaksi::factory()->make();
+
+    $result = $observer->forceDeleted($transaksi);
+    $this->assertNull($result);
+})->group('models', 'observers');
+
+test('utang piutang observer - restored method dapat dipanggil', function () {
+    $observer = new \App\Observers\UtangPiutangObserver();
+    $utangPiutang = UtangPiutang::factory()->make();
+
+    $result = $observer->restored($utangPiutang);
+    $this->assertNull($result);
+})->group('models', 'observers');
+
+test('utang piutang observer - forceDeleted method dapat dipanggil', function () {
+    $observer = new \App\Observers\UtangPiutangObserver();
+    $utangPiutang = UtangPiutang::factory()->make();
+
+    $result = $observer->forceDeleted($utangPiutang);
+    $this->assertNull($result);
+})->group('models', 'observers');
