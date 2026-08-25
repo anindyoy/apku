@@ -37,7 +37,7 @@ class ListTransaksis extends ListRecords
     public function defaultForm($livewire)
     {
         return [
-            'buku_kas_id' => BukuKas::where('nama_buku', $livewire->activeTab)->first()->id,
+            'buku_kas_id' => optional(BukuKas::where('nama_buku', $livewire->activeTab)->first())->id,
             'tanggal' => date('d M Y, H:i:s')
         ];
     }
@@ -136,7 +136,7 @@ class ListTransaksis extends ListRecords
                     $action->cancel();
                 })
                 ->fillForm(fn($livewire): array => [
-                    'buku_kas_id' => BukuKas::where('nama_buku', $livewire->activeTab)->first()->id,
+                    'buku_kas_id' => optional(BukuKas::where('nama_buku', $livewire->activeTab)->first())->id,
                     'tanggal' => now()
                 ])
                 ->extraModalFooterActions(fn(Action $action): array => [
