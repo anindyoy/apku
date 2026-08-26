@@ -16,7 +16,8 @@ use Filament\Tables\Concerns\InteractsWithTable;
 
 class Kategori extends Page
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-tag';
     protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
+    protected static ?int $navigationSort = 2;
     protected string $view = 'filament.pages.kategori';
 }

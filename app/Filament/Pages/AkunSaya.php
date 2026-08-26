@@ -21,9 +21,11 @@ class AkunSaya extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-user-circle';
+    protected static ?string $navigationLabel = 'Akun Saya';
     protected string $view = 'filament.pages.akun-saya';
     protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
+    protected static ?int $navigationSort = 4;
 
     public ?array $data = [];
 

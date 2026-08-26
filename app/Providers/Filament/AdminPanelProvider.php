@@ -7,6 +7,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
@@ -35,8 +36,12 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->navigationGroups([
-                'Utang Piutang',
-                'Pengaturan',
+                NavigationGroup::make()
+                    ->label('Utang Piutang')
+                    ->collapsed(false),
+                NavigationGroup::make()
+                    ->label('Pengaturan')
+                    ->collapsed(true),
             ])
             ->profile()
             ->registration()

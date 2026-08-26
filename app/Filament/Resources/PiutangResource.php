@@ -19,9 +19,11 @@ class PiutangResource extends Resource
 {
     protected static ?string $model = UtangPiutang::class;
     protected static string | UnitEnum | null $navigationGroup = 'Utang Piutang';
+    protected static ?string $navigationLabel = 'Piutang';
     protected static ?string $modelLabel = 'Piutang';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-arrow-up-right';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

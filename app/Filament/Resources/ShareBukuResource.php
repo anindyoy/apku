@@ -27,11 +27,13 @@ class ShareBukuResource extends Resource
 {
     protected static ?string $model = ShareBuku::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-arrow-right-start-on-rectangle';
+    protected static ?string $navigationLabel = 'Share Buku';
     protected static ?string $pluralLabel = 'Share Buku';
     protected static ?string $slug = 'share-buku';
     protected static bool $shouldRegisterNavigation = false;
     protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Schema $schema): Schema
     {
