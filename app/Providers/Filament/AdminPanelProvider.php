@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\User;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
@@ -12,6 +13,7 @@ use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Filament\Http\Middleware\Authenticate;
 use pxlrbt\FilamentSpotlight\SpotlightPlugin;
+use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -42,6 +44,28 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->plugins([
                 SpotlightPlugin::make(),
+                FilamentDeveloperLoginsPlugin::make()
+                    ->enabled(app()->environment('local'))
+                    ->users(function () {
+                        $users = [];
+
+                        // Add super@apku.com as Admin if exists
+                        $admin = User::where('email', 'super@apku.com')->first();
+                        if ($admin) {
+                            $users['Admin'] = $admin->email;
+                        }
+
+                        // Add user with most transactions
+                        $topUser = User::withCount('transaksi')
+                            ->orderBy('transaksi_count', 'desc')
+                            ->first();
+
+                        if ($topUser && (!isset($users['Admin']) || $topUser->email !== $admin?->email)) {
+                            $users['User'] = $topUser->email;
+                        }
+
+                        return $users;
+                    }),
             ])
             ->colors([
                 'primary' => Color::Amber,
