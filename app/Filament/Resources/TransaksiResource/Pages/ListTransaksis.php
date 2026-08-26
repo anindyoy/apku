@@ -12,7 +12,8 @@ use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\TransaksiResource;
 // Tab class removed for Filament v5 compatibility
 use Filament\Pages\Concerns\ExposesTableToWidgets;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 
 class ListTransaksis extends ListRecords
@@ -21,10 +22,16 @@ class ListTransaksis extends ListRecords
 
     protected static string $resource = TransaksiResource::class;
     protected static ?string $navigationLabel = 'Transaksi';
+    protected string $view = 'filament.resources.transaksi-resource.pages.list-transaksis';
     public $list_kas = [];
+    public string $filterMonth = '';
+    public string|int $filterYear = '';
 
     public function mount(): void
     {
+        $this->filterMonth = request()->query('filter_month', date('m'));
+        $this->filterYear = request()->query('filter_year', date('Y'));
+
         if (!in_array($this->activeTab, BukuKas::pluck('nama_buku')->toArray())) {
             $this->activeTab = null;
         }
@@ -32,6 +39,50 @@ class ListTransaksis extends ListRecords
         $this->authorizeAccess();
 
         $this->loadDefaultActiveTab();
+    }
+
+    public function getPreviousPeriodUrl(): string
+    {
+        $month = (int) $this->filterMonth - 1;
+        $year = (int) $this->filterYear;
+
+        if ($month < 1) {
+            $month = 12;
+            $year--;
+        }
+
+        return static::getUrl(parameters: [
+            'filter_month' => str_pad($month, 2, '0', STR_PAD_LEFT),
+            'filter_year' => $year,
+        ]);
+    }
+
+    public function getNextPeriodUrl(): string
+    {
+        $month = (int) $this->filterMonth + 1;
+        $year = (int) $this->filterYear;
+
+        if ($month > 12) {
+            $month = 1;
+            $year++;
+        }
+
+        return static::getUrl(parameters: [
+            'filter_month' => str_pad($month, 2, '0', STR_PAD_LEFT),
+            'filter_year' => $year,
+        ]);
+    }
+
+    protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder | Relation | null
+    {
+        $query = parent::getTableQuery();
+
+        if ($query && !empty($this->filterMonth) && !empty($this->filterYear)) {
+            $query->whereMonth('tanggal', $this->filterMonth)
+                ->whereYear('tanggal', $this->filterYear);
+        }
+
+        return $query;
     }
 
     public function defaultForm($livewire)
@@ -152,7 +203,7 @@ class ListTransaksis extends ListRecords
     public function getHeaderWidgets(): array
     {
         return [
-            KasOverview::class
+            KasOverview::class,
         ];
     }
 

@@ -118,7 +118,6 @@ class TransaksiResource extends Resource
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([
-                //
             ])
             ->actions([
                 EditAction::make()
