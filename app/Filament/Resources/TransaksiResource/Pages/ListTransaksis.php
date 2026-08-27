@@ -26,11 +26,11 @@ class ListTransaksis extends ListRecords
     public string|int $filterYear = '';
     public ?string $filterBukuKas = '';
 
-    public function mount(): void
+    public function mount(?string $filterBukuKas = null): void
     {
         $this->filterMonth = request()->query('filter_month', date('m'));
         $this->filterYear = request()->query('filter_year', date('Y'));
-        $this->filterBukuKas = request()->query('filter_buku_kas', '');
+        $this->filterBukuKas = $filterBukuKas ?? request()->query('filter_buku_kas', '');
 
         $this->authorizeAccess();
     }
@@ -38,7 +38,6 @@ class ListTransaksis extends ListRecords
     public function updatedFilterBukuKas(): void
     {
         $this->flushCachedTableRecords();
-        $this->resetPage();
     }
 
     public function getPreviousPeriodUrl(): string
