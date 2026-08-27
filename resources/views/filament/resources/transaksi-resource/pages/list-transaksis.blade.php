@@ -44,6 +44,15 @@
             class="fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
             &rsaquo;
         </a>
+
+        {{-- Buku Kas Filter --}}
+        <select wire:model.live="filterBukuKas"
+            class="period-filter-select fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
+            <option value="">Semua Buku Kas</option>
+            @foreach($this->getBukuKasOptions() as $id => $nama)
+                <option value="{{ $id }}" {{ (string) $filterBukuKas === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
+            @endforeach
+        </select>
     </div>
 
     {{ $this->content }}

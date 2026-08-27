@@ -7,10 +7,8 @@ use App\Models\Transaksi;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
-use Filament\Pages\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\TransaksiResource;
-// Tab class removed for Filament v5 compatibility
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -26,19 +24,15 @@ class ListTransaksis extends ListRecords
     public $list_kas = [];
     public string $filterMonth = '';
     public string|int $filterYear = '';
+    public ?string $filterBukuKas = '';
 
     public function mount(): void
     {
         $this->filterMonth = request()->query('filter_month', date('m'));
         $this->filterYear = request()->query('filter_year', date('Y'));
-
-        if (!in_array($this->activeTab, BukuKas::pluck('nama_buku')->toArray())) {
-            $this->activeTab = null;
-        }
+        $this->filterBukuKas = request()->query('filter_buku_kas', '');
 
         $this->authorizeAccess();
-
-        $this->loadDefaultActiveTab();
     }
 
     public function getPreviousPeriodUrl(): string
@@ -54,6 +48,7 @@ class ListTransaksis extends ListRecords
         return static::getUrl(parameters: [
             'filter_month' => str_pad($month, 2, '0', STR_PAD_LEFT),
             'filter_year' => $year,
+            'filter_buku_kas' => $this->filterBukuKas,
         ]);
     }
 
@@ -70,7 +65,16 @@ class ListTransaksis extends ListRecords
         return static::getUrl(parameters: [
             'filter_month' => str_pad($month, 2, '0', STR_PAD_LEFT),
             'filter_year' => $year,
+            'filter_buku_kas' => $this->filterBukuKas,
         ]);
+    }
+
+    public function getBukuKasOptions(): array
+    {
+        return BukuKas::orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
+            ->orderBy('nama_buku')
+            ->pluck('nama_buku', 'id')
+            ->toArray();
     }
 
     protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder | Relation | null
@@ -82,13 +86,17 @@ class ListTransaksis extends ListRecords
                 ->whereYear('tanggal', $this->filterYear);
         }
 
+        if ($query && !empty($this->filterBukuKas)) {
+            $query->where('buku_kas_id', $this->filterBukuKas);
+        }
+
         return $query;
     }
 
     public function defaultForm($livewire)
     {
         return [
-            'buku_kas_id' => optional(BukuKas::where('nama_buku', $livewire->activeTab)->first())->id,
+            'buku_kas_id' => $this->filterBukuKas ?: optional(BukuKas::first())->id,
             'tanggal' => date('d M Y, H:i:s')
         ];
     }
@@ -186,8 +194,8 @@ class ListTransaksis extends ListRecords
 
                     $action->cancel();
                 })
-                ->fillForm(fn($livewire): array => [
-                    'buku_kas_id' => optional(BukuKas::where('nama_buku', $livewire->activeTab)->first())->id,
+                ->fillForm(fn(): array => [
+                    'buku_kas_id' => $this->filterBukuKas ?: optional(BukuKas::first())->id,
                     'tanggal' => now()
                 ])
                 ->extraModalFooterActions(fn(Action $action): array => [
@@ -207,17 +215,4 @@ class ListTransaksis extends ListRecords
         ];
     }
 
-    // Tabs disabled for Filament v5 compatibility
-    // public function getTabs(): array
-    // {
-    //     $kas = BukuKas::all();
-    //     $tab = [];
-    //     foreach ($kas as $key => $value) {
-    //         $tab[$value->nama_buku] = Tab::make()
-    //             ->modifyQueryUsing(
-    //                 fn(Builder $query) => $query->where('buku_kas_id', $value->id)
-    //             );
-    //     }
-    //     return $tab;
-    // }
 }
