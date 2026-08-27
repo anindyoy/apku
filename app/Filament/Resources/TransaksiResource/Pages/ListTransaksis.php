@@ -37,7 +37,8 @@ class ListTransaksis extends ListRecords
 
     public function updatedFilterBukuKas(): void
     {
-        $this->resetTablePage();
+        $this->flushCachedTableRecords();
+        $this->resetPage();
     }
 
     public function getPreviousPeriodUrl(): string
