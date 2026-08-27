@@ -35,6 +35,11 @@ class ListTransaksis extends ListRecords
         $this->authorizeAccess();
     }
 
+    public function updatedFilterBukuKas(): void
+    {
+        $this->resetTablePage();
+    }
+
     public function getPreviousPeriodUrl(): string
     {
         $month = (int) $this->filterMonth - 1;
