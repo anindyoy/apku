@@ -46,7 +46,17 @@
         </a>
 
         {{-- Buku Kas Filter --}}
-        <select wire:model.live="filterBukuKas"
+        @php
+            $filterUrl = fn(string $bukuKasId = '') => request()->url() . '?' . http_build_query(array_merge(
+                array_filter([
+                    'filter_month' => $filterMonth,
+                    'filter_year' => $filterYear,
+                ]),
+                $bukuKasId !== '' ? ['filter_buku_kas' => $bukuKasId] : []
+            ));
+        @endphp
+        <select
+            onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
             class="period-filter-select fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
             <option value="">Semua Buku Kas</option>
             @foreach($this->getBukuKasOptions() as $id => $nama)

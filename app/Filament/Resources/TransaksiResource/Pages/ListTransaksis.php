@@ -35,10 +35,6 @@ class ListTransaksis extends ListRecords
         $this->authorizeAccess();
     }
 
-    public function updatedFilterBukuKas(): void
-    {
-        $this->flushCachedTableRecords();
-    }
 
     public function getPreviousPeriodUrl(): string
     {
