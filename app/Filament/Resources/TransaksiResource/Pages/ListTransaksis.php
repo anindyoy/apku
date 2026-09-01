@@ -2,28 +2,34 @@
 
 namespace App\Filament\Resources\TransaksiResource\Pages;
 
+use App\Filament\Resources\TransaksiResource;
+use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
 use App\Models\Transaksi;
 use Filament\Actions\Action;
-use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ListRecords;
-use App\Filament\Resources\TransaksiResource;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
+use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
+use Illuminate\Support\Facades\DB;
 
 class ListTransaksis extends ListRecords
 {
     use ExposesTableToWidgets;
 
     protected static string $resource = TransaksiResource::class;
+
     protected static ?string $navigationLabel = 'Transaksi';
+
     protected string $view = 'filament.resources.transaksi-resource.pages.list-transaksis';
+
     public $list_kas = [];
+
     public string $filterMonth = '';
+
     public string|int $filterYear = '';
+
     public ?string $filterBukuKas = '';
 
     public function mount(?string $filterBukuKas = null): void
@@ -37,7 +43,6 @@ class ListTransaksis extends ListRecords
 
         $this->authorizeAccess();
     }
-
 
     public function getPreviousPeriodUrl(): string
     {
@@ -89,16 +94,16 @@ class ListTransaksis extends ListRecords
         return (string) ($bukuKasId ?? '');
     }
 
-    protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder | Relation | null
+    protected function getTableQuery(): Builder|Relation|null
     {
         $query = parent::getTableQuery();
 
-        if ($query && !empty($this->filterMonth) && !empty($this->filterYear)) {
+        if ($query && ! empty($this->filterMonth) && ! empty($this->filterYear)) {
             $query->whereMonth('tanggal', $this->filterMonth)
                 ->whereYear('tanggal', $this->filterYear);
         }
 
-        if ($query && !empty($this->filterBukuKas)) {
+        if ($query && ! empty($this->filterBukuKas)) {
             $query->where('buku_kas_id', $this->filterBukuKas);
         }
 
@@ -109,20 +114,38 @@ class ListTransaksis extends ListRecords
     {
         return [
             'buku_kas_id' => $this->filterBukuKas ?: optional(BukuKas::first())->id,
-            'tanggal' => date('d M Y, H:i:s')
+            'tanggal' => date('d M Y, H:i:s'),
         ];
+    }
+
+    public function dapatMengelolaBukuKasTerpilih(): bool
+    {
+        $bukuKas = BukuKas::find($this->filterBukuKas);
+
+        return $bukuKas !== null
+            && auth()->user()->dapatMengelolaTransaksiPada($bukuKas);
     }
 
     protected function getHeaderActions(): array
     {
         return [
             Action::make('Transfer saldo')
+                ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih())
+                ->before(function (): void {
+                    abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
+                })
                 ->tooltip('Transfer saldo ke kas lain')
                 ->action(function ($form, $action, $livewire, array $data, array $arguments) {
                     DB::transaction(function () use ($data) {
                         $data['user_id'] = auth()->user()->id;
                         $tujuan_id = $data['buku_kas_id_tujuan'];
                         $asal_id = $data['buku_kas_id'];
+
+                        abort_unless(
+                            auth()->user()->dapatMengelolaTransaksiPada(BukuKas::findOrFail($asal_id))
+                            && auth()->user()->dapatMengelolaTransaksiPada(BukuKas::findOrFail($tujuan_id)),
+                            403
+                        );
 
                         unset($data['buku_kas_id_tujuan']);
 
@@ -152,8 +175,8 @@ class ListTransaksis extends ListRecords
 
                     $action->cancel();
                 })
-                ->fillForm(fn($livewire): array => $this->defaultForm($livewire))
-                ->extraModalFooterActions(fn(Action $action): array => [
+                ->fillForm(fn ($livewire): array => $this->defaultForm($livewire))
+                ->extraModalFooterActions(fn (Action $action): array => [
                     $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                         ->label('Tambah yang lain'),
                 ])
@@ -162,7 +185,14 @@ class ListTransaksis extends ListRecords
                 ->icon('heroicon-o-arrow-path-rounded-square'),
 
             Action::make('Catat Pemasukan')
+                ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih())
+                ->before(function (): void {
+                    abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
+                })
                 ->action(function ($form, $action, $livewire, array $data, array $arguments) {
+                    $bukuKas = BukuKas::findOrFail($data['buku_kas_id']);
+                    abort_unless(auth()->user()->dapatMengelolaTransaksiPada($bukuKas), 403);
+
                     $data['jenis'] = 'Pemasukan';
                     $data['user_id'] = auth()->user()->id;
                     Transaksi::create($data);
@@ -179,8 +209,8 @@ class ListTransaksis extends ListRecords
 
                     $action->cancel();
                 })
-                ->fillForm(fn($livewire): array => $this->defaultForm($livewire))
-                ->extraModalFooterActions(fn(Action $action): array => [
+                ->fillForm(fn ($livewire): array => $this->defaultForm($livewire))
+                ->extraModalFooterActions(fn (Action $action): array => [
                     $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                         ->label('Tambah yang lain'),
                 ])
@@ -189,7 +219,14 @@ class ListTransaksis extends ListRecords
                 ->icon('heroicon-o-arrow-down-on-square'),
 
             Action::make('Catat Pengeluaran')
+                ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih())
+                ->before(function (): void {
+                    abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
+                })
                 ->action(function (?Transaksi $record, array $data, $livewire, $form, $action, array $arguments) {
+                    $bukuKas = BukuKas::findOrFail($data['buku_kas_id']);
+                    abort_unless(auth()->user()->dapatMengelolaTransaksiPada($bukuKas), 403);
+
                     $data['jenis'] = 'Pengeluaran';
                     $data['user_id'] = auth()->user()->id;
 
@@ -206,11 +243,11 @@ class ListTransaksis extends ListRecords
 
                     $action->cancel();
                 })
-                ->fillForm(fn(): array => [
+                ->fillForm(fn (): array => [
                     'buku_kas_id' => $this->filterBukuKas ?: optional(BukuKas::first())->id,
-                    'tanggal' => now()
+                    'tanggal' => now(),
                 ])
-                ->extraModalFooterActions(fn(Action $action): array => [
+                ->extraModalFooterActions(fn (Action $action): array => [
                     $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                         ->label('Tambah yang lain'),
                 ])
@@ -226,5 +263,4 @@ class ListTransaksis extends ListRecords
             KasOverview::class,
         ];
     }
-
 }

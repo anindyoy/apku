@@ -2,26 +2,26 @@
 
 namespace App\Models;
 
-use App\Models\User;
-use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
 use App\Models\Scopes\UserScope;
 use App\Observers\TransaksiObserver;
-use Filament\Forms\Components\Select;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Forms\Components\TextInput;
+use Database\Factories\TransaksiFactory;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Model;
 
 #[ScopedBy([UserScope::class])]
 #[ObservedBy([TransaksiObserver::class])]
 class Transaksi extends Model
 {
-    /** @use HasFactory<\Database\Factories\TransaksiFactory> */
+    /** @use HasFactory<TransaksiFactory> */
     use HasFactory;
+
     protected $guarded = [];
+
     protected $table = 'transaksi';
 
     public function user()
@@ -60,24 +60,33 @@ class Transaksi extends Model
                     'Transfer Pengeluaran' => 'Transfer Pengeluaran',
                 ])
                 ->disabled()
-                ->visible(fn($record) => $record),
+                ->visible(fn ($record) => $record),
 
             Select::make('buku_kas_id')
                 ->label('Buku Kas')
                 ->live()
-                ->relationship('buku_kas', 'nama_buku')
+                ->relationship(
+                    'buku_kas',
+                    'nama_buku',
+                    fn ($query) => static::batasiBukuKasYangDapatDikelola($query)
+                )
                 ->required(),
 
             Select::make('buku_kas_id_tujuan')
                 ->label('Buku Kas Tujuan')
-                ->relationship('buku_kas', 'nama_buku', fn($query, $get) => $query->whereNot('id', $get('buku_kas_id')))
+                ->relationship(
+                    'buku_kas',
+                    'nama_buku',
+                    fn ($query, $get) => static::batasiBukuKasYangDapatDikelola($query)
+                        ->whereNot('id', $get('buku_kas_id'))
+                )
                 ->required()
                 ->visible($transfer),
 
             Select::make('jenis_transaksi_id')
                 ->label('Kategori')
                 ->hidden(
-                    fn($record = null) => $transfer || ($record && in_array(
+                    fn ($record = null) => $transfer || ($record && in_array(
                         $record->jenis,
                         ['Transfer Pemasukan', 'Transfer Pengeluaran']
                     ))
@@ -85,7 +94,7 @@ class Transaksi extends Model
                 ->relationship(
                     'jenis_transaksi',
                     'nama_jenis',
-                    fn($query, $record) => $record ? $query->where('tipe', $record->jenis) : $query
+                    fn ($query, $record) => $record ? $query->where('tipe', $record->jenis) : $query
                 )
                 ->required(),
 
@@ -104,5 +113,19 @@ class Transaksi extends Model
             TextInput::make('deskripsi')
                 ->columnSpanFull(),
         ];
+    }
+
+    private static function batasiBukuKasYangDapatDikelola($query)
+    {
+        $user = auth()->user();
+
+        if ($user->isSuper() || $user->masaAktifBerlaku()) {
+            return $query;
+        }
+
+        return $query->where(function ($query) use ($user) {
+            $query->where('nama_buku', 'Kas Utama')
+                ->orWhere('id', $user->idBukuKasTambahanGratis());
+        });
     }
 }

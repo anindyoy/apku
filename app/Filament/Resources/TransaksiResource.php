@@ -2,36 +2,35 @@
 
 namespace App\Filament\Resources;
 
-use BackedEnum;
-use Filament\Tables;
+use App\Filament\Resources\TransaksiResource\Pages;
+use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
+use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
+use App\Models\BukuKas;
 use App\Models\Transaksi;
-use Filament\Schemas\Schema;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Illuminate\Support\Facades\DB;
-use Filament\Actions\BulkActionGroup;
+use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\TransaksiResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\TransaksiResource\RelationManagers;
-use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
-use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
-use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Filament\Resources\TransaksiResource\Pages\CreateTransaksi;
+use Illuminate\Support\Facades\DB;
 
 class TransaksiResource extends Resource
 {
     protected static ?string $model = Transaksi::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
+
     protected static ?string $navigationLabel = 'Transaksi';
+
     protected static ?string $pluralLabel = 'Transaksi';
+
     protected static ?string $slug = 'transaksi';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
@@ -43,7 +42,7 @@ class TransaksiResource extends Resource
     {
         return $table
             ->modifyQueryUsing(
-                fn(Builder $query) => $query->select(
+                fn (Builder $query) => $query->select(
                     'transaksi.*',
                     DB::raw(
                         'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
@@ -55,40 +54,40 @@ class TransaksiResource extends Resource
             ->columns([
                 IconColumn::make('jenis')
                     ->label('Tipe')
-                    ->tooltip(fn($state) => $state)
-                    ->icon(fn(string $state): string => match ($state) {
+                    ->tooltip(fn ($state) => $state)
+                    ->icon(fn (string $state): string => match ($state) {
                         'Pemasukan' => 'heroicon-o-arrow-down-on-square',
                         'Pengeluaran' => 'heroicon-o-arrow-up-on-square',
                         'Transfer Pemasukan' => 'heroicon-o-arrow-path-rounded-square',
                         'Transfer Pengeluaran' => 'heroicon-o-arrow-path-rounded-square',
                     })
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Pemasukan' => 'success',
                         'Pengeluaran' => 'danger',
                         'Transfer Pemasukan' => 'primary',
                         'Transfer Pengeluaran' => 'primary',
                     }),
 
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->visible(auth()->user()->isSuper()),
 
-                Tables\Columns\TextColumn::make('tanggal')
-                    ->formatStateUsing(fn($state) => date('d M Y, H:i', strtotime($state))),
+                TextColumn::make('tanggal')
+                    ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state))),
 
-                Tables\Columns\TextColumn::make('kategori')
+                TextColumn::make('kategori')
                     ->label('Kategori')
                     ->getStateUsing(function ($record) {
-                        if (!in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
+                        if (! in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
                             $text = $record->jenis_transaksi?->nama_jenis;
                         }
 
                         if ($record->jenis == 'Transfer Pemasukan') {
-                            $text = 'Transfer dari ' . $record->asal_buku_tabungan->nama_buku;
+                            $text = 'Transfer dari '.$record->asal_buku_tabungan->nama_buku;
                         }
 
                         if ($record->jenis == 'Transfer Pengeluaran') {
-                            $text = 'Transfer ke ' . $record->tujuan_buku_tabungan->nama_buku;
+                            $text = 'Transfer ke '.$record->tujuan_buku_tabungan->nama_buku;
                         }
 
                         return $text;
@@ -98,20 +97,20 @@ class TransaksiResource extends Resource
                             ->where('deskripsi', 'like', "%{$search}%");
                     })
                     ->description(
-                        fn($record) => $record->deskripsi
-                            ? ('Deskripsi: ' . $record->deskripsi) : ''
+                        fn ($record) => $record->deskripsi
+                            ? ('Deskripsi: '.$record->deskripsi) : ''
                     )
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('nominal')
+                TextColumn::make('nominal')
                     ->numeric()
                     ->prefix('Rp '),
 
@@ -123,8 +122,16 @@ class TransaksiResource extends Resource
             ])
             ->actions([
                 EditAction::make()
-                    ->hidden(auth()->user()->isSuper())
+                    ->hidden(fn ($record): bool => auth()->user()->isSuper()
+                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas))
                     ->before(function ($record, $livewire) {
+                        abort_unless(auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas), 403);
+
+                        $bukuKasBaru = BukuKas::findOrFail(
+                            $livewire->mountedTableActionsData[0]['buku_kas_id']
+                        );
+                        abort_unless(auth()->user()->dapatMengelolaTransaksiPada($bukuKasBaru), 403);
+
                         if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
                             $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
                             $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
@@ -135,7 +142,7 @@ class TransaksiResource extends Resource
 
                                 if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
                                     $relatedKas->saldo -= $selisih;
-                                } else if ($relatedTransaction->jenis === 'Transfer Pemasukan') {
+                                } elseif ($relatedTransaction->jenis === 'Transfer Pemasukan') {
                                     $relatedKas->saldo += $selisih;
                                 }
 
@@ -150,7 +157,11 @@ class TransaksiResource extends Resource
                     }),
 
                 DeleteAction::make()
-                    ->hidden(auth()->user()->isSuper())
+                    ->hidden(fn ($record): bool => auth()->user()->isSuper()
+                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas))
+                    ->before(function ($record): void {
+                        abort_unless(auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas), 403);
+                    })
                     ->after(function ($record) {
                         $kas = $record->buku_kas;
                         if (in_array($record->jenis, ['Transfer Pengeluaran', 'Transfer Pemasukan'])) {
@@ -158,7 +169,7 @@ class TransaksiResource extends Resource
 
                             if ($record->jenis === 'Transfer Pengeluaran') {
                                 $kas->saldo = $kas->saldo + $record->nominal;
-                            } else if ($record->jenis === 'Transfer Pemasukan') {
+                            } elseif ($record->jenis === 'Transfer Pemasukan') {
                                 $kas->saldo = $kas->saldo - $record->nominal;
                             }
 
@@ -171,13 +182,14 @@ class TransaksiResource extends Resource
 
                                 if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
                                     $relatedKas->saldo += $relatedTransaction->nominal;
-                                } else
+                                } else {
                                     $relatedKas->saldo -= $relatedTransaction->nominal;
+                                }
 
                                 $relatedKas->save();
                                 $relatedTransaction->delete();
                             }
-                        } else if (in_array($record->jenis, ['Pengeluaran', 'Pemasukan'])) {
+                        } elseif (in_array($record->jenis, ['Pengeluaran', 'Pemasukan'])) {
                             if ($record->jenis == 'Pengeluaran') {
                                 $kas->saldo = $kas->saldo + $record->nominal;
                             } else {
@@ -186,7 +198,7 @@ class TransaksiResource extends Resource
 
                             $kas->save();
                         }
-                    })
+                    }),
             ])
             ->bulkActions([
                 // DeleteBulkAction::make(),
@@ -196,14 +208,14 @@ class TransaksiResource extends Resource
     public static function getWidgets(): array
     {
         return [
-            KasOverview::class
+            KasOverview::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTransaksis::route('/'),
+            'index' => ListTransaksis::route('/'),
             // 'create' => Pages\CreateTransaksi::route('/create'),
             // 'edit' => Pages\EditTransaksi::route('/{record}/edit'),
         ];

@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources\BukuKasResource\Pages;
 
-use Filament\Actions;
-use App\Models\Transaksi;
-use Filament\Pages\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\BukuKasResource;
+use App\Models\Transaksi;
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
 
 class ListBukuKas extends ListRecords
 {
@@ -16,6 +15,10 @@ class ListBukuKas extends ListRecords
     {
         return [
             Actions\CreateAction::make()
+                ->visible(fn (): bool => auth()->user()->dapatMembuatBukuKas())
+                ->before(function (): void {
+                    abort_unless(auth()->user()->dapatMembuatBukuKas(), 403);
+                })
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = auth()->id();
 

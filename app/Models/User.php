@@ -2,22 +2,20 @@
 
 namespace App\Models;
 
-use Filament\Panel;
-use App\Models\BukuKas;
-use App\Models\Transaksi;
-use App\Models\UtangPiutang;
 use App\Observers\UserObserver;
-use Illuminate\Notifications\Notifiable;
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 // #[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -49,7 +47,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function canAccessPanel(Panel $panel): bool
     {
         if (date('Y-m-d', strtotime($this->email_verified_at)) == date('Y-m-d')) {
-            if (!$this->buku_kas->count()) {
+            if (! $this->buku_kas->count()) {
                 $buku = BukuKas::create([
                     'user_id' => $this->id,
                     'nama_buku' => 'Kas Utama',
@@ -83,8 +81,39 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'masa_aktif' => 'date',
             'password' => 'hashed',
         ];
+    }
+
+    public function masaAktifBerlaku(): bool
+    {
+        return $this->masa_aktif !== null
+            && $this->masa_aktif->startOfDay()->greaterThanOrEqualTo(today());
+    }
+
+    public function dapatMengelolaTransaksiPada(BukuKas $bukuKas): bool
+    {
+        return $this->isSuper()
+            || $bukuKas->nama_buku === 'Kas Utama'
+            || $bukuKas->id === $this->idBukuKasTambahanGratis()
+            || $this->masaAktifBerlaku();
+    }
+
+    public function dapatMembuatBukuKas(): bool
+    {
+        return $this->isSuper()
+            || $this->buku_kas()->count() < 2
+            || $this->masaAktifBerlaku();
+    }
+
+    public function idBukuKasTambahanGratis(): ?int
+    {
+        return $this->buku_kas()
+            ->where('nama_buku', '!=', 'Kas Utama')
+            ->reorder()
+            ->orderBy('id')
+            ->value('id');
     }
 
     public function buku_kas()

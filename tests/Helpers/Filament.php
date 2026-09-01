@@ -10,8 +10,8 @@
 |
 */
 
-use App\Models\User;
 use App\Models\BukuKas;
+use App\Models\User;
 
 if (! function_exists('createRegularUserWithBukuKas')) {
     function createRegularUserWithBukuKas(): User
@@ -19,6 +19,7 @@ if (! function_exists('createRegularUserWithBukuKas')) {
         $user = User::factory()->create([
             'role' => 'reguler',
             'email_verified_at' => now(),
+            'masa_aktif' => today()->addMonth(),
         ]);
 
         BukuKas::factory()->create([
