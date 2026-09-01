@@ -13,16 +13,34 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('buku_kas_id');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('jenis_transaksi_id')->nullable();
+            $table->foreignId('buku_kas_id')
+                ->constrained('buku_kas')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+            $table->foreignId('jenis_transaksi_id')
+                ->nullable()
+                ->constrained('jenis_transaksi')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
             $table->dateTime('tanggal');
             $table->integer('nominal');
             $table->enum('jenis', ['Pengeluaran', 'Pemasukan', 'Transfer Pemasukan', 'Transfer Pengeluaran']);
             $table->string('transfer_code', 30)->nullable();
             $table->text('deskripsi')->nullable();
-            $table->unsignedBigInteger('tujuan_buku_tabungan_id')->nullable();
-            $table->unsignedBigInteger('asal_buku_tabungan_id')->nullable();
+            $table->foreignId('tujuan_buku_tabungan_id')
+                ->nullable()
+                ->constrained('buku_kas')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->foreignId('asal_buku_tabungan_id')
+                ->nullable()
+                ->constrained('buku_kas')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
             $table->timestamps();
         });
@@ -33,6 +51,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaksis');
+        Schema::dropIfExists('transaksi');
     }
 };

@@ -7,6 +7,7 @@ use App\Models\UtangPiutang;
 use Illuminate\Database\Seeder;
 use App\Models\UtangPiutangDetail;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\Schema;
 
 class UtangPiutangSeeder extends Seeder
 {
@@ -15,8 +16,10 @@ class UtangPiutangSeeder extends Seeder
      */
     public function run(): void
     {
-        UtangPiutang::truncate();
-        UtangPiutangDetail::truncate();
+        Schema::withoutForeignKeyConstraints(function () {
+            UtangPiutangDetail::truncate();
+            UtangPiutang::truncate();
+        });
 
         $users = User::whereNot('id', 1)->get();
 

@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('jenis_transaksi', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->string('nama_jenis');
             $table->enum('tipe', ['Pemasukan', 'Pengeluaran']);
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jenis_catatans');
+        Schema::dropIfExists('jenis_transaksi');
     }
 };

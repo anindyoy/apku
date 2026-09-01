@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\JenisTransaksi;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\Schema;
 
 class JenisTransaksiSeeder extends Seeder
 {
@@ -14,7 +15,9 @@ class JenisTransaksiSeeder extends Seeder
      */
     public function run(): void
     {
-        JenisTransaksi::truncate();
+        Schema::withoutForeignKeyConstraints(function () {
+            JenisTransaksi::truncate();
+        });
 
         // CREATE JENIS TRANSAKSI
         $list_tipe = ['Pemasukan', 'Pengeluaran'];

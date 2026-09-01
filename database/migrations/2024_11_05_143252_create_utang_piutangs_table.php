@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('utang_piutang', function (Blueprint $table) {
             $table->id();
             $table->string('code', 30)->nullable();
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->enum('tipe', ['utang', 'piutang']);
             $table->string('kepada', 150);
             $table->string('deskripsi')->nullable();
@@ -29,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('utang_piutangs');
+        Schema::dropIfExists('utang_piutang');
     }
 };

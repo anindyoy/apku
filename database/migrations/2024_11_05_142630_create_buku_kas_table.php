@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('buku_kas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->string('nama_buku');
             $table->integer('saldo');
             $table->integer('goal')->nullable();

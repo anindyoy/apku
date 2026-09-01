@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('share_buku', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('buku_kas_id');
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('buku_kas_id')
+                ->constrained('buku_kas')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->enum('privilege', ['editor', 'viewer']);
             $table->timestamps();
         });
@@ -25,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('share_bukus');
+        Schema::dropIfExists('share_buku');
     }
 };

@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('utang_piutang_detail', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('utang_piutang_id');
+            $table->foreignId('utang_piutang_id')
+                ->constrained('utang_piutang')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
             $table->integer('nominal');
             $table->enum('tipe', ['tambah', 'kurang']);
             $table->string('deskripsi')->nullable();
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('utang_piutang_detail');
     }
 };
