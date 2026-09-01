@@ -29,7 +29,7 @@ test('buku kas dengan transaksi menampilkan tombol hapus', function () {
     Livewire::actingAs($user)
         ->test(ListBukuKas::class)
         ->assertSuccessful()
-        ->assertSee('Hapus');
+        ->assertSeeText('Hapus');
 })->group('filament', 'buku-kas-delete2');
 
 test('buku kas tanpa transaksi tidak menampilkan tombol hapus', function () {
@@ -71,5 +71,5 @@ test('buku kas dengan transaksi memiliki aksi delete2 dengan form', function () 
     Livewire::actingAs($user)
         ->test(ListBukuKas::class)
         ->assertSuccessful()
-        ->assertSee('Hapus');
+        ->assertSeeText('Hapus');
 })->group('filament', 'buku-kas-delete2');

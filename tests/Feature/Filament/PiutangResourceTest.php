@@ -17,7 +17,7 @@ test('piutang resource dapat menampilkan halaman list', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\PiutangResource\Pages\ListPiutangs::class)
         ->assertSuccessful()
-        ->assertSee('Test Piutang');
+        ->assertSeeText('Test Piutang');
 })
     ->group('filament', 'piutang');
 
@@ -33,6 +33,6 @@ test('piutang resource dapat menampilkan halaman detail', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\PiutangResource\Pages\PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Test Piutang');
+        ->assertSeeText('Test Piutang');
 })
     ->group('filament', 'piutang');

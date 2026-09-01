@@ -44,7 +44,7 @@ test('halaman daftar piutang hanya menampilkan data piutang milik user', functio
     Livewire::actingAs($user)
         ->test(ListPiutangs::class)
         ->assertSuccessful()
-        ->assertSee('Piutang Milik Saya')
+        ->assertSeeText('Piutang Milik Saya')
         ->assertDontSee('Piutang Milik Orang Lain');
 })->group('piutang');
 
@@ -61,7 +61,7 @@ test('halaman daftar piutang hanya menampilkan data dengan tipe piutang', functi
     Livewire::actingAs($user)
         ->test(ListPiutangs::class)
         ->assertSuccessful()
-        ->assertSee('Data Piutang Unik')
+        ->assertSeeText('Data Piutang Unik')
         ->assertDontSee('Data Utang Bukan Piutang');
 })->group('piutang');
 
@@ -74,7 +74,7 @@ test('super user bisa melihat data piutang milik user lain', function () {
     Livewire::actingAs($super)
         ->test(ListPiutangs::class)
         ->assertSuccessful()
-        ->assertSee('Data Piutang Dari User Lain');
+        ->assertSeeText('Data Piutang Dari User Lain');
 })->group('piutang');
 
 test('user bisa membuka halaman detail piutang', function () {
@@ -84,7 +84,7 @@ test('user bisa membuka halaman detail piutang', function () {
     Livewire::actingAs($user)
         ->test(PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Piutang kepada Budi Santoso');
+        ->assertSeeText('Piutang kepada Budi Santoso');
 })->group('piutang');
 
 test('user bisa menambah nominal piutang pada halaman detail', function () {

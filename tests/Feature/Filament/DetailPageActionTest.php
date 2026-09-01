@@ -25,8 +25,8 @@ test('utang detail page dapat ditampilkan dengan data', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Test Utang Detail')
-        ->assertSee('Rp');
+        ->assertSeeText('Test Utang Detail')
+        ->assertSeeText('Rp');
 })
     ->group('filament', 'utang-detail');
 
@@ -56,7 +56,7 @@ test('utang detail - title menampilkan tipe dan nama', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Budi Santoso');
+        ->assertSeeText('Budi Santoso');
 })
     ->group('filament', 'utang-detail');
 
@@ -73,7 +73,7 @@ test('utang detail - tanpa parent tampilkan default', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Default Test');
+        ->assertSeeText('Default Test');
 })
     ->group('filament', 'utang-detail');
 
@@ -96,7 +96,7 @@ test('utang detail - dengan tempo menampilkan subheading', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Jatuh tempo');
+        ->assertSeeText('Jatuh tempo');
 })
     ->group('filament', 'utang-detail');
 
@@ -121,8 +121,8 @@ test('piutang detail page dapat ditampilkan dengan data', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\PiutangResource\Pages\PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Test Piutang Detail')
-        ->assertSee('Rp');
+        ->assertSeeText('Test Piutang Detail')
+        ->assertSeeText('Rp');
 })
     ->group('filament', 'piutang-detail');
 
@@ -152,7 +152,7 @@ test('piutang detail - title menampilkan tipe dan nama', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\PiutangResource\Pages\PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Ani Wijaya');
+        ->assertSeeText('Ani Wijaya');
 })
     ->group('filament', 'piutang-detail');
 
@@ -175,7 +175,7 @@ test('piutang detail - dengan tempo menampilkan subheading', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\PiutangResource\Pages\PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Jatuh tempo');
+        ->assertSeeText('Jatuh tempo');
 })
     ->group('filament', 'piutang-detail');
 
@@ -192,6 +192,6 @@ test('piutang detail - tanpa parent tampilkan default', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\PiutangResource\Pages\PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Default Test');
+        ->assertSeeText('Default Test');
 })
     ->group('filament', 'piutang-detail');

@@ -16,8 +16,8 @@ test('user resource dapat menampilkan halaman list (super user only)', function 
     Livewire::actingAs($superUser)
         ->test(\App\Filament\Resources\UserResource\Pages\ListUsers::class)
         ->assertSuccessful()
-        ->assertSee($superUser->name)
-        ->assertSee($superUser->email);
+        ->assertSeeText($superUser->name)
+        ->assertSeeText($superUser->email);
 })
     ->group('filament', 'user');
 

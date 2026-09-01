@@ -25,7 +25,7 @@ test('utang resource dapat menampilkan halaman list', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\UtangResource\Pages\ListUtangs::class)
         ->assertSuccessful()
-        ->assertSee('Test Utang');
+        ->assertSeeText('Test Utang');
 })
     ->group('filament', 'utang');
 
@@ -41,6 +41,6 @@ test('utang resource dapat menampilkan halaman detail', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\UtangResource\Pages\UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Test Utang');
+        ->assertSeeText('Test Utang');
 })
     ->group('filament', 'utang');

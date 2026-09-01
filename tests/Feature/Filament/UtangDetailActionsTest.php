@@ -76,7 +76,7 @@ test('utang detail - judul halaman benar', function () {
     Livewire::actingAs($user)
         ->test(UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Utang kepada Judul Utang Test');
+        ->assertSeeText('Utang kepada Judul Utang Test');
 })->group('utang-detail-action');
 
 test('utang detail - subheading jatuh tempo muncul jika ada tempo', function () {
@@ -99,7 +99,7 @@ test('utang detail - subheading jatuh tempo muncul jika ada tempo', function () 
     Livewire::actingAs($user)
         ->test(UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Jatuh tempo');
+        ->assertSeeText('Jatuh tempo');
 })->group('utang-detail-action');
 
 test('utang detail - subheading tidak muncul jika tanpa tempo', function () {
@@ -124,7 +124,7 @@ test('utang detail - title fallback saat parent null', function () {
     Livewire::actingAs($user)
         ->test(UtangDetail::class, ['record' => 'non_existent_code_12345'])
         ->assertSuccessful()
-        ->assertSee('Detail Utang/Piutang');
+        ->assertSeeText('Detail Utang/Piutang');
 })->group('utang-detail-action');
 
 // --- Table action with tambah and kurang ---

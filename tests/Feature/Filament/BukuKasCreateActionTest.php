@@ -21,7 +21,7 @@ test('list buku kas menampilkan data buku kas', function () {
 
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\BukuKasResource\Pages\ListBukuKas::class)
-        ->assertSee($bukuKas->nama_buku);
+        ->assertSeeText($bukuKas->nama_buku);
 })
     ->group('filament', 'buku-kas');
 

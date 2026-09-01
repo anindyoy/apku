@@ -144,8 +144,8 @@ test('transaksi list - header actions tersedia', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
         ->assertSuccessful()
-        ->assertSee('Transfer saldo')
-        ->assertSee('Catat Pemasukan')
-        ->assertSee('Catat Pengeluaran');
+        ->assertSeeText('Transfer saldo')
+        ->assertSeeText('Catat Pemasukan')
+        ->assertSeeText('Catat Pengeluaran');
 })
     ->group('filament', 'transaksi-delete');

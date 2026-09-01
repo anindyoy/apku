@@ -76,7 +76,7 @@ test('piutang detail - judul halaman benar', function () {
     Livewire::actingAs($user)
         ->test(PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Piutang kepada Judul Test');
+        ->assertSeeText('Piutang kepada Judul Test');
 })->group('piutang-detail-action');
 
 test('piutang detail - subheading jatuh tempo muncul jika ada tempo', function () {
@@ -99,7 +99,7 @@ test('piutang detail - subheading jatuh tempo muncul jika ada tempo', function (
     Livewire::actingAs($user)
         ->test(PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Jatuh tempo');
+        ->assertSeeText('Jatuh tempo');
 })->group('piutang-detail-action');
 
 test('piutang detail - subheading tidak muncul jika tanpa tempo', function () {

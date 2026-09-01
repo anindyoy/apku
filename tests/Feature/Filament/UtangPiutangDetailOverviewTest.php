@@ -48,7 +48,7 @@ test('widget overview menghitung sisa utang dengan benar - multiple details', fu
     Livewire::actingAs($user)
         ->test(UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Rp');
+        ->assertSeeText('Rp');
 })->group('filament', 'widget');
 
 test('widget overview menangani data kosong - tidak ada detail', function () {
@@ -64,7 +64,7 @@ test('widget overview menangani data kosong - tidak ada detail', function () {
     Livewire::actingAs($user)
         ->test(UtangDetail::class, ['record' => $utang->code])
         ->assertSuccessful()
-        ->assertSee('Rp');
+        ->assertSeeHtml('Rp');
 })->group('filament', 'widget');
 
 test('widget overview piutang dengan multiple details', function () {
@@ -94,5 +94,5 @@ test('widget overview piutang dengan multiple details', function () {
     Livewire::actingAs($user)
         ->test(PiutangDetail::class, ['record' => $piutang->code])
         ->assertSuccessful()
-        ->assertSee('Rp');
+        ->assertSeeText('Rp');
 })->group('filament', 'widget');

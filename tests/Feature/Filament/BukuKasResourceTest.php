@@ -10,7 +10,7 @@ test('buku kas resource dapat menampilkan halaman list', function () {
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\BukuKasResource\Pages\ListBukuKas::class)
         ->assertSuccessful()
-        ->assertSee('Kas Test');
+        ->assertSeeText('Kas Test');
 })
     ->group('filament', 'buku-kas');
 
