@@ -4,6 +4,22 @@ use Livewire\Livewire;
 
 // ==================== FILTER BUKU KAS TESTS ====================
 
+test('toolbar filter transaksi menampilkan kontrol periode buku kas dan reset', function () {
+    $user = createRegularUserWithBukuKas();
+
+    Livewire::actingAs($user)
+        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->assertSuccessful()
+        ->assertSeeText('Periode transaksi')
+        ->assertSeeText('Buku Kas')
+        ->assertSeeText('Kas Utama')
+        ->assertDontSeeHtml('>Semua Buku Kas</option>')
+        ->assertSeeText('Reset filter')
+        ->assertSeeHtml('aria-label="Bulan sebelumnya"')
+        ->assertSeeHtml('aria-label="Bulan berikutnya"');
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
 test('filter buku kas - getBukuKasOptions mengembalikan array dengan nama_buku dan id', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
@@ -39,13 +55,14 @@ test('filter buku kas - getBukuKasOptions mengurutkan Kas Utama di atas', functi
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
-test('filter buku kas - filterBukuKas default kosong', function () {
+test('filter buku kas - filterBukuKas default menggunakan Kas Utama', function () {
     $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->where('nama_buku', 'Kas Utama')->firstOrFail();
 
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
         ->assertSuccessful()
-        ->assertSet('filterBukuKas', '');
+        ->assertSet('filterBukuKas', (string) $bukuKas->id);
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 

@@ -30,7 +30,10 @@ class ListTransaksis extends ListRecords
     {
         $this->filterMonth = request()->query('filter_month', date('m'));
         $this->filterYear = request()->query('filter_year', date('Y'));
-        $this->filterBukuKas = $filterBukuKas ?? request()->query('filter_buku_kas', '');
+        $requestedBukuKas = $filterBukuKas ?? request()->query('filter_buku_kas');
+        $this->filterBukuKas = filled($requestedBukuKas)
+            ? (string) $requestedBukuKas
+            : $this->getDefaultBukuKasId();
 
         $this->authorizeAccess();
     }
@@ -76,6 +79,14 @@ class ListTransaksis extends ListRecords
             ->orderBy('nama_buku')
             ->pluck('nama_buku', 'id')
             ->toArray();
+    }
+
+    public function getDefaultBukuKasId(): string
+    {
+        $bukuKasId = BukuKas::where('nama_buku', 'Kas Utama')->value('id')
+            ?? BukuKas::value('id');
+
+        return (string) ($bukuKasId ?? '');
     }
 
     protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder | Relation | null

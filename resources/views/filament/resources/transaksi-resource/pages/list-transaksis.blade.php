@@ -1,10 +1,12 @@
+@vite('resources/css/filament-toolbar.css')
+
 <style>
-    /* Light mode select option colors */
+    /* Warna opsi select pada mode terang */
     .period-filter-select option {
         color: #1f2937;
         background-color: #ffffff;
     }
-    /* Dark mode select option colors */
+    /* Warna opsi select pada mode gelap */
     .dark .period-filter-select option {
         color: #e5e7eb;
         background-color: #1f2937;
@@ -16,58 +18,91 @@
 </style>
 
 <x-filament-panels::page>
-    <div class="flex items-center gap-2 mb-4">
-        {{-- Previous Month --}}
-        <a href="{{ $this->getPreviousPeriodUrl() }}"
-            class="fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
-            &lsaquo;
-        </a>
-
-        {{-- Month Select --}}
-        <select wire:model.live="filterMonth"
-            class="period-filter-select fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
-            @foreach(['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'] as $value => $label)
-                <option value="{{ $value }}" {{ $filterMonth === $value ? 'selected' : '' }}>{{ $label }}</option>
-            @endforeach
-        </select>
-
-        {{-- Year Select --}}
-        <select wire:model.live="filterYear"
-            class="period-filter-select fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
-            @for($year = date('Y'); $year >= date('Y') - 5; $year--)
-                <option value="{{ $year }}" {{ (string) $filterYear === (string) $year ? 'selected' : '' }}>{{ $year }}</option>
-            @endfor
-        </select>
-
-        {{-- Next Month --}}
-        <a href="{{ $this->getNextPeriodUrl() }}"
-            class="fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
-            &rsaquo;
-        </a>
-
-        {{-- Buku Kas Filter --}}
-        <div class="ml-4 flex items-center gap-2">
         @php
-            $filterUrl = fn(string $bukuKasId = '') => request()->url() . '?' . http_build_query(array_merge(
+            $filterUrl = fn(string $bukuKasId) => request()->url() . '?' . http_build_query(
                 array_filter([
                     'filter_month' => $filterMonth,
                     'filter_year' => $filterYear,
-                ]),
-                $bukuKasId !== '' ? ['filter_buku_kas' => $bukuKasId] : []
-            ));
+                    'filter_buku_kas' => $bukuKasId,
+                ])
+            );
+
+            $resetFilterUrl = request()->url() . '?' . http_build_query([
+                'filter_month' => date('m'),
+                'filter_year' => date('Y'),
+                'filter_buku_kas' => $this->getDefaultBukuKasId(),
+            ]);
         @endphp
-        <label for="buku-kas-filter" class="text-sm font-semibold text-gray-700 dark:text-gray-300">Buku Kas</label>
-        <select
-            id="buku-kas-filter"
-            onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
-            class="period-filter-select fi-btn fi-btn-size-sm inline-flex items-center justify-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-75 hover:bg-gray-50 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10 fi-color-primary">
-            <option value="">Semua Buku Kas</option>
-            @foreach($this->getBukuKasOptions() as $id => $nama)
-                <option value="{{ $id }}" {{ (string) $filterBukuKas === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
-            @endforeach
-        </select>
+
+    <section aria-labelledby="filter-transaksi-title"
+        class="mb-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5 dark:bg-white/5 dark:ring-white/10">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+                <div class="space-y-1.5">
+                    <label id="filter-transaksi-title" class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                        Periode transaksi
+                    </label>
+
+                    <div class="flex items-center gap-2">
+                        {{-- Navigasi ke bulan sebelumnya --}}
+                        <a href="{{ $this->getPreviousPeriodUrl() }}" aria-label="Bulan sebelumnya"
+                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm ring-1 ring-inset ring-gray-950/10 transition hover:bg-gray-50 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/10">
+                            <x-filament::icon icon="heroicon-m-chevron-left" class="h-5 w-5" />
+                        </a>
+
+                        <div class="flex h-10 items-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-inset ring-gray-950/10 dark:bg-white/5 dark:ring-white/10">
+                            <x-filament::icon icon="heroicon-m-calendar-days" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
+
+                            <select aria-label="Bulan" wire:model.live="filterMonth"
+                                class="period-filter-select h-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                                @foreach(['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'] as $value => $label)
+                                    <option value="{{ $value }}" {{ $filterMonth === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+
+                            <span class="h-5 w-px bg-gray-200 dark:bg-white/10"></span>
+
+                            <select aria-label="Tahun" wire:model.live="filterYear"
+                                class="period-filter-select h-full border-0 bg-transparent py-0 pl-3 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                                @for($year = date('Y'); $year >= date('Y') - 5; $year--)
+                                    <option value="{{ $year }}" {{ (string) $filterYear === (string) $year ? 'selected' : '' }}>{{ $year }}</option>
+                                @endfor
+                            </select>
+                        </div>
+
+                        {{-- Navigasi ke bulan berikutnya --}}
+                        <a href="{{ $this->getNextPeriodUrl() }}" aria-label="Bulan berikutnya"
+                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm ring-1 ring-inset ring-gray-950/10 transition hover:bg-gray-50 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/10">
+                            <x-filament::icon icon="heroicon-m-chevron-right" class="h-5 w-5" />
+                        </a>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="buku-kas-filter" class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                        Buku Kas
+                    </label>
+
+                    <div class="flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm ring-1 ring-inset ring-gray-950/10 dark:bg-white/5 dark:ring-white/10">
+                        <x-filament::icon icon="heroicon-m-book-open" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
+                        <select id="buku-kas-filter"
+                            onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
+                            class="period-filter-select h-full w-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                            @foreach($this->getBukuKasOptions() as $id => $nama)
+                                <option value="{{ $id }}" {{ (string) $filterBukuKas === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ $resetFilterUrl }}"
+                class="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg bg-white px-3 text-sm font-semibold text-gray-600 shadow-sm ring-1 ring-inset ring-gray-950/10 transition hover:bg-gray-50 hover:text-gray-950 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/10 dark:hover:text-white lg:self-auto">
+                <x-filament::icon icon="heroicon-m-arrow-path" class="h-4 w-4" />
+                Reset filter
+            </a>
         </div>
-    </div>
+    </section>
 
     {{ $this->content }}
 </x-filament-panels::page>

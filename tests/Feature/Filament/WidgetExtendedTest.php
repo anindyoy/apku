@@ -74,6 +74,19 @@ test('widget kas overview - tampilkan data transaksi', function () {
 })
     ->group('filament', 'widgets');
 
+test('widget kas overview - tetap tampil saat periode tidak memiliki transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->where('nama_buku', 'Kas Utama')->firstOrFail();
+
+    $bukuKas->update(['saldo' => 125000]);
+
+    Livewire::actingAs($user)
+        ->test(\App\Filament\Resources\TransaksiResource\Widgets\KasOverview::class)
+        ->assertSuccessful()
+        ->assertSeeText('Rp 125,000');
+})
+    ->group('filament', 'widgets');
+
 test('widget utang piutang detail - tanpa detail tampilkan total 0', function () {
     $user = createRegularUserWithBukuKas();
 
