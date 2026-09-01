@@ -2,37 +2,32 @@
 
 namespace App\Filament\Resources;
 
-use BackedEnum;
-use Filament\Forms;
-use Filament\Tables;
-use UnitEnum;
+use App\Filament\Resources\BukuKasResource\Pages;
+use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
-use Filament\Schemas\Schema;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\BukuKasResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\BukuKasResource\RelationManagers;
-use App\Filament\Resources\BukuKasResource\Pages\EditBukuKas;
-use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
-use App\Filament\Resources\BukuKasResource\Pages\CreateBukuKas;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Validation\Rule;
+use UnitEnum;
 
 class BukuKasResource extends Resource
 {
     protected static ?string $model = BukuKas::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-book-open';
-    protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
@@ -43,11 +38,16 @@ class BukuKasResource extends Resource
                 //     ->required()
                 //     ->numeric(),
 
-                Forms\Components\TextInput::make('nama_buku')
+                TextInput::make('nama_buku')
                     ->required()
+                    ->rules(fn (?BukuKas $record): array => [
+                        Rule::unique('buku_kas', 'nama_buku')
+                            ->where('user_id', auth()->id())
+                            ->ignore($record?->id),
+                    ])
                     ->maxLength(50),
 
-                Forms\Components\TextInput::make('saldo')
+                TextInput::make('saldo')
                     ->prefix('Rp')
                     ->required()
                     ->numeric(),
@@ -57,7 +57,7 @@ class BukuKasResource extends Resource
                 //     ->default(null),
                 // Forms\Components\DatePicker::make('tanggal_goal'),
 
-                Forms\Components\TextInput::make('description')
+                TextInput::make('description')
                     ->maxLength(200)
                     ->default(null),
             ]);
@@ -71,10 +71,10 @@ class BukuKasResource extends Resource
                 //     ->numeric()
                 //     ->sortable(),
 
-                Tables\Columns\TextColumn::make('nama_buku')
+                TextColumn::make('nama_buku')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('saldo')
+                TextColumn::make('saldo')
                     ->prefix('Rp ')
                     ->numeric()
                     ->sortable(),
@@ -90,15 +90,15 @@ class BukuKasResource extends Resource
                 //     ->date()
                 //     ->sortable(),
 
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -113,7 +113,7 @@ class BukuKasResource extends Resource
                 //     ->hidden(fn($record) => $record->transaksi->count()),
 
                 Action::make('Delete2')
-                    ->visible(fn($record) => $record->transaksi->count())
+                    ->visible(fn ($record) => $record->transaksi->count())
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->label('Hapus')
@@ -127,8 +127,7 @@ class BukuKasResource extends Resource
                                 ->required(),
                         ];
                     })
-                    ->modelLabel('Pindahkan transaksi')
-
+                    ->modelLabel('Pindahkan transaksi'),
 
             ])
             ->bulkActions([
@@ -148,7 +147,7 @@ class BukuKasResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBukuKas::route('/'),
+            'index' => ListBukuKas::route('/'),
             // 'create' => Pages\CreateBukuKas::route('/create'),
             // 'edit' => Pages\EditBukuKas::route('/{record}/edit'),
         ];
