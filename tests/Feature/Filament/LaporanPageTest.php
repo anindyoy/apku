@@ -37,7 +37,8 @@ test('laporan bulanan menghitung saldo dan membatasi data milik pengguna', funct
 
     $komponen = Livewire::actingAs($user)
         ->test(Laporan::class)
-        ->set('tanggalAcuan', '2026-08-15')
+        ->set('bulan', '08')
+        ->set('tahun', 2026)
         ->assertSuccessful();
 
     $laporan = $komponen->instance()->dataLaporan;
@@ -65,7 +66,8 @@ test('laporan mendukung periode harian tahunan custom dan navigasi periode', fun
         ->set('tanggalAcuan', '2026-08-15');
     expect($komponen->instance()->dataLaporan['pemasukan'])->toBe(200);
 
-    $komponen->call('pilihPeriode', 'tahunan');
+    $komponen->call('pilihPeriode', 'tahunan')
+        ->set('tahun', 2026);
     expect($komponen->instance()->dataLaporan['pemasukan'])->toBe(600);
 
     $komponen->call('pilihPeriode', 'custom')
@@ -74,8 +76,26 @@ test('laporan mendukung periode harian tahunan custom dan navigasi periode', fun
     expect($komponen->instance()->dataLaporan['pemasukan'])->toBe(200);
 
     $komponen->call('pilihPeriode', 'bulanan')
-        ->set('tanggalAcuan', '2026-08-15')
+        ->set('bulan', '08')
+        ->set('tahun', 2026)
         ->call('geserPeriode', 1);
-    expect($komponen->get('tanggalAcuan'))->toBe('2026-09-15')
+    expect($komponen->get('bulan'))->toBe('09')
+        ->and($komponen->get('tahun'))->toBe(2026)
         ->and($komponen->instance()->dataLaporan['pemasukan'])->toBe(300);
+});
+
+test('laporan bulanan dan tahunan menggunakan pilihan periode tanpa input tanggal', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 0]);
+
+    Livewire::actingAs($user)
+        ->test(Laporan::class)
+        ->assertSuccessful()
+        ->assertDontSeeHtml('aria-label="Tanggal acuan"')
+        ->assertSeeHtml('aria-label="Bulan"')
+        ->assertSeeHtml('aria-label="Tahun"')
+        ->call('pilihPeriode', 'tahunan')
+        ->assertDontSeeHtml('aria-label="Tanggal acuan"')
+        ->assertDontSeeHtml('aria-label="Bulan"')
+        ->assertSeeHtml('aria-label="Tahun"');
 });

@@ -27,6 +27,10 @@ class Laporan extends Page
 
     public string $tanggalAcuan = '';
 
+    public string $bulan = '';
+
+    public int $tahun;
+
     public string $tanggalMulai = '';
 
     public string $tanggalSelesai = '';
@@ -37,6 +41,8 @@ class Laporan extends Page
     {
         $hariIni = now()->toDateString();
         $this->tanggalAcuan = $hariIni;
+        $this->bulan = now()->format('m');
+        $this->tahun = now()->year;
         $this->tanggalMulai = now()->startOfMonth()->toDateString();
         $this->tanggalSelesai = $hariIni;
     }
@@ -54,12 +60,21 @@ class Laporan extends Page
             return;
         }
 
-        $tanggal = CarbonImmutable::parse($this->tanggalAcuan);
-        $this->tanggalAcuan = match ($this->periode) {
-            'harian' => $tanggal->addDays($arah)->toDateString(),
-            'tahunan' => $tanggal->addYears($arah)->toDateString(),
-            default => $tanggal->addMonthsNoOverflow($arah)->toDateString(),
-        };
+        if ($this->periode === 'harian') {
+            $this->tanggalAcuan = CarbonImmutable::parse($this->tanggalAcuan)->addDays($arah)->toDateString();
+
+            return;
+        }
+
+        if ($this->periode === 'tahunan') {
+            $this->tahun += $arah;
+
+            return;
+        }
+
+        $periode = CarbonImmutable::create($this->tahun, (int) $this->bulan, 1)->addMonths($arah);
+        $this->bulan = $periode->format('m');
+        $this->tahun = $periode->year;
     }
 
     /** @return array<string, mixed> */
@@ -113,8 +128,11 @@ class Laporan extends Page
 
         return match ($this->periode) {
             'harian' => [$acuan->startOfDay(), $acuan->endOfDay()],
-            'tahunan' => [$acuan->startOfYear(), $acuan->endOfYear()],
-            default => [$acuan->startOfMonth(), $acuan->endOfMonth()],
+            'tahunan' => [CarbonImmutable::create($this->tahun)->startOfYear(), CarbonImmutable::create($this->tahun)->endOfYear()],
+            default => [
+                CarbonImmutable::create($this->tahun, (int) $this->bulan)->startOfMonth(),
+                CarbonImmutable::create($this->tahun, (int) $this->bulan)->endOfMonth(),
+            ],
         };
     }
 

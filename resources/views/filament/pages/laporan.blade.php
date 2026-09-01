@@ -37,16 +37,44 @@
         </section>
 
         <section class="laporan-datebar">
-            @if ($periode !== 'custom')
+            @if ($periode === 'harian')
                 <button type="button" wire:click="geserPeriode(-1)" aria-label="Periode sebelumnya">&#10094;</button>
                 <input type="date" wire:model.live="tanggalAcuan" aria-label="Tanggal acuan">
                 <strong>{{ $laporan['label'] }}</strong>
                 <button type="button" wire:click="geserPeriode(1)" aria-label="Periode berikutnya">&#10095;</button>
+            @elseif ($periode === 'bulanan')
+                <button type="button" wire:click="geserPeriode(-1)" aria-label="Bulan sebelumnya">&#10094;</button>
+                <div class="laporan-period-select" aria-label="Periode laporan bulanan">
+                    <x-heroicon-m-calendar-days />
+                    <select aria-label="Bulan" wire:model.live="bulan">
+                        @foreach (['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'] as $nilai => $nama)
+                            <option value="{{ $nilai }}">{{ $nama }}</option>
+                        @endforeach
+                    </select>
+                    <span></span>
+                    <select aria-label="Tahun" wire:model.live="tahun">
+                        @for ($pilihanTahun = now()->year + 1; $pilihanTahun >= now()->year - 10; $pilihanTahun--)
+                            <option value="{{ $pilihanTahun }}">{{ $pilihanTahun }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <button type="button" wire:click="geserPeriode(1)" aria-label="Bulan berikutnya">&#10095;</button>
+            @elseif ($periode === 'tahunan')
+                <button type="button" wire:click="geserPeriode(-1)" aria-label="Tahun sebelumnya">&#10094;</button>
+                <div class="laporan-period-select laporan-period-select--year" aria-label="Periode laporan tahunan">
+                    <x-heroicon-m-calendar-days />
+                    <select aria-label="Tahun" wire:model.live="tahun">
+                        @for ($pilihanTahun = now()->year + 1; $pilihanTahun >= now()->year - 10; $pilihanTahun--)
+                            <option value="{{ $pilihanTahun }}">{{ $pilihanTahun }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <button type="button" wire:click="geserPeriode(1)" aria-label="Tahun berikutnya">&#10095;</button>
             @else
                 <div class="laporan-range">
                     <label>Dari <input type="date" wire:model.live.debounce.400ms="tanggalMulai"></label>
                     <span>hingga</span>
-                    <label>Sampai <input type="date" wire:model.live.debounce.400ms="tanggalSelesai"></label>
+                    <label><input type="date" wire:model.live.debounce.400ms="tanggalSelesai"></label>
                 </div>
                 <strong>{{ $laporan['label'] }}</strong>
             @endif
@@ -106,6 +134,13 @@
         .laporan-datebar { display:flex; align-items:center; justify-content:center; gap:1rem; padding:.9rem 1rem; border-radius:1rem; color:white; background:linear-gradient(105deg,#3f4650,#686f78); }
         .laporan-datebar button { width:2.3rem; height:2.3rem; border-radius:999px; background:rgb(255 255 255 / .12); }
         .laporan-datebar strong { min-width:170px; text-align:center; text-transform:capitalize; } .laporan-datebar input { color:var(--gray-700); }
+        .laporan-period-select { display:flex; height:2.5rem; align-items:center; overflow:hidden; border:1px solid rgb(255 255 255 / .2); border-radius:.6rem; background:rgb(255 255 255 / .12); }
+        .laporan-period-select svg { width:1.2rem; margin-left:.75rem; color:rgb(255 255 255 / .7); }
+        .laporan-period-select select { height:100%; border:0; color:white; background:transparent; padding:.25rem 2rem .25rem .55rem; font-size:.875rem; font-weight:700; }
+        .laporan-period-select select:focus { box-shadow:none; outline:none; }
+        .laporan-period-select select option { color:#1f2937; background:white; }
+        .laporan-period-select>span { width:1px; height:1.25rem; background:rgb(255 255 255 / .2); }
+        .laporan-period-select--year select { min-width:100px; }
         .laporan-range { display:flex; align-items:center; gap:.75rem; } .laporan-range label { display:flex; align-items:center; gap:.45rem; font-size:.8rem; }
         .laporan-card { overflow:hidden; border:1px solid var(--gray-200); border-radius:1rem; background:white; box-shadow:0 2px 10px rgb(0 0 0 / .05); }
         .laporan-card header { display:flex; align-items:center; gap:.65rem; padding:1rem 1.25rem; border-bottom:1px solid var(--gray-200); background:linear-gradient(90deg,var(--gray-100),white); }
