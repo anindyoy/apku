@@ -46,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->emailVerification()
             ->passwordReset()
+            ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
                 fn (): View => view('filament.components.navbar-user-name'),
