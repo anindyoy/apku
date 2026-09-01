@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class BukuKasFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * Menentukan data bawaan model.
      *
      * @return array<string, mixed>
      */
@@ -20,7 +20,7 @@ class BukuKasFactory extends Factory
         $goal = rand(0, 4);
         return [
             'user_id' => User::inRandomOrder()->notSuper()->first()->id,
-            'nama_buku' => fake()->word(),
+            'nama_buku' => fake()->word() . '-' . fake()->unique()->numerify('########'),
             'saldo' => 0,
             'description' => fake()->sentence(),
             'goal' => $goal == 4 ? rand(100, 1000) : null,

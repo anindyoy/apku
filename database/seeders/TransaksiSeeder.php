@@ -52,7 +52,7 @@ class TransaksiSeeder extends Seeder
 
                 $bukuKasRows[] = [
                     'user_id' => $user->id,
-                    'nama_buku' => $i === 0 ? 'Kas Utama' : fake()->word(),
+                    'nama_buku' => $i === 0 ? 'Kas Utama' : 'Buku Kas ' . ($i + 1),
                     'saldo' => 0, // Updated after transaksi is inserted
                     'goal' => null,
                     'tanggal_goal' => null,

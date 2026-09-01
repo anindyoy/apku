@@ -13,7 +13,7 @@ test('navbar menampilkan nama pengguna yang sedang login', function () {
 
     expect($html)
         ->toContain('data-testid="navbar-user-name"')
-        ->toContain('Halo, Nama Pengguna Aktif');
+        ->toContain('Hai, Nama Pengguna Aktif');
 })->group('filament', 'navbar');
 
 test('nama pengguna tidak ditampilkan ketika belum login', function () {
