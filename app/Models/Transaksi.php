@@ -124,7 +124,7 @@ class Transaksi extends Model
         }
 
         return $query->where(function ($query) use ($user) {
-            $query->where('nama_buku', 'Kas Utama')
+            $query->whereKey($user->idBukuKasUtama())
                 ->orWhere('id', $user->idBukuKasTambahanGratis());
         });
     }

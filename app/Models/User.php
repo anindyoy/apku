@@ -46,29 +46,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(Panel $panel): bool
     {
-        if (date('Y-m-d', strtotime($this->email_verified_at)) == date('Y-m-d')) {
-            if (! $this->buku_kas->count()) {
-                $buku = BukuKas::create([
-                    'user_id' => $this->id,
-                    'nama_buku' => 'Kas Utama',
-                    'saldo' => 0,
-                ]);
-
-                $transaksi = Transaksi::create([
-                    'user_id' => $this->id,
-                    'buku_kas_id' => $buku->id,
-                    'tanggal' => now(),
-                    'nominal' => 0,
-                    'jenis' => 'Pemasukan',
-                    'deskripsi' => 'Saldo pertama',
-                ]);
-
-                $kas = $transaksi->buku_kas;
-                $kas->saldo += $transaksi->nominal;
-                $kas->save();
-            }
-        }
-
         return true;
     }
 
@@ -95,7 +72,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function dapatMengelolaTransaksiPada(BukuKas $bukuKas): bool
     {
         return $this->isSuper()
-            || $bukuKas->nama_buku === 'Kas Utama'
+            || $bukuKas->id === $this->idBukuKasUtama()
             || $bukuKas->id === $this->idBukuKasTambahanGratis()
             || $this->masaAktifBerlaku();
     }
@@ -110,9 +87,17 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function idBukuKasTambahanGratis(): ?int
     {
         return $this->buku_kas()
-            ->where('nama_buku', '!=', 'Kas Utama')
+            ->whereKeyNot($this->idBukuKasUtama())
             ->reorder()
             ->orderBy('id')
+            ->value('id');
+    }
+
+    public function idBukuKasUtama(): ?int
+    {
+        return $this->buku_kas()
+            ->reorder()
+            ->oldest('id')
             ->value('id');
     }
 
