@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('masa-aktif:kirim-pengingat')
     ->dailyAt('08:00')
     ->withoutOverlapping();
+
+Schedule::command('telescope:prune --hours=336')
+    ->daily()
+    ->withoutOverlapping();
