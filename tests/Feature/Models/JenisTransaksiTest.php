@@ -2,17 +2,19 @@
 
 use App\Models\JenisTransaksi;
 use App\Models\User;
+use Database\Seeders\JenisTransaksiSeeder;
+use Database\Seeders\UserSeeder;
 
 // ==================== JENISTRANSAKSI MODEL ====================
 
 beforeEach(function () {
     $this->seed([
-        \Database\Seeders\UserSeeder::class,
-        \Database\Seeders\JenisTransaksiSeeder::class,
+        UserSeeder::class,
+        JenisTransaksiSeeder::class,
     ]);
 
     // Authenticate user for methods that call auth()->user()->isSuper()
-    $user = \App\Models\User::first();
+    $user = User::first();
     $this->actingAs($user);
 });
 
@@ -30,7 +32,7 @@ test('jenis transaksi memiliki relasi transaksi', function () {
 });
 
 test('jenis transaksi form mengembalikan array schema', function () {
-    $form = JenisTransaksi::form();
+    $form = JenisTransaksi::form('Pemasukan');
 
     expect($form)->toBeArray();
     expect($form)->toHaveCount(1);
@@ -61,13 +63,13 @@ test('jenis transaksi actions mengembalikan edit dan delete action', function ()
 });
 
 test('jenis transaksi menggunakan table yang benar', function () {
-    $model = new JenisTransaksi();
+    $model = new JenisTransaksi;
 
     expect($model->getTable())->toBe('jenis_transaksi');
 });
 
 test('jenis transaksi memiliki guarded kosong', function () {
-    $model = new JenisTransaksi();
+    $model = new JenisTransaksi;
 
     expect($model->getGuarded())->toBe([]);
 });

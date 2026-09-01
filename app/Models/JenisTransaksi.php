@@ -2,28 +2,30 @@
 
 namespace App\Models;
 
-use App\Models\User;
-use App\Models\Transaksi;
 use App\Models\Scopes\UserScope;
-use Illuminate\Support\Facades\DB;
+use Database\Factories\JenisTransaksiFactory;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 // use Filament\Support\Enums\MaxWidth; // Removed for Filament v5
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 #[ScopedBy([UserScope::class])]
 class JenisTransaksi extends Model
 {
-    /** @use HasFactory<\Database\Factories\JenisTransaksiFactory> */
+    /** @use HasFactory<JenisTransaksiFactory> */
     use HasFactory;
+
     protected $table = 'jenis_transaksi';
+
     protected $guarded = [];
 
     public function user()
@@ -36,11 +38,17 @@ class JenisTransaksi extends Model
         return $this->hasMany(Transaksi::class);
     }
 
-    public static function form()
+    public static function form(string $type)
     {
         return [
             TextInput::make('nama_jenis')
                 ->required()
+                ->rules(fn (?self $record): array => [
+                    Rule::unique('jenis_transaksi', 'nama_jenis')
+                        ->where('user_id', auth()->id())
+                        ->where('tipe', $type)
+                        ->ignore($record?->id),
+                ])
                 ->maxLength(255),
         ];
     }
@@ -64,11 +72,12 @@ class JenisTransaksi extends Model
                 ->mutateFormDataUsing(function (array $data) use ($type): array {
                     $data['user_id'] = auth()->id();
                     $data['tipe'] = $type;
+
                     return $data;
                 })
                 ->modalWidth('small') // Filament v5 uses string
                 ->color($type == 'Pengeluaran' ? 'danger' : 'success')
-                ->form(self::form())
+                ->form(self::form($type)),
         ];
     }
 
@@ -78,10 +87,10 @@ class JenisTransaksi extends Model
             EditAction::make()
                 ->hidden(auth()->user()->isSuper())
                 ->modalWidth('small') // Filament v5 uses string
-                ->form(self::form()),
+                ->form(self::form($type)),
 
             DeleteAction::make()
-                ->visible(fn($record) => !$record->transaksi_count && !auth()->user()->isSuper()),
+                ->visible(fn ($record) => ! $record->transaksi_count && ! auth()->user()->isSuper()),
 
             Action::make('Hapus')
                 ->hidden(auth()->user()->isSuper())
@@ -98,7 +107,7 @@ class JenisTransaksi extends Model
                             ),
                     ];
                 })
-                ->modalHeading(fn($record) => 'Hapus ' . $record->nama_jenis)
+                ->modalHeading(fn ($record) => 'Hapus '.$record->nama_jenis)
                 ->modalSubheading(
                     'Kategori ini memiliki data transaksi, pilih kategori lain untuk memindahkan kategori penggantinya.'
                 )
@@ -112,7 +121,7 @@ class JenisTransaksi extends Model
                 })
                 ->color('danger')
                 ->icon('heroicon-m-trash')
-                ->visible(fn($record) => $record->transaksi_count),
+                ->visible(fn ($record) => $record->transaksi_count),
         ];
     }
 }
