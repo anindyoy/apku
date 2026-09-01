@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use UnitEnum;
 
@@ -109,25 +110,58 @@ class BukuKasResource extends Resource
             ->actions([
                 EditAction::make(),
 
-                // DeleteAction::make()
-                //     ->hidden(fn($record) => $record->transaksi->count()),
+                DeleteAction::make()
+                    ->visible(fn (BukuKas $record): bool => ! $record->transaksi()->exists()),
 
-                Action::make('Delete2')
-                    ->visible(fn ($record) => $record->transaksi->count())
+                Action::make('hapusDanPindahkan')
+                    ->visible(fn (BukuKas $record): bool => $record->transaksi()->exists())
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->label('Hapus')
-                    ->form(function ($record) {
-                        return [
-                            Select::make('buku_kas_id')
-                                ->options(
-                                    BukuKas::whereNot('id', $record->id)
-                                        ->pluck('nama_buku', 'id')
-                                )
-                                ->required(),
-                        ];
+                    ->modalHeading('Pindahkan transaksi dan hapus buku kas')
+                    ->modalDescription(fn (BukuKas $record): string => "Buku kas {$record->nama_buku} masih memiliki transaksi. Pilih buku kas tujuan sebelum menghapusnya.")
+                    ->modalSubmitActionLabel('Pindahkan dan hapus')
+                    ->form(fn (BukuKas $record): array => [
+                        Select::make('buku_kas_id')
+                            ->label('Buku kas tujuan')
+                            ->options(fn (): array => BukuKas::query()
+                                ->where('user_id', $record->user_id)
+                                ->whereKeyNot($record->id)
+                                ->pluck('nama_buku', 'id')
+                                ->all())
+                            ->helperText('Semua transaksi dan saldo buku kas ini akan digabungkan ke buku kas tujuan.')
+                            ->searchable()
+                            ->rules([
+                                Rule::exists('buku_kas', 'id')
+                                    ->where('user_id', $record->user_id)
+                                    ->whereNot('id', $record->id),
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (BukuKas $record, array $data): void {
+                        DB::transaction(function () use ($record, $data): void {
+                            $bukuKasAsal = BukuKas::query()
+                                ->whereKey($record->id)
+                                ->where('user_id', $record->user_id)
+                                ->lockForUpdate()
+                                ->firstOrFail();
+
+                            $bukuKasTujuan = BukuKas::query()
+                                ->whereKey($data['buku_kas_id'])
+                                ->whereKeyNot($bukuKasAsal->id)
+                                ->where('user_id', $bukuKasAsal->user_id)
+                                ->lockForUpdate()
+                                ->firstOrFail();
+
+                            $bukuKasAsal->transaksi()->update([
+                                'buku_kas_id' => $bukuKasTujuan->id,
+                            ]);
+
+                            $bukuKasTujuan->increment('saldo', $bukuKasAsal->saldo);
+                            $bukuKasAsal->delete();
+                        });
                     })
-                    ->modelLabel('Pindahkan transaksi'),
+                    ->successNotificationTitle('Transaksi dipindahkan dan buku kas berhasil dihapus'),
 
             ])
             ->bulkActions([

@@ -1,21 +1,16 @@
 <?php
 
-use App\Models\User;
-use Livewire\Livewire;
-use App\Models\BukuKas;
-use App\Models\Transaksi;
-use App\Models\JenisTransaksi;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
-
-// ==================== BUKU KAS RESOURCE - DELETE2 ACTION FORM ====================
-// Targets uncovered lines 119-127 in BukuKasResource.php (Delete2 action form closure)
+use App\Models\BukuKas;
+use App\Models\JenisTransaksi;
+use App\Models\Transaksi;
+use Livewire\Livewire;
 
 test('buku kas dengan transaksi menampilkan tombol hapus', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
     $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
 
-    // Create a transaction so the Delete2 action becomes visible
     Transaksi::create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
@@ -40,23 +35,19 @@ test('buku kas tanpa transaksi tidak menampilkan tombol hapus', function () {
         ->assertSuccessful();
 })->group('filament', 'buku-kas-delete2');
 
-// Test the Delete2 action form closure (lines 119-127) by creating a BukuKas with transactions
-// and verifying the action form renders with the Select component.
-// The form closure builds a Select for moving transactions to another buku_kas.
-test('buku kas dengan transaksi memiliki aksi delete2 dengan form', function () {
+test('transaksi dan saldo dipindahkan sebelum buku kas dihapus', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
+    $bukuKas->update(['saldo' => 50000]);
     $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
 
-    // Create second buku kas
     $secondBukuKas = BukuKas::factory()->create([
         'user_id' => $user->id,
         'nama_buku' => 'Kas Tujuan',
-        'saldo' => 0,
+        'saldo' => 25000,
     ]);
 
-    // Create transaction so Delete2 is visible
-    Transaksi::create([
+    $transaksi = Transaksi::create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
         'jenis' => 'Pemasukan',
@@ -66,10 +57,45 @@ test('buku kas dengan transaksi memiliki aksi delete2 dengan form', function () 
         'deskripsi' => 'Transaksi untuk test delete2 form',
     ]);
 
-    // Verify the page renders successfully - the Delete2 action form closure is invoked
-    // when the action button is rendered (which includes form evaluation)
     Livewire::actingAs($user)
         ->test(ListBukuKas::class)
-        ->assertSuccessful()
-        ->assertSeeText('Hapus');
+        ->callTableAction('hapusDanPindahkan', $bukuKas, data: [
+            'buku_kas_id' => $secondBukuKas->id,
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $this->assertDatabaseMissing('buku_kas', ['id' => $bukuKas->id]);
+    $this->assertDatabaseHas('transaksi', [
+        'id' => $transaksi->id,
+        'buku_kas_id' => $secondBukuKas->id,
+    ]);
+    expect($secondBukuKas->fresh()->saldo)->toBe(75000);
 })->group('filament', 'buku-kas-delete2');
+
+test('buku kas tujuan wajib milik pengguna yang sama', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->first();
+    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $userLain = createRegularUserWithBukuKas();
+    $bukuKasUserLain = $userLain->buku_kas()->first();
+
+    Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Pemasukan',
+        'nominal' => 50000,
+        'tanggal' => now(),
+        'jenis_transaksi_id' => $jenis->id,
+        'deskripsi' => 'Transaksi tetap aman',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListBukuKas::class)
+        ->callTableAction('hapusDanPindahkan', $bukuKas, data: [
+            'buku_kas_id' => $bukuKasUserLain->id,
+        ])
+        ->assertHasTableActionErrors(['buku_kas_id']);
+
+    $this->assertDatabaseHas('buku_kas', ['id' => $bukuKas->id]);
+    $this->assertDatabaseHas('transaksi', ['buku_kas_id' => $bukuKas->id]);
+});
