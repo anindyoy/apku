@@ -6,9 +6,16 @@ use App\Models\BukuKas;
 use App\Models\Transaksi;
 use BackedEnum;
 use Carbon\CarbonImmutable;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Writer\XLSX\Writer;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use UnitEnum;
 
 class Laporan extends Page
@@ -83,8 +90,9 @@ class Laporan extends Page
         [$mulai, $selesai] = $this->rentangTanggal();
         $query = $this->queryTransaksi();
         $transaksiPeriode = (clone $query)
-            ->with('jenis_transaksi:id,nama_jenis')
+            ->with(['jenis_transaksi:id,nama_jenis', 'buku_kas:id,nama_buku'])
             ->whereBetween('tanggal', [$mulai, $selesai])
+            ->orderBy('tanggal')
             ->get();
 
         $pemasukan = $transaksiPeriode->whereIn('jenis', ['Pemasukan', 'Transfer Pemasukan'])->sum('nominal');
@@ -107,7 +115,46 @@ class Laporan extends Page
             'saldoAkhir' => $saldoAwal + $pemasukan - $pengeluaran,
             'kategoriPemasukan' => $this->ringkasanKategori($transaksiPeriode, 'Pemasukan'),
             'kategoriPengeluaran' => $this->ringkasanKategori($transaksiPeriode, 'Pengeluaran'),
+            'transaksi' => $transaksiPeriode,
         ];
+    }
+
+    public function unduhPdf(): StreamedResponse
+    {
+        $data = $this->dataEkspor();
+        $opsi = new Options;
+        $opsi->set('defaultFont', 'DejaVu Sans');
+
+        $pdf = new Dompdf($opsi);
+        $pdf->loadHtml(view('laporan.pdf', $data)->render());
+        $pdf->setPaper('a4', 'landscape');
+        $pdf->render();
+
+        return response()->streamDownload(
+            static fn () => print $pdf->output(),
+            $this->namaFileLaporan('pdf'),
+            ['Content-Type' => 'application/pdf']
+        );
+    }
+
+    public function unduhExcel(): BinaryFileResponse
+    {
+        $data = $this->dataEkspor();
+        $lokasi = tempnam(sys_get_temp_dir(), 'laporan-');
+        $penulis = new Writer;
+        $penulis->openToFile($lokasi);
+
+        foreach ($this->barisExcel($data) as $baris) {
+            $penulis->addRow(Row::fromValues($baris));
+        }
+
+        $penulis->close();
+
+        return response()->download(
+            $lokasi,
+            $this->namaFileLaporan('xlsx'),
+            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+        )->deleteFileAfterSend();
     }
 
     /** @return array{CarbonImmutable, CarbonImmutable} */
@@ -182,5 +229,65 @@ class Laporan extends Page
             'tahunan' => $mulai->format('Y'),
             default => $mulai->locale('id')->translatedFormat('d M Y').' – '.$selesai->locale('id')->translatedFormat('d M Y'),
         };
+    }
+
+    /** @return array{laporan: array<string, mixed>, namaBuku: string, tipePeriode: string} */
+    private function dataEkspor(): array
+    {
+        return [
+            'laporan' => $this->dataLaporan,
+            'namaBuku' => $this->bukuKasId === 'semua'
+                ? 'Semua Buku Kas'
+                : BukuKas::findOrFail($this->bukuKasId)->nama_buku,
+            'tipePeriode' => Str::headline($this->periode),
+        ];
+    }
+
+    /** @param array{laporan: array<string, mixed>, namaBuku: string, tipePeriode: string} $data */
+    private function barisExcel(array $data): array
+    {
+        $laporan = $data['laporan'];
+        $baris = [
+            ['LAPORAN BUKU KAS'],
+            ['Buku Kas', $data['namaBuku']],
+            ['Tipe Periode', $data['tipePeriode']],
+            ['Periode', $laporan['label']],
+            [],
+            ['RINGKASAN'],
+            ['Saldo Awal', $laporan['saldoAwal']],
+            ['Pemasukan', $laporan['pemasukan']],
+            ['Pengeluaran', $laporan['pengeluaran']],
+            ['Akumulasi', $laporan['akumulasi']],
+            ['Saldo Akhir', $laporan['saldoAkhir']],
+            [],
+            ['RINCIAN TRANSAKSI'],
+            ['Tanggal', 'Buku Kas', 'Jenis', 'Kategori', 'Deskripsi', 'Nominal'],
+        ];
+
+        foreach ($laporan['transaksi'] as $transaksi) {
+            $baris[] = [
+                CarbonImmutable::parse($transaksi->tanggal)->format('d/m/Y H:i'),
+                $transaksi->buku_kas?->nama_buku ?? '-',
+                $transaksi->jenis,
+                str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'),
+                $transaksi->deskripsi ?? '',
+                $transaksi->nominal,
+            ];
+        }
+
+        return $baris;
+    }
+
+    private function namaFileLaporan(string $ekstensi): string
+    {
+        [$mulai, $selesai] = $this->rentangTanggal();
+
+        return sprintf(
+            'laporan-%s-%s-%s.%s',
+            $this->periode,
+            $mulai->format('Ymd'),
+            $selesai->format('Ymd'),
+            $ekstensi
+        );
     }
 }

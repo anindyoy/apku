@@ -34,6 +34,32 @@
                     <button type="button" wire:click="pilihPeriode('{{ $nilai }}')" @class(['active' => $periode === $nilai])>{{ $label }}</button>
                 @endforeach
             </div>
+            <x-filament::dropdown placement="bottom-end">
+                <x-slot name="trigger">
+                    <x-filament::button icon="heroicon-o-arrow-down-tray" color="gray" aria-label="Export laporan">
+                        Export
+                    </x-filament::button>
+                </x-slot>
+
+                <x-filament::dropdown.list>
+                    <x-filament::dropdown.list.item
+                        icon="heroicon-o-document-arrow-down"
+                        wire:click="unduhPdf"
+                        wire:loading.attr="disabled"
+                        wire:target="unduhPdf"
+                    >
+                        PDF
+                    </x-filament::dropdown.list.item>
+                    <x-filament::dropdown.list.item
+                        icon="heroicon-o-table-cells"
+                        wire:click="unduhExcel"
+                        wire:loading.attr="disabled"
+                        wire:target="unduhExcel"
+                    >
+                        Excel
+                    </x-filament::dropdown.list.item>
+                </x-filament::dropdown.list>
+            </x-filament::dropdown>
         </section>
 
         <section class="laporan-datebar">

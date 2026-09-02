@@ -99,3 +99,28 @@ test('laporan bulanan dan tahunan menggunakan pilihan periode tanpa input tangga
         ->assertDontSeeHtml('aria-label="Bulan"')
         ->assertSeeHtml('aria-label="Tahun"');
 });
+
+test('laporan dapat diunduh sebagai pdf dan excel sesuai filter aktif', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Ekspor', 'saldo' => 750]);
+    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Bonus', 'tipe' => 'Pemasukan']);
+    buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 750, '2026-08-15 09:00:00');
+    buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 999, '2026-09-15 09:00:00');
+
+    Livewire::actingAs($user)
+        ->test(Laporan::class)
+        ->set('bukuKasId', (string) $bukuKas->id)
+        ->set('bulan', '08')
+        ->set('tahun', 2026)
+        ->assertSeeHtml('aria-label="Export laporan"')
+        ->call('unduhPdf')
+        ->assertFileDownloaded('laporan-bulanan-20260801-20260831.pdf');
+
+    Livewire::actingAs($user)
+        ->test(Laporan::class)
+        ->set('bukuKasId', (string) $bukuKas->id)
+        ->set('bulan', '08')
+        ->set('tahun', 2026)
+        ->call('unduhExcel')
+        ->assertFileDownloaded('laporan-bulanan-20260801-20260831.xlsx');
+});
