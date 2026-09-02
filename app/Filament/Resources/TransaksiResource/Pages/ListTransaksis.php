@@ -30,16 +30,14 @@ class ListTransaksis extends ListRecords
 
     public string|int $filterYear = '';
 
-    public ?string $filterBukuKas = '';
+    public ?string $filterBukuKas = null;
 
     public function mount(?string $filterBukuKas = null): void
     {
         $this->filterMonth = request()->query('filter_month', date('m'));
         $this->filterYear = request()->query('filter_year', date('Y'));
         $requestedBukuKas = $filterBukuKas ?? request()->query('filter_buku_kas');
-        $this->filterBukuKas = filled($requestedBukuKas)
-            ? (string) $requestedBukuKas
-            : $this->getDefaultBukuKasId();
+        $this->filterBukuKas = filled($requestedBukuKas) ? (string) $requestedBukuKas : null;
 
         $this->authorizeAccess();
     }
@@ -84,14 +82,6 @@ class ListTransaksis extends ListRecords
             ->orderBy('nama_buku')
             ->pluck('nama_buku', 'id')
             ->toArray();
-    }
-
-    public function getDefaultBukuKasId(): string
-    {
-        $bukuKasId = BukuKas::where('nama_buku', 'Kas Utama')->value('id')
-            ?? BukuKas::value('id');
-
-        return (string) ($bukuKasId ?? '');
     }
 
     protected function getTableQuery(): Builder|Relation|null
@@ -259,8 +249,6 @@ class ListTransaksis extends ListRecords
 
     public function getHeaderWidgets(): array
     {
-        return [
-            KasOverview::class,
-        ];
+        return filled($this->filterBukuKas) ? [KasOverview::class] : [];
     }
 }

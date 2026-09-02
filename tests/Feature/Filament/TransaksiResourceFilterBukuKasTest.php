@@ -1,19 +1,23 @@
 <?php
 
+use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
+use App\Models\BukuKas;
+use App\Models\JenisTransaksi;
+use App\Models\Transaksi;
 use Livewire\Livewire;
 
-// ==================== FILTER BUKU KAS TESTS ====================
+// ==================== PENGUJIAN FILTER BUKU KAS ====================
 
 test('toolbar filter transaksi menampilkan kontrol periode buku kas dan reset', function () {
     $user = createRegularUserWithBukuKas();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertSeeText('Periode transaksi')
         ->assertSeeText('Buku Kas')
         ->assertSeeText('Kas Utama')
-        ->assertDontSeeHtml('>Semua Buku Kas</option>')
+        ->assertSeeText('Semua Buku Kas')
         ->assertSeeText('Reset filter')
         ->assertSeeHtml('aria-label="Bulan sebelumnya"')
         ->assertSeeHtml('aria-label="Bulan berikutnya"');
@@ -25,7 +29,7 @@ test('filter buku kas - getBukuKasOptions mengembalikan array dengan nama_buku d
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->call('getBukuKasOptions')
         ->assertSuccessful();
@@ -35,34 +39,33 @@ test('filter buku kas - getBukuKasOptions mengembalikan array dengan nama_buku d
 test('filter buku kas - getBukuKasOptions mengurutkan Kas Utama di atas', function () {
     $user = createRegularUserWithBukuKas();
 
-    // Create additional buku kas
-    \App\Models\BukuKas::factory()->create([
+    // Buat buku kas tambahan
+    BukuKas::factory()->create([
         'user_id' => $user->id,
         'nama_buku' => 'Kas Utama',
         'saldo' => 0,
     ]);
-    \App\Models\BukuKas::factory()->create([
+    BukuKas::factory()->create([
         'user_id' => $user->id,
         'nama_buku' => 'Kas Tabungan',
         'saldo' => 0,
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->call('getBukuKasOptions')
         ->assertSuccessful();
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
-test('filter buku kas - filterBukuKas default menggunakan Kas Utama', function () {
+test('filter buku kas - filterBukuKas default menampilkan semua buku kas', function () {
     $user = createRegularUserWithBukuKas();
-    $bukuKas = $user->buku_kas()->where('nama_buku', 'Kas Utama')->firstOrFail();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
-        ->assertSet('filterBukuKas', (string) $bukuKas->id);
+        ->assertSet('filterBukuKas', null);
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
@@ -71,26 +74,51 @@ test('filter buku kas - filterBukuKas dapat diatur', function () {
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->set('filterBukuKas', (string) $bukuKas->id)
         ->assertSet('filterBukuKas', (string) $bukuKas->id);
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
+test('filter buku kas - semua buku kas menampilkan kolom buku kas tanpa saldo', function () {
+    $user = createRegularUserWithBukuKas();
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertSuccessful()
+        ->assertTableColumnVisible('buku_kas.nama_buku')
+        ->assertTableColumnHidden('saldo');
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
+test('filter buku kas - buku kas terpilih menampilkan saldo tanpa kolom buku kas', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class, [
+            'filterBukuKas' => (string) $bukuKas->id,
+        ])
+        ->assertSuccessful()
+        ->assertTableColumnHidden('buku_kas.nama_buku')
+        ->assertTableColumnVisible('saldo');
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
 test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas tersebut', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas1 = $user->buku_kas()->first();
-    $bukuKas2 = \App\Models\BukuKas::factory()->create([
+    $bukuKas2 = BukuKas::factory()->create([
         'user_id' => $user->id,
         'nama_buku' => 'Kas Kedua',
         'saldo' => 0,
     ]);
 
-    $jenis = \App\Models\JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
 
-    // Transaksi di buku kas 1
-    \App\Models\Transaksi::create([
+    // Transaksi di buku kas pertama
+    Transaksi::create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas1->id,
         'jenis' => 'Pemasukan',
@@ -100,8 +128,8 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
         'deskripsi' => 'Transaksi di Kas Test',
     ]);
 
-    // Transaksi di buku kas 2
-    \App\Models\Transaksi::create([
+    // Transaksi di buku kas kedua
+    Transaksi::create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas2->id,
         'jenis' => 'Pemasukan',
@@ -111,7 +139,7 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
         'deskripsi' => 'Transaksi di Kas Kedua',
     ]);
 
-    // Verify both transactions exist in DB
+    // Pastikan kedua transaksi tersimpan di basis data
     $this->assertDatabaseHas('transaksi', [
         'buku_kas_id' => $bukuKas1->id,
         'deskripsi' => 'Transaksi di Kas Test',
@@ -121,16 +149,16 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
         'deskripsi' => 'Transaksi di Kas Kedua',
     ]);
 
-    // Filter by buku kas 1 — set filter and verify it's applied
+    // Terapkan filter buku kas pertama
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->set('filterBukuKas', (string) $bukuKas1->id)
         ->assertSet('filterBukuKas', (string) $bukuKas1->id);
 
-    // Filter by buku kas 2 — set filter and verify it's applied
+    // Terapkan filter buku kas kedua
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->set('filterBukuKas', (string) $bukuKas2->id)
         ->assertSet('filterBukuKas', (string) $bukuKas2->id);
@@ -140,15 +168,15 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
 test('filter buku kas - filterBukuKas kosong tampilkan semua transaksi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas1 = $user->buku_kas()->first();
-    $bukuKas2 = \App\Models\BukuKas::factory()->create([
+    $bukuKas2 = BukuKas::factory()->create([
         'user_id' => $user->id,
         'nama_buku' => 'Kas Kedua',
         'saldo' => 0,
     ]);
 
-    $jenis = \App\Models\JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
 
-    \App\Models\Transaksi::create([
+    $transaksiPertama = Transaksi::create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas1->id,
         'jenis' => 'Pemasukan',
@@ -158,7 +186,7 @@ test('filter buku kas - filterBukuKas kosong tampilkan semua transaksi', functio
         'deskripsi' => 'Pemasukan Kas Test',
     ]);
 
-    \App\Models\Transaksi::create([
+    $transaksiKedua = Transaksi::create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas2->id,
         'jenis' => 'Pemasukan',
@@ -169,12 +197,13 @@ test('filter buku kas - filterBukuKas kosong tampilkan semua transaksi', functio
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
-        ->set('filterBukuKas', '')
-        ->assertSet('filterBukuKas', '');
+        ->set('filterBukuKas', null)
+        ->assertSet('filterBukuKas', null)
+        ->assertCanSeeTableRecords([$transaksiPertama, $transaksiKedua]);
 
-    // Verify both transactions exist in DB
+    // Pastikan kedua transaksi tersimpan di basis data
     $this->assertDatabaseHas('transaksi', ['deskripsi' => 'Pemasukan Kas Test']);
     $this->assertDatabaseHas('transaksi', ['deskripsi' => 'Pemasukan Kas Kedua']);
 })
@@ -185,7 +214,7 @@ test('filter buku kas - mount initialize filterBukuKas dari parameter', function
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class, [
+        ->test(ListTransaksis::class, [
             'filterBukuKas' => (string) $bukuKas->id,
         ])
         ->assertSuccessful()
@@ -198,16 +227,16 @@ test('filter buku kas - defaultForm menggunakan filterBukuKas jika diset', funct
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->set('filterBukuKas', (string) $bukuKas->id);
 
-    // Verify the property is set correctly — defaultForm uses this internally
+    // Pastikan properti digunakan oleh defaultForm
     $component = Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->set('filterBukuKas', (string) $bukuKas->id);
 
-    // Verify getBukuKasOptions still returns data
+    // Pastikan pilihan buku kas tetap dapat dimuat
     $component->call('getBukuKasOptions')->assertSuccessful();
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
@@ -217,7 +246,7 @@ test('filter buku kas - previous period url mempertahankan filter', function () 
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->set('filterBukuKas', (string) $bukuKas->id)
         ->call('getPreviousPeriodUrl')
@@ -230,7 +259,7 @@ test('filter buku kas - next period url mempertahankan filter', function () {
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->set('filterBukuKas', (string) $bukuKas->id)
         ->call('getNextPeriodUrl')

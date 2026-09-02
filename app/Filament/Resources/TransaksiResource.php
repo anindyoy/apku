@@ -75,6 +75,10 @@ class TransaksiResource extends Resource
                 TextColumn::make('tanggal')
                     ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state))),
 
+                TextColumn::make('buku_kas.nama_buku')
+                    ->label('Buku Kas')
+                    ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterBukuKas)),
+
                 TextColumn::make('kategori')
                     ->label('Kategori')
                     ->getStateUsing(function ($record) {
@@ -115,7 +119,8 @@ class TransaksiResource extends Resource
                     ->prefix('Rp '),
 
                 TextColumn::make('saldo')->numeric()
-                    ->prefix('Rp '),
+                    ->prefix('Rp ')
+                    ->visible(fn (ListTransaksis $livewire): bool => filled($livewire->filterBukuKas)),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([

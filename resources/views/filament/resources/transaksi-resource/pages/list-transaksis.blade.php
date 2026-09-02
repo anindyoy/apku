@@ -30,7 +30,6 @@
             $resetFilterUrl = request()->url() . '?' . http_build_query([
                 'filter_month' => date('m'),
                 'filter_year' => date('Y'),
-                'filter_buku_kas' => $this->getDefaultBukuKasId(),
             ]);
         @endphp
 
@@ -88,6 +87,7 @@
                         <select id="buku-kas-filter"
                             onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
                             class="period-filter-select h-full w-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                            <option value="" {{ blank($filterBukuKas) ? 'selected' : '' }}>Semua Buku Kas</option>
                             @foreach($this->getBukuKasOptions() as $id => $nama)
                                 <option value="{{ $id }}" {{ (string) $filterBukuKas === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
                             @endforeach
