@@ -161,3 +161,106 @@ test('hapus salah satu sisi transfer menghapus pasangan dan mengembalikan seluru
         ->and($bank->fresh()->saldo)->toBe(0)
         ->and($bukuKas->fresh()->saldo)->toBe(0);
 });
+
+test('edit transaksi biasa dapat memindahkan dampak saldo ke buku kas dan dompet lain', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $bukuKasTujuan = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Tujuan',
+        'saldo' => 0,
+    ]);
+    $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $cash->id,
+        'tanggal' => now(),
+        'nominal' => 25000,
+        'jenis' => 'Pemasukan',
+    ]));
+    $bukuKas->update(['saldo' => 25000]);
+    $cash->update(['saldo' => 25000]);
+
+    app(TransaksiService::class)->ubah($user, $transaksi, [
+        'buku_kas_id' => $bukuKasTujuan->id,
+        'dompet_id' => $bank->id,
+        'nominal' => 40000,
+    ]);
+
+    expect($bukuKas->fresh()->saldo)->toBe(0)
+        ->and($cash->fresh()->saldo)->toBe(0)
+        ->and($bukuKasTujuan->fresh()->saldo)->toBe(40000)
+        ->and($bank->fresh()->saldo)->toBe(40000)
+        ->and($transaksi->fresh()->buku_kas_id)->toBe($bukuKasTujuan->id)
+        ->and($transaksi->fresh()->dompet_id)->toBe($bank->id);
+});
+
+test('edit transaksi menolak buku kas atau dompet milik pengguna lain', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet();
+    ['bukuKas' => $bukuKasLain, 'bank' => $dompetLain] = buatDataDompet();
+    $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $cash->id,
+        'tanggal' => now(),
+        'nominal' => 10000,
+        'jenis' => 'Pemasukan',
+    ]));
+
+    expect(fn () => app(TransaksiService::class)->ubah($user, $transaksi, [
+        'buku_kas_id' => $bukuKasLain->id,
+        'dompet_id' => $dompetLain->id,
+    ]))->toThrow(AuthorizationException::class);
+
+    expect($transaksi->fresh()->buku_kas_id)->toBe($bukuKas->id)
+        ->and($transaksi->fresh()->dompet_id)->toBe($cash->id);
+});
+
+test('filter gabungan buku kas dan dompet hanya menampilkan irisan transaksi', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $bukuKasKedua = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Kedua',
+        'saldo' => 0,
+    ]);
+
+    $sesuai = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $cash->id,
+        'tanggal' => now(),
+        'nominal' => 1000,
+        'jenis' => 'Pemasukan',
+    ]));
+    $bedaDompet = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $bank->id,
+        'tanggal' => now(),
+        'nominal' => 2000,
+        'jenis' => 'Pemasukan',
+    ]));
+    $bedaBuku = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKasKedua->id,
+        'dompet_id' => $cash->id,
+        'tanggal' => now(),
+        'nominal' => 3000,
+        'jenis' => 'Pemasukan',
+    ]));
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id])
+        ->set('filterDompet', (string) $cash->id)
+        ->assertCanSeeTableRecords([$sesuai])
+        ->assertCanNotSeeTableRecords([$bedaDompet, $bedaBuku]);
+});
+
+test('filter dompet dari query string mengabaikan dompet pengguna lain', function () {
+    ['user' => $user] = buatDataDompet();
+    ['bank' => $dompetLain] = buatDataDompet();
+
+    Livewire::withQueryParams(['filter_dompet' => $dompetLain->id])
+        ->actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertSet('filterDompet', null);
+});

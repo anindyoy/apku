@@ -113,3 +113,61 @@ test('action hapus dompet memindahkan saldo dan melakukan soft delete', function
         ->and($bank->fresh()->saldo)->toBe(100000)
         ->and($bank->fresh()->is_default)->toBeTrue();
 });
+
+test('transfer buku kas dengan dompet sama menjaga saldo bersih dompet', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+    $bukuKasTujuan = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Tujuan',
+        'saldo' => 0,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id])
+        ->callAction('Transfer saldo', data: [
+            'buku_kas_id' => $bukuKas->id,
+            'buku_kas_id_tujuan' => $bukuKasTujuan->id,
+            'dompet_id' => $cash->id,
+            'dompet_id_tujuan' => $cash->id,
+            'tanggal' => now(),
+            'nominal' => 25000,
+            'deskripsi' => 'Transfer buku dengan dompet sama',
+        ])
+        ->assertHasNoActionErrors();
+
+    expect($bukuKas->fresh()->saldo)->toBe(-25000)
+        ->and($bukuKasTujuan->fresh()->saldo)->toBe(25000)
+        ->and($cash->fresh()->saldo)->toBe(100000);
+});
+
+test('transfer buku kas dengan dompet berbeda turut memindahkan saldo dompet', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+    $bukuKasTujuan = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Tujuan',
+        'saldo' => 0,
+    ]);
+    $bank = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Bank',
+        'saldo' => 0,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id])
+        ->callAction('Transfer saldo', data: [
+            'buku_kas_id' => $bukuKas->id,
+            'buku_kas_id_tujuan' => $bukuKasTujuan->id,
+            'dompet_id' => $cash->id,
+            'dompet_id_tujuan' => $bank->id,
+            'tanggal' => now(),
+            'nominal' => 25000,
+            'deskripsi' => 'Transfer buku dengan dompet berbeda',
+        ])
+        ->assertHasNoActionErrors();
+
+    expect($bukuKas->fresh()->saldo)->toBe(-25000)
+        ->and($bukuKasTujuan->fresh()->saldo)->toBe(25000)
+        ->and($cash->fresh()->saldo)->toBe(75000)
+        ->and($bank->fresh()->saldo)->toBe(25000);
+});
