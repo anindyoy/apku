@@ -104,10 +104,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMengelolaTransaksiPadaDompet(Dompet $dompet): bool
     {
-        return $this->isSuper()
-            || $dompet->id === $this->idDompetUtama()
-            || $dompet->id === $this->idDompetTambahanGratis()
-            || $this->masaAktifBerlaku();
+        return $dompet->user_id === $this->id
+            && ($this->isSuper()
+                || $dompet->id === $this->idDompetUtama()
+                || $dompet->id === $this->idDompetTambahanGratis()
+                || $this->masaAktifBerlaku());
     }
 
     public function dapatMembuatDompet(): bool

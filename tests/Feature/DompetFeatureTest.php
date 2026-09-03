@@ -86,6 +86,115 @@ test('dompet ketiga tidak dapat dipakai ketika masa aktif tidak valid', function
         ->and($dompetKetiga->fresh()->saldo)->toBe(0);
 });
 
+test('saldo dapat ditransfer keluar dari dompet terbatas', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet([
+        'masa_aktif' => today()->subDay(),
+    ]);
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 50000,
+    ]);
+
+    app(TransferDompetService::class)->transfer($user, $dompetKetiga, $cash, $bukuKas, 20000);
+
+    expect($dompetKetiga->fresh()->saldo)->toBe(30000)
+        ->and($cash->fresh()->saldo)->toBe(120000)
+        ->and($bukuKas->fresh()->saldo)->toBe(0);
+});
+
+test('dompet ketiga otomatis terbatas setelah masa aktif kedaluwarsa', function () {
+    ['user' => $user, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 0,
+    ]);
+
+    expect($user->dapatMengelolaTransaksiPadaDompet($dompetKetiga))->toBeTrue();
+
+    $user->update(['masa_aktif' => today()->subDay()]);
+    $user->refresh();
+
+    expect($user->dapatMengelolaTransaksiPadaDompet($cash))->toBeTrue()
+        ->and($user->dapatMengelolaTransaksiPadaDompet($bank))->toBeTrue()
+        ->and($user->dapatMengelolaTransaksiPadaDompet($dompetKetiga))->toBeFalse();
+});
+
+test('service menolak pemindahan transaksi ke dompet terbatas', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet([
+        'masa_aktif' => today()->subDay(),
+    ]);
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 0,
+    ]);
+    $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $cash->id,
+        'tanggal' => now(),
+        'nominal' => 10000,
+        'jenis' => 'Pemasukan',
+    ]));
+
+    expect(fn () => app(TransaksiService::class)->ubah($user, $transaksi, [
+        'dompet_id' => $dompetKetiga->id,
+    ]))->toThrow(AuthorizationException::class);
+
+    expect($transaksi->fresh()->dompet_id)->toBe($cash->id);
+});
+
+test('transaksi lama pada dompet terbatas tidak dapat diubah atau dihapus', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas] = buatDataDompet();
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 50000,
+    ]);
+    $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $dompetKetiga->id,
+        'tanggal' => now(),
+        'nominal' => 50000,
+        'jenis' => 'Pemasukan',
+    ]));
+    $user->update(['masa_aktif' => today()->subDay()]);
+    $user->refresh();
+
+    expect(fn () => app(TransaksiService::class)->ubah($user, $transaksi, ['nominal' => 60000]))
+        ->toThrow(AuthorizationException::class)
+        ->and(fn () => app(TransaksiService::class)->hapus($user, $transaksi))
+        ->toThrow(AuthorizationException::class);
+
+    expect($transaksi->fresh())->not->toBeNull()
+        ->and($transaksi->fresh()->nominal)->toBe(50000)
+        ->and($dompetKetiga->fresh()->saldo)->toBe(50000);
+});
+
+test('seluruh dompet otomatis dapat digunakan kembali setelah masa aktif diperpanjang', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet([
+        'masa_aktif' => today()->subDay(),
+    ]);
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 0,
+    ]);
+
+    expect($user->dapatMengelolaTransaksiPadaDompet($dompetKetiga))->toBeFalse();
+
+    $user->update(['masa_aktif' => today()->addMonth()]);
+    $user->refresh();
+    app(TransferDompetService::class)->transfer($user, $cash, $dompetKetiga, $bukuKas, 10000);
+
+    expect($user->dapatMengelolaTransaksiPadaDompet($dompetKetiga))->toBeTrue()
+        ->and($cash->fresh()->saldo)->toBe(90000)
+        ->and($dompetKetiga->fresh()->saldo)->toBe(10000);
+});
+
 test('filter dompet hanya menampilkan transaksi dompet terpilih', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
 

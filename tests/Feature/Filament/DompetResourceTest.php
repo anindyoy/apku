@@ -4,6 +4,7 @@ use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\Transaksi;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -68,6 +69,34 @@ test('pengguna tanpa masa aktif tidak dapat membuat dompet ketiga', function () 
         ->assertActionHidden('create');
 });
 
+test('dompet dan transaksi ketiga tetap terlihat tetapi action pengelolaan disembunyikan', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas] = buatPenggunaUntukUiDompet();
+    Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 0]);
+    $dompetKetiga = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'E-Wallet', 'saldo' => 50000]);
+    $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $dompetKetiga->id,
+        'tanggal' => now(),
+        'nominal' => 50000,
+        'jenis' => 'Pemasukan',
+    ]));
+    $user->update(['masa_aktif' => today()->subDay()]);
+
+    Livewire::actingAs($user->refresh())
+        ->test(ListDompet::class)
+        ->assertCanSeeTableRecords([$dompetKetiga])
+        ->assertTableColumnStateSet('status_akses', 'Terbatas', $dompetKetiga)
+        ->assertTableActionHidden('edit', $dompetKetiga)
+        ->assertTableActionHidden('pindahkanDanHapus', $dompetKetiga);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertCanSeeTableRecords([$transaksi])
+        ->assertTableActionHidden('edit', $transaksi)
+        ->assertTableActionHidden('delete', $transaksi);
+});
+
 test('action transfer dompet tersedia tanpa masa aktif dan menghasilkan saldo negatif', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet(today()->subDay()->toDateString());
     $bank = Dompet::create([
@@ -91,6 +120,32 @@ test('action transfer dompet tersedia tanpa masa aktif dan menghasilkan saldo ne
 
     expect($cash->fresh()->saldo)->toBe(-25000)
         ->and($bank->fresh()->saldo)->toBe(125000);
+});
+
+test('action transfer mengizinkan saldo keluar dari dompet terbatas', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet(today()->subDay()->toDateString());
+    Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 0]);
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 50000,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertActionVisible('Pindah saldo dompet')
+        ->callAction('Pindah saldo dompet', data: [
+            'dompet_asal_id' => $dompetKetiga->id,
+            'dompet_tujuan_id' => $cash->id,
+            'buku_kas_id' => $bukuKas->id,
+            'tanggal' => now(),
+            'nominal' => 20000,
+            'deskripsi' => 'Keluarkan saldo dompet terbatas',
+        ])
+        ->assertHasNoActionErrors();
+
+    expect($dompetKetiga->fresh()->saldo)->toBe(30000)
+        ->and($cash->fresh()->saldo)->toBe(120000);
 });
 
 test('action hapus dompet memindahkan saldo dan melakukan soft delete', function () {

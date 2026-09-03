@@ -11,7 +11,7 @@ Fitur ini memisahkan dua dimensi pencatatan keuangan:
 - Setiap transaksi wajib terkait dengan tepat satu buku kas dan satu dompet milik pengguna yang sama.
 - Pengguna dapat memindahkan saldo dari satu dompet ke dompet lain tanpa mengubah saldo bersih buku kas.
 - Pengguna dengan masa aktif valid atau role super dapat menggunakan seluruh dompetnya.
-- Pengguna dengan masa aktif tidak valid hanya dapat menggunakan maksimal dua dompet. Dompet ke-3 dan seterusnya tetap tersimpan, tetapi tidak dapat dipakai untuk membuat, mengubah, atau mentransfer transaksi sampai masa aktif kembali valid.
+- Pengguna dengan masa aktif tidak valid hanya dapat menggunakan maksimal dua dompet untuk transaksi biasa dan sebagai tujuan transfer. Dompet ke-3 dan seterusnya tetap tersimpan dan boleh menjadi sumber transfer agar saldonya dapat dikeluarkan, tetapi tidak dapat dipakai untuk membuat atau mengubah transaksi biasa sampai masa aktif kembali valid.
 - Masa aktif yang tidak valid tidak menonaktifkan fitur transfer. Pengguna tetap dapat melakukan transfer saldo antar buku kas dan antar dompet yang termasuk kuota gratis serta dapat dikelola.
 
 Keputusan produk yang sudah disepakati:
@@ -90,7 +90,7 @@ Terapkan aturan yang konsisten dengan pembatasan buku kas pada `User`:
 - Dua dompet gratis yang tetap aktif adalah dompet default dan satu dompet tambahan dengan ID paling kecil. Pemilihan ini harus deterministik.
 - Jika pengguna sebelumnya mempunyai lebih dari dua dompet, dompet ke-3 dan seterusnya berstatus **terbatas** secara terhitung. Record, saldo, dan histori transaksinya tidak dihapus atau dipindahkan otomatis.
 - Dompet terbatas masih boleh terlihat pada daftar dompet, laporan, dan histori dengan badge atau keterangan **Tidak aktif—perpanjang masa aktif untuk menggunakan**.
-- Dompet terbatas tidak muncul sebagai opsi pada form transaksi baru dan transfer. Upaya mengirim ID dompet tersebut secara manual harus ditolak di lapisan domain/otorisasi.
+- Dompet terbatas tidak muncul sebagai opsi pada form transaksi baru atau sebagai tujuan transfer. Dompet tersebut tetap muncul sebagai sumber transfer agar saldonya dapat dikeluarkan. Upaya mengirim ID dompet terbatas sebagai tujuan atau sebagai dompet transaksi biasa harus ditolak di lapisan domain/otorisasi.
 - Transaksi lama pada dompet terbatas tetap dapat dibaca, tetapi tidak dapat diedit atau dihapus apabila operasi tersebut mengubah saldo dompet. Hal ini mengikuti prinsip pembatasan pengelolaan buku kas saat ini.
 - Ketika masa aktif kembali valid, seluruh dompet otomatis dapat digunakan lagi. Karena itu, status terbatas tidak perlu disimpan sebagai flag permanen di database.
 
@@ -165,7 +165,7 @@ Form onboarding menampilkan **Kas Utama** dan **Cash** sebagai nilai awal. Pengg
 - Tampilkan transfer sebagai satu aktivitas logis pada UI detail atau beri tautan ke transaksi pasangannya agar pengguna tidak mengira ada pemasukan/pengeluaran riil.
 - Transfer dompet tidak dihitung sebagai pemasukan atau pengeluaran pada ringkasan laba-arus pengguna. Nilainya hanya memengaruhi mutasi dan saldo per dompet.
 - Jangan menolak transfer ketika nominal melebihi saldo dompet asal. Simpan hasil saldo negatif dan tandai baris atau nilai saldo dompet negatif dengan warna kontras pada daftar transaksi.
-- Pengguna dengan masa aktif tidak valid tidak boleh memilih dompet ke-3 dan seterusnya sebagai asal maupun tujuan. Transfer lama pada dompet terbatas tetap dapat dilihat, tetapi tidak dapat diubah atau dihapus sampai akses kembali aktif.
+- Pengguna dengan masa aktif tidak valid boleh memilih dompet ke-3 dan seterusnya sebagai asal transfer untuk mengeluarkan saldo, tetapi tidak sebagai tujuan. Transfer lama pada dompet terbatas tetap dapat dilihat, tetapi tidak dapat diubah atau dihapus sampai akses kembali aktif.
 - Untuk transfer antar buku kas, terapkan prinsip yang sama: pengguna bermasa aktif tidak valid tetap dapat transfer selama buku kas asal dan tujuan termasuk buku kas gratis yang dapat dikelola.
 
 ### 7. Tambahkan pengelolaan dompet di Filament
@@ -259,8 +259,8 @@ Tambahkan atau sesuaikan pengujian terfokus berikut:
 - pengguna dengan masa aktif tidak valid dapat membuat dan menggunakan maksimal dua dompet;
 - pengguna dengan masa aktif tidak valid tetap dapat membuka dan menjalankan action transfer antar dua dompet atau buku kas gratis yang dapat dikelola;
 - masa aktif tidak valid tidak boleh menjadi satu-satunya alasan penolakan transfer;
-- dompet ke-3 dan seterusnya milik pengguna dengan masa aktif tidak valid tetap tersimpan dan terlihat, tetapi tidak dapat dipakai pada create, edit, delete, atau transfer transaksi;
-- request manual yang memakai dompet terbatas ditolak meskipun melewati pembatasan UI;
+- dompet ke-3 dan seterusnya milik pengguna dengan masa aktif tidak valid tetap tersimpan dan terlihat, tidak dapat dipakai pada create, edit, atau delete transaksi, tetapi dapat menjadi sumber transfer untuk mengeluarkan saldo;
+- request manual yang memakai dompet terbatas sebagai tujuan transfer atau dompet transaksi biasa ditolak meskipun melewati pembatasan UI;
 - seluruh dompet kembali dapat digunakan setelah masa aktif diperpanjang;
 - user super tidak terkena batas jumlah atau penggunaan dompet;
 - penghapusan dompet terakhir ditolak;

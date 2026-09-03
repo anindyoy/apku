@@ -188,4 +188,11 @@ class Transaksi extends Model
             ->pluck('nama_dompet', 'id')
             ->all();
     }
+
+    public static function opsiDompetSumberTransfer(): array
+    {
+        return Dompet::query()
+            ->pluck('nama_dompet', 'id')
+            ->all();
+    }
 }

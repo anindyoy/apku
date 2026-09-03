@@ -151,11 +151,11 @@ class ListTransaksis extends ListRecords
     {
         return [
             Action::make('Pindah saldo dompet')
-                ->visible(fn (): bool => count(Transaksi::opsiDompetYangDapatDikelola()) >= 2)
+                ->visible(fn (): bool => count(Transaksi::opsiDompetSumberTransfer()) >= 2)
                 ->schema([
                     Select::make('dompet_asal_id')
                         ->label('Dompet asal')
-                        ->options(fn (): array => Transaksi::opsiDompetYangDapatDikelola())
+                        ->options(fn (): array => Transaksi::opsiDompetSumberTransfer())
                         ->default(fn (): ?int => $this->filterDompet ? (int) $this->filterDompet : auth()->user()->idDompetUtama())
                         ->required(),
                     Select::make('dompet_tujuan_id')

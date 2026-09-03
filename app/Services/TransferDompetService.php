@@ -35,7 +35,6 @@ class TransferDompetService
             $dompetAsal->user_id !== $user->id
             || $dompetTujuan->user_id !== $user->id
             || $bukuKas->user_id !== $user->id
-            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetAsal)
             || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
         ) {
