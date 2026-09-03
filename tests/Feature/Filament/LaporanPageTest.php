@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\Laporan;
 use App\Models\BukuKas;
+use App\Models\Dompet;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -9,9 +10,15 @@ use Livewire\Livewire;
 
 function buatTransaksiLaporan(User $user, BukuKas $bukuKas, JenisTransaksi $kategori, string $jenis, int $nominal, string $tanggal): Transaksi
 {
+    $dompet = Dompet::withoutGlobalScopes()->firstOrCreate(
+        ['user_id' => $user->id, 'nama_dompet' => 'Cash'],
+        ['saldo' => 0, 'is_default' => true]
+    );
+
     return Transaksi::withoutEvents(fn () => Transaksi::create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $dompet->id,
         'jenis_transaksi_id' => $kategori->id,
         'jenis' => $jenis,
         'nominal' => $nominal,

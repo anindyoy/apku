@@ -29,6 +29,15 @@
                     @endforeach
                 </select>
             </div>
+            <div class="laporan-filter__book">
+                <label for="dompet">Dompet</label>
+                <select id="dompet" wire:model.live="dompetId">
+                    <option value="semua">Semua Dompet</option>
+                    @foreach (\App\Models\Dompet::withTrashed()->get() as $dompet)
+                        <option value="{{ $dompet->id }}">{{ $dompet->nama_dompet }}{{ $dompet->trashed() ? ' (Dihapus)' : '' }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="laporan-periods" aria-label="Pilihan periode laporan">
                 @foreach (['harian' => 'Harian', 'bulanan' => 'Bulanan', 'tahunan' => 'Tahunan', 'custom' => 'Custom'] as $nilai => $label)
                     <button type="button" wire:click="pilihPeriode('{{ $nilai }}')" @class(['active' => $periode === $nilai])>{{ $label }}</button>

@@ -28,6 +28,7 @@ class ListBukuKas extends ListRecords
                     Transaksi::create([
                         'user_id' => $record->user_id,
                         'buku_kas_id' => $record->id,
+                        'dompet_id' => auth()->user()->idDompetUtama(),
                         'tanggal' => now(),
                         'nominal' => $record->saldo,
                         'jenis' => 'Pemasukan',

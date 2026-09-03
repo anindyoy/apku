@@ -40,8 +40,16 @@ test('pengguna baru dapat menyimpan pengaturan awal', function () {
         ->description->toBe('Kas operasional toko')
         ->saldo->toBe(150000);
 
+    $dompet = $user->dompet()->firstOrFail();
+
+    expect($dompet)
+        ->nama_dompet->toBe('Cash')
+        ->saldo->toBe(150000)
+        ->is_default->toBeTrue();
+
     $this->assertDatabaseHas('transaksi', [
         'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $dompet->id,
         'nominal' => 150000,
         'jenis' => 'Pemasukan',
         'deskripsi' => 'Saldo awal',
@@ -50,12 +58,13 @@ test('pengguna baru dapat menyimpan pengaturan awal', function () {
     $this->assertDatabaseHas('jenis_transaksi', ['user_id' => $user->id, 'tipe' => 'Pengeluaran', 'nama_jenis' => 'Belanja Stok']);
 });
 
-test('placeholder tidak disimpan sebagai data awal', function () {
+test('label default onboarding terisi tanpa mengisi kategori dengan placeholder', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
 
     Livewire::actingAs($user)
         ->test(Onboarding::class)
-        ->assertSet('data.nama_buku', null)
+        ->assertSet('data.nama_buku', 'Kas Utama')
+        ->assertSet('data.nama_dompet', 'Cash')
         ->assertSet('data.kategori_pemasukan', fn (array $items) => collect($items)->pluck('nama_jenis')->filter()->isEmpty())
         ->assertSet('data.kategori_pengeluaran', fn (array $items) => collect($items)->pluck('nama_jenis')->filter()->isEmpty());
 });

@@ -1,5 +1,7 @@
 <?php
 
+use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
+use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use Illuminate\Support\Facades\DB;
@@ -16,10 +18,11 @@ test('transaksi resource dapat menampilkan halaman list', function () {
         'buku_kas_id' => $bukuKas->id,
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
+        'tanggal' => now(),
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertSeeText('Rp');
 })
@@ -43,7 +46,7 @@ test('transaksi resource dapat mengedit nominal transaksi', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\EditTransaksi::class, ['record' => $transaksi->id])
+        ->test(EditTransaksi::class, ['record' => $transaksi->id])
         ->assertSuccessful()
         ->set('data.nominal', 150000)
         ->call('save')
@@ -71,7 +74,7 @@ test('transaksi resource dapat menghapus transaksi pemasukan', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\EditTransaksi::class, ['record' => $transaksi->id])
+        ->test(EditTransaksi::class, ['record' => $transaksi->id])
         ->callTableAction('delete', $transaksi->id);
 
     $this->assertEmpty(DB::table('transaksi')->find($transaksi->id));

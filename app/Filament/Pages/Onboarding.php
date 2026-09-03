@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\BukuKas;
+use App\Models\Dompet;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use BackedEnum;
@@ -35,13 +36,16 @@ class Onboarding extends Page implements HasForms
 
     public function mount(): void
     {
-        if (auth()->user()->buku_kas()->exists()) {
+        if (auth()->user()->buku_kas()->exists() && auth()->user()->dompet()->exists()) {
             $this->redirect(filament()->getUrl(), navigate: true);
 
             return;
         }
 
-        $this->form->fill();
+        $this->form->fill([
+            'nama_buku' => 'Kas Utama',
+            'nama_dompet' => 'Cash',
+        ]);
     }
 
     public function form(Schema $schema): Schema
@@ -56,6 +60,10 @@ class Onboarding extends Page implements HasForms
                             TextInput::make('nama_buku')
                                 ->label('Label buku kas utama')
                                 ->placeholder('Contoh: Dompet Harian atau Rekening Usaha')
+                                ->required()
+                                ->maxLength(50),
+                            TextInput::make('nama_dompet')
+                                ->label('Label dompet utama')
                                 ->required()
                                 ->maxLength(50),
                             Textarea::make('description')
@@ -122,11 +130,21 @@ class Onboarding extends Page implements HasForms
                 'nama_buku' => $data['nama_buku'],
                 'description' => $data['description'] ?: null,
                 'saldo' => $data['saldo_awal'],
+                'is_default' => true,
+            ]);
+
+            $dompet = Dompet::create([
+                'user_id' => $user->id,
+                'nama_dompet' => $data['nama_dompet'],
+                'saldo' => $data['saldo_awal'],
+                'is_default' => true,
+                'description' => 'Dompet utama',
             ]);
 
             Transaksi::create([
                 'user_id' => $user->id,
                 'buku_kas_id' => $bukuKas->id,
+                'dompet_id' => $dompet->id,
                 'tanggal' => now(),
                 'nominal' => $data['saldo_awal'],
                 'jenis' => 'Pemasukan',

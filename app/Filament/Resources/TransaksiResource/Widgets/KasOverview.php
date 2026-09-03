@@ -7,6 +7,7 @@ use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
+use App\Models\Dompet;
 
 class KasOverview extends BaseWidget
 {
@@ -21,13 +22,18 @@ class KasOverview extends BaseWidget
     {
         $filterBukuKas = $this->getTablePageInstance()->filterBukuKas;
         $saldoBukuKas = BukuKas::find($filterBukuKas)?->saldo ?? 0;
+        $filterDompet = $this->getTablePageInstance()->filterDompet;
+        $saldoDompet = Dompet::withTrashed()->find($filterDompet)?->saldo;
 
         return [
             Stat::make(
                 'Saldo',
-                'Rp ' . number_format($saldoBukuKas)
+                'Rp ' . number_format($saldoDompet ?? $saldoBukuKas)
             )
-                ->description('Semua Buku Kas Rp ' . number_format(BukuKas::sum('saldo'))),
+                ->description($filterDompet
+                    ? 'Saldo dompet terpilih'
+                    : 'Semua Buku Kas Rp '.number_format(BukuKas::sum('saldo')))
+                ->color(($saldoDompet ?? $saldoBukuKas) < 0 ? 'danger' : 'primary'),
         ];
     }
 }

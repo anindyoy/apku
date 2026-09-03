@@ -37,6 +37,7 @@ class PencarianTransaksi extends Page implements HasTable
                     'asal_buku_tabungan:id,nama_buku',
                     'tujuan_buku_tabungan:id,nama_buku',
                     'user:id,name',
+                    'dompet' => fn ($query) => $query->withTrashed(),
                 ]);
 
                 return filled($this->getTableSearch())
@@ -72,6 +73,11 @@ class PencarianTransaksi extends Page implements HasTable
 
                 TextColumn::make('buku_kas.nama_buku')
                     ->label('Buku Kas')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('dompet.nama_dompet')
+                    ->label('Dompet')
                     ->searchable()
                     ->sortable(),
 
@@ -126,6 +132,12 @@ class PencarianTransaksi extends Page implements HasTable
                 SelectFilter::make('buku_kas_id')
                     ->label('Buku kas')
                     ->relationship('buku_kas', 'nama_buku')
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('dompet_id')
+                    ->label('Dompet')
+                    ->relationship('dompet', 'nama_dompet')
                     ->searchable()
                     ->preload(),
             ])

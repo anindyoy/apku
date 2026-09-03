@@ -6,6 +6,7 @@ use App\Filament\Resources\TransaksiResource\Pages;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
+use App\Models\Dompet;
 use App\Models\Transaksi;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -46,6 +47,9 @@ class TransaksiResource extends Resource
                     'transaksi.*',
                     DB::raw(
                         'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
+                    ),
+                    DB::raw(
+                        'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY dompet_id ORDER BY tanggal, id desc) as saldo_dompet'
                     )
                 )
             )
@@ -79,23 +83,13 @@ class TransaksiResource extends Resource
                     ->label('Buku Kas')
                     ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterBukuKas)),
 
+                TextColumn::make('dompet.nama_dompet')
+                    ->label('Dompet')
+                    ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterDompet)),
+
                 TextColumn::make('kategori')
                     ->label('Kategori')
-                    ->getStateUsing(function ($record) {
-                        if (! in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
-                            $text = $record->jenis_transaksi?->nama_jenis;
-                        }
-
-                        if ($record->jenis == 'Transfer Pemasukan') {
-                            $text = 'Transfer dari '.$record->asal_buku_tabungan->nama_buku;
-                        }
-
-                        if ($record->jenis == 'Transfer Pengeluaran') {
-                            $text = 'Transfer ke '.$record->tujuan_buku_tabungan->nama_buku;
-                        }
-
-                        return $text;
-                    })
+                    ->getStateUsing(fn (Transaksi $record) => static::getKategoriLabel($record))
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query
                             ->where('deskripsi', 'like', "%{$search}%");
@@ -121,6 +115,14 @@ class TransaksiResource extends Resource
                 TextColumn::make('saldo')->numeric()
                     ->prefix('Rp ')
                     ->visible(fn (ListTransaksis $livewire): bool => filled($livewire->filterBukuKas)),
+
+                TextColumn::make('saldo_dompet')
+                    ->label('Saldo Dompet')
+                    ->numeric()
+                    ->prefix('Rp ')
+                    ->color(fn ($state): string => (int) $state < 0 ? 'danger' : 'gray')
+                    ->tooltip(fn ($state): ?string => (int) $state < 0 ? 'Saldo dompet negatif' : null)
+                    ->visible(fn (ListTransaksis $livewire): bool => filled($livewire->filterDompet)),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([
@@ -128,14 +130,24 @@ class TransaksiResource extends Resource
             ->actions([
                 EditAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isSuper()
-                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas))
+                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
+                        || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
                     ->before(function ($record, $livewire) {
-                        abort_unless(auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas), 403);
+                        abort_unless(
+                            auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
+                            && auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet),
+                            403
+                        );
 
                         $bukuKasBaru = BukuKas::findOrFail(
                             $livewire->mountedTableActionsData[0]['buku_kas_id']
                         );
                         abort_unless(auth()->user()->dapatMengelolaTransaksiPada($bukuKasBaru), 403);
+
+                        $dompetBaru = Dompet::findOrFail(
+                            $livewire->mountedTableActionsData[0]['dompet_id']
+                        );
+                        abort_unless(auth()->user()->dapatMengelolaTransaksiPadaDompet($dompetBaru), 403);
 
                         if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
                             $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
@@ -163,7 +175,8 @@ class TransaksiResource extends Resource
 
                 DeleteAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isSuper()
-                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas))
+                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
+                        || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
                     ->before(function ($record): void {
                         abort_unless(auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas), 403);
                     })
@@ -208,6 +221,19 @@ class TransaksiResource extends Resource
             ->bulkActions([
                 // DeleteBulkAction::make(),
             ]);
+    }
+
+    public static function getKategoriLabel(Transaksi $transaksi): ?string
+    {
+        return match ($transaksi->jenis) {
+            'Transfer Pemasukan' => $transaksi->tipe_transfer === 'dompet'
+                ? 'Transfer masuk dompet'
+                : 'Transfer dari '.($transaksi->asal_buku_tabungan?->nama_buku ?? '-'),
+            'Transfer Pengeluaran' => $transaksi->tipe_transfer === 'dompet'
+                ? 'Transfer keluar dompet'
+                : 'Transfer ke '.($transaksi->tujuan_buku_tabungan?->nama_buku ?? '-'),
+            default => $transaksi->jenis_transaksi?->nama_jenis,
+        };
     }
 
     public static function getWidgets(): array

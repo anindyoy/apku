@@ -24,6 +24,22 @@ class Transaksi extends Model
 
     protected $table = 'transaksi';
 
+    protected static function booted(): void
+    {
+        static::creating(function (Transaksi $transaksi): void {
+            if ($transaksi->dompet_id || ! $transaksi->user_id) {
+                return;
+            }
+
+            $dompet = Dompet::withoutGlobalScopes()->firstOrCreate(
+                ['user_id' => $transaksi->user_id, 'nama_dompet' => 'Cash'],
+                ['saldo' => 0, 'is_default' => true, 'description' => 'Dompet tunai utama']
+            );
+
+            $transaksi->dompet_id = $dompet->id;
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -32,6 +48,11 @@ class Transaksi extends Model
     public function buku_kas()
     {
         return $this->belongsTo(BukuKas::class);
+    }
+
+    public function dompet()
+    {
+        return $this->belongsTo(Dompet::class)->withTrashed();
     }
 
     public function jenis_transaksi()
@@ -71,6 +92,21 @@ class Transaksi extends Model
                     fn ($query) => static::batasiBukuKasYangDapatDikelola($query)
                 )
                 ->required(),
+
+            Select::make('dompet_id')
+                ->label($transfer ? 'Dompet Asal' : 'Dompet')
+                ->relationship(
+                    'dompet',
+                    'nama_dompet',
+                    fn ($query) => static::batasiDompetYangDapatDikelola($query)
+                )
+                ->required(),
+
+            Select::make('dompet_id_tujuan')
+                ->label('Dompet Tujuan')
+                ->options(fn (): array => static::opsiDompetYangDapatDikelola())
+                ->required()
+                ->visible($transfer),
 
             Select::make('buku_kas_id_tujuan')
                 ->label('Buku Kas Tujuan')
@@ -127,5 +163,27 @@ class Transaksi extends Model
             $query->whereKey($user->idBukuKasUtama())
                 ->orWhere('id', $user->idBukuKasTambahanGratis());
         });
+    }
+
+    private static function batasiDompetYangDapatDikelola($query)
+    {
+        $user = auth()->user();
+        $query->withoutTrashed();
+
+        if ($user->isSuper() || $user->masaAktifBerlaku()) {
+            return $query;
+        }
+
+        return $query->whereKey(array_filter([
+            $user->idDompetUtama(),
+            $user->idDompetTambahanGratis(),
+        ]));
+    }
+
+    public static function opsiDompetYangDapatDikelola(): array
+    {
+        return static::batasiDompetYangDapatDikelola(Dompet::query())
+            ->pluck('nama_dompet', 'id')
+            ->all();
     }
 }

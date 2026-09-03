@@ -2,18 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\BukuKas;
-use App\Models\Transaksi;
+use App\Models\Dompet;
 use App\Models\JenisTransaksi;
+use App\Models\Transaksi;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Seeder khusus untuk membuat transaksi 3 bulan terakhir untuk user tertentu.
  *
- * Usage:
+ * Penggunaan:
  *   php artisan db:seed --class=UserTransactionSeeder
  *   php artisan db:seed --class=UserTransactionSeeder --email=mursita77@example.org
  *   php artisan db:seed --class=UserTransactionSeeder --email=mursita77@example.org --months=6
@@ -24,10 +25,11 @@ use Illuminate\Support\Carbon;
 class UserTransactionSeeder extends Seeder
 {
     private ?string $email = null;
+
     private int $months = 3;
 
     /**
-     * Output a line: uses command output (artisan db:seed) or stdout (tinker).
+     * Tampilkan baris melalui output command atau stdout.
      */
     private function line(string $message, string $type = 'info'): void
     {
@@ -37,38 +39,41 @@ class UserTransactionSeeder extends Seeder
                 default => $this->command->info($message),
             };
         } else {
-            echo $message . PHP_EOL;
+            echo $message.PHP_EOL;
         }
+
     }
 
     /**
-     * Set email target user (chainable).
+     * Tentukan email pengguna tujuan.
      */
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
         return $this;
     }
 
     /**
-     * Set jumlah bulan ke belakang (chainable).
+     * Tentukan jumlah bulan ke belakang.
      */
     public function setMonths(int $months): static
     {
         $this->months = $months;
+
         return $this;
     }
 
     /**
-     * Run the database seeds.
+     * Jalankan seeder database.
      *
-     * Usage via artisan tinker:
+     * Penggunaan melalui artisan tinker:
      *   (new \Database\Seeders\UserTransactionSeeder)
      *       ->setEmail('mursita77@example.org')
      *       ->setMonths(3)
      *       ->run();
      *
-     * Usage via artisan tinker (one-liner):
+     * Penggunaan satu baris melalui artisan tinker:
      *   php artisan tinker --execute="(new \Database\Seeders\UserTransactionSeeder)->setEmail('mursita77@example.org')->setMonths(3)->run();"
      */
     public function run(): void
@@ -76,13 +81,15 @@ class UserTransactionSeeder extends Seeder
 
         $user = User::where('email', $this->email)->first();
 
-        if (!$this->email) {
-            $this->line("Email belum ditentukan! Gunakan setEmail() atau --email.", 'error');
+        if (! $this->email) {
+            $this->line('Email belum ditentukan! Gunakan setEmail() atau --email.', 'error');
+
             return;
         }
 
-        if (!$user) {
+        if (! $user) {
             $this->line("User dengan email {$this->email} tidak ditemukan!", 'error');
+
             return;
         }
 
@@ -93,7 +100,7 @@ class UserTransactionSeeder extends Seeder
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$bukuKas) {
+        if (! $bukuKas) {
             $bukuKas = BukuKas::create([
                 'user_id' => $user->id,
                 'nama_buku' => 'Kas Utama',
@@ -105,34 +112,39 @@ class UserTransactionSeeder extends Seeder
             $this->line("  Using BukuKas: {$bukuKas->nama_buku} (ID: {$bukuKas->id})");
         }
 
+        $dompet = Dompet::withoutGlobalScopes()->firstOrCreate(
+            ['user_id' => $user->id, 'nama_dompet' => 'Cash'],
+            ['saldo' => 0, 'is_default' => true, 'description' => 'Dompet tunai utama']
+        );
+
         // --- 2. Pastikan user punya JenisTransaksi ---
         $pemasukanType = JenisTransaksi::where('user_id', $user->id)
             ->where('tipe', 'Pemasukan')
             ->first();
 
-        if (!$pemasukanType) {
+        if (! $pemasukanType) {
             $pemasukanType = JenisTransaksi::create([
                 'user_id' => $user->id,
                 'nama_jenis' => 'Gaji',
                 'tipe' => 'Pemasukan',
             ]);
-            $this->line("  Created JenisTransaksi Pemasukan: Gaji");
+            $this->line('  Created JenisTransaksi Pemasukan: Gaji');
         }
 
         $pengeluaranType = JenisTransaksi::where('user_id', $user->id)
             ->where('tipe', 'Pengeluaran')
             ->first();
 
-        if (!$pengeluaranType) {
+        if (! $pengeluaranType) {
             $pengeluaranType = JenisTransaksi::create([
                 'user_id' => $user->id,
                 'nama_jenis' => 'Makanan',
                 'tipe' => 'Pengeluaran',
             ]);
-            $this->line("  Created JenisTransaksi Pengeluaran: Makanan");
+            $this->line('  Created JenisTransaksi Pengeluaran: Makanan');
         }
 
-        // --- 3. Generate transaksi untuk N bulan terakhir ---
+        // Tahap 3: buat transaksi untuk beberapa bulan terakhir.
         $now = Carbon::now();
         $allTransactions = [];
 
@@ -174,12 +186,14 @@ class UserTransactionSeeder extends Seeder
 
                 $allTransactions[] = [
                     'buku_kas_id' => $bukuKas->id,
+                    'dompet_id' => $dompet->id,
                     'user_id' => $user->id,
                     'jenis_transaksi_id' => $pemasukanType->id,
                     'tanggal' => $date->format('Y-m-d H:i:s'),
                     'nominal' => $pemasukanNominals[array_rand($pemasukanNominals)],
                     'jenis' => 'Pemasukan',
                     'transfer_code' => null,
+                    'tipe_transfer' => null,
                     'deskripsi' => $pemasukanDescriptions[array_rand($pemasukanDescriptions)],
                     'tujuan_buku_tabungan_id' => null,
                     'asal_buku_tabungan_id' => null,
@@ -198,12 +212,14 @@ class UserTransactionSeeder extends Seeder
 
                 $allTransactions[] = [
                     'buku_kas_id' => $bukuKas->id,
+                    'dompet_id' => $dompet->id,
                     'user_id' => $user->id,
                     'jenis_transaksi_id' => $pengeluaranType->id,
                     'tanggal' => $date->format('Y-m-d H:i:s'),
                     'nominal' => $pengeluaranNominals[array_rand($pengeluaranNominals)],
                     'jenis' => 'Pengeluaran',
                     'transfer_code' => null,
+                    'tipe_transfer' => null,
                     'deskripsi' => $pengeluaranDescriptions[array_rand($pengeluaranDescriptions)],
                     'tujuan_buku_tabungan_id' => null,
                     'asal_buku_tabungan_id' => null,
@@ -215,10 +231,10 @@ class UserTransactionSeeder extends Seeder
             $this->line("  Generated transactions for {$month->format('F Y')}");
         }
 
-        // Sort by tanggal
-        usort($allTransactions, fn($a, $b) => strtotime($a['tanggal']) - strtotime($b['tanggal']));
+        // Urutkan berdasarkan tanggal.
+        usort($allTransactions, fn ($a, $b) => strtotime($a['tanggal']) - strtotime($b['tanggal']));
 
-        // Bulk insert in chunks
+        // Simpan massal dalam beberapa bagian.
         $chunks = array_chunk($allTransactions, 50);
         $totalInserted = 0;
 
@@ -227,7 +243,7 @@ class UserTransactionSeeder extends Seeder
             $totalInserted += count($chunk);
         }
 
-        // --- 4. Update saldo BukuKas ---
+        // Tahap 4: perbarui saldo buku kas.
         $totalPemasukan = DB::table('transaksi')
             ->where('user_id', $user->id)
             ->where('jenis', 'Pemasukan')
@@ -245,19 +261,24 @@ class UserTransactionSeeder extends Seeder
                 'updated_at' => $now,
             ]);
 
-        // --- 5. Summary ---
-        $this->line("");
-        $this->line("=== SUMMARY ===");
+        DB::table('dompet')->where('id', $dompet->id)->update([
+            'saldo' => $totalPemasukan - $totalPengeluaran,
+            'updated_at' => $now,
+        ]);
+
+        // Tahap 5: tampilkan ringkasan.
+        $this->line('');
+        $this->line('=== SUMMARY ===');
         $this->line("Total transaksi dibuat: {$totalInserted}");
 
         $pemasukanCount = DB::table('transaksi')->where('user_id', $user->id)->where('jenis', 'Pemasukan')->count();
         $pengeluaranCount = DB::table('transaksi')->where('user_id', $user->id)->where('jenis', 'Pengeluaran')->count();
-        $this->line("Pemasukan: {$pemasukanCount} transaksi (Rp " . number_format($totalPemasukan, 0, ',', '.') . ")");
-        $this->line("Pengeluaran: {$pengeluaranCount} transaksi (Rp " . number_format($totalPengeluaran, 0, ',', '.') . ")");
-        $this->line("Saldo BukuKas {$bukuKas->nama_buku}: Rp " . number_format($totalPemasukan - $totalPengeluaran, 0, ',', '.'));
+        $this->line("Pemasukan: {$pemasukanCount} transaksi (Rp ".number_format($totalPemasukan, 0, ',', '.').')');
+        $this->line("Pengeluaran: {$pengeluaranCount} transaksi (Rp ".number_format($totalPengeluaran, 0, ',', '.').')');
+        $this->line("Saldo BukuKas {$bukuKas->nama_buku}: Rp ".number_format($totalPemasukan - $totalPengeluaran, 0, ',', '.'));
 
-        $this->line("");
-        $this->line("=== PER MONTH ===");
+        $this->line('');
+        $this->line('=== PER MONTH ===');
 
         for ($m = $this->months - 1; $m >= 0; $m--) {
             $month = $now->copy()->subMonths($m);
@@ -282,11 +303,10 @@ class UserTransactionSeeder extends Seeder
                 ->count();
 
             $this->line(
-                "{$month->format('F Y')}: {$monthCount} transaksi " .
-                "(Pemasukan: Rp " . number_format($monthPemasukan, 0, ',', '.') .
-                ", Pengeluaran: Rp " . number_format($monthPengeluaran, 0, ',', '.') . ")"
+                "{$month->format('F Y')}: {$monthCount} transaksi ".
+                '(Pemasukan: Rp '.number_format($monthPemasukan, 0, ',', '.').
+                ', Pengeluaran: Rp '.number_format($monthPengeluaran, 0, ',', '.').')'
             );
         }
     }
-
 }

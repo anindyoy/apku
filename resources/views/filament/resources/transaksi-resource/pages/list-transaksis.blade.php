@@ -19,11 +19,12 @@
 
 <x-filament-panels::page>
         @php
-            $filterUrl = fn(string $bukuKasId) => request()->url() . '?' . http_build_query(
+            $filterUrl = fn(string $bukuKasId, ?string $dompetId = null) => request()->url() . '?' . http_build_query(
                 array_filter([
                     'filter_month' => $filterMonth,
                     'filter_year' => $filterYear,
                     'filter_buku_kas' => $bukuKasId,
+                    'filter_dompet' => $dompetId ?? $filterDompet,
                 ])
             );
 
@@ -74,6 +75,24 @@
                             class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm ring-1 ring-inset ring-gray-950/10 transition hover:bg-gray-50 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/10">
                             <x-filament::icon icon="heroicon-m-chevron-right" class="h-5 w-5" />
                         </a>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label for="dompet-filter" class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                        Dompet
+                    </label>
+
+                    <div class="flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm ring-1 ring-inset ring-gray-950/10 dark:bg-white/5 dark:ring-white/10">
+                        <x-filament::icon icon="heroicon-m-wallet" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
+                        <select id="dompet-filter"
+                            onchange="window.location.href='{{ $filterUrl($filterBukuKas ?? '', '__VALUE__') }}'.replace('__VALUE__', this.value)"
+                            class="period-filter-select h-full w-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                            <option value="" {{ blank($filterDompet) ? 'selected' : '' }}>Semua Dompet</option>
+                            @foreach($this->getDompetOptions() as $id => $nama)
+                                <option value="{{ $id }}" {{ (string) $filterDompet === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

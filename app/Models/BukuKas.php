@@ -2,30 +2,34 @@
 
 namespace App\Models;
 
-use App\Models\User;
-use App\Models\Transaksi;
 use App\Models\Scopes\UserScope;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use Database\Factories\BukuKasFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 #[ScopedBy([UserScope::class])]
 class BukuKas extends Model
 {
-    /** @use HasFactory<\Database\Factories\BukuKasFactory> */
+    /** @use HasFactory<BukuKasFactory> */
     use HasFactory;
+
     protected $table = 'buku_kas';
+
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return ['is_default' => 'boolean'];
+    }
 
     protected static function boot()
     {
         parent::boot();
         static::addGlobalScope('order', function (Builder $builder) {
             $builder->orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
-                ->orderBy('nama_buku')
-            ;
+                ->orderBy('nama_buku');
         });
     }
 

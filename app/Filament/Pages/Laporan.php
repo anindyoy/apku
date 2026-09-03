@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\BukuKas;
+use App\Models\Dompet;
 use App\Models\Transaksi;
 use BackedEnum;
 use Carbon\CarbonImmutable;
@@ -43,6 +44,8 @@ class Laporan extends Page
     public string $tanggalSelesai = '';
 
     public string $bukuKasId = 'semua';
+
+    public string $dompetId = 'semua';
 
     public function mount(): void
     {
@@ -90,16 +93,19 @@ class Laporan extends Page
         [$mulai, $selesai] = $this->rentangTanggal();
         $query = $this->queryTransaksi();
         $transaksiPeriode = (clone $query)
-            ->with(['jenis_transaksi:id,nama_jenis', 'buku_kas:id,nama_buku'])
+            ->with(['jenis_transaksi:id,nama_jenis', 'buku_kas:id,nama_buku', 'dompet' => fn ($query) => $query->withTrashed()])
             ->whereBetween('tanggal', [$mulai, $selesai])
             ->orderBy('tanggal')
             ->get();
 
-        $pemasukan = $transaksiPeriode->whereIn('jenis', ['Pemasukan', 'Transfer Pemasukan'])->sum('nominal');
-        $pengeluaran = $transaksiPeriode->whereIn('jenis', ['Pengeluaran', 'Transfer Pengeluaran'])->sum('nominal');
-        $saldoSekarang = BukuKas::query()
-            ->when($this->bukuKasId !== 'semua', fn (Builder $q) => $q->whereKey($this->bukuKasId))
-            ->sum('saldo');
+        $transaksiArusKas = $transaksiPeriode->reject(fn (Transaksi $item): bool => $item->tipe_transfer === 'dompet');
+        $pemasukan = $transaksiArusKas->whereIn('jenis', ['Pemasukan', 'Transfer Pemasukan'])->sum('nominal');
+        $pengeluaran = $transaksiArusKas->whereIn('jenis', ['Pengeluaran', 'Transfer Pengeluaran'])->sum('nominal');
+        $saldoSekarang = $this->dompetId !== 'semua'
+            ? (int) Dompet::withTrashed()->whereKey($this->dompetId)->sum('saldo')
+            : (int) BukuKas::query()
+                ->when($this->bukuKasId !== 'semua', fn (Builder $q) => $q->whereKey($this->bukuKasId))
+                ->sum('saldo');
         $setelahMulai = (clone $query)->where('tanggal', '>=', $mulai)->get();
         $perubahanSetelahMulai = $this->perubahanSaldo($setelahMulai);
         $saldoAwal = $saldoSekarang - $perubahanSetelahMulai;
@@ -186,14 +192,15 @@ class Laporan extends Page
     private function queryTransaksi(): Builder
     {
         return Transaksi::query()
-            ->when($this->bukuKasId !== 'semua', fn (Builder $q) => $q->where('buku_kas_id', $this->bukuKasId));
+            ->when($this->bukuKasId !== 'semua', fn (Builder $q) => $q->where('buku_kas_id', $this->bukuKasId))
+            ->when($this->dompetId !== 'semua', fn (Builder $q) => $q->where('dompet_id', $this->dompetId));
     }
 
     private function perubahanSaldo(Collection $transaksi): int
     {
         return (int) $transaksi->sum(fn (Transaksi $item) => in_array($item->jenis, ['Pemasukan', 'Transfer Pemasukan'], true)
-            ? $item->nominal
-            : -$item->nominal);
+            ? ($item->tipe_transfer === 'dompet' ? 0 : $item->nominal)
+            : ($item->tipe_transfer === 'dompet' ? 0 : -$item->nominal));
     }
 
     /** @return array<int, array{nama: string, nominal: int, warna: string, persen: float}> */
@@ -261,13 +268,14 @@ class Laporan extends Page
             ['Saldo Akhir', $laporan['saldoAkhir']],
             [],
             ['RINCIAN TRANSAKSI'],
-            ['Tanggal', 'Buku Kas', 'Jenis', 'Kategori', 'Deskripsi', 'Nominal'],
+            ['Tanggal', 'Buku Kas', 'Dompet', 'Jenis', 'Kategori', 'Deskripsi', 'Nominal'],
         ];
 
         foreach ($laporan['transaksi'] as $transaksi) {
             $baris[] = [
                 CarbonImmutable::parse($transaksi->tanggal)->format('d/m/Y H:i'),
                 $transaksi->buku_kas?->nama_buku ?? '-',
+                $transaksi->dompet?->nama_dompet ?? '-',
                 $transaksi->jenis,
                 str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'),
                 $transaksi->deskripsi ?? '',

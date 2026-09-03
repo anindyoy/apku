@@ -13,7 +13,12 @@ class EnsureUserHasCompletedOnboarding
     {
         $user = $request->user();
 
-        if ($user && ! $user->isSuper() && ! $user->buku_kas()->exists() && ! $request->routeIs('filament.admin.pages.onboarding')) {
+        if (
+            $user
+            && ! $user->isSuper()
+            && (! $user->buku_kas()->exists() || ! $user->dompet()->exists())
+            && ! $request->routeIs('filament.admin.pages.onboarding')
+        ) {
             return redirect(Onboarding::getUrl());
         }
 

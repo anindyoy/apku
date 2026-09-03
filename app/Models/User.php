@@ -97,7 +97,41 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return $this->buku_kas()
             ->reorder()
-            ->oldest('id')
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->value('id');
+    }
+
+    public function dapatMengelolaTransaksiPadaDompet(Dompet $dompet): bool
+    {
+        return $this->isSuper()
+            || $dompet->id === $this->idDompetUtama()
+            || $dompet->id === $this->idDompetTambahanGratis()
+            || $this->masaAktifBerlaku();
+    }
+
+    public function dapatMembuatDompet(): bool
+    {
+        return $this->isSuper()
+            || $this->dompet()->count() < 2
+            || $this->masaAktifBerlaku();
+    }
+
+    public function idDompetUtama(): ?int
+    {
+        return $this->dompet()
+            ->reorder()
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->value('id');
+    }
+
+    public function idDompetTambahanGratis(): ?int
+    {
+        return $this->dompet()
+            ->whereKeyNot($this->idDompetUtama())
+            ->reorder()
+            ->orderBy('id')
             ->value('id');
     }
 
@@ -109,6 +143,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class);
+    }
+
+    public function dompet()
+    {
+        return $this->hasMany(Dompet::class);
     }
 
     public function utang_piutang()
