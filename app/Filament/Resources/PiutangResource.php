@@ -22,7 +22,7 @@ class PiutangResource extends Resource
     protected static ?string $navigationLabel = 'Piutang';
     protected static ?string $modelLabel = 'Piutang';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-arrow-up-right';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-wallet';
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema

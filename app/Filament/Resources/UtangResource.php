@@ -21,7 +21,7 @@ class UtangResource extends Resource
     protected static string | UnitEnum | null $navigationGroup = 'Utang Piutang';
     protected static ?string $navigationLabel = 'Utang';
     protected static ?string $modelLabel = 'Utang';
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-arrow-down-right';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
