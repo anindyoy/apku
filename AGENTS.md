@@ -2,6 +2,10 @@
 
 Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua subfoldernya.
 
+## Klarifikasi Prompt
+
+- Jika prompt pengguna belum memuat konteks yang diperlukan untuk memberikan jawaban atau menjalankan tugas secara akurat, ajukan pertanyaan klarifikasi kepada pengguna sebelum melanjutkan. Pertanyaan harus spesifik pada informasi yang masih kurang dan relevan dengan tugas.
+
 ## Testing
 
 - Setiap kode yang baru dibuat atau dimodifikasi harus diuji secara terprogram (programmatic test). Jalankan test dengan filter yang menyasar baris atau fungsi yang diubah; jangan menjalankan seluruh suite tanpa filter.
