@@ -5,9 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TransaksiResource\Pages;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
-use App\Models\BukuKas;
-use App\Models\Dompet;
 use App\Models\Transaksi;
+use App\Services\TransaksiService;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -132,91 +131,13 @@ class TransaksiResource extends Resource
                     ->hidden(fn ($record): bool => auth()->user()->isSuper()
                         || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
                         || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
-                    ->before(function ($record, $livewire) {
-                        abort_unless(
-                            auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
-                            && auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet),
-                            403
-                        );
-
-                        $bukuKasBaru = BukuKas::findOrFail(
-                            $livewire->mountedTableActionsData[0]['buku_kas_id']
-                        );
-                        abort_unless(auth()->user()->dapatMengelolaTransaksiPada($bukuKasBaru), 403);
-
-                        $dompetBaru = Dompet::findOrFail(
-                            $livewire->mountedTableActionsData[0]['dompet_id']
-                        );
-                        abort_unless(auth()->user()->dapatMengelolaTransaksiPadaDompet($dompetBaru), 403);
-
-                        if (in_array($record->jenis, ['Transfer Pemasukan', 'Transfer Pengeluaran'])) {
-                            $relatedTransactions = Transaksi::where('transfer_code', $record->transfer_code)->get();
-                            $nominal_baru = $livewire->mountedTableActionsData[0]['nominal'];
-                            $selisih = $nominal_baru - $record->nominal;
-
-                            foreach ($relatedTransactions as $relatedTransaction) {
-                                $relatedKas = $relatedTransaction->buku_kas;
-
-                                if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
-                                    $relatedKas->saldo -= $selisih;
-                                } elseif ($relatedTransaction->jenis === 'Transfer Pemasukan') {
-                                    $relatedKas->saldo += $selisih;
-                                }
-
-                                $relatedKas->save();
-
-                                if ($relatedTransaction->id != $record->id) {
-                                    $relatedTransaction->nominal = $nominal_baru;
-                                    $relatedTransaction->save();
-                                }
-                            }
-                        }
-                    }),
+                    ->using(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
 
                 DeleteAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isSuper()
                         || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
                         || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
-                    ->before(function ($record): void {
-                        abort_unless(auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas), 403);
-                    })
-                    ->after(function ($record) {
-                        $kas = $record->buku_kas;
-                        if (in_array($record->jenis, ['Transfer Pengeluaran', 'Transfer Pemasukan'])) {
-                            $kas = $record->buku_kas;
-
-                            if ($record->jenis === 'Transfer Pengeluaran') {
-                                $kas->saldo = $kas->saldo + $record->nominal;
-                            } elseif ($record->jenis === 'Transfer Pemasukan') {
-                                $kas->saldo = $kas->saldo - $record->nominal;
-                            }
-
-                            $kas->save();
-
-                            $relatedTransaction = Transaksi::where('transfer_code', $record->transfer_code)->first();
-
-                            if ($relatedTransaction) {
-                                $relatedKas = $relatedTransaction->buku_kas;
-
-                                if ($relatedTransaction->jenis === 'Transfer Pengeluaran') {
-                                    $relatedKas->saldo += $relatedTransaction->nominal;
-                                } else {
-                                    $relatedKas->saldo -= $relatedTransaction->nominal;
-                                }
-
-                                $relatedKas->save();
-                                $relatedTransaction->delete();
-                            }
-                        } elseif (in_array($record->jenis, ['Pengeluaran', 'Pemasukan'])) {
-                            if ($record->jenis == 'Pengeluaran') {
-                                $kas->saldo = $kas->saldo + $record->nominal;
-                            } else {
-                                $kas->saldo = $kas->saldo - $record->nominal;
-                            }
-
-                            $kas->save();
-                        }
-                    }),
+                    ->using(fn (Transaksi $record): bool => app(TransaksiService::class)->hapus(auth()->user(), $record)),
             ])
             ->bulkActions([
                 // DeleteBulkAction::make(),

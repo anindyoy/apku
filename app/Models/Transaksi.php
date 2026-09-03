@@ -91,6 +91,7 @@ class Transaksi extends Model
                     'nama_buku',
                     fn ($query) => static::batasiBukuKasYangDapatDikelola($query)
                 )
+                ->disabled(fn (?Transaksi $record): bool => filled($record?->transfer_code))
                 ->required(),
 
             Select::make('dompet_id')
@@ -100,6 +101,7 @@ class Transaksi extends Model
                     'nama_dompet',
                     fn ($query) => static::batasiDompetYangDapatDikelola($query)
                 )
+                ->disabled(fn (?Transaksi $record): bool => filled($record?->transfer_code))
                 ->required(),
 
             Select::make('dompet_id_tujuan')

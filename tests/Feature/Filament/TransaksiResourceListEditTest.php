@@ -1,10 +1,12 @@
 <?php
 
+use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
+use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use Livewire\Livewire;
 
-// ==================== TRANSAKSI RESOURCE - LIST & EDIT PAGE TESTS ====================
+// Pengujian halaman daftar dan edit transaksi.
 
 test('transaksi resource - list page menampilkan kolom yang benar', function () {
     $user = createRegularUserWithBukuKas();
@@ -22,10 +24,11 @@ test('transaksi resource - list page menampilkan kolom yang benar', function () 
         'nominal' => 100000,
         'deskripsi' => 'Test deskripsi transaksi',
         'jenis_transaksi_id' => $jenis->id,
+        'tanggal' => now(),
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertSeeText('Rp')
         ->assertSeeText('Test deskripsi transaksi');
@@ -48,10 +51,11 @@ test('transaksi resource - edit page dapat update nominal', function () {
         'nominal' => 100000,
         'deskripsi' => 'Deskripsi awal',
         'jenis_transaksi_id' => $jenis->id,
+        'tanggal' => now(),
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\EditTransaksi::class, ['record' => $transaksi->id])
+        ->test(EditTransaksi::class, ['record' => $transaksi->id])
         ->assertSuccessful()
         ->set('data.nominal', 200000)
         ->call('save')
@@ -80,7 +84,7 @@ test('transaksi resource - edit page dapat update deskripsi', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\EditTransaksi::class, ['record' => $transaksi->id])
+        ->test(EditTransaksi::class, ['record' => $transaksi->id])
         ->assertSuccessful()
         ->set('data.deskripsi', 'Deskripsi baru yang diubah')
         ->call('save')
@@ -106,10 +110,11 @@ test('transaksi resource - list page dengan pengeluaran', function () {
         'nominal' => 50000,
         'deskripsi' => 'Test pengeluaran',
         'jenis_transaksi_id' => $jenis->id,
+        'tanggal' => now(),
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertSeeText('Rp')
         ->assertSeeText('Test pengeluaran');
@@ -134,7 +139,7 @@ test('transaksi resource - edit page validasi nominal required', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\EditTransaksi::class, ['record' => $transaksi->id])
+        ->test(EditTransaksi::class, ['record' => $transaksi->id])
         ->assertSuccessful()
         ->set('data.nominal', null)
         ->call('save')
@@ -147,7 +152,7 @@ test('transaksi resource - list page kas overview widget ditampilkan', function 
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful();
 })
     ->group('filament', 'transaksi', 'widgets');

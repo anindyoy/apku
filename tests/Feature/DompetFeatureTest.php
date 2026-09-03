@@ -5,6 +5,7 @@ use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
 use App\Models\User;
+use App\Services\TransaksiService;
 use App\Services\TransferDompetService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Livewire;
@@ -127,4 +128,36 @@ test('hapus dompet memindahkan saldo lalu mempertahankan histori dengan soft del
         'tipe_transfer' => 'dompet',
         'jenis' => 'Transfer Pengeluaran',
     ]);
+});
+
+test('edit pasangan transfer memperbarui nominal dan kedua saldo secara atomik', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $hasil = app(TransferDompetService::class)->transfer($user, $cash, $bank, $bukuKas, 25000);
+
+    app(TransaksiService::class)->ubah($user, $hasil['keluar'], [
+        'nominal' => 40000,
+        'tanggal' => now()->subHour(),
+        'deskripsi' => 'Transfer diperbarui',
+    ]);
+
+    $pasangan = Transaksi::where('transfer_code', $hasil['keluar']->transfer_code)->get();
+
+    expect($pasangan)->toHaveCount(2)
+        ->and($pasangan->pluck('nominal')->unique()->all())->toBe([40000])
+        ->and($pasangan->pluck('deskripsi')->unique()->all())->toBe(['Transfer diperbarui'])
+        ->and($cash->fresh()->saldo)->toBe(60000)
+        ->and($bank->fresh()->saldo)->toBe(40000)
+        ->and($bukuKas->fresh()->saldo)->toBe(0);
+});
+
+test('hapus salah satu sisi transfer menghapus pasangan dan mengembalikan seluruh saldo', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $hasil = app(TransferDompetService::class)->transfer($user, $cash, $bank, $bukuKas, 25000);
+
+    app(TransaksiService::class)->hapus($user, $hasil['masuk']);
+
+    expect(Transaksi::where('transfer_code', $hasil['masuk']->transfer_code)->count())->toBe(0)
+        ->and($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(0)
+        ->and($bukuKas->fresh()->saldo)->toBe(0);
 });
