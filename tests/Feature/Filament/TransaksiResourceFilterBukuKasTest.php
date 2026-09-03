@@ -222,7 +222,7 @@ test('filter buku kas - mount initialize filterBukuKas dari parameter', function
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
-test('filter buku kas - defaultForm menggunakan filterBukuKas jika diset', function () {
+test('filter buku kas - data awal transaksi menggunakan filterBukuKas jika diset', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
@@ -231,7 +231,7 @@ test('filter buku kas - defaultForm menggunakan filterBukuKas jika diset', funct
         ->assertSuccessful()
         ->set('filterBukuKas', (string) $bukuKas->id);
 
-    // Pastikan properti digunakan oleh defaultForm
+    // Pastikan properti digunakan oleh data awal transaksi.
     $component = Livewire::actingAs($user)
         ->test(ListTransaksis::class)
         ->set('filterBukuKas', (string) $bukuKas->id);

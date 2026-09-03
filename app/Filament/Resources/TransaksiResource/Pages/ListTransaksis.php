@@ -130,7 +130,7 @@ class ListTransaksis extends ListRecords
         return $query;
     }
 
-    public function defaultForm($livewire)
+    public function dataAwalTransaksi($livewire): array
     {
         return [
             'buku_kas_id' => $this->filterBukuKas ?: optional(BukuKas::first())->id,
@@ -152,7 +152,7 @@ class ListTransaksis extends ListRecords
         return [
             Action::make('Pindah saldo dompet')
                 ->visible(fn (): bool => count(Transaksi::opsiDompetYangDapatDikelola()) >= 2)
-                ->form([
+                ->schema([
                     Select::make('dompet_asal_id')
                         ->label('Dompet asal')
                         ->options(fn (): array => Transaksi::opsiDompetYangDapatDikelola())
@@ -236,13 +236,13 @@ class ListTransaksis extends ListRecords
                         ->send();
 
                     if ($arguments['another'] ?? false) {
-                        $form->fill($this->defaultForm($livewire));
+                        $form->fill($this->dataAwalTransaksi($livewire));
                         $action->halt();
                     }
 
                     $action->cancel();
                 })
-                ->fillForm(fn ($livewire): array => $this->defaultForm($livewire))
+                ->fillForm(fn ($livewire): array => $this->dataAwalTransaksi($livewire))
                 ->extraModalFooterActions(fn (Action $action): array => [
                     $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                         ->label('Tambah yang lain'),
@@ -275,13 +275,13 @@ class ListTransaksis extends ListRecords
                         ->send();
 
                     if ($arguments['another'] ?? false) {
-                        $form->fill($this->defaultForm($livewire));
+                        $form->fill($this->dataAwalTransaksi($livewire));
                         $action->halt();
                     }
 
                     $action->cancel();
                 })
-                ->fillForm(fn ($livewire): array => $this->defaultForm($livewire))
+                ->fillForm(fn ($livewire): array => $this->dataAwalTransaksi($livewire))
                 ->extraModalFooterActions(fn (Action $action): array => [
                     $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
                         ->label('Tambah yang lain'),
@@ -314,7 +314,7 @@ class ListTransaksis extends ListRecords
                         ->send();
 
                     if ($arguments['another'] ?? false) {
-                        $form->fill($this->defaultForm($livewire));
+                        $form->fill($this->dataAwalTransaksi($livewire));
                         $action->halt();
                     }
 
