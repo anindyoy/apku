@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\TransaksiService;
 use App\Services\TransferDompetService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
 function buatDataDompet(array $atributUser = []): array
@@ -224,19 +225,95 @@ test('filter dompet hanya menampilkan transaksi dompet terpilih', function () {
 
 test('hapus dompet memindahkan saldo lalu mempertahankan histori dengan soft delete', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $bank->update(['saldo' => 50000]);
 
-    app(TransferDompetService::class)->pindahkanSaldoDanHapus($user, $cash, $bank, $bukuKas);
+    app(TransferDompetService::class)->pindahkanSaldoDanHapus($user, $bank, $cash, $bukuKas);
 
-    expect(Dompet::withTrashed()->findOrFail($cash->id)->trashed())->toBeTrue()
-        ->and(Dompet::withTrashed()->findOrFail($cash->id)->saldo)->toBe(0)
-        ->and($bank->fresh()->saldo)->toBe(100000)
-        ->and($bank->fresh()->is_default)->toBeTrue();
+    expect(Dompet::withTrashed()->findOrFail($bank->id)->trashed())->toBeTrue()
+        ->and(Dompet::withTrashed()->findOrFail($bank->id)->saldo)->toBe(0)
+        ->and($cash->fresh()->saldo)->toBe(150000)
+        ->and($cash->fresh()->is_default)->toBeTrue();
 
     $this->assertDatabaseHas('transaksi', [
-        'dompet_id' => $cash->id,
+        'dompet_id' => $bank->id,
         'tipe_transfer' => 'dompet',
         'jenis' => 'Transfer Pengeluaran',
     ]);
+});
+
+test('hapus dompet bersaldo negatif memindahkan kewajiban ke dompet tujuan', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $bank->update(['saldo' => -25000]);
+
+    app(TransferDompetService::class)->pindahkanSaldoDanHapus($user, $bank, $cash, $bukuKas);
+
+    expect(Dompet::withTrashed()->findOrFail($bank->id)->saldo)->toBe(0)
+        ->and(Dompet::withTrashed()->findOrFail($bank->id)->trashed())->toBeTrue()
+        ->and($cash->fresh()->saldo)->toBe(75000)
+        ->and(Transaksi::where('user_id', $user->id)->whereNotNull('transfer_code')->count())->toBe(2);
+});
+
+test('hapus dompet bersaldo nol tidak membuat transaksi transfer', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+
+    app(TransferDompetService::class)->pindahkanSaldoDanHapus($user, $bank, $cash, $bukuKas);
+
+    expect(Dompet::withTrashed()->findOrFail($bank->id)->trashed())->toBeTrue()
+        ->and(Transaksi::where('user_id', $user->id)->count())->toBe(0);
+});
+
+test('dompet default tidak dapat dihapus', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+
+    expect(fn () => app(TransferDompetService::class)->pindahkanSaldoDanHapus($user, $cash, $bank, $bukuKas))
+        ->toThrow(ValidationException::class);
+
+    expect($cash->fresh()->trashed())->toBeFalse()
+        ->and($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(0);
+});
+
+test('dompet terakhir tidak dapat dihapus', function () {
+    $user = User::factory()->create(['role' => 'reguler', 'masa_aktif' => today()->addMonth()]);
+    $bukuKas = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Utama',
+        'saldo' => 0,
+        'is_default' => true,
+    ]);
+    $dompet = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Satu-satunya',
+        'saldo' => 0,
+    ]);
+
+    expect(fn () => app(TransferDompetService::class)->pindahkanSaldoDanHapus($user, $dompet, $dompet, $bukuKas))
+        ->toThrow(ValidationException::class);
+
+    expect($dompet->fresh()->trashed())->toBeFalse();
+});
+
+test('kegagalan pemindahan saldo membatalkan penghapusan dompet', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'bank' => $bank] = buatDataDompet([
+        'masa_aktif' => today()->subDay(),
+    ]);
+    $dompetTerbatas = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 50000,
+    ]);
+
+    expect(fn () => app(TransferDompetService::class)->pindahkanSaldoDanHapus(
+        $user,
+        $bank,
+        $dompetTerbatas,
+        $bukuKas,
+    ))->toThrow(AuthorizationException::class);
+
+    expect($bank->fresh()->trashed())->toBeFalse()
+        ->and($bank->fresh()->saldo)->toBe(0)
+        ->and($dompetTerbatas->fresh()->saldo)->toBe(50000)
+        ->and(Transaksi::where('user_id', $user->id)->count())->toBe(0);
 });
 
 test('edit pasangan transfer memperbarui nominal dan kedua saldo secara atomik', function () {

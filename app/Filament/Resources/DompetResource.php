@@ -89,7 +89,9 @@ class DompetResource extends Resource
                     ->label('Hapus')
                     ->color('danger')
                     ->icon('heroicon-o-trash')
-                    ->visible(fn (Dompet $record): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($record) && auth()->user()->dompet()->count() > 1)
+                    ->visible(fn (Dompet $record): bool => ! $record->is_default
+                        && auth()->user()->dapatMengelolaTransaksiPadaDompet($record)
+                        && auth()->user()->dompet()->count() > 1)
                     ->form(fn (Dompet $record): array => [
                         Select::make('dompet_tujuan_id')
                             ->label('Dompet tujuan')

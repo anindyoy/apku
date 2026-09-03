@@ -102,9 +102,39 @@ class TransferDompetService
             throw ValidationException::withMessages(['dompet_tujuan_id' => 'Dompet terakhir tidak dapat dihapus.']);
         }
 
+        if ($dompetAsal->is_default) {
+            throw ValidationException::withMessages(['dompet_tujuan_id' => 'Dompet default tidak dapat dihapus.']);
+        }
+
+        if ($dompetAsal->is($dompetTujuan)) {
+            throw ValidationException::withMessages(['dompet_tujuan_id' => 'Dompet tujuan harus berbeda dari dompet yang dihapus.']);
+        }
+
+        if (
+            $dompetAsal->user_id !== $user->id
+            || $dompetTujuan->user_id !== $user->id
+            || $bukuKas->user_id !== $user->id
+            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetAsal)
+            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
+            || ! $user->dapatMengelolaTransaksiPada($bukuKas)
+        ) {
+            throw new AuthorizationException('Dompet atau buku kas tidak dapat dikelola.');
+        }
+
         $prosesPenghapusan = function () use ($user, $dompetAsal, $dompetTujuan, $bukuKas): void {
-            $asal = Dompet::withoutGlobalScopes()->whereKey($dompetAsal->id)->lockForUpdate()->firstOrFail();
-            $tujuan = Dompet::withoutGlobalScopes()->whereKey($dompetTujuan->id)->lockForUpdate()->firstOrFail();
+            $dompet = Dompet::withoutGlobalScopes()
+                ->whereKey([$dompetAsal->id, $dompetTujuan->id])
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+            $asal = $dompet->get($dompetAsal->id);
+            $tujuan = $dompet->get($dompetTujuan->id);
+
+            if (! $asal || ! $tujuan) {
+                throw new AuthorizationException('Dompet tidak tersedia.');
+            }
+
             $saldo = (int) $asal->saldo;
 
             if ($saldo > 0) {
@@ -117,10 +147,6 @@ class TransferDompetService
 
             if ((int) $asal->saldo !== 0) {
                 throw ValidationException::withMessages(['dompet_tujuan_id' => 'Saldo dompet asal gagal dipindahkan.']);
-            }
-
-            if ($asal->is_default) {
-                $tujuan->update(['is_default' => true]);
             }
 
             $asal->delete();

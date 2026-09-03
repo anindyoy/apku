@@ -184,7 +184,7 @@ Form onboarding menampilkan **Kas Utama** dan **Cash** sebagai nilai awal. Pengg
 - Jika saldo dompet asal nol, tidak perlu membuat transaksi transfer; langsung lanjutkan proses soft delete.
 - Setelah pemindahan berhasil, saldo dompet asal harus tepat nol, lalu lakukan soft delete. Jangan memindahkan atau menulis ulang `dompet_id` transaksi lama karena akan merusak histori dan saldo berjalan.
 - Transaksi pemindahan saldo menyimpan `transfer_code`, deskripsi sistem seperti **Pemindahan saldo sebelum penghapusan dompet**, serta referensi pasangan agar dapat diaudit.
-- Jika dompet asal merupakan default, jadikan dompet tujuan sebagai default dalam transaksi database yang sama sebelum soft delete.
+- Dompet default tidak dapat dihapus. Pengguna harus menjadikan dompet lain sebagai default terlebih dahulu sebelum menjalankan penghapusan.
 - Dompet yang sudah dihapus secara lunak tidak muncul pada pilihan transaksi/filter normal, tetapi namanya tetap dapat ditampilkan pada histori lama. Sediakan filter **Termasuk Dompet Dihapus** bila histori perlu dicari secara khusus.
 - Hard delete hanya boleh dilakukan oleh proses administratif ketika dompet tidak mempunyai referensi transaksi sama sekali.
 - Pengguna bermasa aktif tidak valid hanya dapat membuat dompet jika jumlahnya masih kurang dari dua. Tampilkan ajakan memperpanjang masa aktif ketika batas tercapai.
@@ -267,7 +267,7 @@ Tambahkan atau sesuaikan pengujian terfokus berikut:
 - penghapusan dompet bersaldo positif memindahkan seluruh saldo ke dompet tujuan, menyisakan saldo asal nol, lalu melakukan soft delete;
 - penghapusan dompet bersaldo negatif memindahkan kewajiban ke dompet tujuan dan menyisakan saldo asal nol;
 - penghapusan dompet bersaldo nol tidak membuat transfer yang tidak diperlukan;
-- penghapusan dompet default memindahkan status default ke dompet tujuan;
+- penghapusan dompet default ditolak;
 - transaksi lama tetap menunjuk ke dompet asal setelah soft delete dan nama dompet masih dapat ditampilkan pada histori;
 - kegagalan pemindahan saldo membatalkan seluruh proses sehingga dompet tidak terhapus sebagian;
 - daftar, pencarian, widget, laporan, ekspor, dan PDF menghormati filter dompet;
@@ -299,7 +299,7 @@ Siapkan backup database dan prosedur rollback sebelum backfill. Rollback kode ti
 - Pindah saldo antar-dompet mengubah kedua saldo dompet dengan nominal yang sama tanpa mengubah saldo bersih buku kas atau laporan pemasukan/pengeluaran.
 - Saldo dompet boleh negatif; kondisi negatif terlihat jelas dan aksesibel pada daftar transaksi.
 - Data pengguna lama berhasil di-backfill tanpa kehilangan histori.
-- Dompet terakhir dan buku kas terakhir tidak dapat dihapus.
+- Dompet default, dompet terakhir, dan buku kas terakhir tidak dapat dihapus.
 - Dompet yang dihapus memindahkan saldo atau kewajibannya ke dompet tujuan melalui transaksi yang dapat diaudit, kemudian dihapus secara lunak tanpa mengubah referensi histori lama.
 - Pengguna dengan masa aktif tidak valid hanya dapat membuat dan menggunakan dua dompet: dompet default dan satu dompet tambahan gratis.
 - Pengguna dengan masa aktif tidak valid tetap dapat mentransfer saldo antar buku kas atau dompet yang berada dalam kuota gratis dan dapat dikelola.

@@ -153,20 +153,21 @@ test('action hapus dompet memindahkan saldo dan melakukan soft delete', function
     $bank = Dompet::create([
         'user_id' => $user->id,
         'nama_dompet' => 'Bank',
-        'saldo' => 0,
+        'saldo' => 50000,
     ]);
 
     Livewire::actingAs($user)
         ->test(ListDompet::class)
-        ->callTableAction('pindahkanDanHapus', $cash, data: [
-            'dompet_tujuan_id' => $bank->id,
+        ->assertTableActionHidden('pindahkanDanHapus', $cash)
+        ->callTableAction('pindahkanDanHapus', $bank, data: [
+            'dompet_tujuan_id' => $cash->id,
             'buku_kas_id' => $bukuKas->id,
         ])
         ->assertHasNoTableActionErrors();
 
-    expect(Dompet::withTrashed()->findOrFail($cash->id)->trashed())->toBeTrue()
-        ->and($bank->fresh()->saldo)->toBe(100000)
-        ->and($bank->fresh()->is_default)->toBeTrue();
+    expect(Dompet::withTrashed()->findOrFail($bank->id)->trashed())->toBeTrue()
+        ->and($cash->fresh()->saldo)->toBe(150000)
+        ->and($cash->fresh()->is_default)->toBeTrue();
 });
 
 test('transfer buku kas dengan dompet sama menjaga saldo bersih dompet', function () {
