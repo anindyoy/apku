@@ -7,6 +7,7 @@ use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
+use App\Services\TransaksiService;
 use App\Services\TransferDompetService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
@@ -17,8 +18,6 @@ use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ListTransaksis extends ListRecords
 {
@@ -198,37 +197,16 @@ class ListTransaksis extends ListRecords
                 })
                 ->tooltip('Transfer saldo ke kas lain')
                 ->action(function ($form, $action, $livewire, array $data, array $arguments) {
-                    DB::transaction(function () use ($data) {
-                        $data['user_id'] = auth()->user()->id;
-                        $tujuan_id = $data['buku_kas_id_tujuan'];
-                        $asal_id = $data['buku_kas_id'];
-                        $dompetTujuanId = $data['dompet_id_tujuan'];
-
-                        abort_unless(
-                            auth()->user()->dapatMengelolaTransaksiPada(BukuKas::findOrFail($asal_id))
-                            && auth()->user()->dapatMengelolaTransaksiPada(BukuKas::findOrFail($tujuan_id))
-                            && auth()->user()->dapatMengelolaTransaksiPadaDompet(Dompet::findOrFail($data['dompet_id']))
-                            && auth()->user()->dapatMengelolaTransaksiPadaDompet(Dompet::findOrFail($dompetTujuanId)),
-                            403
-                        );
-
-                        unset($data['buku_kas_id_tujuan'], $data['dompet_id_tujuan']);
-
-                        $transfer_code = (string) Str::uuid();
-
-                        $data['jenis'] = 'Transfer Pengeluaran';
-                        $data['transfer_code'] = $transfer_code;
-                        $data['tipe_transfer'] = 'buku_kas';
-                        $data['tujuan_buku_tabungan_id'] = $tujuan_id;
-                        Transaksi::create($data);
-
-                        $data['jenis'] = 'Transfer Pemasukan';
-                        $data['transfer_code'] = $transfer_code;
-                        $data['buku_kas_id'] = $tujuan_id;
-                        $data['dompet_id'] = $dompetTujuanId;
-                        $data['asal_buku_tabungan_id'] = $asal_id;
-                        Transaksi::create($data);
-                    });
+                    app(TransaksiService::class)->transferBukuKas(
+                        auth()->user(),
+                        BukuKas::findOrFail($data['buku_kas_id']),
+                        BukuKas::findOrFail($data['buku_kas_id_tujuan']),
+                        Dompet::findOrFail($data['dompet_id']),
+                        Dompet::findOrFail($data['dompet_id_tujuan']),
+                        (int) $data['nominal'],
+                        $data['tanggal'],
+                        $data['deskripsi'] ?? null,
+                    );
 
                     Notification::make()
                         ->title('Berhasil Transfer Saldo')
@@ -257,17 +235,7 @@ class ListTransaksis extends ListRecords
                     abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
                 })
                 ->action(function ($form, $action, $livewire, array $data, array $arguments) {
-                    $bukuKas = BukuKas::findOrFail($data['buku_kas_id']);
-                    $dompet = Dompet::findOrFail($data['dompet_id']);
-                    abort_unless(
-                        auth()->user()->dapatMengelolaTransaksiPada($bukuKas)
-                        && auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet),
-                        403
-                    );
-
-                    $data['jenis'] = 'Pemasukan';
-                    $data['user_id'] = auth()->user()->id;
-                    Transaksi::create($data);
+                    app(TransaksiService::class)->buat(auth()->user(), $data, 'Pemasukan');
 
                     Notification::make()
                         ->title('Berhasil Catat Pemasukan')
@@ -296,18 +264,7 @@ class ListTransaksis extends ListRecords
                     abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
                 })
                 ->action(function (?Transaksi $record, array $data, $livewire, $form, $action, array $arguments) {
-                    $bukuKas = BukuKas::findOrFail($data['buku_kas_id']);
-                    $dompet = Dompet::findOrFail($data['dompet_id']);
-                    abort_unless(
-                        auth()->user()->dapatMengelolaTransaksiPada($bukuKas)
-                        && auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet),
-                        403
-                    );
-
-                    $data['jenis'] = 'Pengeluaran';
-                    $data['user_id'] = auth()->user()->id;
-
-                    Transaksi::create($data);
+                    app(TransaksiService::class)->buat(auth()->user(), $data, 'Pengeluaran');
                     Notification::make()
                         ->title('Berhasil Catat Pengeluaran')
                         ->success()

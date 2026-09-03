@@ -3,6 +3,7 @@
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\TransaksiService;
@@ -37,6 +38,119 @@ function buatDataDompet(array $atributUser = []): array
 
     return compact('user', 'bukuKas', 'cash', 'bank');
 }
+
+test('service membuat transaksi biasa dan memperbarui kedua saldo secara atomik', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet();
+    $kategori = JenisTransaksi::create([
+        'user_id' => $user->id,
+        'nama_jenis' => 'Gaji',
+        'tipe' => 'Pemasukan',
+    ]);
+
+    $transaksi = app(TransaksiService::class)->buat($user, [
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $cash->id,
+        'jenis_transaksi_id' => $kategori->id,
+        'tanggal' => now(),
+        'nominal' => 25000,
+        'deskripsi' => 'Pendapatan layanan',
+    ], 'Pemasukan');
+
+    expect($transaksi->user_id)->toBe($user->id)
+        ->and($transaksi->jenis)->toBe('Pemasukan')
+        ->and($bukuKas->fresh()->saldo)->toBe(25000)
+        ->and($cash->fresh()->saldo)->toBe(125000);
+});
+
+test('service transaksi biasa menolak dompet terbatas dan kategori pengguna lain', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas] = buatDataDompet([
+        'masa_aktif' => today()->subDay(),
+    ]);
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 0,
+    ]);
+    ['user' => $userLain] = buatDataDompet();
+    $kategoriLain = JenisTransaksi::create([
+        'user_id' => $userLain->id,
+        'nama_jenis' => 'Rahasia',
+        'tipe' => 'Pemasukan',
+    ]);
+    $data = [
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $dompetKetiga->id,
+        'jenis_transaksi_id' => $kategoriLain->id,
+        'nominal' => 10000,
+    ];
+
+    expect(fn () => app(TransaksiService::class)->buat($user, $data, 'Pemasukan'))
+        ->toThrow(AuthorizationException::class);
+
+    $data['dompet_id'] = $user->idDompetUtama();
+
+    expect(fn () => app(TransaksiService::class)->buat($user, $data, 'Pemasukan'))
+        ->toThrow(AuthorizationException::class);
+
+    expect(Transaksi::where('user_id', $user->id)->count())->toBe(0)
+        ->and($bukuKas->fresh()->saldo)->toBe(0)
+        ->and($dompetKetiga->fresh()->saldo)->toBe(0);
+});
+
+test('service transfer buku kas membuat pasangan konsisten dan menjaga dompet yang sama', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet();
+    $bukuKasTujuan = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Tujuan',
+        'saldo' => 0,
+    ]);
+
+    $hasil = app(TransaksiService::class)->transferBukuKas(
+        $user,
+        $bukuKas,
+        $bukuKasTujuan,
+        $cash,
+        $cash,
+        40000,
+    );
+
+    expect($hasil['keluar']->transfer_code)->toBe($hasil['masuk']->transfer_code)
+        ->and($hasil['keluar']->tipe_transfer)->toBe('buku_kas')
+        ->and($bukuKas->fresh()->saldo)->toBe(-40000)
+        ->and($bukuKasTujuan->fresh()->saldo)->toBe(40000)
+        ->and($cash->fresh()->saldo)->toBe(100000);
+});
+
+test('service transfer buku kas menolak tujuan dompet terbatas tanpa perubahan parsial', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet([
+        'masa_aktif' => today()->subDay(),
+    ]);
+    $bukuKasTujuan = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Tujuan',
+        'saldo' => 0,
+    ]);
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 0,
+    ]);
+
+    expect(fn () => app(TransaksiService::class)->transferBukuKas(
+        $user,
+        $bukuKas,
+        $bukuKasTujuan,
+        $cash,
+        $dompetKetiga,
+        40000,
+    ))->toThrow(AuthorizationException::class);
+
+    expect(Transaksi::where('user_id', $user->id)->count())->toBe(0)
+        ->and($bukuKas->fresh()->saldo)->toBe(0)
+        ->and($bukuKasTujuan->fresh()->saldo)->toBe(0)
+        ->and($cash->fresh()->saldo)->toBe(100000)
+        ->and($dompetKetiga->fresh()->saldo)->toBe(0);
+});
 
 test('transfer dompet memindahkan saldo tanpa mengubah saldo buku kas', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();

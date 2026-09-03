@@ -4,6 +4,7 @@ use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use App\Models\User;
 use Livewire\Livewire;
@@ -54,6 +55,43 @@ test('halaman dompet dapat membuat dan mengubah dompet', function () {
         ->assertHasNoTableActionErrors();
 
     expect($bank->fresh()->nama_dompet)->toBe('Bank Bisnis');
+});
+
+test('action transaksi biasa menggunakan service untuk memperbarui saldo', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+    $kategoriMasuk = JenisTransaksi::create([
+        'user_id' => $user->id,
+        'nama_jenis' => 'Gaji',
+        'tipe' => 'Pemasukan',
+    ]);
+    $kategoriKeluar = JenisTransaksi::create([
+        'user_id' => $user->id,
+        'nama_jenis' => 'Belanja',
+        'tipe' => 'Pengeluaran',
+    ]);
+    $komponen = Livewire::actingAs($user)
+        ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id]);
+
+    $komponen->callAction('Catat Pemasukan', data: [
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $cash->id,
+        'jenis_transaksi_id' => $kategoriMasuk->id,
+        'tanggal' => now(),
+        'nominal' => 25000,
+        'deskripsi' => 'Pemasukan lewat service',
+    ])->assertHasNoActionErrors();
+    $komponen->callAction('Catat Pengeluaran', data: [
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $cash->id,
+        'jenis_transaksi_id' => $kategoriKeluar->id,
+        'tanggal' => now(),
+        'nominal' => 10000,
+        'deskripsi' => 'Pengeluaran lewat service',
+    ])->assertHasNoActionErrors();
+
+    expect($bukuKas->fresh()->saldo)->toBe(15000)
+        ->and($cash->fresh()->saldo)->toBe(115000)
+        ->and(Transaksi::where('user_id', $user->id)->count())->toBe(2);
 });
 
 test('pengguna tanpa masa aktif tidak dapat membuat dompet ketiga', function () {

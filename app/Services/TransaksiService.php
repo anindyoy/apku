@@ -4,13 +4,133 @@ namespace App\Services;
 
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class TransaksiService
 {
+    public function buat(User $user, array $data, string $jenis): Transaksi
+    {
+        if (! in_array($jenis, ['Pemasukan', 'Pengeluaran'], true)) {
+            throw ValidationException::withMessages(['jenis' => 'Jenis transaksi tidak valid.']);
+        }
+
+        if ((int) ($data['nominal'] ?? 0) <= 0) {
+            throw ValidationException::withMessages(['nominal' => 'Nominal transaksi harus lebih dari nol.']);
+        }
+
+        $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($data['buku_kas_id']);
+        $dompet = Dompet::withoutGlobalScopes()->findOrFail($data['dompet_id']);
+        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
+        $this->pastikanKategoriValid($user, $data['jenis_transaksi_id'] ?? null, $jenis);
+
+        return DB::transaction(function () use ($user, $data, $jenis): Transaksi {
+            $bukuKas = BukuKas::withoutGlobalScopes()->whereKey($data['buku_kas_id'])->lockForUpdate()->firstOrFail();
+            $dompet = Dompet::withoutGlobalScopes()->whereKey($data['dompet_id'])->lockForUpdate()->firstOrFail();
+            $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
+            $this->pastikanKategoriValid($user, $data['jenis_transaksi_id'] ?? null, $jenis);
+
+            $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
+                'user_id' => $user->id,
+                'buku_kas_id' => $bukuKas->id,
+                'dompet_id' => $dompet->id,
+                'jenis_transaksi_id' => $data['jenis_transaksi_id'] ?? null,
+                'tanggal' => $data['tanggal'] ?? now(),
+                'nominal' => (int) $data['nominal'],
+                'jenis' => $jenis,
+                'deskripsi' => $data['deskripsi'] ?? null,
+            ]));
+            $this->terapkanDampak($transaksi);
+
+            return $transaksi;
+        });
+    }
+
+    /** @return array{keluar: Transaksi, masuk: Transaksi} */
+    public function transferBukuKas(
+        User $user,
+        BukuKas $bukuKasAsal,
+        BukuKas $bukuKasTujuan,
+        Dompet $dompetAsal,
+        Dompet $dompetTujuan,
+        int $nominal,
+        mixed $tanggal = null,
+        ?string $deskripsi = null,
+    ): array {
+        if ($nominal <= 0) {
+            throw ValidationException::withMessages(['nominal' => 'Nominal transfer harus lebih dari nol.']);
+        }
+
+        if ($bukuKasAsal->is($bukuKasTujuan)) {
+            throw ValidationException::withMessages(['buku_kas_id_tujuan' => 'Buku kas tujuan harus berbeda dari buku kas asal.']);
+        }
+
+        if (
+            $bukuKasAsal->user_id !== $user->id
+            || $bukuKasTujuan->user_id !== $user->id
+            || $dompetAsal->user_id !== $user->id
+            || $dompetTujuan->user_id !== $user->id
+            || ! $user->dapatMengelolaTransaksiPada($bukuKasAsal)
+            || ! $user->dapatMengelolaTransaksiPada($bukuKasTujuan)
+            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
+        ) {
+            throw new AuthorizationException('Dompet atau buku kas tidak dapat dikelola.');
+        }
+
+        return DB::transaction(function () use ($user, $bukuKasAsal, $bukuKasTujuan, $dompetAsal, $dompetTujuan, $nominal, $tanggal, $deskripsi): array {
+            $bukuKas = BukuKas::withoutGlobalScopes()
+                ->whereKey([$bukuKasAsal->id, $bukuKasTujuan->id])
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+            $dompet = Dompet::withoutGlobalScopes()
+                ->whereKey([$dompetAsal->id, $dompetTujuan->id])
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            if ($bukuKas->count() !== 2 || $dompet->count() !== ($dompetAsal->is($dompetTujuan) ? 1 : 2)) {
+                throw new AuthorizationException('Dompet atau buku kas tidak tersedia.');
+            }
+
+            $kodeTransfer = (string) Str::uuid();
+            $data = [
+                'user_id' => $user->id,
+                'tanggal' => $tanggal ?? now(),
+                'nominal' => $nominal,
+                'transfer_code' => $kodeTransfer,
+                'tipe_transfer' => 'buku_kas',
+                'deskripsi' => $deskripsi,
+            ];
+            $transaksi = Transaksi::withoutEvents(fn (): array => [
+                'keluar' => Transaksi::create($data + [
+                    'buku_kas_id' => $bukuKasAsal->id,
+                    'dompet_id' => $dompetAsal->id,
+                    'jenis' => 'Transfer Pengeluaran',
+                    'tujuan_buku_tabungan_id' => $bukuKasTujuan->id,
+                ]),
+                'masuk' => Transaksi::create($data + [
+                    'buku_kas_id' => $bukuKasTujuan->id,
+                    'dompet_id' => $dompetTujuan->id,
+                    'jenis' => 'Transfer Pemasukan',
+                    'asal_buku_tabungan_id' => $bukuKasAsal->id,
+                ]),
+            ]);
+
+            $this->terapkanDampak($transaksi['keluar']);
+            $this->terapkanDampak($transaksi['masuk']);
+
+            return $transaksi;
+        });
+    }
+
     public function ubah(User $user, Transaksi $transaksi, array $data): Transaksi
     {
         $this->pastikanDapatMengelola($user, $transaksi);
@@ -108,6 +228,17 @@ class TransaksiService
             || ! $user->dapatMengelolaTransaksiPadaDompet($dompet)
         ) {
             throw new AuthorizationException('Transaksi tidak dapat dikelola.');
+        }
+    }
+
+    private function pastikanKategoriValid(User $user, ?int $kategoriId, string $jenis): void
+    {
+        $kategori = $kategoriId
+            ? JenisTransaksi::withoutGlobalScopes()->find($kategoriId)
+            : null;
+
+        if (! $kategori || $kategori->user_id !== $user->id || $kategori->tipe !== $jenis) {
+            throw new AuthorizationException('Kategori transaksi tidak dapat digunakan.');
         }
     }
 
