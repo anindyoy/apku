@@ -26,6 +26,28 @@ function buatTransaksiLaporan(User $user, BukuKas $bukuKas, JenisTransaksi $kate
     ]));
 }
 
+function buatTransaksiLaporanPadaDompet(
+    User $user,
+    BukuKas $bukuKas,
+    Dompet $dompet,
+    ?JenisTransaksi $kategori,
+    string $jenis,
+    int $nominal,
+    string $tanggal,
+    ?string $tipeTransfer = null,
+): Transaksi {
+    return Transaksi::withoutEvents(fn () => Transaksi::create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'dompet_id' => $dompet->id,
+        'jenis_transaksi_id' => $kategori?->id,
+        'jenis' => $jenis,
+        'nominal' => $nominal,
+        'tanggal' => $tanggal,
+        'tipe_transfer' => $tipeTransfer,
+    ]));
+}
+
 test('laporan bulanan menghitung saldo dan membatasi data milik pengguna', function () {
     $user = User::factory()->create(['role' => 'user']);
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 1150]);
@@ -130,4 +152,59 @@ test('laporan dapat diunduh sebagai pdf dan excel sesuai filter aktif', function
         ->set('tahun', 2026)
         ->call('unduhExcel')
         ->assertFileDownloaded('laporan-bulanan-20260801-20260831.xlsx');
+});
+
+test('laporan memfilter dompet dan tidak menghitung transfer dompet sebagai arus kas', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 1300]);
+    $cash = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Cash', 'saldo' => 700, 'is_default' => true]);
+    $bank = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 600]);
+    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Gaji', 'tipe' => 'Pemasukan']);
+
+    buatTransaksiLaporanPadaDompet($user, $bukuKas, $cash, $kategori, 'Pemasukan', 1000, '2026-08-01 09:00:00');
+    buatTransaksiLaporanPadaDompet($user, $bukuKas, $cash, null, 'Transfer Pengeluaran', 300, '2026-08-10 09:00:00', 'dompet');
+    buatTransaksiLaporanPadaDompet($user, $bukuKas, $bank, null, 'Transfer Pemasukan', 300, '2026-08-10 09:00:00', 'dompet');
+    buatTransaksiLaporanPadaDompet($user, $bukuKas, $bank, $kategori, 'Pemasukan', 300, '2026-08-15 09:00:00');
+
+    $komponen = Livewire::actingAs($user)
+        ->test(Laporan::class)
+        ->set('dompetId', (string) $cash->id)
+        ->set('bulan', '08')
+        ->set('tahun', 2026);
+
+    $laporan = $komponen->instance()->dataLaporan;
+
+    expect($laporan['transaksi'])->toHaveCount(2)
+        ->and($laporan['pemasukan'])->toBe(1000)
+        ->and($laporan['pengeluaran'])->toBe(0)
+        ->and($laporan['akumulasi'])->toBe(1000)
+        ->and($laporan['saldoAwal'])->toBe(0)
+        ->and($laporan['saldoAkhir'])->toBe(700)
+        ->and($laporan['kategoriPemasukan'])->toHaveCount(1)
+        ->and($laporan['kategoriPengeluaran'])->toBeEmpty();
+});
+
+test('laporan dengan semua dompet menjaga transfer dompet tetap netral', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 1000]);
+    $cash = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Cash', 'saldo' => 600, 'is_default' => true]);
+    $bank = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 400]);
+
+    buatTransaksiLaporanPadaDompet($user, $bukuKas, $cash, null, 'Transfer Pengeluaran', 400, '2026-08-10 09:00:00', 'dompet');
+    buatTransaksiLaporanPadaDompet($user, $bukuKas, $bank, null, 'Transfer Pemasukan', 400, '2026-08-10 09:00:00', 'dompet');
+
+    $komponen = Livewire::actingAs($user)
+        ->test(Laporan::class)
+        ->set('bulan', '08')
+        ->set('tahun', 2026);
+
+    $laporan = $komponen->instance()->dataLaporan;
+
+    expect($laporan['pemasukan'])->toBe(0)
+        ->and($laporan['pengeluaran'])->toBe(0)
+        ->and($laporan['akumulasi'])->toBe(0)
+        ->and($laporan['saldoAwal'])->toBe(1000)
+        ->and($laporan['saldoAkhir'])->toBe(1000)
+        ->and($laporan['kategoriPemasukan'])->toBeEmpty()
+        ->and($laporan['kategoriPengeluaran'])->toBeEmpty();
 });

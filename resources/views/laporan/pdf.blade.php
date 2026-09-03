@@ -23,7 +23,7 @@
 <body>
     @php($rupiah = fn ($nilai) => 'Rp '.number_format($nilai, 0, ',', '.'))
     <h1>Laporan Buku Kas</h1>
-    <div class="meta">{{ $namaBuku }} &bull; {{ $tipePeriode }} &bull; {{ $laporan['label'] }}</div>
+    <div class="meta">{{ $namaBuku }} &bull; {{ $namaDompet }} &bull; {{ $tipePeriode }} &bull; {{ $laporan['label'] }}</div>
 
     <table class="summary">
         <tr>

@@ -109,6 +109,7 @@ class Laporan extends Page
         $setelahMulai = (clone $query)->where('tanggal', '>=', $mulai)->get();
         $perubahanSetelahMulai = $this->perubahanSaldo($setelahMulai);
         $saldoAwal = $saldoSekarang - $perubahanSetelahMulai;
+        $perubahanPeriode = $this->perubahanSaldo($transaksiPeriode);
 
         return [
             'mulai' => $mulai,
@@ -118,7 +119,7 @@ class Laporan extends Page
             'pemasukan' => $pemasukan,
             'pengeluaran' => $pengeluaran,
             'akumulasi' => $pemasukan - $pengeluaran,
-            'saldoAkhir' => $saldoAwal + $pemasukan - $pengeluaran,
+            'saldoAkhir' => $saldoAwal + $perubahanPeriode,
             'kategoriPemasukan' => $this->ringkasanKategori($transaksiPeriode, 'Pemasukan'),
             'kategoriPengeluaran' => $this->ringkasanKategori($transaksiPeriode, 'Pengeluaran'),
             'transaksi' => $transaksiPeriode,
@@ -199,8 +200,8 @@ class Laporan extends Page
     private function perubahanSaldo(Collection $transaksi): int
     {
         return (int) $transaksi->sum(fn (Transaksi $item) => in_array($item->jenis, ['Pemasukan', 'Transfer Pemasukan'], true)
-            ? ($item->tipe_transfer === 'dompet' ? 0 : $item->nominal)
-            : ($item->tipe_transfer === 'dompet' ? 0 : -$item->nominal));
+            ? $item->nominal
+            : -$item->nominal);
     }
 
     /** @return array<int, array{nama: string, nominal: int, warna: string, persen: float}> */
@@ -212,7 +213,8 @@ class Laporan extends Page
         $warna = $jenis === 'Pemasukan'
             ? ['#4f8f72', '#79aa91', '#a4c7b4', '#d0e3d8', '#2f6f53']
             : ['#be5b62', '#d47b80', '#e4a1a5', '#f0c5c7', '#9e4149'];
-        $ringkasan = $transaksi->whereIn('jenis', $jenisYangDipilih)
+        $ringkasan = $transaksi->reject(fn (Transaksi $item): bool => $item->tipe_transfer === 'dompet')
+            ->whereIn('jenis', $jenisYangDipilih)
             ->groupBy(fn (Transaksi $item) => str_starts_with($item->jenis, 'Transfer')
                 ? 'Transfer'
                 : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'))
@@ -238,7 +240,7 @@ class Laporan extends Page
         };
     }
 
-    /** @return array{laporan: array<string, mixed>, namaBuku: string, tipePeriode: string} */
+    /** @return array{laporan: array<string, mixed>, namaBuku: string, namaDompet: string, tipePeriode: string} */
     private function dataEkspor(): array
     {
         return [
@@ -246,17 +248,21 @@ class Laporan extends Page
             'namaBuku' => $this->bukuKasId === 'semua'
                 ? 'Semua Buku Kas'
                 : BukuKas::findOrFail($this->bukuKasId)->nama_buku,
+            'namaDompet' => $this->dompetId === 'semua'
+                ? 'Semua Dompet'
+                : Dompet::withTrashed()->findOrFail($this->dompetId)->nama_dompet,
             'tipePeriode' => Str::headline($this->periode),
         ];
     }
 
-    /** @param array{laporan: array<string, mixed>, namaBuku: string, tipePeriode: string} $data */
+    /** @param array{laporan: array<string, mixed>, namaBuku: string, namaDompet: string, tipePeriode: string} $data */
     private function barisExcel(array $data): array
     {
         $laporan = $data['laporan'];
         $baris = [
             ['LAPORAN BUKU KAS'],
             ['Buku Kas', $data['namaBuku']],
+            ['Dompet', $data['namaDompet']],
             ['Tipe Periode', $data['tipePeriode']],
             ['Periode', $laporan['label']],
             [],
