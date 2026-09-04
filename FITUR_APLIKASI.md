@@ -113,6 +113,21 @@ Fitur berikut hanya tersedia untuk admin:
 - Login cepat akun pengembangan pada lingkungan lokal.
 - Pencatatan aktivitas dan debugging melalui Laravel Telescope serta Debugbar pada lingkungan yang sesuai.
 
+## 13. Langganan premium
+
+- User dapat membandingkan benefit akun Reguler dan Premium berdasarkan batas buku kas serta dompet.
+- Admin mengelola paket langganan yang terdiri dari label, harga minimal Rp1, durasi dalam hari, dan status aktif.
+- Admin mengelola rekening atau metode pembayaran manual, termasuk bank, dompet digital, QR, dan instruksi transfer.
+- User dapat membuat beberapa order aktif dengan memilih paket dan metode pembayaran yang tersedia.
+- Detail paket, harga, durasi, dan tujuan pembayaran disimpan sebagai snapshot agar riwayat lama tidak berubah ketika data master diperbarui.
+- User dapat mengirim bukti pembayaran berformat JPG, JPEG, PNG, atau PDF dengan ukuran maksimal 3 MB.
+- Bukti pembayaran disimpan secara privat dan hanya dapat dilihat oleh pemilik order atau admin.
+- Admin dapat menyetujui atau menolak pembayaran yang menunggu verifikasi.
+- Persetujuan mengaktifkan akun Premium atau memperpanjang masa aktif tanpa menghilangkan sisa masa aktif yang masih tersedia.
+- Riwayat user hanya menampilkan order miliknya, sedangkan admin dapat melihat seluruh order.
+- Order tidak kedaluwarsa otomatis. Paket dan metode pembayaran yang tidak lagi digunakan dinonaktifkan, bukan dihapus.
+- User dan admin menerima notifikasi dalam aplikasi saat pembayaran dikonfirmasi, disetujui, atau ditolak sesuai perannya.
+
 ## Catatan implementasi
 
 Terdapat modul **Share Buku** dengan pilihan hak akses `viewer` dan `editor`. Resource dan penyimpanan datanya sudah tersedia, tetapi menu navigasinya disembunyikan dan mekanisme berbagi tersebut belum terhubung ke aturan akses buku kas utama. Karena itu, fitur ini belum dianggap sebagai fitur pengguna yang aktif.

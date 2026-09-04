@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -154,6 +155,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function utang_piutang()
     {
         return $this->hasMany(UtangPiutang::class);
+    }
+
+    public function langganans(): HasMany
+    {
+        return $this->hasMany(Langganan::class);
     }
 
     public function isAdmin(): bool

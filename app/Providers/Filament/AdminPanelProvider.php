@@ -37,6 +37,9 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Langganan')
+                    ->collapsed(false),
+                NavigationGroup::make()
                     ->label('Utang Piutang')
                     ->collapsed(false),
                 NavigationGroup::make()
