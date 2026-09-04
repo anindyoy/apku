@@ -140,12 +140,15 @@ test('list transaksi - transaksi exist di database', function () {
 
 test('transaksi list - header actions tersedia', function () {
     $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class, [
+            'filterBukuKas' => (string) $bukuKas->id,
+        ])
         ->assertSuccessful()
         ->assertSeeText('Transfer saldo')
-        ->assertSeeText('Catat Pemasukan')
-        ->assertSeeText('Catat Pengeluaran');
+        ->assertSeeText('Catat pemasukan')
+        ->assertSeeText('Catat pengeluaran');
 })
     ->group('filament', 'transaksi-delete');

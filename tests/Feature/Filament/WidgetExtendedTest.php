@@ -76,7 +76,7 @@ test('widget kas overview - tampilkan data transaksi', function () {
 
 test('widget kas overview - tetap tampil saat periode tidak memiliki transaksi', function () {
     $user = createRegularUserWithBukuKas();
-    $bukuKas = $user->buku_kas()->where('nama_buku', 'Kas Utama')->firstOrFail();
+    $bukuKas = $user->buku_kas()->firstOrFail();
 
     $bukuKas->update(['saldo' => 125000]);
 

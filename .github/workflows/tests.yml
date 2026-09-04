@@ -33,6 +33,17 @@ jobs:
       - name: Install Dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build Frontend Assets
+        run: |
+          npm ci
+          npm run build
+
       - name: Copy Environment File
         run: cp .env.example .env
 
