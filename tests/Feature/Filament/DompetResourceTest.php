@@ -107,6 +107,22 @@ test('pengguna tanpa masa aktif tidak dapat membuat dompet ketiga', function () 
         ->assertActionHidden('create');
 });
 
+test('user super dapat membuat dompet tanpa mengelola dompet pengguna lain', function () {
+    $super = User::factory()->create(['role' => 'super', 'masa_aktif' => null]);
+    Dompet::create(['user_id' => $super->id, 'nama_dompet' => 'Cash', 'saldo' => 0, 'is_default' => true]);
+    Dompet::create(['user_id' => $super->id, 'nama_dompet' => 'Bank', 'saldo' => 0]);
+    Dompet::create(['user_id' => $super->id, 'nama_dompet' => 'E-Wallet', 'saldo' => 0]);
+    ['cash' => $dompetPenggunaLain] = buatPenggunaUntukUiDompet();
+
+    Livewire::actingAs($super)
+        ->test(ListDompet::class)
+        ->set('tableRecordsPerPage', 50)
+        ->assertActionVisible('create')
+        ->assertCanSeeTableRecords([$dompetPenggunaLain])
+        ->assertTableActionHidden('edit', $dompetPenggunaLain)
+        ->assertTableActionHidden('pindahkanDanHapus', $dompetPenggunaLain);
+});
+
 test('dompet dan transaksi ketiga tetap terlihat tetapi action pengelolaan disembunyikan', function () {
     ['user' => $user, 'bukuKas' => $bukuKas] = buatPenggunaUntukUiDompet();
     Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 0]);

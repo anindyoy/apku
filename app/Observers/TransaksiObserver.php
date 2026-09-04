@@ -6,6 +6,12 @@ use App\Models\Dompet;
 use App\Models\Transaksi;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
+/**
+ * Jalur kompatibilitas untuk penulisan model secara langsung.
+ *
+ * Seluruh alur transaksi aplikasi wajib menggunakan service domain yang
+ * menonaktifkan event model agar perubahan saldo tidak dihitung dua kali.
+ */
 class TransaksiObserver implements ShouldHandleEventsAfterCommit
 {
     /** Menangani event pembuatan transaksi. */

@@ -310,6 +310,42 @@ test('seluruh dompet otomatis dapat digunakan kembali setelah masa aktif diperpa
         ->and($dompetKetiga->fresh()->saldo)->toBe(10000);
 });
 
+test('user super tidak terkena batas jumlah dompet miliknya', function () {
+    ['user' => $user, 'cash' => $cash, 'bank' => $bank] = buatDataDompet([
+        'role' => 'super',
+        'masa_aktif' => null,
+    ]);
+    $dompetKetiga = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 0,
+    ]);
+
+    expect($user->dapatMembuatDompet())->toBeTrue()
+        ->and($user->dapatMengelolaTransaksiPadaDompet($cash))->toBeTrue()
+        ->and($user->dapatMengelolaTransaksiPadaDompet($bank))->toBeTrue()
+        ->and($user->dapatMengelolaTransaksiPadaDompet($dompetKetiga))->toBeTrue();
+});
+
+test('user super tidak dapat mengubah saldo dompet pengguna lain', function () {
+    ['user' => $super, 'bukuKas' => $bukuKasSuper, 'cash' => $cashSuper] = buatDataDompet([
+        'role' => 'super',
+    ]);
+    ['cash' => $cashPenggunaLain] = buatDataDompet();
+
+    expect($super->dapatMengelolaTransaksiPadaDompet($cashPenggunaLain))->toBeFalse()
+        ->and(fn () => app(TransferDompetService::class)->transfer(
+            $super,
+            $cashSuper,
+            $cashPenggunaLain,
+            $bukuKasSuper,
+            10000,
+        ))->toThrow(AuthorizationException::class);
+
+    expect($cashSuper->fresh()->saldo)->toBe(100000)
+        ->and($cashPenggunaLain->fresh()->saldo)->toBe(100000);
+});
+
 test('filter dompet hanya menampilkan transaksi dompet terpilih', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
 

@@ -1,5 +1,13 @@
 # Rencana Implementasi Fitur Dompet
 
+## Status implementasi
+
+Fitur utama telah diimplementasikan, meliputi skema dan backfill, model dan relasi, onboarding, lifecycle transaksi melalui service domain, transfer dompet dan buku kas, pembatasan masa aktif, penghapusan dompet dengan pemindahan saldo, filter transaksi, pencarian, laporan, PDF, Excel, factory, dan seeder.
+
+`TransaksiObserver` dipertahankan hanya sebagai jalur kompatibilitas untuk penulisan model secara langsung. Alur aplikasi menggunakan service domain dengan event model dinonaktifkan agar saldo tidak dihitung dua kali.
+
+Pekerjaan audit integritas dan rekonsiliasi tidak termasuk penyelesaian fitur utama ini dan ditunda ke tugas terpisah sesuai keputusan pengguna. Bagian audit dalam dokumen ini tetap menjadi referensi untuk tugas tersebut.
+
 ## Ringkasan kebutuhan
 
 Fitur ini memisahkan dua dimensi pencatatan keuangan:

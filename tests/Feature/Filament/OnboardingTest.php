@@ -138,3 +138,27 @@ test('middleware memperbaiki akun yang hanya memiliki dompet', function () {
         ->and($bukuKas->is_default)->toBeTrue()
         ->and($dompet->is_default)->toBeTrue();
 });
+
+test('service default memulihkan dompet cash yang terhapus', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+    BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Utama',
+        'saldo' => 45000,
+        'is_default' => true,
+    ]);
+    $cash = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Cash',
+        'saldo' => 45000,
+        'is_default' => true,
+    ]);
+    $cash->delete();
+
+    $hasil = app(PastikanAkunKeuanganDefault::class)->jalankan($user);
+
+    expect($hasil['dompet']->id)->toBe($cash->id)
+        ->and($hasil['dompet']->trashed())->toBeFalse()
+        ->and($hasil['dompet']->is_default)->toBeTrue()
+        ->and($user->dompet()->count())->toBe(1);
+});
