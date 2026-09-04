@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
 use Database\Factories\DompetFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Dompet extends Model
 {
     /** @use HasFactory<DompetFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, MembersihkanCacheOpsiSelect, SoftDeletes;
 
     protected $table = 'dompet';
 
@@ -34,5 +35,10 @@ class Dompet extends Model
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class);
+    }
+
+    protected function cacheOpsiSelectEntitas(): string
+    {
+        return 'dompet';
     }
 }

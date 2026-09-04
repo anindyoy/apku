@@ -10,6 +10,7 @@ use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
 use App\Services\BatalkanLangganan;
 use App\Services\KonfirmasiPembayaranLangganan;
+use App\Services\OpsiSelectCache;
 use App\Services\SetujuiLangganan;
 use App\Services\TolakLangganan;
 use BackedEnum;
@@ -49,23 +50,23 @@ class LanggananResource extends Resource
         return $schema->schema([
             Select::make('paket_langganan_id')
                 ->label('Paket langganan')
-                ->options(fn (): array => PaketLangganan::query()
+                ->options(fn (): array => OpsiSelectCache::ingat('paket-langganan', fn (): array => PaketLangganan::query()
                     ->where('is_active', true)
                     ->orderBy('harga')
                     ->get()
                     ->mapWithKeys(fn (PaketLangganan $paket): array => [
                         $paket->id => $paket->label.' — Rp '.number_format($paket->harga, 0, ',', '.').' / '.$paket->durasi_hari.' hari',
-                    ])->all())
+                    ])->all()))
                 ->searchable()
                 ->required(),
             Select::make('metode_pembayaran_id')
                 ->label('Metode pembayaran')
-                ->options(fn (): array => MetodePembayaran::query()
+                ->options(fn (): array => OpsiSelectCache::ingat('metode-pembayaran', fn (): array => MetodePembayaran::query()
                     ->where('is_active', true)
                     ->orderBy('urutan')
                     ->orderBy('label')
                     ->pluck('label', 'id')
-                    ->all())
+                    ->all()))
                 ->required(),
             TextInput::make('kode_voucher')
                 ->label('Kode voucher')

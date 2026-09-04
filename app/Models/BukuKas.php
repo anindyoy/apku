@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
 use Database\Factories\BukuKasFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 class BukuKas extends Model
 {
     /** @use HasFactory<BukuKasFactory> */
-    use HasFactory;
+    use HasFactory, MembersihkanCacheOpsiSelect;
 
     protected $table = 'buku_kas';
 
@@ -47,5 +48,10 @@ class BukuKas extends Model
     {
         return self::where('user_id', $user_id)
             ->inRandomOrder();
+    }
+
+    protected function cacheOpsiSelectEntitas(): string
+    {
+        return 'buku-kas';
     }
 }

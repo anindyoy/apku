@@ -110,6 +110,7 @@ Fitur berikut hanya tersedia untuk admin:
 ## 12. Fitur pendukung
 
 - Antarmuka berbahasa Indonesia.
+- Opsi input pilihan yang berasal dari data master disimpan dalam cache selama 3 hari dan otomatis diperbarui ketika entitas terkait ditambah, diubah, atau dihapus.
 - Pencarian cepat menu melalui Spotlight.
 - Login cepat akun pengembangan pada lingkungan lokal.
 - Pencatatan aktivitas dan debugging melalui Laravel Telescope serta Debugbar pada lingkungan yang sesuai.

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Scopes\UserScope;
 use App\Observers\TransaksiObserver;
+use App\Services\OpsiSelectCache;
 use Database\Factories\TransaksiFactory;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -86,21 +87,13 @@ class Transaksi extends Model
             Select::make('buku_kas_id')
                 ->label('Buku Kas')
                 ->live()
-                ->relationship(
-                    'buku_kas',
-                    'nama_buku',
-                    fn ($query) => static::batasiBukuKasYangDapatDikelola($query)
-                )
+                ->options(fn (): array => static::opsiBukuKasYangDapatDikelola())
                 ->disabled(fn (?Transaksi $record): bool => filled($record?->transfer_code))
                 ->required(),
 
             Select::make('dompet_id')
                 ->label($transfer ? 'Dompet Asal' : 'Dompet')
-                ->relationship(
-                    'dompet',
-                    'nama_dompet',
-                    fn ($query) => static::batasiDompetYangDapatDikelola($query)
-                )
+                ->options(fn (): array => static::opsiDompetYangDapatDikelola())
                 ->disabled(fn (?Transaksi $record): bool => filled($record?->transfer_code))
                 ->required(),
 
@@ -112,12 +105,11 @@ class Transaksi extends Model
 
             Select::make('buku_kas_id_tujuan')
                 ->label('Buku Kas Tujuan')
-                ->relationship(
-                    'buku_kas',
-                    'nama_buku',
-                    fn ($query, $get) => static::batasiBukuKasYangDapatDikelola($query)
-                        ->whereNot('id', $get('buku_kas_id'))
-                )
+                ->options(fn ($get): array => array_filter(
+                    static::opsiBukuKasYangDapatDikelola(),
+                    fn ($id): bool => (int) $id !== (int) $get('buku_kas_id'),
+                    ARRAY_FILTER_USE_KEY,
+                ))
                 ->required()
                 ->visible($transfer),
 
@@ -129,11 +121,7 @@ class Transaksi extends Model
                         ['Transfer Pemasukan', 'Transfer Pengeluaran']
                     ))
                 )
-                ->relationship(
-                    'jenis_transaksi',
-                    'nama_jenis',
-                    fn ($query, $record) => $record ? $query->where('tipe', $record->jenis) : $query
-                )
+                ->options(fn (?Transaksi $record): array => static::opsiJenisTransaksi($record?->jenis))
                 ->required(),
 
             DateTimePicker::make('tanggal')
@@ -184,15 +172,40 @@ class Transaksi extends Model
 
     public static function opsiDompetYangDapatDikelola(): array
     {
-        return static::batasiDompetYangDapatDikelola(Dompet::query())
+        return OpsiSelectCache::ingat('dompet', fn (): array => static::batasiDompetYangDapatDikelola(Dompet::query())
             ->pluck('nama_dompet', 'id')
-            ->all();
+            ->all(), auth()->id(), 'dapat-dikelola');
     }
 
     public static function opsiDompetSumberTransfer(): array
     {
-        return Dompet::query()
+        return OpsiSelectCache::ingat('dompet', fn (): array => Dompet::query()
             ->pluck('nama_dompet', 'id')
-            ->all();
+            ->all(), auth()->id(), 'aktif');
+    }
+
+    public static function opsiBukuKasYangDapatDikelola(): array
+    {
+        return OpsiSelectCache::ingat('buku-kas', fn (): array => static::batasiBukuKasYangDapatDikelola(BukuKas::query())
+            ->pluck('nama_buku', 'id')
+            ->all(), auth()->id(), 'dapat-dikelola');
+    }
+
+    public static function opsiJenisTransaksi(?string $tipe = null): array
+    {
+        $tipe = in_array($tipe, ['Pemasukan', 'Pengeluaran'], true) ? $tipe : 'semua';
+
+        if ($tipe === 'semua') {
+            return array_replace(
+                static::opsiJenisTransaksi('Pemasukan'),
+                static::opsiJenisTransaksi('Pengeluaran'),
+            );
+        }
+
+        return OpsiSelectCache::ingat('jenis-transaksi', fn (): array => JenisTransaksi::query()
+            ->where('tipe', $tipe)
+            ->orderBy('nama_jenis')
+            ->pluck('nama_jenis', 'id')
+            ->all(), auth()->id(), $tipe);
     }
 }

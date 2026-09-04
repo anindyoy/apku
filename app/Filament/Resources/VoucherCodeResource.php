@@ -5,7 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\VoucherCodeResource\Pages\CreateVoucherCode;
 use App\Filament\Resources\VoucherCodeResource\Pages\EditVoucherCode;
 use App\Filament\Resources\VoucherCodeResource\Pages\ListVoucherCodes;
+use App\Models\Voucher;
 use App\Models\VoucherCode;
+use App\Services\OpsiSelectCache;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -40,7 +42,10 @@ class VoucherCodeResource extends Resource
         return $schema->schema([
             Select::make('voucher_id')
                 ->label('Voucher')
-                ->relationship('voucher', 'label')
+                ->options(fn (): array => OpsiSelectCache::ingat('voucher', fn (): array => Voucher::query()
+                    ->orderBy('label')
+                    ->pluck('label', 'id')
+                    ->all()))
                 ->searchable()
                 ->preload()
                 ->required(),

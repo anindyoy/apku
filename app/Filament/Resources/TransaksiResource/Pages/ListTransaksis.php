@@ -7,6 +7,7 @@ use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
+use App\Services\OpsiSelectCache;
 use App\Services\TransaksiService;
 use App\Services\TransferDompetService;
 use Filament\Actions\Action;
@@ -91,22 +92,22 @@ class ListTransaksis extends ListRecords
 
     public function getBukuKasOptions(): array
     {
-        return BukuKas::orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
+        return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
             ->orderBy('nama_buku')
             ->pluck('nama_buku', 'id')
-            ->toArray();
+            ->toArray(), auth()->id());
     }
 
     public function getDompetOptions(): array
     {
-        return Dompet::withTrashed()
+        return OpsiSelectCache::ingat('dompet', fn (): array => Dompet::withTrashed()
             ->orderByDesc('is_default')
             ->orderBy('nama_dompet')
             ->get()
             ->mapWithKeys(fn (Dompet $dompet): array => [
                 $dompet->id => $dompet->nama_dompet.($dompet->trashed() ? ' (Dihapus)' : ''),
             ])
-            ->all();
+            ->all(), auth()->id(), 'dengan-terhapus');
     }
 
     protected function getTableQuery(): Builder|Relation|null
@@ -164,10 +165,7 @@ class ListTransaksis extends ListRecords
                         ->required(),
                     Select::make('buku_kas_id')
                         ->label('Buku kas pencatatan')
-                        ->options(fn (): array => BukuKas::all()
-                            ->filter(fn (BukuKas $bukuKas): bool => auth()->user()->dapatMengelolaTransaksiPada($bukuKas))
-                            ->pluck('nama_buku', 'id')
-                            ->all())
+                        ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
                         ->default(fn (): ?int => $this->filterBukuKas ? (int) $this->filterBukuKas : auth()->user()->idBukuKasUtama())
                         ->required(),
                     DateTimePicker::make('tanggal')->required()->default(now())->seconds(false),

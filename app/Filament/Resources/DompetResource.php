@@ -6,6 +6,7 @@ use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\Transaksi;
 use App\Services\TransferDompetService;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -98,19 +99,15 @@ class DompetResource extends Resource
                     ->form(fn (Dompet $record): array => [
                         Select::make('dompet_tujuan_id')
                             ->label('Dompet tujuan')
-                            ->options(fn (): array => Dompet::query()
-                                ->whereKeyNot($record->id)
-                                ->get()
-                                ->filter(fn (Dompet $dompet): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet))
-                                ->pluck('nama_dompet', 'id')
-                                ->all())
+                            ->options(fn (): array => array_filter(
+                                Transaksi::opsiDompetYangDapatDikelola(),
+                                fn ($id): bool => (int) $id !== (int) $record->id,
+                                ARRAY_FILTER_USE_KEY,
+                            ))
                             ->required(),
                         Select::make('buku_kas_id')
                             ->label('Buku kas pencatatan')
-                            ->options(fn (): array => BukuKas::all()
-                                ->filter(fn (BukuKas $bukuKas): bool => auth()->user()->dapatMengelolaTransaksiPada($bukuKas))
-                                ->pluck('nama_buku', 'id')
-                                ->all())
+                            ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
                             ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
                             ->required(),
                     ])

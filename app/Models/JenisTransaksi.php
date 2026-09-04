@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
+use App\Services\OpsiSelectCache;
 use Database\Factories\JenisTransaksiFactory;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -22,7 +24,7 @@ use Illuminate\Validation\Rule;
 class JenisTransaksi extends Model
 {
     /** @use HasFactory<JenisTransaksiFactory> */
-    use HasFactory;
+    use HasFactory, MembersihkanCacheOpsiSelect;
 
     protected $table = 'jenis_transaksi';
 
@@ -99,12 +101,14 @@ class JenisTransaksi extends Model
                     return [
                         Select::make('kategori')
                             ->required()
-                            ->options(
-                                self::orderby('nama_jenis')
+                            ->options(fn (): array => array_filter(
+                                OpsiSelectCache::ingat('jenis-transaksi', fn (): array => self::orderby('nama_jenis')
                                     ->whereTipe($type)
-                                    ->whereNot('id', $record->id)
                                     ->pluck('nama_jenis', 'id')
-                            ),
+                                    ->all(), auth()->id(), $type),
+                                fn ($id): bool => (int) $id !== (int) $record->id,
+                                ARRAY_FILTER_USE_KEY,
+                            )),
                     ];
                 })
                 ->modalHeading(fn ($record) => 'Hapus '.$record->nama_jenis)
@@ -123,5 +127,10 @@ class JenisTransaksi extends Model
                 ->icon('heroicon-m-trash')
                 ->visible(fn ($record) => $record->transaksi_count),
         ];
+    }
+
+    protected function cacheOpsiSelectEntitas(): string
+    {
+        return 'jenis-transaksi';
     }
 }

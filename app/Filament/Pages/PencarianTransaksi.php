@@ -3,7 +3,10 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Models\BukuKas;
+use App\Models\Dompet;
 use App\Models\Transaksi;
+use App\Services\OpsiSelectCache;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\IconColumn;
@@ -133,13 +136,17 @@ class PencarianTransaksi extends Page implements HasTable
 
                 SelectFilter::make('buku_kas_id')
                     ->label('Buku kas')
-                    ->relationship('buku_kas', 'nama_buku')
+                    ->options(fn (): array => OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+                        ->pluck('nama_buku', 'id')
+                        ->all(), auth()->id()))
                     ->searchable()
                     ->preload(),
 
                 SelectFilter::make('dompet_id')
                     ->label('Dompet')
-                    ->relationship('dompet', 'nama_dompet')
+                    ->options(fn (): array => OpsiSelectCache::ingat('dompet', fn (): array => Dompet::query()
+                        ->pluck('nama_dompet', 'id')
+                        ->all(), auth()->id(), 'aktif'))
                     ->searchable()
                     ->preload(),
             ])

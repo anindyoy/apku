@@ -6,6 +6,7 @@ use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
+use App\Services\OpsiSelectCache;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -127,11 +128,14 @@ class BukuKasResource extends Resource
                     ->form(fn (BukuKas $record): array => [
                         Select::make('buku_kas_id')
                             ->label('Buku kas tujuan')
-                            ->options(fn (): array => BukuKas::query()
-                                ->where('user_id', $record->user_id)
-                                ->whereKeyNot($record->id)
-                                ->pluck('nama_buku', 'id')
-                                ->all())
+                            ->options(fn (): array => array_filter(
+                                OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+                                    ->where('user_id', $record->user_id)
+                                    ->pluck('nama_buku', 'id')
+                                    ->all(), $record->user_id),
+                                fn ($id): bool => (int) $id !== (int) $record->id,
+                                ARRAY_FILTER_USE_KEY,
+                            ))
                             ->helperText('Semua transaksi dan saldo buku kas ini akan digabungkan ke buku kas tujuan.')
                             ->searchable()
                             ->rules([
