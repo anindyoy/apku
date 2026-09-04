@@ -29,6 +29,9 @@ class LanggananFactory extends Factory
                 'nama_pemilik' => 'APKu',
                 'instruksi' => 'Transfer sesuai total order.',
             ],
+            'persentase_diskon' => 0,
+            'nominal_diskon' => 0,
+            'total_pembayaran' => 25000,
             'status' => StatusLangganan::MenungguPembayaran,
         ];
     }

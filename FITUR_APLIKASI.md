@@ -127,6 +127,9 @@ Fitur berikut hanya tersedia untuk admin:
 - Riwayat user hanya menampilkan order miliknya, sedangkan admin dapat melihat seluruh order.
 - Order tidak kedaluwarsa otomatis. Paket dan metode pembayaran yang tidak lagi digunakan dinonaktifkan, bukan dihapus.
 - User dan admin menerima notifikasi dalam aplikasi saat pembayaran dikonfirmasi, disetujui, atau ditolak sesuai perannya.
+- Admin dapat mengelola voucher berisi label, tanggal kedaluwarsa opsional, persentase diskon, dan ketentuan pemakaian berulang.
+- Satu voucher dapat memiliki banyak kode unik. Kode voucher berulang dapat dipakai berkali-kali oleh user mana pun, sedangkan kode non-berulang hanya dapat dipakai pada satu order yang tidak dibatalkan.
+- User dapat memasukkan kode voucher saat membuat order. Kode, persentase, nominal diskon, dan total pembayaran disimpan sebagai snapshot order.
 
 ## Catatan implementasi
 

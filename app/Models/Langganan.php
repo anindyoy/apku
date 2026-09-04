@@ -12,9 +12,10 @@ class Langganan extends Model
     use HasFactory;
 
     protected $fillable = [
-        'kode_order', 'user_id', 'paket_langganan_id', 'metode_pembayaran_id',
+        'kode_order', 'user_id', 'paket_langganan_id', 'metode_pembayaran_id', 'voucher_code_id',
         'label_paket', 'harga', 'durasi_hari', 'label_metode_pembayaran',
-        'detail_pembayaran', 'status', 'bukti_pembayaran_path', 'tanggal_konfirmasi',
+        'detail_pembayaran', 'kode_voucher', 'persentase_diskon', 'nominal_diskon',
+        'total_pembayaran', 'status', 'bukti_pembayaran_path', 'tanggal_konfirmasi',
         'catatan_user', 'catatan_admin', 'diverifikasi_oleh', 'tanggal_verifikasi',
         'masa_aktif_mulai', 'masa_aktif_sampai',
     ];
@@ -24,6 +25,9 @@ class Langganan extends Model
         return [
             'harga' => 'integer',
             'durasi_hari' => 'integer',
+            'persentase_diskon' => 'integer',
+            'nominal_diskon' => 'integer',
+            'total_pembayaran' => 'integer',
             'detail_pembayaran' => 'array',
             'status' => StatusLangganan::class,
             'tanggal_konfirmasi' => 'datetime',
@@ -51,5 +55,10 @@ class Langganan extends Model
     public function verifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'diverifikasi_oleh');
+    }
+
+    public function voucherCode(): BelongsTo
+    {
+        return $this->belongsTo(VoucherCode::class);
     }
 }

@@ -17,6 +17,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -66,6 +67,10 @@ class LanggananResource extends Resource
                     ->pluck('label', 'id')
                     ->all())
                 ->required(),
+            TextInput::make('kode_voucher')
+                ->label('Kode voucher')
+                ->helperText('Opsional. Masukkan kode voucher jika tersedia.')
+                ->maxLength(255),
         ]);
     }
 
@@ -85,6 +90,9 @@ class LanggananResource extends Resource
                 TextColumn::make('user.name')->label('User')->searchable()->visible(fn (): bool => auth()->user()->isAdmin()),
                 TextColumn::make('label_paket')->label('Paket')->searchable(),
                 TextColumn::make('harga')->money('IDR')->sortable(),
+                TextColumn::make('kode_voucher')->label('Voucher')->placeholder('-'),
+                TextColumn::make('nominal_diskon')->label('Diskon')->money('IDR')->toggleable(),
+                TextColumn::make('total_pembayaran')->label('Total')->money('IDR')->sortable(),
                 TextColumn::make('durasi_hari')->label('Durasi')->suffix(' hari'),
                 TextColumn::make('label_metode_pembayaran')
                     ->label('Pembayaran')
