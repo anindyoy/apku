@@ -3,7 +3,8 @@
 namespace App\Filament\Resources\BukuKasResource\Pages;
 
 use App\Filament\Resources\BukuKasResource;
-use App\Models\Transaksi;
+use App\Models\Dompet;
+use App\Services\TransaksiService;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -24,16 +25,18 @@ class ListBukuKas extends ListRecords
 
                     return $data;
                 })
-                ->after(function ($record) {
-                    Transaksi::create([
-                        'user_id' => $record->user_id,
-                        'buku_kas_id' => $record->id,
-                        'dompet_id' => auth()->user()->idDompetUtama(),
-                        'tanggal' => now(),
-                        'nominal' => $record->saldo,
-                        'jenis' => 'Pemasukan',
-                        'deskripsi' => 'Saldo pertama',
-                    ]);
+                ->after(function ($record): void {
+                    $saldoAwal = (int) $record->saldo;
+                    $record->update(['saldo' => 0]);
+                    $dompet = Dompet::findOrFail(auth()->user()->idDompetUtama());
+
+                    app(TransaksiService::class)->buatSaldoAwal(
+                        auth()->user(),
+                        $record,
+                        $dompet,
+                        $saldoAwal,
+                        'Saldo pertama',
+                    );
                 }),
         ];
     }

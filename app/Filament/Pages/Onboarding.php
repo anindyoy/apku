@@ -5,7 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\JenisTransaksi;
-use App\Models\Transaksi;
+use App\Services\TransaksiService;
 use BackedEnum;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -129,27 +129,24 @@ class Onboarding extends Page implements HasForms
                 'user_id' => $user->id,
                 'nama_buku' => $data['nama_buku'],
                 'description' => $data['description'] ?: null,
-                'saldo' => $data['saldo_awal'],
+                'saldo' => 0,
                 'is_default' => true,
             ]);
 
             $dompet = Dompet::create([
                 'user_id' => $user->id,
                 'nama_dompet' => $data['nama_dompet'],
-                'saldo' => $data['saldo_awal'],
+                'saldo' => 0,
                 'is_default' => true,
                 'description' => 'Dompet utama',
             ]);
 
-            Transaksi::create([
-                'user_id' => $user->id,
-                'buku_kas_id' => $bukuKas->id,
-                'dompet_id' => $dompet->id,
-                'tanggal' => now(),
-                'nominal' => $data['saldo_awal'],
-                'jenis' => 'Pemasukan',
-                'deskripsi' => 'Saldo awal',
-            ]);
+            app(TransaksiService::class)->buatSaldoAwal(
+                $user,
+                $bukuKas,
+                $dompet,
+                (int) $data['saldo_awal'],
+            );
 
             foreach (['Pemasukan' => 'kategori_pemasukan', 'Pengeluaran' => 'kategori_pengeluaran'] as $tipe => $field) {
                 foreach ($data[$field] as $kategori) {

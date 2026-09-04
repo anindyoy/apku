@@ -14,6 +14,37 @@ use Illuminate\Validation\ValidationException;
 
 class TransaksiService
 {
+    public function buatSaldoAwal(
+        User $user,
+        BukuKas $bukuKas,
+        Dompet $dompet,
+        int $nominal,
+        string $deskripsi = 'Saldo awal',
+    ): Transaksi {
+        if ($nominal < 0) {
+            throw ValidationException::withMessages(['nominal' => 'Saldo awal tidak boleh negatif.']);
+        }
+
+        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
+
+        return DB::transaction(function () use ($user, $bukuKas, $dompet, $nominal, $deskripsi): Transaksi {
+            BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
+            Dompet::withoutGlobalScopes()->whereKey($dompet->id)->lockForUpdate()->firstOrFail();
+            $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
+                'user_id' => $user->id,
+                'buku_kas_id' => $bukuKas->id,
+                'dompet_id' => $dompet->id,
+                'tanggal' => now(),
+                'nominal' => $nominal,
+                'jenis' => 'Pemasukan',
+                'deskripsi' => $deskripsi,
+            ]));
+            $this->terapkanDampak($transaksi);
+
+            return $transaksi;
+        });
+    }
+
     public function buat(User $user, array $data, string $jenis): Transaksi
     {
         if (! in_array($jenis, ['Pemasukan', 'Pengeluaran'], true)) {

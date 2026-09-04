@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TransaksiSeeder extends Seeder
 {
@@ -60,6 +61,7 @@ class TransaksiSeeder extends Seeder
                     'user_id' => $user->id,
                     'nama_buku' => $i === 0 ? 'Kas Utama' : 'Buku Kas '.($i + 1),
                     'saldo' => 0, // Diperbarui setelah transaksi disimpan.
+                    'is_default' => $i === 0,
                     'goal' => null,
                     'tanggal_goal' => null,
                     'description' => fake()->sentence(),
@@ -121,7 +123,7 @@ class TransaksiSeeder extends Seeder
                     $availableIdxs = array_diff(array_keys($bukuIdMap), [$kasIdx]);
                     $tujuanIdx = $availableIdxs[array_rand($availableIdxs)];
                     $tujuanId = $bukuIdMap[$tujuanIdx];
-                    $transferCode = uniqid();
+                    $transferCode = (string) Str::uuid();
                     $nominal = rand(1, 100);
 
                     // Ambil tanggal transaksi paling awal sebagai batas rentang.
