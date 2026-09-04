@@ -114,6 +114,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Pencarian cepat menu melalui Spotlight.
 - Login cepat akun pengembangan pada lingkungan lokal.
 - Pencatatan aktivitas dan debugging melalui Laravel Telescope serta Debugbar pada lingkungan yang sesuai.
+- Notifikasi otomatis ke Telegram untuk exception yang dilaporkan pada lingkungan production apabila kredensial bot dan chat telah dikonfigurasi.
 
 ## 13. Langganan premium
 
