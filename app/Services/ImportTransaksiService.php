@@ -1,0 +1,301 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\BukuKas;
+use App\Models\Dompet;
+use App\Models\ImportTransaksi;
+use App\Models\JenisTransaksi;
+use App\Models\User;
+use Carbon\CarbonImmutable;
+use DateTimeInterface;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Reader\CSV\Reader as CsvReader;
+use OpenSpout\Reader\XLSX\Reader as XlsxReader;
+use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
+use Throwable;
+
+class ImportTransaksiService
+{
+    public const BATAS_BARIS = 1000;
+
+    public const BATAS_UKURAN_FILE = 3 * 1024 * 1024;
+
+    private const HEADER = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi'];
+
+    public function buatTemplateXlsx(string $path): void
+    {
+        $writer = new XlsxWriter;
+        $writer->openToFile($path);
+        $writer->addRow(Row::fromValues(self::HEADER));
+        $writer->addRow(Row::fromValues([
+            now()->startOfDay()->format('Y-m-d H:i'),
+            'Pemasukan',
+            'Kas Utama',
+            'Cash',
+            'Gaji',
+            5000000,
+            'Gaji bulan berjalan',
+        ]));
+        $writer->close();
+    }
+
+    /**
+     * @return array{baris: array<int, array<string, mixed>>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
+     */
+    public function pratinjau(User $user, UploadedFile|TemporaryUploadedFile|string $file, ?string $namaFile = null): array
+    {
+        [$path, $namaFile] = $this->informasiFile($file, $namaFile);
+        $extension = strtolower(pathinfo($namaFile, PATHINFO_EXTENSION));
+
+        if (! in_array($extension, ['csv', 'xlsx'], true)) {
+            throw ValidationException::withMessages(['file' => 'File harus berformat CSV atau XLSX.']);
+        }
+
+        if (! is_file($path) || filesize($path) === 0) {
+            throw ValidationException::withMessages(['file' => 'File import kosong atau tidak dapat dibaca.']);
+        }
+
+        if (filesize($path) > self::BATAS_UKURAN_FILE) {
+            throw ValidationException::withMessages(['file' => 'Ukuran file import maksimal 3 MB.']);
+        }
+
+        $hasil = [
+            'baris' => [],
+            'errors' => [],
+            'jumlah_baris' => 0,
+            'total_pemasukan' => 0,
+            'total_pengeluaran' => 0,
+            'hash_file' => hash_file('sha256', $path),
+        ];
+
+        $reader = $extension === 'csv' ? new CsvReader : new XlsxReader;
+
+        try {
+            $reader->open($path);
+            $header = null;
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                foreach ($sheet->getRowIterator() as $row) {
+                    $nilai = array_map(fn ($cell) => $cell->getValue(), $row->getCells());
+
+                    if ($this->barisKosong($nilai)) {
+                        continue;
+                    }
+
+                    if ($header === null) {
+                        $header = array_map(fn ($value): string => $this->normalisasiHeader($value), $nilai);
+                        $this->pastikanHeaderValid($header);
+
+                        continue;
+                    }
+
+                    $hasil['jumlah_baris']++;
+                    $nomorBaris = $hasil['jumlah_baris'] + 1;
+
+                    if ($hasil['jumlah_baris'] > self::BATAS_BARIS) {
+                        throw ValidationException::withMessages([
+                            'file' => 'File melebihi batas '.number_format(self::BATAS_BARIS, 0, ',', '.').' baris transaksi.',
+                        ]);
+                    }
+
+                    $dataMentah = array_combine($header, array_slice(array_pad($nilai, count($header), null), 0, count($header)));
+                    [$data, $errors] = $this->validasiBaris($user, $dataMentah, $nomorBaris);
+
+                    if ($errors !== []) {
+                        array_push($hasil['errors'], ...$errors);
+
+                        continue;
+                    }
+
+                    $hasil['baris'][] = $data;
+                    $kunciTotal = $data['jenis'] === 'Pemasukan' ? 'total_pemasukan' : 'total_pengeluaran';
+                    $hasil[$kunciTotal] += $data['nominal'];
+                }
+
+                break;
+            }
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable) {
+            throw ValidationException::withMessages(['file' => 'Isi file tidak dapat dibaca. Pastikan file tidak rusak dan formatnya benar.']);
+        } finally {
+            $reader->close();
+        }
+
+        if ($header === null || $hasil['jumlah_baris'] === 0) {
+            throw ValidationException::withMessages(['file' => 'File tidak memiliki baris transaksi.']);
+        }
+
+        if (ImportTransaksi::query()->where('user_id', $user->id)->where('hash_file', $hasil['hash_file'])->exists()) {
+            $hasil['errors'][] = 'File yang sama sudah pernah berhasil diimpor.';
+        }
+
+        return $hasil;
+    }
+
+    /** @return array{jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int} */
+    public function impor(User $user, UploadedFile|TemporaryUploadedFile|string $file, ?string $namaFile = null): array
+    {
+        [$path, $namaFile] = $this->informasiFile($file, $namaFile);
+        $hasil = $this->pratinjau($user, $path, $namaFile);
+
+        if ($hasil['errors'] !== []) {
+            throw ValidationException::withMessages(['file' => $hasil['errors']]);
+        }
+
+        return DB::transaction(function () use ($user, $namaFile, $hasil): array {
+            if (ImportTransaksi::query()->where('user_id', $user->id)->where('hash_file', $hasil['hash_file'])->lockForUpdate()->exists()) {
+                throw ValidationException::withMessages(['file' => 'File yang sama sudah pernah berhasil diimpor.']);
+            }
+
+            foreach ($hasil['baris'] as $data) {
+                app(TransaksiService::class)->buat($user, $data, $data['jenis']);
+            }
+
+            ImportTransaksi::query()->create([
+                'user_id' => $user->id,
+                'nama_file' => Str::limit(basename($namaFile), 255, ''),
+                'hash_file' => $hasil['hash_file'],
+                'jumlah_baris' => $hasil['jumlah_baris'],
+                'status' => 'berhasil',
+            ]);
+
+            return [
+                'jumlah_baris' => $hasil['jumlah_baris'],
+                'total_pemasukan' => $hasil['total_pemasukan'],
+                'total_pengeluaran' => $hasil['total_pengeluaran'],
+            ];
+        });
+    }
+
+    /** @return array{string, string} */
+    private function informasiFile(UploadedFile|TemporaryUploadedFile|string $file, ?string $namaFile): array
+    {
+        if ($file instanceof UploadedFile) {
+            return [$file->getRealPath(), $namaFile ?? $file->getClientOriginalName()];
+        }
+
+        return [$file, $namaFile ?? basename($file)];
+    }
+
+    /** @param array<int, mixed> $nilai */
+    private function barisKosong(array $nilai): bool
+    {
+        return collect($nilai)->every(fn ($value): bool => $value === null || trim((string) $value) === '');
+    }
+
+    private function normalisasiHeader(mixed $value): string
+    {
+        return str_replace(' ', '_', mb_strtolower(trim((string) $value, "\xEF\xBB\xBF \t\n\r\0\x0B")));
+    }
+
+    /** @param array<int, string> $header */
+    private function pastikanHeaderValid(array $header): void
+    {
+        $header = array_values(array_filter($header, fn (string $value): bool => $value !== ''));
+        $hilang = array_diff(self::HEADER, $header);
+
+        if ($hilang !== [] || count($header) !== count(array_unique($header))) {
+            $pesan = $hilang !== []
+                ? 'Header wajib tidak lengkap: '.implode(', ', $hilang).'.'
+                : 'Header file tidak boleh duplikat.';
+
+            throw ValidationException::withMessages(['file' => $pesan]);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{array<string, mixed>, array<int, string>}
+     */
+    private function validasiBaris(User $user, array $data, int $nomorBaris): array
+    {
+        $errors = [];
+        $jenis = Str::title(trim((string) ($data['jenis'] ?? '')));
+        $bukuKas = $this->cariBukuKas($user, $data['buku_kas'] ?? null);
+        $dompet = $this->cariDompet($user, $data['dompet'] ?? null);
+        $kategori = $this->cariKategori($user, $data['kategori'] ?? null, $jenis);
+        $tanggal = $this->parseTanggal($data['tanggal'] ?? null);
+        $nominal = filter_var($data['nominal'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        if (! in_array($jenis, ['Pemasukan', 'Pengeluaran'], true)) {
+            $errors[] = "Baris {$nomorBaris}, kolom jenis: hanya Pemasukan atau Pengeluaran yang didukung.";
+        }
+
+        if ($tanggal === null || $tanggal->isFuture()) {
+            $errors[] = "Baris {$nomorBaris}, kolom tanggal: tanggal tidak valid atau berada di masa depan.";
+        }
+
+        if ($nominal === false) {
+            $errors[] = "Baris {$nomorBaris}, kolom nominal: harus berupa bilangan bulat lebih dari nol tanpa pemisah ribuan.";
+        }
+
+        if ($bukuKas === null) {
+            $errors[] = "Baris {$nomorBaris}, kolom buku_kas: buku kas tidak ditemukan atau tidak dapat dikelola.";
+        }
+
+        if ($dompet === null) {
+            $errors[] = "Baris {$nomorBaris}, kolom dompet: dompet aktif tidak ditemukan atau tidak dapat dikelola.";
+        }
+
+        if ($kategori === null) {
+            $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori tidak ditemukan atau tipenya tidak sesuai.";
+        }
+
+        return [[
+            'tanggal' => $tanggal,
+            'jenis' => $jenis,
+            'buku_kas_id' => $bukuKas?->id,
+            'dompet_id' => $dompet?->id,
+            'jenis_transaksi_id' => $kategori?->id,
+            'nominal' => $nominal === false ? 0 : $nominal,
+            'deskripsi' => filled($data['deskripsi'] ?? null) ? trim((string) $data['deskripsi']) : null,
+        ], $errors];
+    }
+
+    private function cariBukuKas(User $user, mixed $nama): ?BukuKas
+    {
+        $hasil = BukuKas::withoutGlobalScopes()->where('user_id', $user->id)
+            ->whereRaw('LOWER(nama_buku) = ?', [mb_strtolower(trim((string) $nama))])->get();
+
+        return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPada($hasil->first()) ? $hasil->first() : null;
+    }
+
+    private function cariDompet(User $user, mixed $nama): ?Dompet
+    {
+        $hasil = Dompet::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
+            ->whereRaw('LOWER(nama_dompet) = ?', [mb_strtolower(trim((string) $nama))])->get();
+
+        return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;
+    }
+
+    private function cariKategori(User $user, mixed $nama, string $jenis): ?JenisTransaksi
+    {
+        $hasil = JenisTransaksi::withoutGlobalScopes()->where('user_id', $user->id)->where('tipe', $jenis)
+            ->whereRaw('LOWER(nama_jenis) = ?', [mb_strtolower(trim((string) $nama))])->get();
+
+        return $hasil->count() === 1 ? $hasil->first() : null;
+    }
+
+    private function parseTanggal(mixed $value): ?CarbonImmutable
+    {
+        if ($value instanceof DateTimeInterface) {
+            return CarbonImmutable::instance($value);
+        }
+
+        try {
+            $teks = trim((string) $value);
+            $tanggal = CarbonImmutable::createFromFormat('Y-m-d H:i', $teks);
+
+            return $tanggal->format('Y-m-d H:i') === $teks ? $tanggal : null;
+        } catch (Throwable) {
+            return null;
+        }
+    }
+}

@@ -7,18 +7,27 @@ use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
+use App\Services\ImportTransaksiService;
 use App\Services\OpsiSelectCache;
 use App\Services\TransaksiService;
 use App\Services\TransferDompetService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\HtmlString;
+use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ListTransaksis extends ListRecords
 {
@@ -150,6 +159,73 @@ class ListTransaksis extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('Unduh Template Import')
+                ->action(function () {
+                    $path = tempnam(sys_get_temp_dir(), 'template-import-transaksi-');
+                    app(ImportTransaksiService::class)->buatTemplateXlsx($path);
+
+                    return response()->download($path, 'template-import-transaksi.xlsx')->deleteFileAfterSend(true);
+                })
+                ->color('gray')
+                ->icon('heroicon-o-arrow-down-tray'),
+
+            Action::make('Import Transaksi')
+                ->schema([
+                    FileUpload::make('file')
+                        ->label('File CSV atau XLSX')
+                        ->acceptedFileTypes([
+                            'text/csv',
+                            'text/plain',
+                            'application/csv',
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        ])
+                        ->maxSize(3072)
+                        ->storeFiles(false)
+                        ->live()
+                        ->required()
+                        ->afterStateUpdated(function (mixed $state, Set $set): void {
+                            if (! $state instanceof TemporaryUploadedFile) {
+                                $set('pratinjau', null);
+
+                                return;
+                            }
+
+                            try {
+                                $hasil = app(ImportTransaksiService::class)->pratinjau(auth()->user(), $state);
+                                $set('pratinjau', collect($hasil)->only([
+                                    'jumlah_baris', 'total_pemasukan', 'total_pengeluaran', 'errors',
+                                ])->all());
+                            } catch (ValidationException $exception) {
+                                $set('pratinjau', [
+                                    'jumlah_baris' => 0,
+                                    'total_pemasukan' => 0,
+                                    'total_pengeluaran' => 0,
+                                    'errors' => collect($exception->errors())->flatten()->all(),
+                                ]);
+                            }
+                        }),
+                    Hidden::make('pratinjau'),
+                    Placeholder::make('ringkasan_import')
+                        ->label('Pratinjau')
+                        ->content(fn (Get $get): HtmlString => $this->formatPratinjauImport($get('pratinjau'))),
+                ])
+                ->modalSubmitActionLabel('Import')
+                ->action(function (array $data): void {
+                    if (! ($data['file'] ?? null) instanceof TemporaryUploadedFile) {
+                        throw ValidationException::withMessages(['file' => 'File import tidak tersedia. Silakan unggah ulang.']);
+                    }
+
+                    $hasil = app(ImportTransaksiService::class)->impor(auth()->user(), $data['file']);
+
+                    Notification::make()
+                        ->title($hasil['jumlah_baris'].' transaksi berhasil diimpor')
+                        ->body('Pemasukan Rp '.number_format($hasil['total_pemasukan'], 0, ',', '.').' · Pengeluaran Rp '.number_format($hasil['total_pengeluaran'], 0, ',', '.'))
+                        ->success()
+                        ->send();
+                })
+                ->color('info')
+                ->icon('heroicon-o-arrow-up-tray'),
+
             Action::make('Pindah saldo dompet')
                 ->visible(fn (): bool => count(Transaksi::opsiDompetSumberTransfer()) >= 2)
                 ->schema([
@@ -288,6 +364,38 @@ class ListTransaksis extends ListRecords
                 ->color('danger')
                 ->icon('heroicon-o-arrow-up-on-square'),
         ];
+    }
+
+    /** @param array<string, mixed>|null $pratinjau */
+    public function formatPratinjauImport(?array $pratinjau): HtmlString
+    {
+        if ($pratinjau === null) {
+            return new HtmlString('<p>Unggah file untuk melihat hasil validasi sebelum import.</p>');
+        }
+
+        $jumlah = number_format((int) ($pratinjau['jumlah_baris'] ?? 0), 0, ',', '.');
+        $pemasukan = number_format((int) ($pratinjau['total_pemasukan'] ?? 0), 0, ',', '.');
+        $pengeluaran = number_format((int) ($pratinjau['total_pengeluaran'] ?? 0), 0, ',', '.');
+        $errors = $pratinjau['errors'] ?? [];
+        $html = '<div class="space-y-2"><p><strong>'.$jumlah.'</strong> baris · Pemasukan Rp '.$pemasukan.' · Pengeluaran Rp '.$pengeluaran.'</p>';
+
+        if ($errors === []) {
+            $html .= '<p class="text-success-600">Semua baris valid dan siap diimpor.</p>';
+        } else {
+            $html .= '<p class="text-danger-600"><strong>'.count($errors).' masalah ditemukan:</strong></p><ul class="list-disc pl-5 text-sm text-danger-600">';
+
+            foreach (array_slice($errors, 0, 20) as $error) {
+                $html .= '<li>'.e($error).'</li>';
+            }
+
+            if (count($errors) > 20) {
+                $html .= '<li>'.e('Masih ada '.(count($errors) - 20).' masalah lainnya.').'</li>';
+            }
+
+            $html .= '</ul>';
+        }
+
+        return new HtmlString($html.'</div>');
     }
 
     public function getHeaderWidgets(): array
