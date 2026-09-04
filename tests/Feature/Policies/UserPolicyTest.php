@@ -5,11 +5,11 @@ use Illuminate\Support\Facades\Gate;
 
 // ==================== USER POLICY ====================
 
-test('super user dapat viewAny user', function () {
-    $superUser = createSuperUser();
+test('admin dapat viewAny user', function () {
+    $adminUser = createAdminUser();
 
-    $this->actingAs($superUser);
-    $this->assertTrue(Gate::forUser($superUser)->allows('viewAny', User::class));
+    $this->actingAs($adminUser);
+    $this->assertTrue(Gate::forUser($adminUser)->allows('viewAny', User::class));
 })
     ->group('policies', 'authorization');
 
@@ -21,12 +21,12 @@ test('regular user tidak dapat viewAny user', function () {
 })
     ->group('policies', 'authorization');
 
-test('super user dapat view user', function () {
-    $superUser = createSuperUser();
+test('admin dapat view user', function () {
+    $adminUser = createAdminUser();
     $user = createRegularUserWithBukuKas();
 
-    $this->actingAs($superUser);
-    $this->assertTrue(Gate::forUser($superUser)->allows('view', $user));
+    $this->actingAs($adminUser);
+    $this->assertTrue(Gate::forUser($adminUser)->allows('view', $user));
 })
     ->group('policies', 'authorization');
 
@@ -42,11 +42,11 @@ test('regular user tidak dapat view user lain', function () {
 })
     ->group('policies', 'authorization');
 
-test('super user dapat create user', function () {
-    $superUser = createSuperUser();
+test('admin dapat create user', function () {
+    $adminUser = createAdminUser();
 
-    $this->actingAs($superUser);
-    $this->assertTrue(Gate::forUser($superUser)->allows('create', User::class));
+    $this->actingAs($adminUser);
+    $this->assertTrue(Gate::forUser($adminUser)->allows('create', User::class));
 })
     ->group('policies', 'authorization');
 
@@ -58,12 +58,12 @@ test('regular user tidak dapat create user', function () {
 })
     ->group('policies', 'authorization');
 
-test('super user dapat update user', function () {
-    $superUser = createSuperUser();
+test('admin dapat update user', function () {
+    $adminUser = createAdminUser();
     $user = createRegularUserWithBukuKas();
 
-    $this->actingAs($superUser);
-    $this->assertTrue(Gate::forUser($superUser)->allows('update', $user));
+    $this->actingAs($adminUser);
+    $this->assertTrue(Gate::forUser($adminUser)->allows('update', $user));
 })
     ->group('policies', 'authorization');
 
@@ -79,12 +79,12 @@ test('regular user tidak dapat update user lain', function () {
 })
     ->group('policies', 'authorization');
 
-test('super user dapat delete user', function () {
-    $superUser = createSuperUser();
+test('admin dapat delete user', function () {
+    $adminUser = createAdminUser();
     $user = createRegularUserWithBukuKas();
 
-    $this->actingAs($superUser);
-    $this->assertTrue(Gate::forUser($superUser)->allows('delete', $user));
+    $this->actingAs($adminUser);
+    $this->assertTrue(Gate::forUser($adminUser)->allows('delete', $user));
 })
     ->group('policies', 'authorization');
 
@@ -100,20 +100,20 @@ test('regular user tidak dapat delete user', function () {
 })
     ->group('policies', 'authorization');
 
-test('super user dapat restore user', function () {
-    $superUser = createSuperUser();
+test('admin dapat restore user', function () {
+    $adminUser = createAdminUser();
     $user = createRegularUserWithBukuKas();
 
-    $this->actingAs($superUser);
-    $this->assertTrue(Gate::forUser($superUser)->allows('restore', $user));
+    $this->actingAs($adminUser);
+    $this->assertTrue(Gate::forUser($adminUser)->allows('restore', $user));
 })
     ->group('policies', 'authorization');
 
-test('super user dapat forceDelete user', function () {
-    $superUser = createSuperUser();
+test('admin dapat forceDelete user', function () {
+    $adminUser = createAdminUser();
     $user = createRegularUserWithBukuKas();
 
-    $this->actingAs($superUser);
-    $this->assertTrue(Gate::forUser($superUser)->allows('forceDelete', $user));
+    $this->actingAs($adminUser);
+    $this->assertTrue(Gate::forUser($adminUser)->allows('forceDelete', $user));
 })
     ->group('policies', 'authorization');

@@ -157,7 +157,7 @@ class Transaksi extends Model
     {
         $user = auth()->user();
 
-        if ($user->isSuper() || $user->masaAktifBerlaku()) {
+        if ($user->isAdmin() || $user->masaAktifBerlaku()) {
             return $query;
         }
 
@@ -172,7 +172,7 @@ class Transaksi extends Model
         $user = auth()->user();
         $query->withoutTrashed();
 
-        if ($user->isSuper() || $user->masaAktifBerlaku()) {
+        if ($user->isAdmin() || $user->masaAktifBerlaku()) {
             return $query;
         }
 

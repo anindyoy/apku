@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\User;
-use Livewire\Livewire;
-use App\Models\UtangPiutang;
-use App\Models\UtangPiutangDetail;
 use App\Filament\Resources\UtangResource\Pages\ListUtangs;
 use App\Filament\Resources\UtangResource\Pages\UtangDetail;
+use App\Models\User;
+use App\Models\UtangPiutang;
+use App\Models\UtangPiutangDetail;
+use Livewire\Livewire;
 
 function createUtangTestData(User $user, string $kepada, int $nominal = 100000): UtangPiutang
 {
@@ -26,7 +26,7 @@ function createUtangTestData(User $user, string $kepada, int $nominal = 100000):
 }
 
 test('user bisa membuka halaman daftar utang', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     createUtangTestData($user, 'Siti Aminah');
 
     Livewire::actingAs($user)
@@ -35,8 +35,8 @@ test('user bisa membuka halaman daftar utang', function () {
 })->group('utang');
 
 test('halaman daftar utang hanya menampilkan data utang milik user', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
-    $otherUser = User::notSuper()->whereNot('id', $user->id)->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
+    $otherUser = User::notAdmin()->whereNot('id', $user->id)->inRandomOrder()->first();
 
     createUtangTestData($user, 'Utang Milik Saya');
     createUtangTestData($otherUser, 'Utang Milik Orang Lain');
@@ -49,7 +49,7 @@ test('halaman daftar utang hanya menampilkan data utang milik user', function ()
 })->group('utang');
 
 test('halaman daftar utang hanya menampilkan data dengan tipe utang', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     createUtangTestData($user, 'Data Utang Unik');
     UtangPiutang::factory()->create([
@@ -65,20 +65,20 @@ test('halaman daftar utang hanya menampilkan data dengan tipe utang', function (
         ->assertDontSee('Data Piutang Bukan Utang');
 })->group('utang');
 
-test('super user bisa melihat data utang milik user lain', function () {
-    $super = User::super()->first();
-    $user = User::notSuper()->inRandomOrder()->first();
+test('admin bisa melihat data utang milik user lain', function () {
+    $admin = User::admin()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     createUtangTestData($user, 'Data Utang Dari User Lain');
 
-    Livewire::actingAs($super)
+    Livewire::actingAs($admin)
         ->test(ListUtangs::class)
         ->assertSuccessful()
         ->assertSeeText('Data Utang Dari User Lain');
 })->group('utang');
 
 test('user bisa membuka halaman detail utang', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangTestData($user, 'Siti Aminah', 250000);
 
     Livewire::actingAs($user)
@@ -88,7 +88,7 @@ test('user bisa membuka halaman detail utang', function () {
 })->group('utang');
 
 test('user bisa menambah nominal utang pada halaman detail', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangTestData($user, 'Siti Aminah', 100000);
 
     Livewire::actingAs($user)
@@ -109,7 +109,7 @@ test('user bisa menambah nominal utang pada halaman detail', function () {
 })->group('utang');
 
 test('user bisa mencatat pembayaran utang pada halaman detail', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangTestData($user, 'Siti Aminah', 100000);
 
     Livewire::actingAs($user)

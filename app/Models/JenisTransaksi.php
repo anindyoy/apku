@@ -67,7 +67,7 @@ class JenisTransaksi extends Model
     {
         return [
             CreateAction::make()
-                ->hidden(auth()->user()->isSuper())
+                ->hidden(auth()->user()->isAdmin())
                 ->model(self::class)
                 ->mutateFormDataUsing(function (array $data) use ($type): array {
                     $data['user_id'] = auth()->id();
@@ -85,15 +85,15 @@ class JenisTransaksi extends Model
     {
         return [
             EditAction::make()
-                ->hidden(auth()->user()->isSuper())
+                ->hidden(auth()->user()->isAdmin())
                 ->modalWidth('small') // Filament v5 uses string
                 ->form(self::form($type)),
 
             DeleteAction::make()
-                ->visible(fn ($record) => ! $record->transaksi_count && ! auth()->user()->isSuper()),
+                ->visible(fn ($record) => ! $record->transaksi_count && ! auth()->user()->isAdmin()),
 
             Action::make('Hapus')
-                ->hidden(auth()->user()->isSuper())
+                ->hidden(auth()->user()->isAdmin())
                 ->modalWidth('small') // Filament v5 uses string
                 ->form(function ($record) use ($type) {
                     return [

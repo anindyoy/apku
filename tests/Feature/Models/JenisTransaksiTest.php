@@ -13,7 +13,7 @@ beforeEach(function () {
         JenisTransaksiSeeder::class,
     ]);
 
-    // Authenticate user for methods that call auth()->user()->isSuper()
+    // Autentikasi pengguna untuk metode yang memanggil auth()->user()->isAdmin().
     $user = User::first();
     $this->actingAs($user);
 });

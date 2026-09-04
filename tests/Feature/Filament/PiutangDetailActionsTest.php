@@ -1,10 +1,10 @@
 <?php
 
+use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
 use App\Models\User;
-use Livewire\Livewire;
 use App\Models\UtangPiutang;
 use App\Models\UtangPiutangDetail;
-use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
+use Livewire\Livewire;
 
 // ==================== PIUTANG DETAIL - TABLE ROW ACTIONS ====================
 // Targets uncovered lines in PiutangDetail.php table() method
@@ -32,7 +32,7 @@ function createPiutangDetailTestData(User $user, string $kepada, int $nominal = 
 // --- Table Row Action: ubah detail ---
 
 test('piutang detail - tabel action ubah detail berhasil', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $piutang = createPiutangDetailTestData($user, 'Budi Setiawan', 100000);
 
     $detail = UtangPiutangDetail::where('utang_piutang_id', $piutang->id)->first();
@@ -54,7 +54,7 @@ test('piutang detail - tabel action ubah detail berhasil', function () {
 // --- Table Row Action: delete detail (DeleteAction::make() defaults to name 'delete') ---
 
 test('piutang detail - tabel action delete detail berhasil', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $piutang = createPiutangDetailTestData($user, 'Detail Dihapus', 100000);
 
     $detail = UtangPiutangDetail::where('utang_piutang_id', $piutang->id)->first();
@@ -70,7 +70,7 @@ test('piutang detail - tabel action delete detail berhasil', function () {
 // --- Title and subheading ---
 
 test('piutang detail - judul halaman benar', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $piutang = createPiutangDetailTestData($user, 'Judul Test', 100000);
 
     Livewire::actingAs($user)
@@ -80,7 +80,7 @@ test('piutang detail - judul halaman benar', function () {
 })->group('piutang-detail-action');
 
 test('piutang detail - subheading jatuh tempo muncul jika ada tempo', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     $piutang = UtangPiutang::factory()->create([
         'user_id' => $user->id,
@@ -103,7 +103,7 @@ test('piutang detail - subheading jatuh tempo muncul jika ada tempo', function (
 })->group('piutang-detail-action');
 
 test('piutang detail - subheading tidak muncul jika tanpa tempo', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $piutang = createPiutangDetailTestData($user, 'Tanpa Tempo', 100000);
 
     // Ensure no tempo

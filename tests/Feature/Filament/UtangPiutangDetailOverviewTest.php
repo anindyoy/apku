@@ -1,11 +1,11 @@
 <?php
 
+use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
+use App\Filament\Resources\UtangResource\Pages\UtangDetail;
 use App\Models\User;
-use Livewire\Livewire;
 use App\Models\UtangPiutang;
 use App\Models\UtangPiutangDetail;
-use App\Filament\Resources\UtangResource\Pages\UtangDetail;
-use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
+use Livewire\Livewire;
 
 // ==================== UTANG PIUTANG DETAIL OVERVIEW WIDGET ====================
 // Tests the UtangPiutangDetailOverview widget indirectly via detail pages.
@@ -13,7 +13,7 @@ use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
 // which triggers getStats() method covering lines 22-34.
 
 test('widget overview menghitung sisa utang dengan benar - multiple details', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     $utang = UtangPiutang::factory()->create([
         'user_id' => $user->id,
@@ -52,7 +52,7 @@ test('widget overview menghitung sisa utang dengan benar - multiple details', fu
 })->group('filament', 'widget');
 
 test('widget overview menangani data kosong - tidak ada detail', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     $utang = UtangPiutang::factory()->create([
         'user_id' => $user->id,
@@ -68,7 +68,7 @@ test('widget overview menangani data kosong - tidak ada detail', function () {
 })->group('filament', 'widget');
 
 test('widget overview piutang dengan multiple details', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     $piutang = UtangPiutang::factory()->create([
         'user_id' => $user->id,

@@ -13,9 +13,8 @@ class UserScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if (auth()->id() && !auth()->user()->isSuper()) {
+        if (auth()->id() && ! auth()->user()->isAdmin()) {
             $builder->where('user_id', auth()->id());
         }
     }
-
 }

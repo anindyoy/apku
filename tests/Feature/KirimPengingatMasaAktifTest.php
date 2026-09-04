@@ -32,17 +32,17 @@ it('mengirim pengingat H-30 dan H-7 hanya satu kali', function () {
         ->and($userLain->notifications()->count())->toBe(0);
 });
 
-it('tidak mengirim pengingat kepada super admin', function () {
+it('tidak mengirim pengingat kepada admin', function () {
     Carbon::setTestNow('2026-09-01 08:00:00');
 
-    $superAdmin = User::factory()->create([
-        'role' => 'super',
+    $admin = User::factory()->create([
+        'role' => 'admin',
         'masa_aktif' => today()->addDays(7),
     ]);
 
     $this->artisan('masa-aktif:kirim-pengingat')->assertSuccessful();
 
-    expect($superAdmin->notifications()->count())->toBe(0);
+    expect($admin->notifications()->count())->toBe(0);
 });
 
 it('membentuk data notifikasi yang dapat ditampilkan Filament', function () {

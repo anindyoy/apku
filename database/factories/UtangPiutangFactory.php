@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Models\UtangPiutang;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UtangPiutang>
+ * @extends Factory<UtangPiutang>
  */
 class UtangPiutangFactory extends Factory
 {
@@ -18,7 +19,7 @@ class UtangPiutangFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::notSuper()->inRandomOrder()->first()->id,
+            'user_id' => User::notAdmin()->inRandomOrder()->first()->id,
             'code' => uniqid(),
             'kepada' => fake()->name(),
             'tipe' => rand(0, 1) ? 'utang' : 'piutang',

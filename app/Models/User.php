@@ -71,7 +71,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMengelolaTransaksiPada(BukuKas $bukuKas): bool
     {
-        return $this->isSuper()
+        return $this->isAdmin()
             || $bukuKas->id === $this->idBukuKasUtama()
             || $bukuKas->id === $this->idBukuKasTambahanGratis()
             || $this->masaAktifBerlaku();
@@ -79,7 +79,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMembuatBukuKas(): bool
     {
-        return $this->isSuper()
+        return $this->isAdmin()
             || $this->buku_kas()->count() < 2
             || $this->masaAktifBerlaku();
     }
@@ -105,7 +105,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function dapatMengelolaTransaksiPadaDompet(Dompet $dompet): bool
     {
         return $dompet->user_id === $this->id
-            && ($this->isSuper()
+            && ($this->isAdmin()
                 || $dompet->id === $this->idDompetUtama()
                 || $dompet->id === $this->idDompetTambahanGratis()
                 || $this->masaAktifBerlaku());
@@ -113,7 +113,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMembuatDompet(): bool
     {
-        return $this->isSuper()
+        return $this->isAdmin()
             || $this->dompet()->count() < 2
             || $this->masaAktifBerlaku();
     }
@@ -156,18 +156,18 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(UtangPiutang::class);
     }
 
-    public function isSuper()
+    public function isAdmin(): bool
     {
-        return $this->role == 'super';
+        return $this->role === 'admin';
     }
 
-    public function scopeNotSuper($query)
+    public function scopeNotAdmin($query)
     {
-        return $query->whereNot('id', 1);
+        return $query->where('role', '!=', 'admin');
     }
 
-    public function scopeSuper($query)
+    public function scopeAdmin($query)
     {
-        return $query->where('id', 1);
+        return $query->where('role', 'admin');
     }
 }

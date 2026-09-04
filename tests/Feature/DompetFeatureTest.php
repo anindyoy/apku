@@ -310,9 +310,9 @@ test('seluruh dompet otomatis dapat digunakan kembali setelah masa aktif diperpa
         ->and($dompetKetiga->fresh()->saldo)->toBe(10000);
 });
 
-test('user super tidak terkena batas jumlah dompet miliknya', function () {
+test('admin tidak terkena batas jumlah dompet miliknya', function () {
     ['user' => $user, 'cash' => $cash, 'bank' => $bank] = buatDataDompet([
-        'role' => 'super',
+        'role' => 'admin',
         'masa_aktif' => null,
     ]);
     $dompetKetiga = Dompet::create([
@@ -327,22 +327,22 @@ test('user super tidak terkena batas jumlah dompet miliknya', function () {
         ->and($user->dapatMengelolaTransaksiPadaDompet($dompetKetiga))->toBeTrue();
 });
 
-test('user super tidak dapat mengubah saldo dompet pengguna lain', function () {
-    ['user' => $super, 'bukuKas' => $bukuKasSuper, 'cash' => $cashSuper] = buatDataDompet([
-        'role' => 'super',
+test('admin tidak dapat mengubah saldo dompet pengguna lain', function () {
+    ['user' => $admin, 'bukuKas' => $bukuKasAdmin, 'cash' => $cashAdmin] = buatDataDompet([
+        'role' => 'admin',
     ]);
     ['cash' => $cashPenggunaLain] = buatDataDompet();
 
-    expect($super->dapatMengelolaTransaksiPadaDompet($cashPenggunaLain))->toBeFalse()
+    expect($admin->dapatMengelolaTransaksiPadaDompet($cashPenggunaLain))->toBeFalse()
         ->and(fn () => app(TransferDompetService::class)->transfer(
-            $super,
-            $cashSuper,
+            $admin,
+            $cashAdmin,
             $cashPenggunaLain,
-            $bukuKasSuper,
+            $bukuKasAdmin,
             10000,
         ))->toThrow(AuthorizationException::class);
 
-    expect($cashSuper->fresh()->saldo)->toBe(100000)
+    expect($cashAdmin->fresh()->saldo)->toBe(100000)
         ->and($cashPenggunaLain->fresh()->saldo)->toBe(100000);
 });
 

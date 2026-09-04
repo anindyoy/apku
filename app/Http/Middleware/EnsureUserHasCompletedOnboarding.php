@@ -16,7 +16,7 @@ class EnsureUserHasCompletedOnboarding
 
         if (
             $user
-            && ! $user->isSuper()
+            && ! $user->isAdmin()
             && ($user->buku_kas()->exists() || $user->dompet()->exists())
         ) {
             app(PastikanAkunKeuanganDefault::class)->jalankan($user);
@@ -24,7 +24,7 @@ class EnsureUserHasCompletedOnboarding
 
         if (
             $user
-            && ! $user->isSuper()
+            && ! $user->isAdmin()
             && (! $user->buku_kas()->exists() || ! $user->dompet()->exists())
             && ! $request->routeIs('filament.admin.pages.onboarding')
         ) {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\Transaksi;
 use Livewire\Livewire;
 
@@ -14,10 +15,10 @@ test('regular user tidak dapat mengakses user management', function () {
 })
     ->group('filament', 'authorization');
 
-test('super user dapat mengakses user management', function () {
-    $superUser = createSuperUser();
+test('admin dapat mengakses user management', function () {
+    $adminUser = createAdminUser();
 
-    $this->actingAs($superUser)
+    $this->actingAs($adminUser)
         ->get(route('filament.admin.resources.users.index'))
         ->assertSuccessful();
 })
@@ -39,7 +40,7 @@ test('regular user hanya dapat melihat data sendiri di transaksi', function () {
     $bukuKas1 = $user1->buku_kas()->first();
 
     Livewire::actingAs($user1)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertDontSee('200000');
 })

@@ -2,34 +2,35 @@
 
 namespace App\Models;
 
-use App\Models\User;
 use App\Models\Scopes\UserScope;
-use App\Models\UtangPiutangDetail;
-use Illuminate\Support\Facades\DB;
+use App\Observers\UtangPiutangObserver;
+use Database\Factories\UtangPiutangFactory;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 // use Filament\Support\Enums\MaxWidth; // Removed for Filament v5
-use Filament\Forms\Components\Toggle;
-use App\Observers\UtangPiutangObserver;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 #[ScopedBy([UserScope::class])]
 #[ObservedBy([UtangPiutangObserver::class])]
 class UtangPiutang extends Model
 {
-    /** @use HasFactory<\Database\Factories\UtangPiutangFactory> */
+    /** @use HasFactory<UtangPiutangFactory> */
     use HasFactory;
+
     protected $guarded = [];
+
     protected $table = 'utang_piutang';
 
     public function user()
@@ -50,14 +51,14 @@ class UtangPiutang extends Model
                 ->hiddenLabel()
                 ->icon('heroicon-o-magnifying-glass')
                 ->url(
-                    fn(?Model $record): string => $record->tipe == 'utang'
-                        ? url('/admin/utangs/' . $record->code . '/detail')
-                        : url('/admin/piutangs/' . $record->code . '/detail')
+                    fn (?Model $record): string => $record->tipe == 'utang'
+                        ? url('/admin/utangs/'.$record->code.'/detail')
+                        : url('/admin/piutangs/'.$record->code.'/detail')
                 ),
 
             DeleteAction::make()
                 ->tooltip('Hapus')
-                ->hiddenLabel()
+                ->hiddenLabel(),
         ];
     }
 
@@ -67,13 +68,13 @@ class UtangPiutang extends Model
             // TextColumn::make('id'),
 
             IconColumn::make('status')
-                ->tooltip(fn($record) => $record->nominal <= 0 ? 'Selesai' : 'Belum selesai')
-                ->getStateUsing(fn($record) => $record->nominal <= 0 ? 'selesai' : 'belum')
-                ->icon(fn(string $state): string => match ($state) {
+                ->tooltip(fn ($record) => $record->nominal <= 0 ? 'Selesai' : 'Belum selesai')
+                ->getStateUsing(fn ($record) => $record->nominal <= 0 ? 'selesai' : 'belum')
+                ->icon(fn (string $state): string => match ($state) {
                     'selesai' => 'heroicon-o-check-circle',
                     'belum' => 'heroicon-o-x-circle',
                 })
-                ->color(fn(string $state): string => match ($state) {
+                ->color(fn (string $state): string => match ($state) {
                     'selesai' => 'success',
                     'belum' => 'warning',
                 }),
@@ -82,7 +83,7 @@ class UtangPiutang extends Model
                 ->date('d M Y')
                 ->label('Tanggal')
                 ->description(
-                    fn($record) => "Aktivitas terakhir: " . date(
+                    fn ($record) => 'Aktivitas terakhir: '.date(
                         'd M Y, H:i',
                         strtotime($record->last_activity_date)
                     )
@@ -90,7 +91,7 @@ class UtangPiutang extends Model
 
             TextColumn::make('kepada')
                 ->description(
-                    fn($record) => $record->tempo ? ('Jatuh tempo: ' . date('d M Y', strtotime($record->tempo))) : null
+                    fn ($record) => $record->tempo ? ('Jatuh tempo: '.date('d M Y', strtotime($record->tempo))) : null
                 )
                 ->searchable(),
 
@@ -106,8 +107,8 @@ class UtangPiutang extends Model
     {
         return [
             Stat::make(
-                'Total ' . ucfirst($data->first()?->tipe),
-                'Rp ' . number_format($data->sum('nominal'))
+                'Total '.ucfirst($data->first()?->tipe),
+                'Rp '.number_format($data->sum('nominal'))
             ),
         ];
     }
@@ -134,7 +135,7 @@ class UtangPiutang extends Model
                 ->required()
                 ->native(false)
                 ->closeOnDateSelection()
-                ->visible(fn($get) => $get('jatuh_tempo')),
+                ->visible(fn ($get) => $get('jatuh_tempo')),
 
             Textarea::make('deskripsi'),
         ];
@@ -144,7 +145,7 @@ class UtangPiutang extends Model
     {
         return [
             CreateAction::make()
-                ->hidden(auth()->user()->isSuper())
+                ->hidden(auth()->user()->isAdmin())
                 ->mutateFormDataUsing(function (array $data) use ($tipe): array {
                     $data['user_id'] = auth()->id();
                     $data['code'] = uniqid();

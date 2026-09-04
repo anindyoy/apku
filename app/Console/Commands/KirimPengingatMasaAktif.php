@@ -21,7 +21,7 @@ class KirimPengingatMasaAktif extends Command
 
             User::query()
                 ->whereDate('masa_aktif', $tanggalBerakhir)
-                ->where('role', '!=', 'super')
+                ->where('role', '!=', 'admin')
                 ->chunkById(100, function ($users) use ($jumlahHari, $tanggalBerakhir, &$jumlahTerkirim): void {
                     foreach ($users as $user) {
                         $pengingat = new PengingatPerpanjanganMasaAktif(

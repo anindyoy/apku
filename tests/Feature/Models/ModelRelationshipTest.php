@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Models\UtangPiutang;
@@ -9,15 +8,15 @@ use App\Models\UtangPiutangDetail;
 
 // ==================== USER MODEL ====================
 
-test('user model - isSuper return true untuk super user', function () {
-    $superUser = createSuperUser();
-    $this->assertTrue($superUser->isSuper());
+test('user model - isAdmin return true untuk admin', function () {
+    $adminUser = createAdminUser();
+    $this->assertTrue($adminUser->isAdmin());
 })
     ->group('models', 'relationships');
 
-test('user model - isSuper return false untuk regular user', function () {
+test('user model - isAdmin return false untuk regular user', function () {
     $user = createRegularUserWithBukuKas();
-    $this->assertFalse($user->isSuper());
+    $this->assertFalse($user->isAdmin());
 })
     ->group('models', 'relationships');
 

@@ -2,20 +2,21 @@
 
 namespace Tests;
 
-use App\Models\User;
-use Livewire\Livewire;
-use App\Models\UtangPiutang;
 use App\Filament\Pages\AkunSaya;
 use App\Filament\Pages\Kategori;
-use Filament\Auth\Pages\Register;
-use App\Filament\Resources\UserResource\Pages\EditUser;
-use App\Filament\Resources\UserResource\Pages\ListUsers;
-use App\Filament\Resources\UtangResource\Pages\ListUtangs;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Filament\Resources\UtangResource\Pages\ListUtangs;
+use App\Filament\Resources\UtangResource\Pages\UtangDetail;
+use App\Models\User;
+use App\Models\UtangPiutang;
+use Filament\Auth\Pages\Register;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Livewire\Livewire;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -30,6 +31,7 @@ abstract class TestCase extends BaseTestCase
             $this->seed();
         }
     }
+
     public function renderTest($page, $record = false)
     {
         $pageClass = [
@@ -39,7 +41,7 @@ abstract class TestCase extends BaseTestCase
             'transaksi' => ListTransaksis::class,
             'piutang' => ListPiutangs::class,
             'utang' => ListUtangs::class,
-            'detail_piutang' => \App\Filament\Resources\UtangResource\Pages\UtangDetail::class,
+            'detail_piutang' => UtangDetail::class,
             'register' => Register::class,
             'user' => ListUsers::class,
             'edit_user' => EditUser::class,
@@ -47,14 +49,15 @@ abstract class TestCase extends BaseTestCase
 
         if ($page == 'register') {
             Livewire::test($pageClass[$page])->assertSuccessful();
+
             return; // Early return to simplify the structure
         }
 
         $user = User::inRandomOrder()
             ->when(
-                in_array($page, ['user', 'edit_user']), // These pages need super user
-                fn($query) => $query->super(),
-                fn($query) => $query->notSuper()
+                in_array($page, ['user', 'edit_user']), // Halaman ini memerlukan admin.
+                fn ($query) => $query->admin(),
+                fn ($query) => $query->notAdmin()
             )
             ->first();
 

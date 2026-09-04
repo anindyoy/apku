@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class UserSeeder extends Seeder
 {
@@ -20,10 +19,10 @@ class UserSeeder extends Seeder
         });
 
         User::factory()->create([
-            'name' => 'Super User',
-            'email' => 'super@apku.com',
-            'password' => Hash::make('superapku'),
-            'role' => 'super',
+            'name' => 'Admin',
+            'email' => 'admin@apku.com',
+            'password' => Hash::make('adminapku'),
+            'role' => 'admin',
         ]);
 
         User::factory(10)->create();

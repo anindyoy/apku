@@ -1,32 +1,34 @@
 <?php
 
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use Livewire\Livewire;
 
 // ==================== USER RESOURCE ====================
 
-test('user resource dapat menampilkan halaman list (super user only)', function () {
+test('user resource dapat menampilkan halaman list (admin only)', function () {
     // Hapus semua user factory agar tidak ada user lain yang mengganggu
-    User::query()->where('email', '!=', 'super@test.com')->forceDelete();
+    User::query()->where('email', '!=', 'admin@test.com')->forceDelete();
 
-    $superUser = createSuperUser();
+    $adminUser = createAdminUser();
 
     User::factory(5)->create();
 
-    Livewire::actingAs($superUser)
-        ->test(\App\Filament\Resources\UserResource\Pages\ListUsers::class)
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
         ->assertSuccessful()
-        ->assertSeeText($superUser->name)
-        ->assertSeeText($superUser->email);
+        ->assertSeeText($adminUser->name)
+        ->assertSeeText($adminUser->email);
 })
     ->group('filament', 'user');
 
-test('user resource dapat mengedit user (super user only)', function () {
-    $superUser = createSuperUser();
+test('user resource dapat mengedit user (admin only)', function () {
+    $adminUser = createAdminUser();
     $user = User::factory()->create();
 
-    Livewire::actingAs($superUser)
-        ->test(\App\Filament\Resources\UserResource\Pages\EditUser::class, ['record' => $user->id])
+    Livewire::actingAs($adminUser)
+        ->test(EditUser::class, ['record' => $user->id])
         ->assertSuccessful()
         ->set('data.name', 'Updated Name')
         ->set('data.password', 'password')

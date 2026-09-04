@@ -2,38 +2,41 @@
 
 namespace App\Filament\Resources\PiutangResource\Pages;
 
-use Filament\Tables\Table;
+use App\Filament\Resources\PiutangResource;
+use App\Filament\Widgets\UtangPiutangDetailOverview;
 use App\Models\UtangPiutang;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\DB;
+use App\Models\UtangPiutangDetail as DataModel;
+use App\Models\UtangPiutangDetail as ModelsUtangPiutangDetail;
 use Filament\Actions\Action;
+use Filament\Actions\Action as ActionsAction;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Actions\DeleteAction;
-use Illuminate\Contracts\Support\Htmlable;
-use App\Filament\Resources\PiutangResource;
-use Filament\Actions\Action as ActionsAction;
-use Filament\Forms\Components\DateTimePicker;
-use App\Models\UtangPiutangDetail as DataModel;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
-use App\Filament\Widgets\UtangPiutangDetailOverview;
-use App\Models\UtangPiutangDetail as ModelsUtangPiutangDetail;
+use Filament\Resources\Pages\Page;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\DB;
 
 class PiutangDetail extends Page implements HasTable
 {
-    use InteractsWithTable, ExposesTableToWidgets;
+    use ExposesTableToWidgets, InteractsWithTable;
+
     protected static string $resource = PiutangResource::class;
 
     protected string $view = 'filament.resources.piutang-resource.pages.piutang-detail';
 
-    public $code,
-        $parent,
-        $activeTab;
+    public $code;
+
+    public $parent;
+
+    public $activeTab;
 
     public function mount($record)
     {
@@ -46,7 +49,7 @@ class PiutangDetail extends Page implements HasTable
         return [
             UtangPiutangDetailOverview::make([
                 'record' => $this->parent->id,
-            ])
+            ]),
         ];
     }
 
@@ -57,7 +60,7 @@ class PiutangDetail extends Page implements HasTable
 
         return [
             ActionsAction::make('ubah')
-                ->fillForm(fn(): array => [
+                ->fillForm(fn (): array => [
                     'kepada' => $parent->kepada,
                     'created_at' => $parent->created_at,
                     'jatuh_tempo' => $parent->tempo ? true : false,
@@ -92,26 +95,27 @@ class PiutangDetail extends Page implements HasTable
                 ->action(function () {
                     $tipe = $this->parent->tipe;
                     $this->parent->delete();
-                    redirect(url('/admin/' . $tipe . 's'));
+                    redirect(url('/admin/'.$tipe.'s'));
                     Notification::make()
                         ->title('Berhasil menghapus data')
                         ->success()
                         ->send();
                 })
-                ->icon('heroicon-m-trash')
+                ->icon('heroicon-m-trash'),
         ];
     }
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         $data = $this->parent;
-        return ucfirst($data->tipe) . ' kepada ' . $data->kepada;
+
+        return ucfirst($data->tipe).' kepada '.$data->kepada;
     }
 
     public function getSubheading(): ?string
     {
         return $this->parent->tempo
-            ? 'Jatuh tempo: ' . date('d M Y', strtotime($this->parent->tempo))
+            ? 'Jatuh tempo: '.date('d M Y', strtotime($this->parent->tempo))
             : null;
     }
 
@@ -123,9 +127,9 @@ class PiutangDetail extends Page implements HasTable
             ->headerActions([
                 Action::make('tambah')
                     ->label('Tambah Piutang')
-                    ->hidden(auth()->user()->isSuper())
+                    ->hidden(auth()->user()->isAdmin())
                     ->action(
-                        fn($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'tambah')
+                        fn ($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'tambah')
                     )
                     ->icon('heroicon-o-plus-circle')
                     ->modalWidth('sm')
@@ -134,9 +138,9 @@ class PiutangDetail extends Page implements HasTable
 
                 Action::make('kurang')
                     ->label('Piutang dibayar')
-                    ->hidden(auth()->user()->isSuper())
+                    ->hidden(auth()->user()->isAdmin())
                     ->action(
-                        fn($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'kurang')
+                        fn ($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'kurang')
                     )
                     ->color('success')
                     ->icon('heroicon-o-minus-circle')
@@ -156,13 +160,13 @@ class PiutangDetail extends Page implements HasTable
                     ->hiddenLabel()
                     ->tooltip('Ubah')
                     ->modalHeading(
-                        fn($record) => 'Ubah '
-                            . ucfirst($parent->tipe)
-                            . ' '
-                            . (ucfirst($record->tipe) == 'tambah' ? 'Ditambah' : 'Dibayar')
+                        fn ($record) => 'Ubah '
+                            .ucfirst($parent->tipe)
+                            .' '
+                            .(ucfirst($record->tipe) == 'tambah' ? 'Ditambah' : 'Dibayar')
                     )
                     ->icon('heroicon-o-pencil')
-                    ->fillForm(fn($record): array => [
+                    ->fillForm(fn ($record): array => [
                         'created_at' => $record->created_at,
                         'nominal' => $record->nominal,
                         'deskripsi' => $record->deskripsi,
@@ -196,24 +200,24 @@ class PiutangDetail extends Page implements HasTable
                             ->success()
                             ->send();
                     })
-                    ->hidden(auth()->user()->isSuper()),
+                    ->hidden(auth()->user()->isAdmin()),
 
                 DeleteAction::make()
                     ->hiddenLabel()
                     ->tooltip('Hapus')
-                    ->hidden(auth()->user()->isSuper())
+                    ->hidden(auth()->user()->isAdmin()),
             ])
             ->columns([
                 IconColumn::make('tipe')
-                    ->tooltip(fn(string $state): string => match ($state) {
+                    ->tooltip(fn (string $state): string => match ($state) {
                         'tambah' => 'Ditambah',
                         'kurang' => 'Dibayar',
                     })
-                    ->icon(fn(string $state): string => match ($state) {
+                    ->icon(fn (string $state): string => match ($state) {
                         'tambah' => 'heroicon-o-plus-circle',
                         'kurang' => 'heroicon-o-minus-circle',
                     })
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'tambah' => 'success',
                         'kurang' => 'danger',
                     }),

@@ -117,7 +117,7 @@ class PencarianTransaksi extends Page implements HasTable
                 TextColumn::make('user.name')
                     ->label('Pengguna')
                     ->searchable()
-                    ->visible(fn (): bool => auth()->user()->isSuper()),
+                    ->visible(fn (): bool => auth()->user()->isAdmin()),
             ])
             ->filters([
                 SelectFilter::make('jenis')

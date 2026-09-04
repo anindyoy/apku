@@ -1,10 +1,10 @@
 <?php
 
+use App\Filament\Resources\UtangResource\Pages\UtangDetail;
 use App\Models\User;
-use Livewire\Livewire;
 use App\Models\UtangPiutang;
 use App\Models\UtangPiutangDetail;
-use App\Filament\Resources\UtangResource\Pages\UtangDetail;
+use Livewire\Livewire;
 
 // ==================== UTANG DETAIL - TABLE ROW ACTIONS ====================
 // Targets uncovered lines in UtangDetail.php table() method
@@ -32,7 +32,7 @@ function createUtangDetailTestData(User $user, string $kepada, int $nominal = 10
 // --- Table Row Action: ubah detail ---
 
 test('utang detail - tabel action ubah detail berhasil', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangDetailTestData($user, 'Budi Setiawan', 100000);
 
     $detail = UtangPiutangDetail::where('utang_piutang_id', $utang->id)->first();
@@ -54,7 +54,7 @@ test('utang detail - tabel action ubah detail berhasil', function () {
 // --- Table Row Action: delete detail (DeleteAction::make() defaults to name 'delete') ---
 
 test('utang detail - tabel action delete detail berhasil', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangDetailTestData($user, 'Detail Dihapus', 100000);
 
     $detail = UtangPiutangDetail::where('utang_piutang_id', $utang->id)->first();
@@ -70,7 +70,7 @@ test('utang detail - tabel action delete detail berhasil', function () {
 // --- Title and subheading ---
 
 test('utang detail - judul halaman benar', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangDetailTestData($user, 'Judul Utang Test', 100000);
 
     Livewire::actingAs($user)
@@ -80,7 +80,7 @@ test('utang detail - judul halaman benar', function () {
 })->group('utang-detail-action');
 
 test('utang detail - subheading jatuh tempo muncul jika ada tempo', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     $utang = UtangPiutang::factory()->create([
         'user_id' => $user->id,
@@ -103,7 +103,7 @@ test('utang detail - subheading jatuh tempo muncul jika ada tempo', function () 
 })->group('utang-detail-action');
 
 test('utang detail - subheading tidak muncul jika tanpa tempo', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangDetailTestData($user, 'Tanpa Tempo Utang', 100000);
 
     // Ensure no tempo
@@ -118,7 +118,7 @@ test('utang detail - subheading tidak muncul jika tanpa tempo', function () {
 // --- Test with null parent (edge case for getTitle and getSubheading) ---
 
 test('utang detail - title fallback saat parent null', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
 
     // Use a non-existent code
     Livewire::actingAs($user)
@@ -130,7 +130,7 @@ test('utang detail - title fallback saat parent null', function () {
 // --- Table action with tambah and kurang ---
 
 test('utang detail - tabel action tambah menambahkan detail', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangDetailTestData($user, 'Tambah Detail', 100000);
 
     Livewire::actingAs($user)
@@ -151,7 +151,7 @@ test('utang detail - tabel action tambah menambahkan detail', function () {
 })->group('utang-detail-action');
 
 test('utang detail - tabel action kurang mencatat pembayaran', function () {
-    $user = User::notSuper()->inRandomOrder()->first();
+    $user = User::notAdmin()->inRandomOrder()->first();
     $utang = createUtangDetailTestData($user, 'Bayar Utang', 200000);
 
     Livewire::actingAs($user)

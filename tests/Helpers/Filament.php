@@ -32,13 +32,13 @@ if (! function_exists('createRegularUserWithBukuKas')) {
     }
 }
 
-if (! function_exists('createSuperUser')) {
-    function createSuperUser(): User
+if (! function_exists('createAdminUser')) {
+    function createAdminUser(): User
     {
         return User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'super@test.com',
-            'role' => 'super',
+            'name' => 'Admin',
+            'email' => 'admin@test.com',
+            'role' => 'admin',
             'email_verified_at' => now(),
         ]);
     }
