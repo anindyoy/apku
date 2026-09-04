@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Models\Transaksi;
 use BackedEnum;
 use Filament\Pages\Page;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PencarianTransaksi extends Page implements HasTable
 {
+    use HidesFromAdminNavigation;
     use InteractsWithTable;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-magnifying-glass';

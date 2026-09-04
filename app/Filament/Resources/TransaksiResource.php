@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\TransaksiResource\Pages;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 
 class TransaksiResource extends Resource
 {
+    use HidesFromAdminNavigation;
+
     protected static ?string $model = Transaksi::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';

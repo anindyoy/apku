@@ -2,26 +2,32 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Resources\UtangResource\Pages;
+use App\Filament\Resources\UtangResource\Pages\ListUtangs;
+use App\Filament\Resources\UtangResource\Pages\UtangDetail;
+use App\Models\UtangPiutang;
 use BackedEnum;
-use UnitEnum;
+use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use App\Models\UtangPiutang;
-use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\UtangResource\Pages;
-use App\Filament\Resources\UtangResource\Pages\EditUtang;
-use App\Filament\Resources\UtangResource\Pages\ListUtangs;
-use App\Filament\Resources\UtangResource\Pages\CreateUtang;
-use App\Filament\Resources\UtangResource\Pages\UtangDetail;
+use UnitEnum;
 
 class UtangResource extends Resource
 {
+    use HidesFromAdminNavigation;
+
     protected static ?string $model = UtangPiutang::class;
-    protected static string | UnitEnum | null $navigationGroup = 'Utang Piutang';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Utang Piutang';
+
     protected static ?string $navigationLabel = 'Utang';
+
     protected static ?string $modelLabel = 'Utang';
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
@@ -35,7 +41,7 @@ class UtangResource extends Resource
     {
         return $table
             ->modifyQueryUsing(
-                fn(Builder $query) => $query->utang()
+                fn (Builder $query) => $query->utang()
                     ->selectRawNominalAndLastActivityDate()
             )
             ->searchPlaceholder('Cari nama..')
@@ -56,7 +62,7 @@ class UtangResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUtangs::route('/'),
+            'index' => ListUtangs::route('/'),
             'detail' => UtangDetail::route('/{record}/detail'),
             // 'create' => Pages\CreateUtang::route('/create'),
             // 'edit' => Pages\EditUtang::route('/{record}/edit'),

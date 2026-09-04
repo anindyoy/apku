@@ -16,7 +16,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 use UnitEnum;
 
 class UserResource extends Resource
@@ -66,21 +65,6 @@ class UserResource extends Resource
                 TextColumn::make('type')
                     ->description(fn ($record) => $record->masa_aktif ? ('Masa aktif: '.$record->masa_aktif) : null),
 
-                TextColumn::make('buku_kas_count')
-                    ->counts('buku_kas')
-                    ->sortable()
-                    ->label('Total Buku Kas'),
-
-                TextColumn::make('transaksi_count')
-                    ->counts('transaksi')
-                    ->sortable()
-                    ->label('Total Transaksi'),
-
-                TextColumn::make('utang_piutang_count')
-                    ->counts('utang_piutang')
-                    ->sortable()
-                    ->label('Total Utang Piutang'),
-
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -94,14 +78,9 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->actions(array_merge(
-                [
-                    EditAction::make(),
-                ],
-                class_exists(Impersonate::class)
-                    ? [Impersonate::make()->visible(auth()->user()->isAdmin())]
-                    : [],
-            ))
+            ->actions([
+                EditAction::make(),
+            ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

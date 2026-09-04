@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Models\BukuKas;
 use App\Models\Dompet;
@@ -21,6 +22,8 @@ use UnitEnum;
 
 class DompetResource extends Resource
 {
+    use HidesFromAdminNavigation;
+
     protected static ?string $model = Dompet::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-wallet';

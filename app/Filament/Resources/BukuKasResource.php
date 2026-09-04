@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
@@ -23,6 +24,8 @@ use UnitEnum;
 
 class BukuKasResource extends Resource
 {
+    use HidesFromAdminNavigation;
+
     protected static ?string $model = BukuKas::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';

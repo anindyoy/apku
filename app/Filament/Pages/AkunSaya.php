@@ -2,29 +2,32 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
 use BackedEnum;
-use UnitEnum;
-use App\Models\User;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-
-use function Laravel\Prompts\select;
+use UnitEnum;
 
 class AkunSaya extends Page implements HasForms
 {
+    use HidesFromAdminNavigation;
     use InteractsWithForms;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-user-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
+
     protected static ?string $navigationLabel = 'Akun Saya';
+
     protected string $view = 'filament.pages.akun-saya';
-    protected static string | UnitEnum | null $navigationGroup = 'Pengaturan';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
+
     protected static ?int $navigationSort = 4;
 
     public ?array $data = [];
@@ -71,7 +74,7 @@ class AkunSaya extends Page implements HasForms
                             ->disabled(),
 
                         TextInput::make('masa_aktif')
-                            ->visible(fn($get) => $get('type') === 'premium')
+                            ->visible(fn ($get) => $get('type') === 'premium')
                             ->label('Masa aktif akun premium')
                             ->disabled(),
 
@@ -79,9 +82,9 @@ class AkunSaya extends Page implements HasForms
                             ->label('Ubah password')
                             ->password()
                             ->revealable()
-                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                            ->dehydrated(fn($state) => filled($state))
-                            ->required(fn(string $context): bool => $context === 'create'),
+                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create'),
                     ])
                     ->columns(3),
             ])

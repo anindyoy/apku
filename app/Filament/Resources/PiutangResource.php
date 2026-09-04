@@ -2,27 +2,32 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Resources\PiutangResource\Pages;
+use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
+use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
+use App\Models\UtangPiutang;
 use BackedEnum;
-use UnitEnum;
+use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use App\Models\UtangPiutang;
-use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\PiutangResource\Pages;
-use App\Filament\Resources\PiutangResource\Pages\EditPiutang;
-use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
-use App\Filament\Resources\PiutangResource\Pages\CreatePiutang;
-use App\Filament\Resources\PiutangResource\Pages\PiutangDetail;
+use UnitEnum;
 
 class PiutangResource extends Resource
 {
+    use HidesFromAdminNavigation;
+
     protected static ?string $model = UtangPiutang::class;
-    protected static string | UnitEnum | null $navigationGroup = 'Utang Piutang';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Utang Piutang';
+
     protected static ?string $navigationLabel = 'Piutang';
+
     protected static ?string $modelLabel = 'Piutang';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-wallet';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-wallet';
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
@@ -37,7 +42,7 @@ class PiutangResource extends Resource
     {
         return $table
             ->modifyQueryUsing(
-                fn(Builder $query) => $query->piutang()
+                fn (Builder $query) => $query->piutang()
                     ->selectRawNominalAndLastActivityDate()
             )
             ->searchPlaceholder('Cari nama..')
@@ -58,7 +63,7 @@ class PiutangResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPiutangs::route('/'),
+            'index' => ListPiutangs::route('/'),
             'detail' => PiutangDetail::route('/{record}/detail'),
             // 'create' => Pages\CreatePiutang::route('/create'),
             // 'edit' => Pages\EditPiutang::route('/{record}/edit'),

@@ -93,7 +93,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Akun reguler tetap dapat mengelola buku kas utama, satu buku kas tambahan gratis, dompet utama, dan satu dompet tambahan gratis.
 - Akun dengan masa aktif premium dapat membuat dan mengelola buku kas serta dompet tambahan.
 - Status akses dompet ditampilkan sebagai **Aktif** atau **Terbatas**.
-- Admin memiliki akses lintas data untuk pemantauan dan administrasi, tetapi aksi transaksi operasional tertentu disembunyikan dari admin.
+- Admin memiliki akses lintas data untuk kebutuhan pemantauan dan administrasi, tetapi menu data keuangan pribadi tidak ditampilkan dalam navigasi admin agar paparan data diminimalkan.
 
 ## 11. Administrasi pengguna
 
@@ -103,8 +103,9 @@ Fitur berikut hanya tersedia untuk admin:
 - Membuat, mengubah, dan menghapus pengguna.
 - Mengatur tipe akun dan masa aktif.
 - Melihat status verifikasi email.
-- Melihat jumlah buku kas, transaksi, dan utang-piutang setiap pengguna.
-- Masuk sebagai pengguna lain melalui fitur impersonasi untuk kebutuhan dukungan atau pemeriksaan.
+- Dashboard admin menjadi halaman utama setelah login dan hanya menampilkan data agregat: jumlah pengguna, jumlah akun premium aktif, serta jumlah pembayaran yang menunggu verifikasi.
+- Daftar pengguna tidak menampilkan jumlah buku kas, transaksi, atau utang-piutang dan tidak menyediakan aksi impersonasi.
+- Navigasi admin difokuskan pada dashboard, pengguna, dan operasional langganan. Menu transaksi, pencarian transaksi, laporan, buku kas, dompet, kategori, utang, piutang, dan Akun Saya disembunyikan untuk admin.
 
 ## 12. Fitur pendukung
 

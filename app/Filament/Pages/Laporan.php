@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
@@ -21,6 +22,8 @@ use UnitEnum;
 
 class Laporan extends Page
 {
+    use HidesFromAdminNavigation;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-pie';
 
     protected static string|UnitEnum|null $navigationGroup = 'Laporan';
