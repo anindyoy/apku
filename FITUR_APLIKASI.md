@@ -39,12 +39,17 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data.
 - File import divalidasi dan ditampilkan dalam pratinjau sebelum disimpan, termasuk jumlah baris, kesalahan, serta total pemasukan dan pengeluaran.
 - Pengguna dapat mengunduh laporan error XLSX yang memuat nomor baris, data asli, dan alasan kegagalan untuk membantu memperbaiki file import.
+- Header file dibaca otomatis dan dapat dipetakan ke kolom transaksi, sehingga file dengan nama kolom berbeda tetap dapat digunakan. Sistem memberikan saran untuk nama kolom umum dalam Bahasa Indonesia dan Inggris.
 - Seluruh baris import disimpan secara atomik dan saldo buku kas serta dompet diperbarui menggunakan aturan transaksi yang sama dengan pencatatan manual.
 - Import mengikuti kepemilikan dan hak pengelolaan buku kas, dompet, serta kategori pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
 - Riwayat import menampilkan nama file, waktu, jumlah transaksi, dan status setiap batch milik pengguna.
 - Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo buku kas serta dompet dipulihkan.
 - File dari batch yang sudah dibatalkan dapat diimpor kembali tanpa membuat catatan batch duplikat.
 - Import belum mendukung transfer saldo antar-buku kas atau pemindahan saldo antar-dompet.
+- Beberapa pengguna dapat mencatat transaksi pada buku kas yang sama melalui peran Editor.
+- Setiap transaksi menyimpan identitas pengguna yang mencatatnya.
+- Editor menggunakan dompet dan kategori miliknya sendiri serta hanya dapat mengubah atau menghapus transaksi buatannya.
+- Informasi dompet anggota lain disamarkan pada daftar transaksi, pencarian, laporan, dan hasil ekspor.
 
 ## 4. Pencarian transaksi global
 
@@ -60,6 +65,11 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Menentukan buku kas utama/default.
 - Menghapus buku kas kosong secara langsung.
 - Memindahkan seluruh transaksi dan saldo ke buku kas lain sebelum menghapus buku kas yang masih berisi transaksi.
+- Pemilik dapat membagikan buku kas kepada pengguna APKu lain yang sudah terdaftar dan terverifikasi.
+- Kolaborator memiliki peran **Viewer** atau **Editor**, dengan masa akses yang dapat dijadwalkan atau dibatasi.
+- Viewer dapat melihat transaksi dan laporan buku bersama, sedangkan editor juga dapat mencatat transaksi.
+- Buku bersama tidak dihitung sebagai kuota buku kas milik kolaborator.
+- Pemilik dapat mengubah peran atau mencabut akses kolaborator kapan saja.
 
 ## 6. Dompet
 
@@ -146,6 +156,6 @@ Fitur berikut hanya tersedia untuk admin:
 
 ## Catatan implementasi
 
-Terdapat modul **Share Buku** dengan pilihan hak akses `viewer` dan `editor`. Resource dan penyimpanan datanya sudah tersedia, tetapi menu navigasinya disembunyikan dan mekanisme berbagi tersebut belum terhubung ke aturan akses buku kas utama. Karena itu, fitur ini belum dianggap sebagai fitur pengguna yang aktif.
+Transfer buku kas, pemindahan saldo dompet, dan import transaksi pada buku bersama hanya tersedia bagi pemilik buku pada versi awal fitur kolaborasi.
 
-Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 4 September 2026.
+Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 5 September 2026.

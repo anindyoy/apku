@@ -75,8 +75,8 @@ class TransaksiResource extends Resource
                     }),
 
                 TextColumn::make('user.name')
-                    ->numeric()
-                    ->visible(auth()->user()->isAdmin()),
+                    ->label('Dicatat oleh')
+                    ->visible(fn (): bool => ! auth()->user()->isAdmin()),
 
                 TextColumn::make('tanggal')
                     ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state))),
@@ -87,6 +87,7 @@ class TransaksiResource extends Resource
 
                 TextColumn::make('dompet.nama_dompet')
                     ->label('Dompet')
+                    ->getStateUsing(fn (Transaksi $record): string => $record->labelDompetUntuk(auth()->user()))
                     ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterDompet)),
 
                 TextColumn::make('kategori')
@@ -132,12 +133,14 @@ class TransaksiResource extends Resource
             ->actions([
                 EditAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isAdmin()
+                        || $record->user_id !== auth()->id()
                         || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
                         || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
                     ->using(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
 
                 DeleteAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isAdmin()
+                        || $record->user_id !== auth()->id()
                         || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
                         || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
                     ->using(fn (Transaksi $record): bool => app(TransaksiService::class)->hapus(auth()->user(), $record)),

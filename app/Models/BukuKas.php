@@ -44,6 +44,18 @@ class BukuKas extends Model
         return $this->hasMany(Transaksi::class);
     }
 
+    public function shares()
+    {
+        return $this->hasMany(ShareBuku::class);
+    }
+
+    public function anggota()
+    {
+        return $this->belongsToMany(User::class, 'share_buku')
+            ->withPivot(['privilege', 'berlaku_mulai', 'berlaku_sampai', 'invited_by_user_id'])
+            ->withTimestamps();
+    }
+
     public static function getRandomBukuKas($user_id)
     {
         return self::where('user_id', $user_id)

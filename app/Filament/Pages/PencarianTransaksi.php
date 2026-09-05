@@ -83,8 +83,7 @@ class PencarianTransaksi extends Page implements HasTable
 
                 TextColumn::make('dompet.nama_dompet')
                     ->label('Dompet')
-                    ->searchable()
-                    ->sortable(),
+                    ->getStateUsing(fn (Transaksi $record): string => $record->labelDompetUntuk(auth()->user())),
 
                 TextColumn::make('kategori_pencarian')
                     ->label('Kategori')
@@ -120,9 +119,9 @@ class PencarianTransaksi extends Page implements HasTable
                     ->sortable(),
 
                 TextColumn::make('user.name')
-                    ->label('Pengguna')
+                    ->label('Dicatat oleh')
                     ->searchable()
-                    ->visible(fn (): bool => auth()->user()->isAdmin()),
+                    ->visible(fn (): bool => ! auth()->user()->isAdmin()),
             ])
             ->filters([
                 SelectFilter::make('jenis')

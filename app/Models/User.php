@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -72,10 +73,59 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMengelolaTransaksiPada(BukuKas $bukuKas): bool
     {
-        return $this->isAdmin()
-            || $bukuKas->id === $this->idBukuKasUtama()
-            || $bukuKas->id === $this->idBukuKasTambahanGratis()
-            || $this->masaAktifBerlaku();
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if ($bukuKas->user_id === $this->id) {
+            return $bukuKas->id === $this->idBukuKasUtama()
+                || $bukuKas->id === $this->idBukuKasTambahanGratis()
+                || $this->masaAktifBerlaku();
+        }
+
+        return $this->hakAksesPada($bukuKas) === 'editor'
+            && $this->bukuKasMasihDapatDikelolaPemilik($bukuKas);
+    }
+
+    public function dapatMelihatBukuKas(BukuKas $bukuKas): bool
+    {
+        return $this->isAdmin() || $bukuKas->user_id === $this->id || $this->hakAksesPada($bukuKas) !== null;
+    }
+
+    public function dapatMengelolaKolaborator(BukuKas $bukuKas): bool
+    {
+        return ! $this->isAdmin() && $bukuKas->user_id === $this->id;
+    }
+
+    public function hakAksesPada(BukuKas $bukuKas): ?string
+    {
+        if ($bukuKas->user_id === $this->id) {
+            return 'owner';
+        }
+
+        return ShareBuku::query()->aktif()
+            ->where('buku_kas_id', $bukuKas->id)
+            ->where('user_id', $this->id)
+            ->value('privilege');
+    }
+
+    private function bukuKasMasihDapatDikelolaPemilik(BukuKas $bukuKas): bool
+    {
+        $pemilik = $bukuKas->user;
+
+        if ($pemilik->isAdmin() || $pemilik->masaAktifBerlaku()) {
+            return true;
+        }
+
+        $bukuGratis = BukuKas::withoutGlobalScopes()
+            ->where('user_id', $pemilik->id)
+            ->reorder()
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->limit(2)
+            ->pluck('id');
+
+        return $bukuGratis->contains($bukuKas->id);
     }
 
     public function dapatMembuatBukuKas(): bool
@@ -145,6 +195,18 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function transaksi()
     {
         return $this->hasMany(Transaksi::class);
+    }
+
+    public function shareBukuDiterima(): HasMany
+    {
+        return $this->hasMany(ShareBuku::class);
+    }
+
+    public function bukuKasDibagikan(): BelongsToMany
+    {
+        return $this->belongsToMany(BukuKas::class, 'share_buku')
+            ->withPivot(['privilege', 'berlaku_mulai', 'berlaku_sampai', 'invited_by_user_id'])
+            ->withTimestamps();
     }
 
     public function dompet()

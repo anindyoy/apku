@@ -56,6 +56,13 @@ class Transaksi extends Model
         return $this->belongsTo(Dompet::class)->withTrashed();
     }
 
+    public function labelDompetUntuk(User $user): string
+    {
+        return $this->dompet?->user_id === $user->id
+            ? ($this->dompet?->nama_dompet ?? '-')
+            : 'Dompet anggota';
+    }
+
     public function jenis_transaksi()
     {
         return $this->belongsTo(JenisTransaksi::class)->withoutGlobalScopes();

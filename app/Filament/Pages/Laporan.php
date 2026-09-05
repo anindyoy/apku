@@ -284,7 +284,7 @@ class Laporan extends Page
             $baris[] = [
                 CarbonImmutable::parse($transaksi->tanggal)->format('d/m/Y H:i'),
                 $transaksi->buku_kas?->nama_buku ?? '-',
-                $transaksi->dompet?->nama_dompet ?? '-',
+                $transaksi->labelDompetUntuk(auth()->user()),
                 $transaksi->jenis,
                 str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'),
                 $transaksi->deskripsi ?? '',

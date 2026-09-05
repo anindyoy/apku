@@ -256,7 +256,8 @@ class ListTransaksis extends ListRecords
                 ->icon('heroicon-o-arrow-up-tray'),
 
             Action::make('Pindah saldo dompet')
-                ->visible(fn (): bool => count(Transaksi::opsiDompetSumberTransfer()) >= 2)
+                ->visible(fn (): bool => count(Transaksi::opsiDompetSumberTransfer()) >= 2
+                    && (blank($this->filterBukuKas) || $this->bukuKasTerpilihMilikSendiri()))
                 ->schema([
                     Select::make('dompet_asal_id')
                         ->label('Dompet asal')
@@ -294,7 +295,7 @@ class ListTransaksis extends ListRecords
                 ->icon('heroicon-o-arrows-right-left'),
 
             Action::make('Transfer saldo')
-                ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih())
+                ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih() && $this->bukuKasTerpilihMilikSendiri())
                 ->before(function (): void {
                     abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
                 })

@@ -9,6 +9,7 @@ use App\Models\BukuKas;
 use App\Services\OpsiSelectCache;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\Action as FilamentAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
@@ -77,7 +78,14 @@ class BukuKasResource extends Resource
                 //     ->sortable(),
 
                 TextColumn::make('nama_buku')
-                    ->searchable(),
+                    ->searchable()
+                    ->description(fn (BukuKas $record): string => $record->user_id === auth()->id()
+                        ? 'Milik saya'
+                        : 'Dibagikan kepada saya'),
+
+                TextColumn::make('akses')
+                    ->badge()
+                    ->state(fn (BukuKas $record): string => ucfirst(auth()->user()->hakAksesPada($record) ?? 'Tidak ada')),
 
                 TextColumn::make('saldo')
                     ->prefix('Rp ')
@@ -112,13 +120,20 @@ class BukuKasResource extends Resource
                 //
             ])
             ->actions([
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()),
+
+                FilamentAction::make('kolaborator')
+                    ->label('Kelola Kolaborator')
+                    ->icon('heroicon-o-user-group')
+                    ->url(fn (): string => ShareBukuResource::getUrl())
+                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()),
 
                 DeleteAction::make()
-                    ->visible(fn (BukuKas $record): bool => ! $record->transaksi()->exists()),
+                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id() && ! $record->transaksi()->exists()),
 
                 Action::make('hapusDanPindahkan')
-                    ->visible(fn (BukuKas $record): bool => $record->transaksi()->exists())
+                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id() && $record->transaksi()->exists())
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->label('Hapus')
