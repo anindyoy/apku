@@ -40,6 +40,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - File import divalidasi dan ditampilkan dalam pratinjau sebelum disimpan, termasuk jumlah baris, kesalahan, serta total pemasukan dan pengeluaran.
 - Pengguna dapat mengunduh laporan error XLSX yang memuat nomor baris, data asli, dan alasan kegagalan untuk membantu memperbaiki file import.
 - Header file dibaca otomatis dan dapat dipetakan ke kolom transaksi, sehingga file dengan nama kolom berbeda tetap dapat digunakan. Sistem memberikan saran untuk nama kolom umum dalam Bahasa Indonesia dan Inggris.
+- Kategori yang belum tersedia dapat dibuat otomatis setelah pengguna mengaktifkan konfirmasi. Daftar kategori baru ditampilkan pada pratinjau dan pembuatannya ikut dibatalkan jika import transaksi gagal.
 - Seluruh baris import disimpan secara atomik dan saldo buku kas serta dompet diperbarui menggunakan aturan transaksi yang sama dengan pencatatan manual.
 - Import mengikuti kepemilikan dan hak pengelolaan buku kas, dompet, serta kategori pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
 - Riwayat import menampilkan nama file, waktu, jumlah transaksi, dan status setiap batch milik pengguna.

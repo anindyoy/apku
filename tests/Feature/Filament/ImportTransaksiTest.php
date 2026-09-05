@@ -132,6 +132,60 @@ test('pemetaan menolak kolom wajib kosong dan sumber duplikat', function () {
     ]))->toThrow(ValidationException::class);
 })->group('filament', 'import-transaksi', 'pemetaan-import');
 
+test('kategori baru hanya dibuat setelah dikonfirmasi bersama import', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,Kas Utama,Cash,Bonus Proyek,325000,Bonus proyek baru',
+    ]));
+    $service = app(ImportTransaksiService::class);
+    $tanpaKonfirmasi = $service->pratinjau($data['user'], $file);
+    $denganKonfirmasi = $service->pratinjau($data['user'], $file, buatKategoriOtomatis: true);
+
+    expect($tanpaKonfirmasi['errors'])->not->toBeEmpty()
+        ->and($denganKonfirmasi['errors'])->toBe([])
+        ->and(array_values($denganKonfirmasi['kategori_baru']['Pemasukan']))->toBe(['Bonus Proyek']);
+    $this->assertDatabaseMissing('jenis_transaksi', [
+        'user_id' => $data['user']->id,
+        'nama_jenis' => 'Bonus Proyek',
+    ]);
+
+    $hasil = $service->impor($data['user'], $file, buatKategoriOtomatis: true);
+
+    $this->assertDatabaseHas('jenis_transaksi', [
+        'user_id' => $data['user']->id,
+        'nama_jenis' => 'Bonus Proyek',
+        'tipe' => 'Pemasukan',
+    ]);
+    expect($hasil['jumlah_baris'])->toBe(1)
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(325000)
+        ->and(Transaksi::withoutGlobalScopes()->whereHas('jenis_transaksi', fn ($query) => $query->where('nama_jenis', 'Bonus Proyek'))->exists())->toBeTrue();
+})->group('filament', 'import-transaksi', 'kategori-otomatis-import');
+
+test('kategori baru tidak dibuat ketika batch memiliki baris tidak valid', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi',
+        now()->subDay()->format('Y-m-d H:i').',Pengeluaran,Kas Utama,Cash,Keperluan Baru,50000,Baris valid',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,Kas Utama,Cash,Pemasukan Baru,0,Baris tidak valid',
+    ]));
+
+    expect(fn () => app(ImportTransaksiService::class)->impor($data['user'], $file, buatKategoriOtomatis: true))
+        ->toThrow(ValidationException::class);
+
+    $this->assertDatabaseMissing('jenis_transaksi', [
+        'user_id' => $data['user']->id,
+        'nama_jenis' => 'Keperluan Baru',
+    ]);
+    $this->assertDatabaseMissing('jenis_transaksi', [
+        'user_id' => $data['user']->id,
+        'nama_jenis' => 'Pemasukan Baru',
+    ]);
+    expect(ImportTransaksi::query()->where('user_id', $data['user']->id)->count())->toBe(0)
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(0)
+        ->and($data['dompet']->fresh()->saldo)->toBe(0);
+})->group('filament', 'import-transaksi', 'kategori-otomatis-import');
+
 test('pratinjau xlsx tidak mengubah transaksi atau saldo', function () {
     $data = siapkanDataImportTransaksi();
     $path = tempnam(sys_get_temp_dir(), 'import-transaksi-test-').'.xlsx';

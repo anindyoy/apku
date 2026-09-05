@@ -19,6 +19,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
@@ -208,43 +209,49 @@ class ListTransaksis extends ListRecords
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
-                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $set)),
+                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.jenis')
                         ->label('Kolom jenis')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
-                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $set)),
+                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.buku_kas')
                         ->label('Kolom buku kas')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
-                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $set)),
+                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.dompet')
                         ->label('Kolom dompet')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
-                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $set)),
+                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.kategori')
                         ->label('Kolom kategori')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
-                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $set)),
+                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.nominal')
                         ->label('Kolom nominal')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
-                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $set)),
+                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.deskripsi')
                         ->label('Kolom deskripsi')
                         ->placeholder('Tidak dipetakan')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->live()
-                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $set)),
+                        ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                    Toggle::make('buat_kategori_otomatis')
+                        ->label('Buat kategori yang belum tersedia')
+                        ->helperText('Kategori baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
+                        ->default(false)
+                        ->live()
+                        ->afterStateUpdated(fn (bool $state, Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $state, $set)),
                     Hidden::make('pratinjau'),
                     Placeholder::make('ringkasan_import')
                         ->label('Pratinjau')
@@ -266,6 +273,7 @@ class ListTransaksis extends ListRecords
                         $path = tempnam(sys_get_temp_dir(), 'laporan-error-import-');
                         app(ImportTransaksiService::class)->buatLaporanErrorXlsx(
                             auth()->user(), $data['file'], $path, pemetaan: $data['pemetaan'] ?? [],
+                            buatKategoriOtomatis: (bool) ($data['buat_kategori_otomatis'] ?? false),
                         );
 
                         return response()->download($path, 'laporan-error-import-transaksi.xlsx')->deleteFileAfterSend(true);
@@ -273,6 +281,7 @@ class ListTransaksis extends ListRecords
 
                     $hasil = app(ImportTransaksiService::class)->impor(
                         auth()->user(), $data['file'], pemetaan: $data['pemetaan'] ?? [],
+                        buatKategoriOtomatis: (bool) ($data['buat_kategori_otomatis'] ?? false),
                     );
 
                     Notification::make()
@@ -436,7 +445,20 @@ class ListTransaksis extends ListRecords
         $pemasukan = number_format((int) ($pratinjau['total_pemasukan'] ?? 0), 0, ',', '.');
         $pengeluaran = number_format((int) ($pratinjau['total_pengeluaran'] ?? 0), 0, ',', '.');
         $errors = $pratinjau['errors'] ?? [];
+        $kategoriBaru = $pratinjau['kategori_baru'] ?? [];
         $html = '<div class="space-y-2"><p><strong>'.$jumlah.'</strong> baris · Pemasukan Rp '.$pemasukan.' · Pengeluaran Rp '.$pengeluaran.'</p>';
+
+        if ($kategoriBaru !== []) {
+            $html .= '<div class="text-warning-600"><strong>Kategori yang akan dibuat:</strong><ul class="list-disc pl-5 text-sm">';
+
+            foreach ($kategoriBaru as $jenis => $daftar) {
+                foreach ($daftar as $nama) {
+                    $html .= '<li>'.e($jenis.': '.$nama).'</li>';
+                }
+            }
+
+            $html .= '</ul></div>';
+        }
 
         if ($errors === []) {
             $html .= '<p class="text-success-600">Semua baris valid dan siap diimpor.</p>';
@@ -473,7 +495,7 @@ class ListTransaksis extends ListRecords
             $pemetaan = $service->sarankanPemetaan($header);
             $set('header_options', $header);
             $set('pemetaan', $pemetaan);
-            $this->perbaruiPratinjauImport($file, $pemetaan, $set);
+            $this->perbaruiPratinjauImport($file, $pemetaan, false, $set);
         } catch (ValidationException $exception) {
             $set('header_options', []);
             $set('pemetaan', []);
@@ -482,8 +504,12 @@ class ListTransaksis extends ListRecords
     }
 
     /** @param array<string, mixed> $pemetaan */
-    public function perbaruiPratinjauImport(mixed $file, array $pemetaan, Set $set): void
-    {
+    public function perbaruiPratinjauImport(
+        mixed $file,
+        array $pemetaan,
+        bool $buatKategoriOtomatis,
+        Set $set,
+    ): void {
         if (! $file instanceof TemporaryUploadedFile) {
             $set('pratinjau', null);
 
@@ -491,9 +517,11 @@ class ListTransaksis extends ListRecords
         }
 
         try {
-            $hasil = app(ImportTransaksiService::class)->pratinjau(auth()->user(), $file, pemetaan: $pemetaan);
+            $hasil = app(ImportTransaksiService::class)->pratinjau(
+                auth()->user(), $file, pemetaan: $pemetaan, buatKategoriOtomatis: $buatKategoriOtomatis,
+            );
             $set('pratinjau', collect($hasil)->only([
-                'jumlah_baris', 'total_pemasukan', 'total_pengeluaran', 'errors',
+                'jumlah_baris', 'total_pemasukan', 'total_pengeluaran', 'kategori_baru', 'errors',
             ])->all());
         } catch (ValidationException $exception) {
             $this->setErrorPratinjauImport($set, $exception);

@@ -115,13 +115,14 @@ class ImportTransaksiService
     }
 
     /**
-     * @return array{baris: array<int, array<string, mixed>>, baris_error: array<int, array{nomor_baris: int, data: array<string, mixed>, pesan: string}>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
+     * @return array{baris: array<int, array<string, mixed>>, baris_error: array<int, array{nomor_baris: int, data: array<string, mixed>, pesan: string}>, kategori_baru: array<string, array<string>>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
      */
     public function pratinjau(
         User $user,
         UploadedFile|TemporaryUploadedFile|string $file,
         ?string $namaFile = null,
         array $pemetaan = [],
+        bool $buatKategoriOtomatis = false,
     ): array {
         [$path, $namaFile] = $this->informasiFile($file, $namaFile);
         $extension = $this->validasiFile($path, $namaFile);
@@ -129,6 +130,7 @@ class ImportTransaksiService
         $hasil = [
             'baris' => [],
             'baris_error' => [],
+            'kategori_baru' => [],
             'errors' => [],
             'jumlah_baris' => 0,
             'total_pemasukan' => 0,
@@ -174,7 +176,9 @@ class ImportTransaksiService
                     $dataMentah = collect(self::HEADER)->mapWithKeys(fn (string $tujuan): array => [
                         $tujuan => filled($pemetaan[$tujuan] ?? null) ? ($dataSumber[$pemetaan[$tujuan]] ?? null) : null,
                     ])->all();
-                    [$data, $errors] = $this->validasiBaris($user, $dataMentah, $nomorBaris);
+                    [$data, $errors] = $this->validasiBaris(
+                        $user, $dataMentah, $nomorBaris, $buatKategoriOtomatis,
+                    );
 
                     if ($errors !== []) {
                         array_push($hasil['errors'], ...$errors);
@@ -190,6 +194,12 @@ class ImportTransaksiService
                     }
 
                     $hasil['baris'][] = $data;
+
+                    if (filled($data['nama_kategori_baru'] ?? null)) {
+                        $hasil['kategori_baru'][$data['jenis']] ??= [];
+                        $hasil['kategori_baru'][$data['jenis']][$this->normalisasiNama($data['nama_kategori_baru'])] = $data['nama_kategori_baru'];
+                    }
+
                     $kunciTotal = $data['jenis'] === 'Pemasukan' ? 'total_pemasukan' : 'total_pengeluaran';
                     $hasil[$kunciTotal] += $data['nominal'];
                 }
@@ -221,8 +231,9 @@ class ImportTransaksiService
         string $path,
         ?string $namaFile = null,
         array $pemetaan = [],
+        bool $buatKategoriOtomatis = false,
     ): int {
-        $hasil = $this->pratinjau($user, $file, $namaFile, $pemetaan);
+        $hasil = $this->pratinjau($user, $file, $namaFile, $pemetaan, $buatKategoriOtomatis);
 
         if ($hasil['baris_error'] === []) {
             throw ValidationException::withMessages(['file' => 'File tidak memiliki baris yang perlu diperbaiki.']);
@@ -253,15 +264,16 @@ class ImportTransaksiService
         UploadedFile|TemporaryUploadedFile|string $file,
         ?string $namaFile = null,
         array $pemetaan = [],
+        bool $buatKategoriOtomatis = false,
     ): array {
         [$path, $namaFile] = $this->informasiFile($file, $namaFile);
-        $hasil = $this->pratinjau($user, $path, $namaFile, $pemetaan);
+        $hasil = $this->pratinjau($user, $path, $namaFile, $pemetaan, $buatKategoriOtomatis);
 
         if ($hasil['errors'] !== []) {
             throw ValidationException::withMessages(['file' => $hasil['errors']]);
         }
 
-        return DB::transaction(function () use ($user, $namaFile, $hasil): array {
+        $prosesImport = function () use ($user, $namaFile, $hasil): array {
             $batch = ImportTransaksi::query()
                 ->where('user_id', $user->id)
                 ->where('hash_file', $hasil['hash_file'])
@@ -290,6 +302,15 @@ class ImportTransaksiService
             }
 
             foreach ($hasil['baris'] as $data) {
+                if (filled($data['nama_kategori_baru'] ?? null)) {
+                    $kategori = JenisTransaksi::withoutGlobalScopes()->firstOrCreate([
+                        'user_id' => $user->id,
+                        'tipe' => $data['jenis'],
+                        'nama_jenis' => $data['nama_kategori_baru'],
+                    ]);
+                    $data['jenis_transaksi_id'] = $kategori->id;
+                }
+
                 app(TransaksiService::class)->buat($user, [
                     ...$data,
                     'import_transaksi_id' => $batch->id,
@@ -301,7 +322,9 @@ class ImportTransaksiService
                 'total_pemasukan' => $hasil['total_pemasukan'],
                 'total_pengeluaran' => $hasil['total_pengeluaran'],
             ];
-        });
+        };
+
+        return DB::transactionLevel() > 0 ? $prosesImport() : DB::transaction($prosesImport);
     }
 
     public function batalkan(User $user, ImportTransaksi $batch): void
@@ -389,6 +412,11 @@ class ImportTransaksiService
         return str_replace(' ', '_', mb_strtolower(trim((string) $value, "\xEF\xBB\xBF \t\n\r\0\x0B")));
     }
 
+    private function normalisasiNama(string $value): string
+    {
+        return mb_strtolower(trim($value));
+    }
+
     /** @param array<int, string> $header */
     private function pastikanHeaderDasarValid(array $header): void
     {
@@ -440,13 +468,18 @@ class ImportTransaksiService
      * @param  array<string, mixed>  $data
      * @return array{array<string, mixed>, array<int, string>}
      */
-    private function validasiBaris(User $user, array $data, int $nomorBaris): array
-    {
+    private function validasiBaris(
+        User $user,
+        array $data,
+        int $nomorBaris,
+        bool $buatKategoriOtomatis,
+    ): array {
         $errors = [];
         $jenis = Str::title(trim((string) ($data['jenis'] ?? '')));
         $bukuKas = $this->cariBukuKas($user, $data['buku_kas'] ?? null);
         $dompet = $this->cariDompet($user, $data['dompet'] ?? null);
         $kategori = $this->cariKategori($user, $data['kategori'] ?? null, $jenis);
+        $namaKategoriBaru = trim((string) ($data['kategori'] ?? ''));
         $tanggal = $this->parseTanggal($data['tanggal'] ?? null);
         $nominal = filter_var($data['nominal'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
@@ -470,7 +503,12 @@ class ImportTransaksiService
             $errors[] = "Baris {$nomorBaris}, kolom dompet: dompet aktif tidak ditemukan atau tidak dapat dikelola.";
         }
 
-        if ($kategori === null) {
+        $kategoriDapatDibuat = $buatKategoriOtomatis
+            && in_array($jenis, ['Pemasukan', 'Pengeluaran'], true)
+            && $namaKategoriBaru !== ''
+            && mb_strlen($namaKategoriBaru) <= 255;
+
+        if ($kategori === null && ! $kategoriDapatDibuat) {
             $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori tidak ditemukan atau tipenya tidak sesuai.";
         }
 
@@ -480,6 +518,7 @@ class ImportTransaksiService
             'buku_kas_id' => $bukuKas?->id,
             'dompet_id' => $dompet?->id,
             'jenis_transaksi_id' => $kategori?->id,
+            'nama_kategori_baru' => $kategori === null && $kategoriDapatDibuat ? $namaKategoriBaru : null,
             'nominal' => $nominal === false ? 0 : $nominal,
             'deskripsi' => filled($data['deskripsi'] ?? null) ? trim((string) $data['deskripsi']) : null,
         ], $errors];
