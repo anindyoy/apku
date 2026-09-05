@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 
 class UserSeeder extends Seeder
 {
@@ -14,18 +13,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        Schema::withoutForeignKeyConstraints(function () {
-            User::truncate();
-        });
-
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@apku.com',
-            'password' => Hash::make('adminapku'),
-            'role' => 'admin',
-            'type' => 'premium',
-            'masa_aktif' => now()->addYear(),
-        ]);
+        User::notAdmin()->delete();
 
         User::factory()->create([
             'name' => 'Pengguna Reguler',

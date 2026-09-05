@@ -21,6 +21,7 @@
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="ADMIN_PASSWORD" value="password-admin-testing"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_CONNECTION" value="mariadb"/>
         <env name="DB_DATABASE" value="apku_testing"/>
