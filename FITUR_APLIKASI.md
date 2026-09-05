@@ -38,6 +38,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data.
 - File import divalidasi dan ditampilkan dalam pratinjau sebelum disimpan, termasuk jumlah baris, kesalahan, serta total pemasukan dan pengeluaran.
+- Pengguna dapat mengunduh laporan error XLSX yang memuat nomor baris, data asli, dan alasan kegagalan untuk membantu memperbaiki file import.
 - Seluruh baris import disimpan secara atomik dan saldo buku kas serta dompet diperbarui menggunakan aturan transaksi yang sama dengan pencatatan manual.
 - Import mengikuti kepemilikan dan hak pengelolaan buku kas, dompet, serta kategori pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
 - Riwayat import menampilkan nama file, waktu, jumlah transaksi, dan status setiap batch milik pengguna.

@@ -243,7 +243,7 @@ Di luar MVP, fitur dapat dikembangkan untuk mendukung:
 - [ ] Pemetaan kolom secara fleksibel.
 - [ ] Pembuatan kategori otomatis dengan konfirmasi.
 - [ ] Import sebagian untuk baris valid.
-- [ ] Unduhan laporan error.
+- [x] Unduhan laporan error XLSX berisi data asli dan alasan kegagalan per baris.
 - [ ] Pemrosesan melalui antrean untuk file besar.
 - [x] Status dan riwayat batch import.
 - [x] Pembatalan batch import dengan pembalikan saldo.

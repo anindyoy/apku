@@ -46,7 +46,7 @@ class ImportTransaksiService
     }
 
     /**
-     * @return array{baris: array<int, array<string, mixed>>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
+     * @return array{baris: array<int, array<string, mixed>>, baris_error: array<int, array{nomor_baris: int, data: array<string, mixed>, pesan: string}>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
      */
     public function pratinjau(User $user, UploadedFile|TemporaryUploadedFile|string $file, ?string $namaFile = null): array
     {
@@ -67,6 +67,7 @@ class ImportTransaksiService
 
         $hasil = [
             'baris' => [],
+            'baris_error' => [],
             'errors' => [],
             'jumlah_baris' => 0,
             'total_pemasukan' => 0,
@@ -109,6 +110,13 @@ class ImportTransaksiService
 
                     if ($errors !== []) {
                         array_push($hasil['errors'], ...$errors);
+                        $hasil['baris_error'][] = [
+                            'nomor_baris' => $nomorBaris,
+                            'data' => collect(self::HEADER)->mapWithKeys(fn (string $kolom): array => [
+                                $kolom => $this->nilaiLaporan($dataMentah[$kolom] ?? null),
+                            ])->all(),
+                            'pesan' => implode(' | ', $errors),
+                        ];
 
                         continue;
                     }
@@ -137,6 +145,37 @@ class ImportTransaksiService
         }
 
         return $hasil;
+    }
+
+    public function buatLaporanErrorXlsx(
+        User $user,
+        UploadedFile|TemporaryUploadedFile|string $file,
+        string $path,
+        ?string $namaFile = null,
+    ): int {
+        $hasil = $this->pratinjau($user, $file, $namaFile);
+
+        if ($hasil['baris_error'] === []) {
+            throw ValidationException::withMessages(['file' => 'File tidak memiliki baris yang perlu diperbaiki.']);
+        }
+
+        $writer = new XlsxWriter;
+        $writer->openToFile($path);
+        $writer->addRow(Row::fromValues([
+            'baris', ...self::HEADER, 'kesalahan',
+        ]));
+
+        foreach ($hasil['baris_error'] as $baris) {
+            $writer->addRow(Row::fromValues([
+                $baris['nomor_baris'],
+                ...array_map(fn (string $kolom): mixed => $baris['data'][$kolom] ?? null, self::HEADER),
+                $baris['pesan'],
+            ]));
+        }
+
+        $writer->close();
+
+        return count($hasil['baris_error']);
     }
 
     /** @return array{jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int} */
@@ -238,6 +277,19 @@ class ImportTransaksiService
     private function barisKosong(array $nilai): bool
     {
         return collect($nilai)->every(fn ($value): bool => $value === null || trim((string) $value) === '');
+    }
+
+    private function nilaiLaporan(mixed $value): bool|float|int|string|null
+    {
+        if ($value instanceof DateTimeInterface) {
+            return $value->format('Y-m-d H:i');
+        }
+
+        if (is_bool($value) || is_float($value) || is_int($value) || is_string($value) || $value === null) {
+            return $value;
+        }
+
+        return (string) $value;
     }
 
     private function normalisasiHeader(mixed $value): string

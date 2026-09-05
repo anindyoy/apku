@@ -10,6 +10,7 @@ use App\Services\ImportTransaksiService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 
 function siapkanDataImportTransaksi(): array
 {
@@ -95,6 +96,45 @@ test('baris import yang tidak valid membatalkan seluruh batch', function () {
         ->and($data['dompet']->fresh()->saldo)->toBe(0)
         ->and(ImportTransaksi::query()->where('user_id', $data['user']->id)->count())->toBe(0);
 })->group('filament', 'import-transaksi');
+
+test('laporan error xlsx memuat data asli dan alasan kegagalan', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi',
+        now()->subDay()->format('Y-m-d H:i').',Pengeluaran,Kas Utama,Cash,Gaji,-25000,Kategori dan nominal salah',
+    ]));
+    $path = tempnam(sys_get_temp_dir(), 'laporan-error-import-test-');
+
+    try {
+        $jumlahError = app(ImportTransaksiService::class)->buatLaporanErrorXlsx($data['user'], $file, $path);
+        $reader = new XlsxReader;
+        $reader->open($path);
+        $baris = [];
+
+        foreach ($reader->getSheetIterator() as $sheet) {
+            foreach ($sheet->getRowIterator() as $row) {
+                $baris[] = array_map(fn ($cell) => $cell->getValue(), $row->getCells());
+            }
+
+            break;
+        }
+
+        $reader->close();
+    } finally {
+        @unlink($path);
+    }
+
+    expect($jumlahError)->toBe(1)
+        ->and($baris[0])->toBe([
+            'baris', 'tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi', 'kesalahan',
+        ])
+        ->and($baris[1][0])->toBe(2)
+        ->and($baris[1][2])->toBe('Pengeluaran')
+        ->and($baris[1][5])->toBe('Gaji')
+        ->and($baris[1][6])->toBe('-25000')
+        ->and($baris[1][8])->toContain('kolom nominal')
+        ->and($baris[1][8])->toContain('kolom kategori');
+})->group('filament', 'import-transaksi', 'laporan-error-import');
 
 test('file yang sama tidak dapat diimpor dua kali', function () {
     $data = siapkanDataImportTransaksi();

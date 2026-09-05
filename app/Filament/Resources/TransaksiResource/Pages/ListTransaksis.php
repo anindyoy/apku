@@ -226,9 +226,22 @@ class ListTransaksis extends ListRecords
                         ->content(fn (Get $get): HtmlString => $this->formatPratinjauImport($get('pratinjau'))),
                 ])
                 ->modalSubmitActionLabel('Import')
-                ->action(function (array $data): void {
+                ->extraModalFooterActions(fn (Action $action): array => [
+                    $action->makeModalSubmitAction('unduhLaporanError', arguments: ['unduh_laporan_error' => true])
+                        ->label('Unduh laporan error')
+                        ->color('gray')
+                        ->icon('heroicon-o-document-arrow-down'),
+                ])
+                ->action(function (array $data, array $arguments) {
                     if (! ($data['file'] ?? null) instanceof TemporaryUploadedFile) {
                         throw ValidationException::withMessages(['file' => 'File import tidak tersedia. Silakan unggah ulang.']);
+                    }
+
+                    if ($arguments['unduh_laporan_error'] ?? false) {
+                        $path = tempnam(sys_get_temp_dir(), 'laporan-error-import-');
+                        app(ImportTransaksiService::class)->buatLaporanErrorXlsx(auth()->user(), $data['file'], $path);
+
+                        return response()->download($path, 'laporan-error-import-transaksi.xlsx')->deleteFileAfterSend(true);
                     }
 
                     $hasil = app(ImportTransaksiService::class)->impor(auth()->user(), $data['file']);
