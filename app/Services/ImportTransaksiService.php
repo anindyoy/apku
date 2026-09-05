@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ProsesImportTransaksi;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\ImportTransaksi;
@@ -11,6 +12,7 @@ use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -22,9 +24,11 @@ use Throwable;
 
 class ImportTransaksiService
 {
-    public const BATAS_BARIS = 1000;
+    public const BATAS_BARIS_LANGSUNG = 1000;
 
-    public const BATAS_UKURAN_FILE = 3 * 1024 * 1024;
+    public const BATAS_BARIS = 10000;
+
+    public const BATAS_UKURAN_FILE = 10 * 1024 * 1024;
 
     private const HEADER = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi'];
 
@@ -265,6 +269,7 @@ class ImportTransaksiService
         ?string $namaFile = null,
         array $pemetaan = [],
         bool $buatKategoriOtomatis = false,
+        ?ImportTransaksi $batchAntrean = null,
     ): array {
         [$path, $namaFile] = $this->informasiFile($file, $namaFile);
         $hasil = $this->pratinjau($user, $path, $namaFile, $pemetaan, $buatKategoriOtomatis);
@@ -273,8 +278,8 @@ class ImportTransaksiService
             throw ValidationException::withMessages(['file' => $hasil['errors']]);
         }
 
-        $prosesImport = function () use ($user, $namaFile, $hasil): array {
-            $batch = ImportTransaksi::query()
+        $prosesImport = function () use ($user, $namaFile, $hasil, $batchAntrean): array {
+            $batch = $batchAntrean ?? ImportTransaksi::query()
                 ->where('user_id', $user->id)
                 ->where('hash_file', $hasil['hash_file'])
                 ->lockForUpdate()
@@ -289,6 +294,10 @@ class ImportTransaksiService
                     'nama_file' => Str::limit(basename($namaFile), 255, ''),
                     'jumlah_baris' => $hasil['jumlah_baris'],
                     'status' => 'berhasil',
+                    'jumlah_diproses' => $hasil['jumlah_baris'],
+                    'path_file' => null,
+                    'pesan_error' => null,
+                    'selesai_diproses_at' => now(),
                     'dibatalkan_at' => null,
                 ]);
             } else {
@@ -298,6 +307,8 @@ class ImportTransaksiService
                     'hash_file' => $hasil['hash_file'],
                     'jumlah_baris' => $hasil['jumlah_baris'],
                     'status' => 'berhasil',
+                    'jumlah_diproses' => $hasil['jumlah_baris'],
+                    'selesai_diproses_at' => now(),
                 ]);
             }
 
@@ -325,6 +336,64 @@ class ImportTransaksiService
         };
 
         return DB::transactionLevel() > 0 ? $prosesImport() : DB::transaction($prosesImport);
+    }
+
+    public function antrekan(
+        User $user,
+        UploadedFile|TemporaryUploadedFile|string $file,
+        ?string $namaFile = null,
+        array $pemetaan = [],
+        bool $buatKategoriOtomatis = false,
+    ): ImportTransaksi {
+        [$path, $namaFile] = $this->informasiFile($file, $namaFile);
+        $hasil = $this->pratinjau($user, $path, $namaFile, $pemetaan, $buatKategoriOtomatis);
+
+        if ($hasil['errors'] !== []) {
+            throw ValidationException::withMessages(['file' => $hasil['errors']]);
+        }
+
+        if ($hasil['jumlah_baris'] <= self::BATAS_BARIS_LANGSUNG) {
+            throw ValidationException::withMessages(['file' => 'File kecil dapat diimpor langsung tanpa antrean.']);
+        }
+
+        if (ImportTransaksi::query()
+            ->where('user_id', $user->id)
+            ->where('hash_file', $hasil['hash_file'])
+            ->whereIn('status', ['menunggu', 'diproses'])
+            ->exists()) {
+            throw ValidationException::withMessages(['file' => 'File yang sama sedang menunggu atau diproses.']);
+        }
+
+        $extension = strtolower(pathinfo($namaFile, PATHINFO_EXTENSION));
+        $pathFile = 'import-transaksi/'.$user->id.'/'.Str::uuid().'.'.$extension;
+        Storage::disk('local')->put($pathFile, file_get_contents($path));
+
+        try {
+            $batch = ImportTransaksi::query()->updateOrCreate([
+                'user_id' => $user->id,
+                'hash_file' => $hasil['hash_file'],
+            ], [
+                'nama_file' => Str::limit(basename($namaFile), 255, ''),
+                'path_file' => $pathFile,
+                'pemetaan' => $pemetaan,
+                'buat_kategori_otomatis' => $buatKategoriOtomatis,
+                'jumlah_baris' => $hasil['jumlah_baris'],
+                'jumlah_diproses' => 0,
+                'status' => 'menunggu',
+                'pesan_error' => null,
+                'mulai_diproses_at' => null,
+                'selesai_diproses_at' => null,
+                'dibatalkan_at' => null,
+            ]);
+
+            ProsesImportTransaksi::dispatch($batch->id)->onQueue('import-transaksi');
+
+            return $batch;
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete($pathFile);
+
+            throw $exception;
+        }
     }
 
     public function batalkan(User $user, ImportTransaksi $batch): void
@@ -382,7 +451,7 @@ class ImportTransaksiService
         }
 
         if (filesize($path) > self::BATAS_UKURAN_FILE) {
-            throw ValidationException::withMessages(['file' => 'Ukuran file import maksimal 3 MB.']);
+            throw ValidationException::withMessages(['file' => 'Ukuran file import maksimal 10 MB.']);
         }
 
         return $extension;

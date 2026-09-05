@@ -11,6 +11,7 @@ APKu adalah aplikasi web untuk mencatat dan memantau keuangan pribadi melalui bu
 - Tampilan tipe akun dan masa aktif akun premium.
 - Notifikasi di dalam aplikasi.
 - Pengingat perpanjangan masa aktif pada H-30 dan H-7 sebelum masa aktif berakhir.
+- Akun admin awal dibuat saat migration menggunakan password dari `ADMIN_PASSWORD` pada environment.
 
 ## 2. Onboarding pengguna baru
 
@@ -46,6 +47,9 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Riwayat import menampilkan nama file, waktu, jumlah transaksi, dan status setiap batch milik pengguna.
 - Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo buku kas serta dompet dipulihkan.
 - File dari batch yang sudah dibatalkan dapat diimpor kembali tanpa membuat catatan batch duplikat.
+- File hingga 1.000 baris diproses langsung, sedangkan file 1.001–10.000 baris diproses melalui antrean privat. Status, progres, dan pesan kegagalannya dapat dipantau pada riwayat import.
+- File import dibatasi maksimal 10 MB dan berkas antrean dihapus dari penyimpanan privat setelah selesai atau gagal diproses.
+- Worker antrean memprioritaskan queue `import-transaksi`; batas retry disetel lebih panjang daripada batas waktu job agar batch yang masih berjalan tidak diproses ganda.
 - Import belum mendukung transfer saldo antar-buku kas atau pemindahan saldo antar-dompet.
 - Beberapa pengguna dapat mencatat transaksi pada buku kas yang sama melalui peran Editor.
 - Setiap transaksi menyimpan identitas pengguna yang mencatatnya.

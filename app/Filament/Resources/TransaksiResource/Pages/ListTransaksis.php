@@ -196,7 +196,7 @@ class ListTransaksis extends ListRecords
                             'application/csv',
                             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         ])
-                        ->maxSize(3072)
+                        ->maxSize(10240)
                         ->storeFiles(false)
                         ->live()
                         ->required()
@@ -279,10 +279,26 @@ class ListTransaksis extends ListRecords
                         return response()->download($path, 'laporan-error-import-transaksi.xlsx')->deleteFileAfterSend(true);
                     }
 
-                    $hasil = app(ImportTransaksiService::class)->impor(
-                        auth()->user(), $data['file'], pemetaan: $data['pemetaan'] ?? [],
-                        buatKategoriOtomatis: (bool) ($data['buat_kategori_otomatis'] ?? false),
-                    );
+                    $service = app(ImportTransaksiService::class);
+                    $opsi = [
+                        'pemetaan' => $data['pemetaan'] ?? [],
+                        'buatKategoriOtomatis' => (bool) ($data['buat_kategori_otomatis'] ?? false),
+                    ];
+                    $pratinjau = $service->pratinjau(auth()->user(), $data['file'], ...$opsi);
+
+                    if ($pratinjau['jumlah_baris'] > ImportTransaksiService::BATAS_BARIS_LANGSUNG) {
+                        $service->antrekan(auth()->user(), $data['file'], ...$opsi);
+
+                        Notification::make()
+                            ->title($pratinjau['jumlah_baris'].' transaksi masuk antrean import')
+                            ->body('Progres dapat dipantau pada Riwayat Import.')
+                            ->info()
+                            ->send();
+
+                        return;
+                    }
+
+                    $hasil = $service->impor(auth()->user(), $data['file'], ...$opsi);
 
                     Notification::make()
                         ->title($hasil['jumlah_baris'].' transaksi berhasil diimpor')

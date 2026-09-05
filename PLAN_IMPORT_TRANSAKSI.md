@@ -244,7 +244,7 @@ Di luar MVP, fitur dapat dikembangkan untuk mendukung:
 - [x] Pembuatan kategori otomatis dengan konfirmasi, pratinjau kategori baru, dan rollback atomik.
 - [ ] Import sebagian untuk baris valid.
 - [x] Unduhan laporan error XLSX berisi data asli dan alasan kegagalan per baris.
-- [ ] Pemrosesan melalui antrean untuk file besar.
+- [x] Pemrosesan melalui antrean untuk file 1.001–10.000 baris, dengan penyimpanan privat, status proses, dan penanganan kegagalan.
 - [x] Status dan riwayat batch import.
 - [x] Pembatalan batch import dengan pembalikan saldo.
 - [ ] Dukungan transfer buku kas dan pemindahan saldo dompet.

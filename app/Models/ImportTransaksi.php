@@ -16,7 +16,11 @@ class ImportTransaksi extends Model
     protected function casts(): array
     {
         return [
+            'pemetaan' => 'array',
+            'buat_kategori_otomatis' => 'boolean',
             'dibatalkan_at' => 'datetime',
+            'mulai_diproses_at' => 'datetime',
+            'selesai_diproses_at' => 'datetime',
         ];
     }
 

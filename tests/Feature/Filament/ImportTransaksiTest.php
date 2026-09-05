@@ -2,12 +2,15 @@
 
 use App\Filament\Resources\ImportTransaksiResource\Pages\ListImportTransaksis;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
+use App\Jobs\ProsesImportTransaksi;
 use App\Models\Dompet;
 use App\Models\ImportTransaksi;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use App\Services\ImportTransaksiService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
@@ -61,6 +64,59 @@ test('import transaksi csv menyimpan semua baris dan memperbarui saldo', functio
         ->and(ImportTransaksi::query()->where('user_id', $data['user']->id)->count())->toBe(1)
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->whereNotNull('import_transaksi_id')->count())->toBe(2);
 })->group('filament', 'import-transaksi');
+
+test('file besar disimpan privat dan diproses melalui antrean tanpa transaksi ganda', function () {
+    Queue::fake();
+    Storage::fake('local');
+    $data = siapkanDataImportTransaksi();
+    $baris = ['tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi'];
+
+    foreach (range(1, ImportTransaksiService::BATAS_BARIS_LANGSUNG + 1) as $nomor) {
+        $baris[] = now()->subDay()->format('Y-m-d H:i').",Pemasukan,Kas Utama,Cash,Gaji,1,Baris {$nomor}";
+    }
+
+    $service = app(ImportTransaksiService::class);
+    $batch = $service->antrekan($data['user'], fileCsvImport(implode("\n", $baris)));
+    $pathFile = $batch->path_file;
+
+    Queue::assertPushedOn('import-transaksi', ProsesImportTransaksi::class);
+    Storage::disk('local')->assertExists($batch->path_file);
+    expect($batch->status)->toBe('menunggu')
+        ->and($batch->jumlah_baris)->toBe(1001)
+        ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->count())->toBe(0);
+
+    (new ProsesImportTransaksi($batch->id))->handle($service);
+
+    $batch->refresh();
+    expect($batch->status)->toBe('berhasil')
+        ->and($batch->jumlah_diproses)->toBe(1001)
+        ->and($batch->path_file)->toBeNull()
+        ->and($batch->selesai_diproses_at)->not->toBeNull()
+        ->and(Transaksi::withoutGlobalScopes()->where('import_transaksi_id', $batch->id)->count())->toBe(1001)
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(1001)
+        ->and($data['dompet']->fresh()->saldo)->toBe(1001);
+    Storage::disk('local')->assertMissing($pathFile);
+})->group('filament', 'import-transaksi', 'antrean-import');
+
+test('file besar yang sama tidak dapat masuk antrean lebih dari sekali', function () {
+    Queue::fake();
+    Storage::fake('local');
+    $data = siapkanDataImportTransaksi();
+    $baris = ['tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi'];
+
+    foreach (range(1, ImportTransaksiService::BATAS_BARIS_LANGSUNG + 1) as $nomor) {
+        $baris[] = now()->subDay()->format('Y-m-d H:i').",Pemasukan,Kas Utama,Cash,Gaji,1,Baris {$nomor}";
+    }
+
+    $isi = implode("\n", $baris);
+    $service = app(ImportTransaksiService::class);
+    $service->antrekan($data['user'], fileCsvImport($isi));
+
+    expect(fn () => $service->antrekan($data['user'], fileCsvImport($isi)))
+        ->toThrow(ValidationException::class)
+        ->and(ImportTransaksi::query()->where('user_id', $data['user']->id)->count())->toBe(1);
+    Queue::assertPushed(ProsesImportTransaksi::class, 1);
+})->group('filament', 'import-transaksi', 'antrean-import');
 
 test('header umum dipetakan otomatis dan dapat langsung diimpor', function () {
     $data = siapkanDataImportTransaksi();

@@ -51,10 +51,30 @@ class ImportTransaksiResource extends Resource
                 TextColumn::make('jumlah_baris')
                     ->label('Jumlah transaksi')
                     ->numeric(),
+                TextColumn::make('jumlah_diproses')
+                    ->label('Progres')
+                    ->formatStateUsing(fn (int $state, ImportTransaksi $record): string => number_format($state, 0, ',', '.').' / '.number_format($record->jumlah_baris, 0, ',', '.')),
                 TextColumn::make('status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => $state === 'berhasil' ? 'Berhasil' : 'Dibatalkan')
-                    ->color(fn (string $state): string => $state === 'berhasil' ? 'success' : 'gray'),
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'menunggu' => 'Menunggu',
+                        'diproses' => 'Diproses',
+                        'berhasil' => 'Berhasil',
+                        'gagal' => 'Gagal',
+                        default => 'Dibatalkan',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'menunggu' => 'warning',
+                        'diproses' => 'info',
+                        'berhasil' => 'success',
+                        'gagal' => 'danger',
+                        default => 'gray',
+                    }),
+                TextColumn::make('pesan_error')
+                    ->label('Keterangan')
+                    ->limit(80)
+                    ->placeholder('-')
+                    ->toggleable(),
                 TextColumn::make('dibatalkan_at')
                     ->label('Waktu pembatalan')
                     ->dateTime('d M Y, H:i')
