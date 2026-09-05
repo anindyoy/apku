@@ -28,6 +28,18 @@ class ImportTransaksiService
 
     private const HEADER = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi'];
 
+    private const KOLOM_WAJIB = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal'];
+
+    private const ALIAS_HEADER = [
+        'tanggal' => ['tanggal', 'date', 'datetime', 'transaction_date', 'waktu'],
+        'jenis' => ['jenis', 'tipe', 'type', 'transaction_type'],
+        'buku_kas' => ['buku_kas', 'buku', 'kas', 'book', 'account'],
+        'dompet' => ['dompet', 'wallet', 'rekening'],
+        'kategori' => ['kategori', 'category'],
+        'nominal' => ['nominal', 'amount', 'jumlah', 'value'],
+        'deskripsi' => ['deskripsi', 'description', 'keterangan', 'note', 'memo'],
+    ];
+
     public function buatTemplateXlsx(string $path): void
     {
         $writer = new XlsxWriter;
@@ -45,25 +57,74 @@ class ImportTransaksiService
         $writer->close();
     }
 
+    /** @return array<string, string> */
+    public function bacaHeader(UploadedFile|TemporaryUploadedFile|string $file, ?string $namaFile = null): array
+    {
+        [$path, $namaFile] = $this->informasiFile($file, $namaFile);
+        $extension = $this->validasiFile($path, $namaFile);
+        $reader = $extension === 'csv' ? new CsvReader : new XlsxReader;
+
+        try {
+            $reader->open($path);
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                foreach ($sheet->getRowIterator() as $row) {
+                    $nilai = array_map(fn ($cell) => $cell->getValue(), $row->getCells());
+
+                    if ($this->barisKosong($nilai)) {
+                        continue;
+                    }
+
+                    $header = array_map(fn ($value): string => $this->normalisasiHeader($value), $nilai);
+                    $this->pastikanHeaderDasarValid($header);
+
+                    return array_combine($header, array_map(fn ($value): string => trim((string) $value), $nilai));
+                }
+
+                break;
+            }
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable) {
+            throw ValidationException::withMessages(['file' => 'Header file tidak dapat dibaca.']);
+        } finally {
+            $reader->close();
+        }
+
+        throw ValidationException::withMessages(['file' => 'File tidak memiliki header.']);
+    }
+
+    /**
+     * @param  array<string, string>  $header
+     * @return array<string, string>
+     */
+    public function sarankanPemetaan(array $header): array
+    {
+        $tersedia = array_keys($header);
+        $pemetaan = [];
+
+        foreach (self::ALIAS_HEADER as $tujuan => $alias) {
+            $sumber = collect($alias)->first(fn (string $nama): bool => in_array($nama, $tersedia, true));
+
+            if ($sumber !== null) {
+                $pemetaan[$tujuan] = $sumber;
+            }
+        }
+
+        return $pemetaan;
+    }
+
     /**
      * @return array{baris: array<int, array<string, mixed>>, baris_error: array<int, array{nomor_baris: int, data: array<string, mixed>, pesan: string}>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
      */
-    public function pratinjau(User $user, UploadedFile|TemporaryUploadedFile|string $file, ?string $namaFile = null): array
-    {
+    public function pratinjau(
+        User $user,
+        UploadedFile|TemporaryUploadedFile|string $file,
+        ?string $namaFile = null,
+        array $pemetaan = [],
+    ): array {
         [$path, $namaFile] = $this->informasiFile($file, $namaFile);
-        $extension = strtolower(pathinfo($namaFile, PATHINFO_EXTENSION));
-
-        if (! in_array($extension, ['csv', 'xlsx'], true)) {
-            throw ValidationException::withMessages(['file' => 'File harus berformat CSV atau XLSX.']);
-        }
-
-        if (! is_file($path) || filesize($path) === 0) {
-            throw ValidationException::withMessages(['file' => 'File import kosong atau tidak dapat dibaca.']);
-        }
-
-        if (filesize($path) > self::BATAS_UKURAN_FILE) {
-            throw ValidationException::withMessages(['file' => 'Ukuran file import maksimal 3 MB.']);
-        }
+        $extension = $this->validasiFile($path, $namaFile);
 
         $hasil = [
             'baris' => [],
@@ -91,7 +152,11 @@ class ImportTransaksiService
 
                     if ($header === null) {
                         $header = array_map(fn ($value): string => $this->normalisasiHeader($value), $nilai);
-                        $this->pastikanHeaderValid($header);
+                        $this->pastikanHeaderDasarValid($header);
+                        $pemetaan = $this->pastikanPemetaanValid(
+                            $header,
+                            $pemetaan === [] ? $this->sarankanPemetaan(array_fill_keys($header, '')) : $pemetaan,
+                        );
 
                         continue;
                     }
@@ -105,7 +170,10 @@ class ImportTransaksiService
                         ]);
                     }
 
-                    $dataMentah = array_combine($header, array_slice(array_pad($nilai, count($header), null), 0, count($header)));
+                    $dataSumber = array_combine($header, array_slice(array_pad($nilai, count($header), null), 0, count($header)));
+                    $dataMentah = collect(self::HEADER)->mapWithKeys(fn (string $tujuan): array => [
+                        $tujuan => filled($pemetaan[$tujuan] ?? null) ? ($dataSumber[$pemetaan[$tujuan]] ?? null) : null,
+                    ])->all();
                     [$data, $errors] = $this->validasiBaris($user, $dataMentah, $nomorBaris);
 
                     if ($errors !== []) {
@@ -152,8 +220,9 @@ class ImportTransaksiService
         UploadedFile|TemporaryUploadedFile|string $file,
         string $path,
         ?string $namaFile = null,
+        array $pemetaan = [],
     ): int {
-        $hasil = $this->pratinjau($user, $file, $namaFile);
+        $hasil = $this->pratinjau($user, $file, $namaFile, $pemetaan);
 
         if ($hasil['baris_error'] === []) {
             throw ValidationException::withMessages(['file' => 'File tidak memiliki baris yang perlu diperbaiki.']);
@@ -179,10 +248,14 @@ class ImportTransaksiService
     }
 
     /** @return array{jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int} */
-    public function impor(User $user, UploadedFile|TemporaryUploadedFile|string $file, ?string $namaFile = null): array
-    {
+    public function impor(
+        User $user,
+        UploadedFile|TemporaryUploadedFile|string $file,
+        ?string $namaFile = null,
+        array $pemetaan = [],
+    ): array {
         [$path, $namaFile] = $this->informasiFile($file, $namaFile);
-        $hasil = $this->pratinjau($user, $path, $namaFile);
+        $hasil = $this->pratinjau($user, $path, $namaFile, $pemetaan);
 
         if ($hasil['errors'] !== []) {
             throw ValidationException::withMessages(['file' => $hasil['errors']]);
@@ -273,6 +346,25 @@ class ImportTransaksiService
         return [$file, $namaFile ?? basename($file)];
     }
 
+    private function validasiFile(string $path, string $namaFile): string
+    {
+        $extension = strtolower(pathinfo($namaFile, PATHINFO_EXTENSION));
+
+        if (! in_array($extension, ['csv', 'xlsx'], true)) {
+            throw ValidationException::withMessages(['file' => 'File harus berformat CSV atau XLSX.']);
+        }
+
+        if (! is_file($path) || filesize($path) === 0) {
+            throw ValidationException::withMessages(['file' => 'File import kosong atau tidak dapat dibaca.']);
+        }
+
+        if (filesize($path) > self::BATAS_UKURAN_FILE) {
+            throw ValidationException::withMessages(['file' => 'Ukuran file import maksimal 3 MB.']);
+        }
+
+        return $extension;
+    }
+
     /** @param array<int, mixed> $nilai */
     private function barisKosong(array $nilai): bool
     {
@@ -298,18 +390,50 @@ class ImportTransaksiService
     }
 
     /** @param array<int, string> $header */
-    private function pastikanHeaderValid(array $header): void
+    private function pastikanHeaderDasarValid(array $header): void
     {
-        $header = array_values(array_filter($header, fn (string $value): bool => $value !== ''));
-        $hilang = array_diff(self::HEADER, $header);
-
-        if ($hilang !== [] || count($header) !== count(array_unique($header))) {
-            $pesan = $hilang !== []
-                ? 'Header wajib tidak lengkap: '.implode(', ', $hilang).'.'
-                : 'Header file tidak boleh duplikat.';
-
-            throw ValidationException::withMessages(['file' => $pesan]);
+        if ($header === [] || in_array('', $header, true)) {
+            throw ValidationException::withMessages(['file' => 'Header file tidak boleh kosong.']);
         }
+
+        if (count($header) !== count(array_unique($header))) {
+            throw ValidationException::withMessages(['file' => 'Header file tidak boleh duplikat setelah dinormalisasi.']);
+        }
+    }
+
+    /**
+     * @param  array<int, string>  $header
+     * @param  array<string, mixed>  $pemetaan
+     * @return array<string, string>
+     */
+    private function pastikanPemetaanValid(array $header, array $pemetaan): array
+    {
+        $pemetaan = collect($pemetaan)
+            ->only(self::HEADER)
+            ->filter(fn ($sumber): bool => filled($sumber))
+            ->map(fn ($sumber): string => $this->normalisasiHeader($sumber))
+            ->all();
+        $belumDipetakan = array_diff(self::KOLOM_WAJIB, array_keys($pemetaan));
+
+        if ($belumDipetakan !== []) {
+            throw ValidationException::withMessages([
+                'pemetaan' => 'Kolom wajib belum dipetakan: '.implode(', ', $belumDipetakan).'.',
+            ]);
+        }
+
+        $tidakDitemukan = array_diff(array_values($pemetaan), $header);
+
+        if ($tidakDitemukan !== []) {
+            throw ValidationException::withMessages([
+                'pemetaan' => 'Kolom sumber tidak ditemukan: '.implode(', ', array_unique($tidakDitemukan)).'.',
+            ]);
+        }
+
+        if (count($pemetaan) !== count(array_unique($pemetaan))) {
+            throw ValidationException::withMessages(['pemetaan' => 'Satu kolom sumber tidak boleh dipakai untuk lebih dari satu tujuan.']);
+        }
+
+        return $pemetaan;
     }
 
     /**

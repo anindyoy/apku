@@ -240,7 +240,7 @@ Di luar MVP, fitur dapat dikembangkan untuk mendukung:
 
 ### Progres Pengembangan Lanjutan
 
-- [ ] Pemetaan kolom secara fleksibel.
+- [x] Pemetaan kolom fleksibel dengan pembacaan header dan saran otomatis untuk nama kolom umum.
 - [ ] Pembuatan kategori otomatis dengan konfirmasi.
 - [ ] Import sebagian untuk baris valid.
 - [x] Unduhan laporan error XLSX berisi data asli dan alasan kegagalan per baris.

@@ -62,6 +62,76 @@ test('import transaksi csv menyimpan semua baris dan memperbarui saldo', functio
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->whereNotNull('import_transaksi_id')->count())->toBe(2);
 })->group('filament', 'import-transaksi');
 
+test('header umum dipetakan otomatis dan dapat langsung diimpor', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'Date,Type,Account,Wallet,Category,Amount,Memo',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,Kas Utama,Cash,Gaji,275000,Kolom bahasa Inggris',
+    ]));
+    $service = app(ImportTransaksiService::class);
+    $header = $service->bacaHeader($file);
+    $pemetaan = $service->sarankanPemetaan($header);
+
+    $hasil = $service->impor($data['user'], $file, pemetaan: $pemetaan);
+
+    expect($pemetaan)->toBe([
+        'tanggal' => 'date',
+        'jenis' => 'type',
+        'buku_kas' => 'account',
+        'dompet' => 'wallet',
+        'kategori' => 'category',
+        'nominal' => 'amount',
+        'deskripsi' => 'memo',
+    ])->and($hasil['jumlah_baris'])->toBe(1)
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(275000)
+        ->and($data['dompet']->fresh()->saldo)->toBe(275000);
+})->group('filament', 'import-transaksi', 'pemetaan-import');
+
+test('pengguna dapat memetakan nama kolom yang tidak dikenali', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'Waktu Catat,Arah Dana,Nama Kas,Sumber Dana,Kelompok,Nilai Rupiah,Catatan Saya',
+        now()->subDay()->format('Y-m-d H:i').',Pengeluaran,Kas Utama,Cash,Makanan,45000,Makan bersama',
+    ]));
+    $pemetaan = [
+        'tanggal' => 'waktu_catat',
+        'jenis' => 'arah_dana',
+        'buku_kas' => 'nama_kas',
+        'dompet' => 'sumber_dana',
+        'kategori' => 'kelompok',
+        'nominal' => 'nilai_rupiah',
+        'deskripsi' => 'catatan_saya',
+    ];
+
+    $hasil = app(ImportTransaksiService::class)->impor($data['user'], $file, pemetaan: $pemetaan);
+
+    expect($hasil['jumlah_baris'])->toBe(1)
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(-45000)
+        ->and(Transaksi::withoutGlobalScopes()->where('deskripsi', 'Makan bersama')->exists())->toBeTrue();
+})->group('filament', 'import-transaksi', 'pemetaan-import');
+
+test('pemetaan menolak kolom wajib kosong dan sumber duplikat', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'Date,Type,Account,Wallet,Category,Amount',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,Kas Utama,Cash,Gaji,100000',
+    ]));
+
+    expect(fn () => app(ImportTransaksiService::class)->pratinjau($data['user'], $file, pemetaan: [
+        'tanggal' => 'date',
+        'jenis' => 'type',
+    ]))->toThrow(ValidationException::class);
+
+    expect(fn () => app(ImportTransaksiService::class)->pratinjau($data['user'], $file, pemetaan: [
+        'tanggal' => 'date',
+        'jenis' => 'type',
+        'buku_kas' => 'account',
+        'dompet' => 'wallet',
+        'kategori' => 'category',
+        'nominal' => 'category',
+    ]))->toThrow(ValidationException::class);
+})->group('filament', 'import-transaksi', 'pemetaan-import');
+
 test('pratinjau xlsx tidak mengubah transaksi atau saldo', function () {
     $data = siapkanDataImportTransaksi();
     $path = tempnam(sys_get_temp_dir(), 'import-transaksi-test-').'.xlsx';
