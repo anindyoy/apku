@@ -132,7 +132,7 @@ class ImportTransaksiService
             throw ValidationException::withMessages(['file' => 'File tidak memiliki baris transaksi.']);
         }
 
-        if (ImportTransaksi::query()->where('user_id', $user->id)->where('hash_file', $hasil['hash_file'])->exists()) {
+        if (ImportTransaksi::query()->where('user_id', $user->id)->where('hash_file', $hasil['hash_file'])->where('status', 'berhasil')->exists()) {
             $hasil['errors'][] = 'File yang sama sudah pernah berhasil diimpor.';
         }
 
@@ -150,27 +150,77 @@ class ImportTransaksiService
         }
 
         return DB::transaction(function () use ($user, $namaFile, $hasil): array {
-            if (ImportTransaksi::query()->where('user_id', $user->id)->where('hash_file', $hasil['hash_file'])->lockForUpdate()->exists()) {
+            $batch = ImportTransaksi::query()
+                ->where('user_id', $user->id)
+                ->where('hash_file', $hasil['hash_file'])
+                ->lockForUpdate()
+                ->first();
+
+            if ($batch?->status === 'berhasil') {
                 throw ValidationException::withMessages(['file' => 'File yang sama sudah pernah berhasil diimpor.']);
             }
 
-            foreach ($hasil['baris'] as $data) {
-                app(TransaksiService::class)->buat($user, $data, $data['jenis']);
+            if ($batch) {
+                $batch->update([
+                    'nama_file' => Str::limit(basename($namaFile), 255, ''),
+                    'jumlah_baris' => $hasil['jumlah_baris'],
+                    'status' => 'berhasil',
+                    'dibatalkan_at' => null,
+                ]);
+            } else {
+                $batch = ImportTransaksi::query()->create([
+                    'user_id' => $user->id,
+                    'nama_file' => Str::limit(basename($namaFile), 255, ''),
+                    'hash_file' => $hasil['hash_file'],
+                    'jumlah_baris' => $hasil['jumlah_baris'],
+                    'status' => 'berhasil',
+                ]);
             }
 
-            ImportTransaksi::query()->create([
-                'user_id' => $user->id,
-                'nama_file' => Str::limit(basename($namaFile), 255, ''),
-                'hash_file' => $hasil['hash_file'],
-                'jumlah_baris' => $hasil['jumlah_baris'],
-                'status' => 'berhasil',
-            ]);
+            foreach ($hasil['baris'] as $data) {
+                app(TransaksiService::class)->buat($user, [
+                    ...$data,
+                    'import_transaksi_id' => $batch->id,
+                ], $data['jenis']);
+            }
 
             return [
                 'jumlah_baris' => $hasil['jumlah_baris'],
                 'total_pemasukan' => $hasil['total_pemasukan'],
                 'total_pengeluaran' => $hasil['total_pengeluaran'],
             ];
+        });
+    }
+
+    public function batalkan(User $user, ImportTransaksi $batch): void
+    {
+        if ($batch->user_id !== $user->id || $batch->status !== 'berhasil') {
+            throw ValidationException::withMessages(['batch' => 'Batch import tidak dapat dibatalkan.']);
+        }
+
+        DB::transaction(function () use ($user, $batch): void {
+            $batch = ImportTransaksi::withoutGlobalScopes()->whereKey($batch->id)->lockForUpdate()->firstOrFail();
+
+            if ($batch->user_id !== $user->id || $batch->status !== 'berhasil') {
+                throw ValidationException::withMessages(['batch' => 'Batch import tidak dapat dibatalkan.']);
+            }
+
+            $transaksi = $batch->transaksi()->orderBy('id')->lockForUpdate()->get();
+
+            if ($transaksi->count() !== $batch->jumlah_baris) {
+                throw ValidationException::withMessages([
+                    'batch' => 'Batch tidak dapat dibatalkan karena sebagian transaksi sudah tidak tersedia.',
+                ]);
+            }
+
+            foreach ($transaksi as $item) {
+                app(TransaksiService::class)->hapus($user, $item);
+            }
+
+            $batch->update([
+                'status' => 'dibatalkan',
+                'dibatalkan_at' => now(),
+            ]);
         });
     }
 

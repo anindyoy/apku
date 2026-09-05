@@ -68,6 +68,7 @@ class TransaksiService
 
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
                 'user_id' => $user->id,
+                'import_transaksi_id' => $data['import_transaksi_id'] ?? null,
                 'buku_kas_id' => $bukuKas->id,
                 'dompet_id' => $dompet->id,
                 'jenis_transaksi_id' => $data['jenis_transaksi_id'] ?? null,
@@ -244,6 +245,10 @@ class TransaksiService
 
     private function pastikanDapatMengelola(User $user, Transaksi $transaksi): void
     {
+        if ($transaksi->user_id !== $user->id) {
+            throw new AuthorizationException('Hanya pembuat transaksi yang dapat mengubah atau menghapus transaksi ini.');
+        }
+
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($transaksi->buku_kas_id);
         $dompet = Dompet::withoutGlobalScopes()->withTrashed()->findOrFail($transaksi->dompet_id);
         $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
@@ -252,8 +257,7 @@ class TransaksiService
     private function pastikanTujuanDapatDikelola(User $user, BukuKas $bukuKas, Dompet $dompet): void
     {
         if (
-            $bukuKas->user_id !== $user->id
-            || $dompet->user_id !== $user->id
+            $dompet->user_id !== $user->id
             || $dompet->trashed()
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
             || ! $user->dapatMengelolaTransaksiPadaDompet($dompet)

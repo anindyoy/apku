@@ -40,6 +40,9 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - File import divalidasi dan ditampilkan dalam pratinjau sebelum disimpan, termasuk jumlah baris, kesalahan, serta total pemasukan dan pengeluaran.
 - Seluruh baris import disimpan secara atomik dan saldo buku kas serta dompet diperbarui menggunakan aturan transaksi yang sama dengan pencatatan manual.
 - Import mengikuti kepemilikan dan hak pengelolaan buku kas, dompet, serta kategori pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
+- Riwayat import menampilkan nama file, waktu, jumlah transaksi, dan status setiap batch milik pengguna.
+- Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo buku kas serta dompet dipulihkan.
+- File dari batch yang sudah dibatalkan dapat diimpor kembali tanpa membuat catatan batch duplikat.
 - Import belum mendukung transfer saldo antar-buku kas atau pemindahan saldo antar-dompet.
 
 ## 4. Pencarian transaksi global

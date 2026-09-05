@@ -58,7 +58,12 @@ class Transaksi extends Model
 
     public function jenis_transaksi()
     {
-        return $this->belongsTo(JenisTransaksi::class);
+        return $this->belongsTo(JenisTransaksi::class)->withoutGlobalScopes();
+    }
+
+    public function import_transaksi()
+    {
+        return $this->belongsTo(ImportTransaksi::class);
     }
 
     public function tujuan_buku_tabungan()
@@ -145,13 +150,24 @@ class Transaksi extends Model
     {
         $user = auth()->user();
 
-        if ($user->isAdmin() || $user->masaAktifBerlaku()) {
+        if ($user->isAdmin()) {
             return $query;
         }
 
-        return $query->where(function ($query) use ($user) {
-            $query->whereKey($user->idBukuKasUtama())
-                ->orWhere('id', $user->idBukuKasTambahanGratis());
+        return $query->where(function ($query) use ($user): void {
+            if ($user->masaAktifBerlaku()) {
+                $query->where('buku_kas.user_id', $user->id);
+            } else {
+                $query->whereKey(array_filter([
+                    $user->idBukuKasUtama(),
+                    $user->idBukuKasTambahanGratis(),
+                ]));
+            }
+
+            $query->orWhereHas('shares', fn ($query) => $query
+                ->aktif()
+                ->where('user_id', $user->id)
+                ->where('privilege', 'editor'));
         });
     }
 

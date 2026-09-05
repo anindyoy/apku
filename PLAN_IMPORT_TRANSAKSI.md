@@ -237,3 +237,14 @@ Di luar MVP, fitur dapat dikembangkan untuk mendukung:
 - status dan riwayat batch import;
 - pembatalan batch import dengan pembalikan saldo;
 - dukungan transfer buku kas dan pemindahan saldo dompet.
+
+### Progres Pengembangan Lanjutan
+
+- [ ] Pemetaan kolom secara fleksibel.
+- [ ] Pembuatan kategori otomatis dengan konfirmasi.
+- [ ] Import sebagian untuk baris valid.
+- [ ] Unduhan laporan error.
+- [ ] Pemrosesan melalui antrean untuk file besar.
+- [x] Status dan riwayat batch import.
+- [x] Pembatalan batch import dengan pembalikan saldo.
+- [ ] Dukungan transfer buku kas dan pemindahan saldo dompet.

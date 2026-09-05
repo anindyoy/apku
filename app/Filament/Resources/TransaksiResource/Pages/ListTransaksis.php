@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TransaksiResource\Pages;
 
+use App\Filament\Resources\ImportTransaksiResource;
 use App\Filament\Resources\TransaksiResource;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
@@ -156,10 +157,24 @@ class ListTransaksis extends ListRecords
             && auth()->user()->dapatMengelolaTransaksiPada($bukuKas);
     }
 
+    public function bukuKasTerpilihMilikSendiri(): bool
+    {
+        $bukuKas = BukuKas::find($this->filterBukuKas);
+
+        return $bukuKas !== null && $bukuKas->user_id === auth()->id();
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('Riwayat Import')
+                ->visible(fn (): bool => blank($this->filterBukuKas) || $this->bukuKasTerpilihMilikSendiri())
+                ->url(ImportTransaksiResource::getUrl())
+                ->color('gray')
+                ->icon('heroicon-o-clock'),
+
             Action::make('Unduh Template Import')
+                ->visible(fn (): bool => blank($this->filterBukuKas) || $this->bukuKasTerpilihMilikSendiri())
                 ->action(function () {
                     $path = tempnam(sys_get_temp_dir(), 'template-import-transaksi-');
                     app(ImportTransaksiService::class)->buatTemplateXlsx($path);
@@ -170,6 +185,7 @@ class ListTransaksis extends ListRecords
                 ->icon('heroicon-o-arrow-down-tray'),
 
             Action::make('Import Transaksi')
+                ->visible(fn (): bool => blank($this->filterBukuKas) || $this->bukuKasTerpilihMilikSendiri())
                 ->schema([
                     FileUpload::make('file')
                         ->label('File CSV atau XLSX')
