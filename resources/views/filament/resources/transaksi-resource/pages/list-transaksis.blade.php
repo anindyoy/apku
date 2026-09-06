@@ -1,11 +1,31 @@
 @vite('resources/css/filament-toolbar.css')
 
 <style>
+    /* Warna teks select pada mode terang */
+    .period-filter-select {
+        color: #111827 !important;
+    }
+
+    /* Border kontrol filter pada mode terang */
+    .transaction-filter-control {
+        border: 1px solid #d1d5db;
+    }
+
     /* Warna opsi select pada mode terang */
     .period-filter-select option {
         color: #1f2937;
         background-color: #ffffff;
     }
+
+    /* Warna teks select pada mode gelap */
+    .dark .period-filter-select {
+        color: #ffffff !important;
+    }
+
+    .dark .transaction-filter-control {
+        border-color: rgb(255 255 255 / 0.1);
+    }
+
     /* Warna opsi select pada mode gelap */
     .dark .period-filter-select option {
         color: #e5e7eb;
@@ -35,7 +55,7 @@
         @endphp
 
     <section aria-labelledby="filter-transaksi-title"
-        class="mb-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5 dark:bg-white/5 dark:ring-white/10">
+        class="-mb-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5 dark:bg-white/5 dark:ring-white/10">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
                 <div class="space-y-1.5">
@@ -46,11 +66,11 @@
                     <div class="flex items-center gap-2">
                         {{-- Navigasi ke bulan sebelumnya --}}
                         <a href="{{ $this->getPreviousPeriodUrl() }}" aria-label="Bulan sebelumnya"
-                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm ring-1 ring-inset ring-gray-950/10 transition hover:bg-gray-50 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/10">
+                            class="transaction-filter-control fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10">
                             <x-filament::icon icon="heroicon-m-chevron-left" class="h-5 w-5" />
                         </a>
 
-                        <div class="flex h-10 items-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-inset ring-gray-950/10 dark:bg-white/5 dark:ring-white/10">
+                        <div class="transaction-filter-control flex h-10 items-center overflow-hidden rounded-lg bg-white shadow-sm dark:bg-white/5">
                             <x-filament::icon icon="heroicon-m-calendar-days" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
 
                             <select aria-label="Bulan" wire:model.live="filterMonth"
@@ -72,7 +92,7 @@
 
                         {{-- Navigasi ke bulan berikutnya --}}
                         <a href="{{ $this->getNextPeriodUrl() }}" aria-label="Bulan berikutnya"
-                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm ring-1 ring-inset ring-gray-950/10 transition hover:bg-gray-50 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/10">
+                            class="transaction-filter-control fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10">
                             <x-filament::icon icon="heroicon-m-chevron-right" class="h-5 w-5" />
                         </a>
                     </div>
@@ -83,7 +103,7 @@
                         Dompet
                     </label>
 
-                    <div class="flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm ring-1 ring-inset ring-gray-950/10 dark:bg-white/5 dark:ring-white/10">
+                    <div class="transaction-filter-control flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm dark:bg-white/5">
                         <x-filament::icon icon="heroicon-m-wallet" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
                         <select id="dompet-filter"
                             onchange="window.location.href='{{ $filterUrl($filterBukuKas ?? '', '__VALUE__') }}'.replace('__VALUE__', this.value)"
@@ -101,7 +121,7 @@
                         Kas
                     </label>
 
-                    <div class="flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm ring-1 ring-inset ring-gray-950/10 dark:bg-white/5 dark:ring-white/10">
+                    <div class="transaction-filter-control flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm dark:bg-white/5">
                         <x-filament::icon icon="heroicon-m-book-open" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
                         <select id="buku-kas-filter"
                             onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
@@ -116,7 +136,7 @@
             </div>
 
             <a href="{{ $resetFilterUrl }}"
-                class="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg bg-white px-3 text-sm font-semibold text-gray-600 shadow-sm ring-1 ring-inset ring-gray-950/10 transition hover:bg-gray-50 hover:text-gray-950 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/10 dark:hover:text-white lg:self-auto">
+                class="transaction-filter-control inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg bg-white px-3 text-sm font-semibold text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-950 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white lg:self-auto">
                 <x-filament::icon icon="heroicon-m-arrow-path" class="h-4 w-4" />
                 Reset filter
             </a>

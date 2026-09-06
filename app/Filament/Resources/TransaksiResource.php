@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TransaksiResource extends Resource
 {
@@ -154,7 +155,7 @@ class TransaksiResource extends Resource
 
     public static function getKategoriLabel(Transaksi $transaksi): ?string
     {
-        return match ($transaksi->jenis) {
+        $label = match ($transaksi->jenis) {
             'Transfer Pemasukan' => $transaksi->tipe_transfer === 'dompet'
                 ? 'Transfer masuk dompet'
                 : 'Transfer dari '.($transaksi->asal_buku_tabungan?->nama_buku ?? '-'),
@@ -163,6 +164,8 @@ class TransaksiResource extends Resource
                 : 'Transfer ke '.($transaksi->tujuan_buku_tabungan?->nama_buku ?? '-'),
             default => $transaksi->jenis_transaksi?->nama_jenis,
         };
+
+        return filled($label) ? Str::ucfirst($label) : null;
     }
 
     public static function getWidgets(): array

@@ -24,6 +24,25 @@ test('toolbar filter transaksi menampilkan kontrol periode buku kas dan reset', 
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
+test('toolbar filter transaksi menggunakan warna teks yang kontras pada setiap tema', function () {
+    $user = createRegularUserWithBukuKas();
+
+    $html = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->html();
+
+    expect($html)
+        ->toContain('class="-mb-2 rounded-xl')
+        ->toContain('.period-filter-select {')
+        ->toContain('color: #111827 !important;')
+        ->toContain('.transaction-filter-control {')
+        ->toContain('border: 1px solid #d1d5db;')
+        ->toContain('.dark .period-filter-select {')
+        ->toContain('color: #ffffff !important;')
+        ->toContain('.dark .transaction-filter-control {');
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
 test('filter buku kas - getBukuKasOptions mengembalikan array dengan nama_buku dan id', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();

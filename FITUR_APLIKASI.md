@@ -33,6 +33,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Pemindahan saldo antar-dompet.
 - Menampilkan saldo berjalan untuk kas atau dompet yang sedang dipilih.
 - Penanda visual untuk pemasukan, pengeluaran, dan transfer.
+- Nama aktivitas pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
 - Filter transaksi berdasarkan bulan, tahun, kas, dan dompet.
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
