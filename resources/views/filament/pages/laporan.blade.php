@@ -20,55 +20,59 @@
 
     <div class="laporan-page">
         <section class="laporan-filter">
-            <div class="laporan-filter__book">
-                <label for="buku-kas">Buku kas</label>
-                <select id="buku-kas" wire:model.live="bukuKasId">
-                    <option value="semua">Semua Buku Kas</option>
-                    @foreach (\App\Models\BukuKas::all() as $buku)
-                        <option value="{{ $buku->id }}">{{ $buku->nama_buku }}</option>
+            <div class="laporan-filter__controls">
+                <div class="laporan-filter__input">
+                    <label for="buku-kas">Buku kas</label>
+                    <select id="buku-kas" wire:model.live="bukuKasId">
+                        <option value="semua">Semua Buku Kas</option>
+                        @foreach (\App\Models\BukuKas::all() as $buku)
+                            <option value="{{ $buku->id }}">{{ $buku->nama_buku }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="laporan-filter__input">
+                    <label for="dompet">Dompet</label>
+                    <select id="dompet" wire:model.live="dompetId">
+                        <option value="semua">Semua Dompet</option>
+                        @foreach (\App\Models\Dompet::withTrashed()->get() as $dompet)
+                            <option value="{{ $dompet->id }}">{{ $dompet->nama_dompet }}{{ $dompet->trashed() ? ' (Dihapus)' : '' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="laporan-periods" aria-label="Pilihan periode laporan">
+                    @foreach (['harian' => 'Harian', 'bulanan' => 'Bulanan', 'tahunan' => 'Tahunan', 'custom' => 'Custom'] as $nilai => $label)
+                        <button type="button" wire:click="pilihPeriode('{{ $nilai }}')" @class(['active' => $periode === $nilai])>{{ $label }}</button>
                     @endforeach
-                </select>
+                </div>
             </div>
-            <div class="laporan-filter__book">
-                <label for="dompet">Dompet</label>
-                <select id="dompet" wire:model.live="dompetId">
-                    <option value="semua">Semua Dompet</option>
-                    @foreach (\App\Models\Dompet::withTrashed()->get() as $dompet)
-                        <option value="{{ $dompet->id }}">{{ $dompet->nama_dompet }}{{ $dompet->trashed() ? ' (Dihapus)' : '' }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="laporan-periods" aria-label="Pilihan periode laporan">
-                @foreach (['harian' => 'Harian', 'bulanan' => 'Bulanan', 'tahunan' => 'Tahunan', 'custom' => 'Custom'] as $nilai => $label)
-                    <button type="button" wire:click="pilihPeriode('{{ $nilai }}')" @class(['active' => $periode === $nilai])>{{ $label }}</button>
-                @endforeach
-            </div>
-            <x-filament::dropdown placement="bottom-end">
-                <x-slot name="trigger">
-                    <x-filament::button icon="heroicon-o-arrow-down-tray" color="gray" aria-label="Export laporan">
-                        Export
-                    </x-filament::button>
-                </x-slot>
+            <div class="laporan-filter__export">
+                <x-filament::dropdown placement="bottom-end">
+                    <x-slot name="trigger">
+                        <x-filament::button icon="heroicon-o-arrow-down-tray" color="gray" aria-label="Export laporan">
+                            Export
+                        </x-filament::button>
+                    </x-slot>
 
-                <x-filament::dropdown.list>
-                    <x-filament::dropdown.list.item
-                        icon="heroicon-o-document-arrow-down"
-                        wire:click="unduhPdf"
-                        wire:loading.attr="disabled"
-                        wire:target="unduhPdf"
-                    >
-                        PDF
-                    </x-filament::dropdown.list.item>
-                    <x-filament::dropdown.list.item
-                        icon="heroicon-o-table-cells"
-                        wire:click="unduhExcel"
-                        wire:loading.attr="disabled"
-                        wire:target="unduhExcel"
-                    >
-                        Excel
-                    </x-filament::dropdown.list.item>
-                </x-filament::dropdown.list>
-            </x-filament::dropdown>
+                    <x-filament::dropdown.list>
+                        <x-filament::dropdown.list.item
+                            icon="heroicon-o-document-arrow-down"
+                            wire:click="unduhPdf"
+                            wire:loading.attr="disabled"
+                            wire:target="unduhPdf"
+                        >
+                            PDF
+                        </x-filament::dropdown.list.item>
+                        <x-filament::dropdown.list.item
+                            icon="heroicon-o-table-cells"
+                            wire:click="unduhExcel"
+                            wire:loading.attr="disabled"
+                            wire:target="unduhExcel"
+                        >
+                            Excel
+                        </x-filament::dropdown.list.item>
+                    </x-filament::dropdown.list>
+                </x-filament::dropdown>
+            </div>
         </section>
 
         <section class="laporan-datebar">
@@ -115,7 +119,21 @@
             @endif
         </section>
 
-        <section class="laporan-card laporan-summary">
+        <nav class="laporan-tabs" aria-label="Tampilan laporan">
+            <button type="button" wire:click="pilihTabLaporan('umum')" @class(['active' => $tabLaporan === 'umum'])>Umum</button>
+            <button type="button" wire:click="pilihTabLaporan('aktivitas')" @class(['active' => $tabLaporan === 'aktivitas'])>Kategori</button>
+        </nav>
+
+        <div class="laporan-loading" wire:loading.block wire:loading.delay role="status" aria-live="polite" aria-label="Memuat laporan">
+            <div class="laporan-loading__content">
+                <x-filament::loading-indicator />
+                <span>Memuat laporan...</span>
+            </div>
+        </div>
+
+        <div class="laporan-content">
+            @if ($tabLaporan === 'umum')
+                <section class="laporan-card laporan-summary">
             <header><x-heroicon-o-book-open /> <h2>{{ $bukuKasId === 'semua' ? 'Semua Buku Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }}</h2></header>
             <div class="laporan-summary__content">
                 <div class="laporan-totals">
@@ -133,35 +151,76 @@
                     <div class="bar-chart__labels"><span>Pemasukan</span><span>Pengeluaran</span></div>
                 </div>
             </div>
-        </section>
-
-        <div class="laporan-categories">
-            @foreach ([['Pengeluaran', 'kategoriPengeluaran', 'expense'], ['Pemasukan', 'kategoriPemasukan', 'income']] as [$judul, $key, $kelas])
-                <section class="laporan-card category-card {{ $kelas }}">
-                    <header>
-                        @if ($kelas === 'income') <x-heroicon-o-arrow-trending-up /> @else <x-heroicon-o-arrow-trending-down /> @endif
-                        <h2>{{ $judul }}</h2>
-                    </header>
-                    @if (count($laporan[$key]))
-                        <div class="donut" style="background: {{ $buatGradien($laporan[$key]) }}"><span>{{ count($laporan[$key]) }}<small>kategori</small></span></div>
-                        <div class="category-list">
-                            @foreach ($laporan[$key] as $item)
-                                <div><span><i style="background: {{ $item['warna'] }}"></i>{{ $item['nama'] }}</span><strong>{{ $formatRupiah($item['nominal']) }}</strong></div>
-                            @endforeach
-                            <div class="category-total"><span>Total</span><strong>{{ $formatRupiah($laporan[strtolower($judul)]) }}</strong></div>
-                        </div>
-                    @else
-                        <div class="empty-state"><x-heroicon-o-chart-pie /><p>Belum ada {{ strtolower($judul) }} pada periode ini.</p></div>
-                    @endif
                 </section>
-            @endforeach
+
+                <div class="laporan-categories">
+                @foreach ([['Pengeluaran', 'kategoriPengeluaran', 'expense'], ['Pemasukan', 'kategoriPemasukan', 'income']] as [$judul, $key, $kelas])
+                    <section class="laporan-card category-card {{ $kelas }}">
+                        <header>
+                            @if ($kelas === 'income') <x-heroicon-o-arrow-trending-up /> @else <x-heroicon-o-arrow-trending-down /> @endif
+                            <h2>{{ $judul }}</h2>
+                        </header>
+                        @if (count($laporan[$key]))
+                            <div class="donut" style="background: {{ $buatGradien($laporan[$key]) }}"><span>{{ count($laporan[$key]) }}<small>kategori</small></span></div>
+                            <div class="category-list">
+                                @foreach ($laporan[$key] as $item)
+                                    <div><span><i style="background: {{ $item['warna'] }}"></i>{{ $item['nama'] }}</span><strong>{{ $formatRupiah($item['nominal']) }}</strong></div>
+                                @endforeach
+                                <div class="category-total"><span>Total</span><strong>{{ $formatRupiah($laporan[strtolower($judul)]) }}</strong></div>
+                            </div>
+                        @else
+                            <div class="empty-state"><x-heroicon-o-chart-pie /><p>Belum ada {{ strtolower($judul) }} pada periode ini.</p></div>
+                        @endif
+                    </section>
+                @endforeach
+                </div>
+            @else
+                <div class="laporan-activities">
+                @foreach ([['Pengeluaran', 'aktivitasPengeluaran', 'expense'], ['Pemasukan', 'aktivitasPemasukan', 'income']] as [$judul, $key, $kelas])
+                    <section class="laporan-card activity-card {{ $kelas }}">
+                        <header>
+                            @if ($kelas === 'income') <x-heroicon-o-arrow-trending-up /> @else <x-heroicon-o-arrow-trending-down /> @endif
+                            <h2>{{ $bukuKasId === 'semua' ? 'Semua Buku Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }} - {{ $judul }}</h2>
+                        </header>
+                        @forelse ($laporan[$key] as $aktivitas)
+                            <details class="activity-group">
+                                <summary class="activity-group__heading">
+                                    <span><x-heroicon-o-folder-open /> {{ $aktivitas['nama'] }}</span>
+                                    <span class="activity-group__total"><strong>{{ $formatRupiah($aktivitas['nominal']) }}</strong><x-heroicon-m-chevron-down /></span>
+                                </summary>
+                                <div class="activity-group__transactions">
+                                    @foreach ($aktivitas['transaksi'] as $transaksi)
+                                        <div>
+                                            <time>{{ \Carbon\CarbonImmutable::parse($transaksi->tanggal)->locale('id')->translatedFormat('d M Y, H.i') }}</time>
+                                            <span>{{ $transaksi->deskripsi ?: $transaksi->jenis }}</span>
+                                            <small>{{ $transaksi->buku_kas?->nama_buku ?? '-' }} · {{ $transaksi->labelDompetUntuk(auth()->user()) }}</small>
+                                            <strong>{{ $formatRupiah($transaksi->nominal) }}</strong>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </details>
+                        @empty
+                            <div class="empty-state"><x-heroicon-o-folder-open /><p>Belum ada aktivitas {{ strtolower($judul) }} pada periode ini.</p></div>
+                        @endforelse
+                        <footer><span>Total {{ strtolower($judul) }}</span><strong>{{ $formatRupiah($laporan[strtolower($judul)]) }}</strong></footer>
+                    </section>
+                @endforeach
+                </div>
+            @endif
         </div>
     </div>
 
     <style>
         .laporan-page { display:grid; gap:1.25rem; color:var(--gray-700); }
-        .laporan-filter { display:flex; align-items:end; justify-content:space-between; gap:1rem; padding:1rem; border:1px solid var(--gray-200); border-radius:1rem; background:white; box-shadow:0 1px 3px rgb(0 0 0 / .05); }
-        .laporan-filter__book { display:grid; gap:.4rem; min-width:240px; } .laporan-filter label { font-size:.8rem; font-weight:600; color:var(--gray-500); }
+        .laporan-content { display:grid; gap:1.25rem; min-height:320px; }
+        .laporan-loading { width:100%; display:none; padding:.75rem 1rem; border:1px solid var(--gray-200); border-radius:.75rem; color:var(--gray-600); background:var(--gray-50); }
+        .laporan-loading__content { display:inline-flex !important; flex-direction:row !important; align-items:center; gap:.65rem; white-space:nowrap; }
+        .laporan-loading svg { width:1.5rem; height:1.5rem; flex:none; } .laporan-loading span { font-size:.85rem; font-weight:600; }
+        .laporan-filter { display:flex; align-items:end; gap:1.5rem; padding:1rem; border:1px solid var(--gray-200); border-radius:1rem; background:white; box-shadow:0 1px 3px rgb(0 0 0 / .05); }
+        .laporan-filter__controls { display:flex; align-items:end; gap:1.5rem; }
+        .laporan-filter__input { display:flex; flex-direction:column; gap:.4rem; min-width:240px; }
+        .laporan-filter__export { display:flex; margin-left:auto; }
+        .laporan-filter label { font-size:.8rem; font-weight:600; color:var(--gray-500); }
         .laporan-filter select,.laporan-datebar input { border:1px solid var(--gray-300); border-radius:.6rem; background:white; padding:.55rem .75rem; }
         .laporan-periods { display:flex; padding:.25rem; border-radius:.75rem; background:var(--gray-100); }
         .laporan-periods button { padding:.55rem 1rem; border-radius:.55rem; font-size:.875rem; font-weight:600; transition:.2s; }
@@ -177,6 +236,9 @@
         .laporan-period-select>span { width:1px; height:1.25rem; background:rgb(255 255 255 / .2); }
         .laporan-period-select--year select { min-width:100px; }
         .laporan-range { display:flex; align-items:center; gap:.75rem; } .laporan-range label { display:flex; align-items:center; gap:.45rem; font-size:.8rem; }
+        .laporan-tabs { display:flex; gap:.25rem; padding:.25rem; border-radius:.75rem; background:var(--gray-100); }
+        .laporan-tabs button { padding:.6rem 1rem; border-radius:.55rem; color:var(--gray-500); font-size:.875rem; font-weight:600; }
+        .laporan-tabs button.active { color:white; background:#d39b18; box-shadow:0 2px 6px rgb(163 112 0 / .2); }
         .laporan-card { overflow:hidden; border:1px solid var(--gray-200); border-radius:1rem; background:white; box-shadow:0 2px 10px rgb(0 0 0 / .05); }
         .laporan-card header { display:flex; align-items:center; gap:.65rem; padding:1rem 1.25rem; border-bottom:1px solid var(--gray-200); background:linear-gradient(90deg,var(--gray-100),white); }
         .laporan-card header svg { width:1.4rem; } .laporan-card h2 { font-size:1.1rem; font-weight:700; }
@@ -196,12 +258,26 @@
         .donut span { position:absolute; z-index:1; inset:0; display:grid; place-content:center; text-align:center; font-size:1.4rem; font-weight:700; } .donut small { display:block; color:var(--gray-400); font-size:.65rem; font-weight:500; }
         .category-list { margin:0 1rem; } .category-list>div { display:flex; justify-content:space-between; gap:1rem; padding:.65rem .5rem; border-bottom:1px dotted var(--gray-300); font-size:.85rem; }
         .category-list span { display:flex; align-items:center; gap:.5rem; } .category-list i { width:.65rem; height:.65rem; border-radius:50%; } .category-list .category-total { font-weight:700; border-bottom:2px solid var(--gray-400); background:var(--gray-50); }
+        .laporan-activities { display:grid; gap:1.25rem; }
+        .activity-card.expense header svg { color:#b64c55; } .activity-card.income header svg { color:#438364; }
+        .activity-group { margin:0 1.25rem; padding:1rem 0; border-bottom:1px solid var(--gray-200); }
+        .activity-group__heading,.activity-group__heading span { display:flex; align-items:center; gap:.6rem; }
+        .activity-group__heading { justify-content:space-between; cursor:pointer; list-style:none; } .activity-group__heading::-webkit-details-marker { display:none; }
+        .activity-group__heading svg { width:1.15rem; color:#d39b18; }
+        .activity-group__total svg { color:var(--gray-400); transition:transform .2s; } .activity-group:not([open]) .activity-group__total svg { transform:rotate(-90deg); }
+        .activity-group__transactions { margin:.65rem 0 0 1.75rem; }
+        .activity-group__transactions>div { display:grid; grid-template-columns:150px minmax(160px,1fr) minmax(180px,auto) auto; gap:1rem; padding:.55rem .75rem; background:var(--gray-50); font-size:.8rem; }
+        .activity-group__transactions>div:nth-child(even) { background:var(--gray-100); }
+        .activity-group__transactions time,.activity-group__transactions small { color:var(--gray-500); }
+        .activity-card footer { display:flex; justify-content:flex-end; gap:2rem; padding:.9rem 1.25rem; background:var(--gray-50); }
         .empty-state { min-height:300px; display:grid; place-content:center; justify-items:center; gap:.75rem; color:var(--gray-400); } .empty-state svg { width:3rem; }
         .dark .laporan-page { color:var(--gray-200); } .dark .laporan-filter,.dark .laporan-card { border-color:var(--gray-700); background:var(--gray-900); }
         .dark .laporan-card header { border-color:var(--gray-700); background:linear-gradient(90deg,var(--gray-800),var(--gray-900)); } .dark .donut::after { background:var(--gray-900); }
         .dark .laporan-filter select,.dark .laporan-datebar input { border-color:var(--gray-600); color:var(--gray-100); background:var(--gray-800); }
-        .dark .laporan-periods,.dark .laporan-totals .accumulation,.dark .category-list .category-total { background:var(--gray-800); }
+        .dark .laporan-loading { border-color:var(--gray-700); color:var(--gray-200); background:var(--gray-800); }
+        .dark .laporan-periods,.dark .laporan-tabs,.dark .laporan-totals .accumulation,.dark .category-list .category-total,.dark .activity-group__transactions>div:nth-child(even) { background:var(--gray-800); }
+        .dark .activity-group { border-color:var(--gray-700); } .dark .activity-group__transactions>div,.dark .activity-card footer { background:var(--gray-900); }
         .dark .laporan-totals .income { background:rgb(53 120 88 / .18); } .dark .laporan-totals .expense { background:rgb(164 62 71 / .18); }
-        @media (max-width:800px) { .laporan-filter { align-items:stretch; flex-direction:column; } .laporan-periods { overflow:auto; } .laporan-periods button { flex:1; } .laporan-summary__content,.laporan-categories { grid-template-columns:1fr; } .laporan-range { flex-wrap:wrap; justify-content:center; } .laporan-datebar { flex-wrap:wrap; } }
+        @media (max-width:800px) { .laporan-filter { align-items:stretch; flex-direction:column; } .laporan-filter__controls { align-items:stretch; flex-direction:column; } .laporan-filter__export { margin-left:0; } .laporan-periods { overflow:auto; } .laporan-periods button { flex:1; } .laporan-summary__content,.laporan-categories { grid-template-columns:1fr; } .laporan-range { flex-wrap:wrap; justify-content:center; } .laporan-datebar { flex-wrap:wrap; } .activity-group__transactions { margin-left:0; } .activity-group__transactions>div { grid-template-columns:1fr auto; } .activity-group__transactions small { grid-column:1 / -1; } }
     </style>
 </x-filament-panels::page>

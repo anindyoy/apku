@@ -129,6 +129,57 @@ test('laporan bulanan dan tahunan menggunakan pilihan periode tanpa input tangga
         ->assertSeeHtml('aria-label="Tahun"');
 });
 
+test('filter laporan dikelompokkan di kiri dan export dipisahkan di kanan', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 0]);
+
+    $html = Livewire::actingAs($user)
+        ->test(Laporan::class)
+        ->html();
+
+    expect($html)
+        ->toContain('class="laporan-filter__controls"')
+        ->toContain('class="laporan-filter__input"')
+        ->toContain('class="laporan-filter__export"')
+        ->and(strpos($html, 'laporan-filter__controls'))
+        ->toBeLessThan(strpos($html, 'laporan-filter__export'));
+});
+
+test('tab aktivitas menampilkan transaksi yang dikelompokkan berdasarkan kategori', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 150]);
+    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Makan', 'tipe' => 'Pengeluaran']);
+
+    buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pengeluaran', 50, now()->format('Y-m-05 08:30:00'));
+    buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pengeluaran', 100, now()->format('Y-m-10 12:00:00'));
+
+    $komponen = Livewire::actingAs($user)
+        ->test(Laporan::class)
+        ->call('pilihTabLaporan', 'aktivitas');
+
+    $aktivitas = $komponen->instance()->dataLaporan['aktivitasPengeluaran'];
+
+    $html = $komponen->html();
+
+    expect($komponen->get('tabLaporan'))->toBe('aktivitas')
+        ->and($aktivitas)->toHaveCount(1)
+        ->and($aktivitas[0]['nama'])->toBe('Makan')
+        ->and($aktivitas[0]['nominal'])->toBe(150)
+        ->and($aktivitas[0]['transaksi'])->toHaveCount(2)
+        ->and($html)->toContain('Semua Buku Kas - Pengeluaran')
+        ->toContain('>Kategori</button>')
+        ->toContain('<details class="activity-group">')
+        ->not->toContain('<details class="activity-group" open>')
+        ->toContain('class="laporan-content"')
+        ->toContain('wire:loading.block')
+        ->toContain('aria-label="Memuat laporan"')
+        ->toContain('class="laporan-loading__content"')
+        ->toContain('flex-direction:row !important')
+        ->toContain('white-space:nowrap')
+        ->and(strpos($html, 'aria-label="Tampilan laporan"'))->toBeLessThan(strpos($html, 'aria-label="Memuat laporan"'))
+        ->and(strpos($html, 'aria-label="Memuat laporan"'))->toBeLessThan(strpos($html, 'class="laporan-content"'));
+});
+
 test('laporan dapat diunduh sebagai pdf dan excel sesuai filter aktif', function () {
     $user = User::factory()->create(['role' => 'user']);
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Ekspor', 'saldo' => 750]);

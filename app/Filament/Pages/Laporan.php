@@ -50,6 +50,8 @@ class Laporan extends Page
 
     public string $dompetId = 'semua';
 
+    public string $tabLaporan = 'umum';
+
     public function mount(): void
     {
         $hariIni = now()->toDateString();
@@ -64,6 +66,13 @@ class Laporan extends Page
     {
         if (in_array($periode, ['harian', 'bulanan', 'tahunan', 'custom'], true)) {
             $this->periode = $periode;
+        }
+    }
+
+    public function pilihTabLaporan(string $tab): void
+    {
+        if (in_array($tab, ['umum', 'aktivitas'], true)) {
+            $this->tabLaporan = $tab;
         }
     }
 
@@ -125,6 +134,8 @@ class Laporan extends Page
             'saldoAkhir' => $saldoAwal + $perubahanPeriode,
             'kategoriPemasukan' => $this->ringkasanKategori($transaksiPeriode, 'Pemasukan'),
             'kategoriPengeluaran' => $this->ringkasanKategori($transaksiPeriode, 'Pengeluaran'),
+            'aktivitasPemasukan' => $this->aktivitasKategori($transaksiPeriode, 'Pemasukan'),
+            'aktivitasPengeluaran' => $this->aktivitasKategori($transaksiPeriode, 'Pengeluaran'),
             'transaksi' => $transaksiPeriode,
         ];
     }
@@ -231,6 +242,29 @@ class Laporan extends Page
             'warna' => $warna[$index % count($warna)],
             'persen' => ($item['nominal'] / $total) * 100,
         ])->all();
+    }
+
+    /** @return array<int, array{nama: string, nominal: int, transaksi: Collection<int, Transaksi>}> */
+    private function aktivitasKategori(Collection $transaksi, string $jenis): array
+    {
+        $jenisYangDipilih = $jenis === 'Pemasukan'
+            ? ['Pemasukan', 'Transfer Pemasukan']
+            : ['Pengeluaran', 'Transfer Pengeluaran'];
+
+        return $transaksi
+            ->reject(fn (Transaksi $item): bool => $item->tipe_transfer === 'dompet')
+            ->whereIn('jenis', $jenisYangDipilih)
+            ->groupBy(fn (Transaksi $item): string => str_starts_with($item->jenis, 'Transfer')
+                ? 'Transfer'
+                : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'))
+            ->map(fn (Collection $items, string $nama): array => [
+                'nama' => $nama,
+                'nominal' => (int) $items->sum('nominal'),
+                'transaksi' => $items->sortBy('tanggal')->values(),
+            ])
+            ->sortByDesc('nominal')
+            ->values()
+            ->all();
     }
 
     private function labelPeriode(CarbonImmutable $mulai, CarbonImmutable $selesai): string

@@ -102,6 +102,8 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Filter laporan berdasarkan buku kas dan dompet.
 - Ringkasan saldo awal, total pemasukan, total pengeluaran, akumulasi, dan saldo akhir.
 - Ringkasan pemasukan dan pengeluaran per kategori beserta persentasenya.
+- Tab kategori yang mengelompokkan rincian transaksi pemasukan dan pengeluaran berdasarkan kategori dalam daftar yang dapat dibuka dan ditutup, dengan rincian tertutup secara default.
+- Indikator loading ditampilkan rata kiri pada baris tersendiri di bawah tab dan di atas isi laporan ketika memproses perubahan filter, periode, tab, navigasi, atau ekspor.
 - Rincian transaksi pada periode yang dipilih.
 - Navigasi ke periode sebelum atau sesudah periode aktif.
 - Ekspor laporan ke PDF berformat lanskap.
