@@ -6,6 +6,7 @@ use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
+use App\Services\HargaEmasService;
 use App\Services\OpsiSelectCache;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -102,6 +103,10 @@ class BukuKasResource extends Resource
                     ->counts('transaksi')
                     ->label('Total Transaksi'),
 
+                TextColumn::make('tabungan_emas_count')
+                    ->counts('tabunganEmas')
+                    ->label('Produk Emas'),
+
                 // Tables\Columns\TextColumn::make('goal')
                 //     ->numeric()
                 //     ->sortable(),
@@ -135,11 +140,43 @@ class BukuKasResource extends Resource
                     ->url(fn (): string => ShareBukuResource::getUrl())
                     ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()),
 
+                FilamentAction::make('cekNilaiEmas')
+                    ->label('Cek Nilai Emas')
+                    ->icon('heroicon-o-calculator')
+                    ->visible(fn (BukuKas $record): bool => $record->tabunganEmas()->where('berat_gram', '>', 0)->exists())
+                    ->modalHeading(fn (BukuKas $record): string => 'Nilai emas pada '.$record->nama_buku)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalContent(fn (BukuKas $record) => view('filament.valuasi-emas', ['record' => $record])),
+
+                FilamentAction::make('hargaEmasManual')
+                    ->label('Harga Emas Manual')
+                    ->icon('heroicon-o-pencil-square')
+                    ->visible(fn (BukuKas $record): bool => $record->tabunganEmas()->exists()
+                        && auth()->user()->dapatMengelolaTransaksiPada($record))
+                    ->form([
+                        TextInput::make('harga_per_gram')
+                            ->label('Harga buyback per gram')
+                            ->prefix('Rp')
+                            ->numeric()
+                            ->minValue(1)
+                            ->required(),
+                    ])
+                    ->action(fn (BukuKas $record, array $data) => app(HargaEmasService::class)->simpanManual(
+                        $record,
+                        auth()->user(),
+                        (int) $data['harga_per_gram'],
+                    ))
+                    ->successNotificationTitle('Harga emas manual berhasil disimpan untuk kas ini'),
+
                 DeleteAction::make()
-                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id() && ! $record->transaksi()->exists()),
+                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()
+                        && ! $record->transaksi()->exists()
+                        && ! $record->tabunganEmas()->exists()),
 
                 Action::make('hapusDanPindahkan')
-                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id() && $record->transaksi()->exists())
+                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()
+                        && ($record->transaksi()->exists() || $record->tabunganEmas()->exists()))
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->label('Hapus')
@@ -157,7 +194,7 @@ class BukuKasResource extends Resource
                                 fn ($id): bool => (int) $id !== (int) $record->id,
                                 ARRAY_FILTER_USE_KEY,
                             ))
-                            ->helperText('Semua transaksi dan saldo kas ini akan digabungkan ke kas tujuan.')
+                            ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
                             ->searchable()
                             ->rules([
                                 Rule::exists('buku_kas', 'id')
@@ -182,6 +219,9 @@ class BukuKasResource extends Resource
                                 ->firstOrFail();
 
                             $bukuKasAsal->transaksi()->update([
+                                'buku_kas_id' => $bukuKasTujuan->id,
+                            ]);
+                            $bukuKasAsal->tabunganEmas()->update([
                                 'buku_kas_id' => $bukuKasTujuan->id,
                             ]);
 

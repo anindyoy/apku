@@ -16,10 +16,15 @@ Menambahkan dukungan tabungan berupa emas logam mulia di dalam kas, sehingga pen
 - Emas merupakan aset di dalam kas, bukan jenis kas baru.
 - Pembelian emas mengurangi saldo rupiah kas dan menambah kepemilikan emas.
 - Penjualan emas mengurangi kepemilikan emas dan menambah saldo rupiah kas.
-- Valuasi menggunakan harga **buyback per gram**, karena lebih mendekati nilai yang dapat dicairkan pengguna.
+- Valuasi wajib menggunakan harga **buyback per gram**, karena lebih mendekati nilai yang dapat dicairkan pengguna.
+- Satu kas dapat mempunyai beberapa tabungan emas untuk merek atau produk yang berbeda.
+- Merek dan produk emas bersifat opsional.
 - Perubahan harga emas bukan pemasukan atau pengeluaran dan tidak dimasukkan ke laporan arus kas.
 - Berat emas disimpan dalam gram dengan presisi hingga empat angka desimal.
-- Pada versi awal, mutasi tabungan emas hanya dapat dilakukan oleh pemilik kas. Kolaborator hanya dapat melihat sesuai hak akses kas.
+- Pemilik dan editor kas bersama dapat membeli dan menjual emas. Viewer hanya dapat melihat.
+- Pembelian normal wajib terhubung ke dompet dan transaksi rupiah. Pencatatan tanpa transaksi rupiah hanya tersedia melalui aksi saldo awal atau koreksi yang diberi label secara jelas.
+- Seluruh biaya perolehan, termasuk biaya cetak, premium pecahan, administrasi, dan biaya transaksi, dimasukkan ke total modal emas.
+- Harga manual disimpan sebagai snapshot privat pada kas terkait, bukan sebagai harga global bagi seluruh pengguna.
 
 ## 3. Rumus Utama
 
@@ -45,6 +50,7 @@ Menyimpan posisi emas terkini pada suatu kas.
 | `buku_kas_id` | foreign key | Kas tempat emas dialokasikan |
 | `nama` | string | Contoh: Emas Antam |
 | `merek` | string nullable | Antam, UBS, atau lainnya |
+| `produk` | string nullable | Nama seri atau produk jika tersedia |
 | `kadar` | decimal | Default 99,99% |
 | `berat_gram` | decimal(12,4) | Total berat yang dimiliki |
 | `total_modal` | bigint | Total modal kepemilikan aktif dalam rupiah |
@@ -71,6 +77,7 @@ Menyimpan histori perubahan emas agar dapat diaudit.
 | `tanggal` | datetime | Tanggal transaksi |
 | `berat_gram` | decimal(12,4) | Perubahan berat emas |
 | `harga_per_gram` | bigint nullable | Harga transaksi per gram |
+| `biaya_tambahan` | bigint | Biaya cetak, premium, administrasi, dan biaya lain |
 | `total_rupiah` | bigint nullable | Nilai transaksi rupiah |
 | `catatan` | string nullable | Keterangan transaksi |
 | `created_at` | timestamp | Waktu pembuatan |
@@ -84,6 +91,9 @@ Menyimpan snapshot harga agar aplikasi tetap dapat menampilkan harga terakhir ke
 |---|---|---|
 | `id` | bigint | Primary key |
 | `provider` | string | Nama penyedia data |
+| `buku_kas_id` | foreign key nullable | Diisi untuk snapshot manual privat |
+| `user_id` | foreign key nullable | Pengguna yang memasukkan harga manual |
+| `sumber` | string | `api` atau `manual` |
 | `jenis_harga` | string | Contoh: `buyback` |
 | `harga_per_gram` | bigint | Harga rupiah per gram |
 | `berlaku_pada` | datetime | Waktu harga dari provider |
@@ -92,7 +102,7 @@ Menyimpan snapshot harga agar aplikasi tetap dapat menampilkan harga terakhir ke
 | `created_at` | timestamp | Waktu penyimpanan |
 | `updated_at` | timestamp | Waktu perubahan |
 
-Snapshot tidak harus dibuat pada setiap permintaan. Simpan hanya jika harga atau waktu sumber berubah.
+Snapshot API tidak harus dibuat pada setiap permintaan. Simpan hanya jika harga atau waktu sumber berubah. Snapshot API dapat digunakan secara global, sedangkan snapshot manual hanya dapat digunakan oleh kas terkait dan tidak boleh menjadi fallback global.
 
 ## 5. Service dan Integrasi Harga
 
@@ -135,6 +145,8 @@ Situs resmi [Logam Mulia ANTAM](https://www.logammulia.com/id/index) menampilkan
 - Tampilkan waktu pembaruan serta sumber harga kepada pengguna.
 - Beri label bahwa harga berasal dari cache jika bukan hasil permintaan terbaru.
 - Sediakan input harga manual jika API gagal dan aplikasi belum mempunyai snapshot.
+- Simpan harga manual sebagai snapshot privat pada kas terkait beserta pengguna dan waktu pencatatannya.
+- Jangan gunakan snapshot manual suatu kas untuk kas atau pengguna lain.
 - Jangan mengganti snapshot valid dengan respons kosong atau tidak valid.
 
 ## 6. Alur Pengguna
@@ -145,6 +157,7 @@ Pada daftar kas, tambahkan aksi **Kelola tabungan emas**. Pemilik dapat membuat 
 
 - Nama tabungan emas.
 - Merek emas.
+- Produk emas.
 - Kadar emas.
 - Berat awal opsional.
 - Total modal awal opsional.
@@ -159,7 +172,9 @@ Form pembelian berisi:
 - Tabungan emas tujuan.
 - Berat dalam gram.
 - Harga beli per gram.
-- Total pembayaran yang dihitung otomatis tetapi dapat disesuaikan untuk memasukkan premium atau biaya.
+- Harga dasar emas yang dihitung dari berat dikali harga per gram.
+- Biaya tambahan untuk biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
+- Total pembayaran yang dihitung dari harga dasar ditambah seluruh biaya tambahan.
 - Tanggal.
 - Dompet pembayaran.
 - Kategori pengeluaran.
@@ -169,7 +184,7 @@ Proses penyimpanan dilakukan dalam satu database transaction:
 
 1. Validasi kepemilikan kas, tabungan emas, dompet, dan kategori.
 2. Buat transaksi pengeluaran rupiah.
-3. Tambahkan berat dan total modal emas.
+3. Tambahkan berat dan total modal emas; modal mencakup harga dasar dan seluruh biaya tambahan.
 4. Buat histori transaksi emas.
 5. Rollback seluruh perubahan jika salah satu langkah gagal.
 
@@ -189,7 +204,7 @@ Form penjualan berisi:
 Proses penyimpanan:
 
 1. Pastikan berat yang dijual tidak melebihi kepemilikan.
-2. Hitung pengurangan modal menggunakan metode rata-rata tertimbang.
+2. Hitung pengurangan modal menggunakan metode rata-rata tertimbang yang sudah mencakup seluruh biaya perolehan.
 3. Kurangi berat dan modal emas.
 4. Buat transaksi pemasukan rupiah.
 5. Buat histori transaksi emas.
@@ -205,7 +220,7 @@ Sediakan aksi koreksi untuk menyesuaikan hasil pemeriksaan fisik tanpa menghapus
 - Alasan koreksi.
 - Pengguna dan waktu koreksi.
 
-Koreksi tidak otomatis membuat transaksi rupiah.
+Koreksi tidak otomatis membuat transaksi rupiah. Aksi ini tidak boleh digunakan sebagai jalan pintas untuk pembelian normal dan wajib menyimpan alasan koreksi.
 
 ### 6.5. Mengecek nilai emas
 
@@ -260,13 +275,14 @@ Sediakan daftar histori dengan:
 ## 8. Hak Akses
 
 - Pemilik kas dapat membuat, membeli, menjual, mengoreksi, dan menghapus tabungan emas.
-- Editor kas bersama pada versi awal hanya dapat melihat data emas.
+- Editor kas bersama dapat membeli dan menjual emas menggunakan dompet serta kategori miliknya sendiri, mengikuti pola transaksi bersama yang sudah berlaku.
+- Editor tidak dapat membuat, mengoreksi, memindahkan, atau menghapus tabungan emas kecuali hak aksesnya diperluas pada iterasi berikutnya.
 - Viewer hanya dapat melihat data dan valuasi emas.
 - Data emas mengikuti pembatasan `UserScope` atau kebijakan kas yang sudah berlaku.
 - Admin tidak memperoleh menu data keuangan pribadi, mengikuti kebijakan privasi aplikasi saat ini.
 - Semua query mutasi harus memvalidasi kepemilikan secara eksplisit dan tidak hanya mengandalkan ID dari form.
 
-Hak mutasi editor dapat dipertimbangkan pada iterasi berikutnya setelah aturan kepemilikan emas dan dompet pembayaran disepakati.
+Pembelian dan penjualan oleh editor wajib menyimpan identitas editor sebagai pencatat. Informasi dompet editor tetap disamarkan dari anggota lain sesuai aturan transaksi kas bersama yang sudah berlaku.
 
 ## 9. Dampak pada Fitur yang Sudah Ada
 
@@ -385,7 +401,8 @@ Tambahkan pengujian terarah untuk perilaku berikut:
 ### Otorisasi
 
 - Pemilik dapat melakukan seluruh mutasi.
-- Editor dan viewer tidak dapat melakukan mutasi pada versi awal.
+- Editor dapat membeli dan menjual, tetapi tidak dapat mengoreksi atau menghapus tabungan emas.
+- Viewer tidak dapat melakukan mutasi.
 - Pengguna lain tidak dapat membaca atau mengubah emas yang bukan haknya.
 - Admin tidak melihat menu keuangan pribadi.
 
@@ -413,13 +430,12 @@ Fitur dianggap selesai apabila:
 - Test terfilter untuk perhitungan, transaksi atomik, integrasi API, dan otorisasi berhasil.
 - `FITUR_APLIKASI.md` telah diperbarui mengikuti implementasi akhir.
 
-## 13. Keputusan yang Perlu Dikonfirmasi Sebelum Implementasi
+## 13. Keputusan Implementasi
 
-- Apakah valuasi wajib memakai harga buyback atau pengguna dapat memilih harga beli pasar?
-- Apakah satu kas dapat mempunyai beberapa merek/produk emas atau hanya satu saldo emas agregat?
-- Apakah biaya cetak, premium pecahan, dan biaya transaksi dimasukkan ke total modal?
-- Apakah editor kas bersama boleh membeli dan menjual emas atau hanya pemilik?
-- Apakah harga manual boleh disimpan sebagai snapshot bersama atau hanya dipakai untuk satu pengecekan?
-- Apakah pembelian emas wajib dihubungkan ke dompet, atau boleh dicatat sebagai saldo awal tanpa transaksi rupiah?
-
-Default yang direkomendasikan untuk versi awal adalah harga buyback, beberapa tabungan emas per kas, biaya dimasukkan ke modal, mutasi hanya oleh pemilik, harga manual disimpan dengan label sumber manual, dan setiap pembelian/penjualan wajib mempunyai transaksi rupiah pasangan.
+- Valuasi wajib menggunakan harga buyback.
+- Satu kas dapat mempunyai beberapa merek atau produk emas.
+- Merek dan produk bersifat nullable.
+- Biaya cetak, premium pecahan, administrasi, dan biaya transaksi dimasukkan ke total modal. Pemisahan `harga_dasar` dan `biaya_tambahan` tetap dipertahankan agar rincian biaya dapat diaudit.
+- Editor kas bersama boleh membeli dan menjual emas menggunakan dompet serta kategori miliknya sendiri.
+- Harga manual disimpan sebagai snapshot privat pada kas terkait. Snapshot tersebut dapat digunakan kembali sebagai fallback untuk kas yang sama, tetapi tidak dibagikan sebagai harga global kepada kas atau pengguna lain.
+- Pembelian emas wajib terhubung ke dompet dan transaksi pengeluaran rupiah. Pengecualian hanya untuk saldo awal dan koreksi, yang dicatat melalui aksi khusus tanpa transaksi rupiah serta wajib memiliki alasan.

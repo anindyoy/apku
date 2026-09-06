@@ -40,4 +40,10 @@ return [
         'chat_id' => env('TELEGRAM_CHAT_ID'),
     ],
 
+    'harga_emas' => [
+        'url' => env('HARGA_EMAS_URL', 'https://logam-mulia-api.iamutaki.workers.dev/api/prices/anekalogam'),
+        'timeout' => env('HARGA_EMAS_TIMEOUT', 8),
+        'cache_hours' => env('HARGA_EMAS_CACHE_HOURS', 3),
+    ],
+
 ];

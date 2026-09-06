@@ -44,6 +44,11 @@ class BukuKas extends Model
         return $this->hasMany(Transaksi::class);
     }
 
+    public function tabunganEmas()
+    {
+        return $this->hasMany(TabunganEmas::class);
+    }
+
     public function shares()
     {
         return $this->hasMany(ShareBuku::class);

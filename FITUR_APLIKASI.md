@@ -75,6 +75,13 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Viewer dapat melihat transaksi dan laporan buku bersama, sedangkan editor juga dapat mencatat transaksi.
 - Kas bersama tidak dihitung sebagai kuota kas milik kolaborator.
 - Pemilik dapat mengubah peran atau mencabut akses kolaborator kapan saja.
+- Satu kas dapat memiliki beberapa tabungan emas logam mulia dengan merek dan produk opsional.
+- Pemilik dapat mencatat saldo awal emas, sedangkan pemilik dan editor kas dapat mencatat pembelian atau penjualan emas menggunakan dompet serta kategori miliknya sendiri.
+- Pembelian emas mengurangi saldo rupiah kas dan dompet, sedangkan penjualan menambah saldo rupiah; seluruh perubahan rupiah dan emas disimpan secara atomik.
+- Modal emas mencakup harga dasar, biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
+- Pengguna dapat mengambil harga buyback emas dari endpoint publik, menggunakan snapshot terakhir ketika layanan gagal, atau menyimpan harga manual privat untuk kas terkait.
+- Aksi cek nilai emas menampilkan total berat, nilai pasar emas, modal, estimasi untung/rugi, saldo rupiah, dan total nilai kas gabungan tanpa mencatat perubahan harga sebagai transaksi.
+- Kas yang masih memiliki emas hanya dapat dihapus setelah tabungan emasnya ikut dipindahkan ke kas lain milik pengguna yang sama.
 
 ## 6. Dompet
 
