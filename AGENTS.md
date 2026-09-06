@@ -24,6 +24,10 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 
 - Setiap catatan atau komentar pada kode, baik satu baris maupun blok, harus ditulis dalam Bahasa Indonesia.
 
+## Dokumentasi Markdown
+
+- Setiap file Markdown (`.md`) baru harus diletakkan di folder [`docs`](docs), termasuk file rencana atau plan.
+
 ## Git
 
 - Jangan melakukan `git commit` kecuali diminta secara eksplisit oleh pengguna. Perubahan boleh dibuat atau diedit di working tree, tetapi commit harus menunggu instruksi langsung.
