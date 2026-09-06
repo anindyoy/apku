@@ -75,21 +75,13 @@ class TransaksiResource extends Resource
                         'Transfer Pengeluaran' => 'primary',
                     }),
 
-                TextColumn::make('user.name')
-                    ->label('Dicatat oleh')
-                    ->visible(fn (): bool => ! auth()->user()->isAdmin()),
-
                 TextColumn::make('tanggal')
-                    ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state))),
+                    ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
+                    ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-')),
 
                 TextColumn::make('buku_kas.nama_buku')
                     ->label('Kas')
-                    ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterBukuKas)),
-
-                TextColumn::make('dompet.nama_dompet')
-                    ->label('Dompet')
-                    ->getStateUsing(fn (Transaksi $record): string => $record->labelDompetUntuk(auth()->user()))
-                    ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterDompet)),
+                    ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user())),
 
                 TextColumn::make('kategori')
                     ->label('Aktivitas')
@@ -114,19 +106,20 @@ class TransaksiResource extends Resource
 
                 TextColumn::make('nominal')
                     ->numeric()
-                    ->prefix('Rp '),
-
-                TextColumn::make('saldo')->numeric()
                     ->prefix('Rp ')
-                    ->visible(fn (ListTransaksis $livewire): bool => filled($livewire->filterBukuKas)),
+                    ->description(function (Transaksi $record, ListTransaksis $livewire): ?string {
+                        $saldo = [];
 
-                TextColumn::make('saldo_dompet')
-                    ->label('Saldo Dompet')
-                    ->numeric()
-                    ->prefix('Rp ')
-                    ->color(fn ($state): string => (int) $state < 0 ? 'danger' : 'gray')
-                    ->tooltip(fn ($state): ?string => (int) $state < 0 ? 'Saldo dompet negatif' : null)
-                    ->visible(fn (ListTransaksis $livewire): bool => filled($livewire->filterDompet)),
+                        if (filled($livewire->filterBukuKas)) {
+                            $saldo[] = 'Saldo kas: Rp '.number_format((float) $record->saldo, 0, ',', '.');
+                        }
+
+                        if (filled($livewire->filterDompet)) {
+                            $saldo[] = 'Saldo dompet: Rp '.number_format((float) $record->saldo_dompet, 0, ',', '.');
+                        }
+
+                        return filled($saldo) ? implode(' · ', $saldo) : null;
+                    }),
             ])
             ->defaultSort('tanggal', 'desc')
             ->filters([

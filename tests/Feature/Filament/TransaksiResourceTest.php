@@ -46,6 +46,26 @@ test('kolom aktivitas transaksi selalu diawali huruf kapital', function () {
 })
     ->group('filament', 'transaksi', 'aktivitas-kapital');
 
+test('tabel transaksi merangkum pencatat dan dompet pada deskripsi kolom', function () {
+    $user = createRegularUserWithBukuKas();
+    $transaksi = Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $user->buku_kas()->firstOrFail()->id,
+        'jenis' => 'Pemasukan',
+        'tanggal' => now(),
+    ]);
+
+    $html = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertCanSeeTableRecords([$transaksi])
+        ->html();
+
+    expect($html)
+        ->toContain('Dicatat oleh: '.$user->name)
+        ->toContain('Dompet: '.$transaksi->labelDompetUntuk($user));
+})
+    ->group('filament', 'transaksi', 'ringkasan-kolom');
+
 test('transaksi resource dapat mengedit nominal transaksi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();

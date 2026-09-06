@@ -100,28 +100,35 @@ test('filter buku kas - filterBukuKas dapat diatur', function () {
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
-test('filter buku kas - semua buku kas menampilkan kolom buku kas tanpa saldo', function () {
+test('filter buku kas - semua buku kas menampilkan kolom kas', function () {
     $user = createRegularUserWithBukuKas();
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class)
         ->assertSuccessful()
-        ->assertTableColumnVisible('buku_kas.nama_buku')
-        ->assertTableColumnHidden('saldo');
+        ->assertTableColumnVisible('buku_kas.nama_buku');
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
-test('filter buku kas - buku kas terpilih menampilkan saldo tanpa kolom buku kas', function () {
+test('filter buku kas - buku kas terpilih tetap menampilkan kolom kas dan saldo sebagai deskripsi nominal', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->firstOrFail();
+    Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Pemasukan',
+        'tanggal' => now(),
+    ]);
 
-    Livewire::actingAs($user)
+    $html = Livewire::actingAs($user)
         ->test(ListTransaksis::class, [
             'filterBukuKas' => (string) $bukuKas->id,
         ])
         ->assertSuccessful()
-        ->assertTableColumnHidden('buku_kas.nama_buku')
-        ->assertTableColumnVisible('saldo');
+        ->assertTableColumnVisible('buku_kas.nama_buku')
+        ->html();
+
+    expect($html)->toContain('Saldo kas:');
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
