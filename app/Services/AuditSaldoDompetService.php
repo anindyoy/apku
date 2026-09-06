@@ -25,7 +25,7 @@ class AuditSaldoDompetService
         }
 
         if ($bukuKas->user_id !== $user->id || ! $user->dapatMengelolaTransaksiPada($bukuKas)) {
-            throw new AuthorizationException('Buku kas audit tidak dapat dikelola.');
+            throw new AuthorizationException('Kas audit tidak dapat dikelola.');
         }
 
         if ($rincian === []) {

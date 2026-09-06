@@ -565,7 +565,7 @@ class ImportTransaksiService
         }
 
         if ($bukuKas === null) {
-            $errors[] = "Baris {$nomorBaris}, kolom buku_kas: buku kas tidak ditemukan atau tidak dapat dikelola.";
+            $errors[] = "Baris {$nomorBaris}, kolom buku_kas: kas tidak ditemukan atau tidak dapat dikelola.";
         }
 
         if ($dompet === null) {
@@ -578,7 +578,7 @@ class ImportTransaksiService
             && mb_strlen($namaKategoriBaru) <= 255;
 
         if ($kategori === null && ! $kategoriDapatDibuat) {
-            $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori tidak ditemukan atau tipenya tidak sesuai.";
+            $errors[] = "Baris {$nomorBaris}, kolom aktivitas: aktivitas tidak ditemukan atau tipenya tidak sesuai.";
         }
 
         return [[

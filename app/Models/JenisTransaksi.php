@@ -105,6 +105,7 @@ class JenisTransaksi extends Model
                 ->form(function ($record) use ($type) {
                     return [
                         Select::make('kategori')
+                            ->label('Aktivitas')
                             ->required()
                             ->options(fn (): array => array_filter(
                                 OpsiSelectCache::ingat('jenis-transaksi', fn (): array => self::orderby('nama_jenis')
@@ -118,7 +119,7 @@ class JenisTransaksi extends Model
                 })
                 ->modalHeading(fn ($record) => 'Hapus '.$record->nama_jenis)
                 ->modalSubheading(
-                    'Kategori ini memiliki data transaksi, pilih kategori lain untuk memindahkan kategori penggantinya.'
+                    'Aktivitas ini memiliki data transaksi, pilih aktivitas lain untuk memindahkan aktivitas penggantinya.'
                 )
                 ->action(function ($data, $record) {
                     DB::transaction(function () use ($data, $record) {

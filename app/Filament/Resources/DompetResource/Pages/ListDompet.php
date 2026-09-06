@@ -30,10 +30,10 @@ class ListDompet extends ListRecords
                 ->label('Audit saldo')
                 ->icon('heroicon-o-clipboard-document-check')
                 ->modalHeading('Cocokkan saldo aplikasi dengan saldo riil')
-                ->modalDescription('Masukkan saldo riil setiap dompet. Selisih akan dicatat sebagai transaksi kategori Audit Saldo.')
+                ->modalDescription('Masukkan saldo riil setiap dompet. Selisih akan dicatat sebagai transaksi aktivitas Audit Saldo.')
                 ->form([
                     Select::make('buku_kas_id')
-                        ->label('Buku kas pencatatan')
+                        ->label('Kas pencatatan')
                         ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
                         ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
                         ->required(),

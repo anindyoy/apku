@@ -24,7 +24,7 @@ class AksesBukuDiubah extends Notification
     {
         return [
             'format' => 'filament',
-            'title' => $this->dicabut ? 'Akses buku kas dicabut' : 'Akses buku kas diperbarui',
+            'title' => $this->dicabut ? 'Akses kas dicabut' : 'Akses kas diperbarui',
             'body' => $this->dicabut
                 ? 'Akses Anda ke '.$this->share->buku_kas->nama_buku.' telah dicabut.'
                 : 'Akses Anda ke '.$this->share->buku_kas->nama_buku.' kini menjadi '.ucfirst($this->share->privilege).'.',

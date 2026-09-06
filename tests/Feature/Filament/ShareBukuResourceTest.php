@@ -4,6 +4,12 @@ use App\Models\User;
 use App\Models\ShareBuku;
 use Livewire\Livewire;
 
+test('share buku resource menggunakan label kolaborator kas', function () {
+    expect(\App\Filament\Resources\ShareBukuResource::getNavigationLabel())->toBe('Kolaborator Kas')
+        ->and(\App\Filament\Resources\ShareBukuResource::getModelLabel())->toBe('Kolaborator Kas')
+        ->and(\App\Filament\Resources\ShareBukuResource::getPluralModelLabel())->toBe('Kolaborator Kas');
+})->group('filament', 'share-buku', 'label-kolaborator-kas');
+
 // ==================== SHARE BUKU RESOURCE ====================
 
 test('share buku resource dapat menampilkan halaman list', function () {

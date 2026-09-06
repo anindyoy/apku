@@ -58,3 +58,12 @@ test('halaman kategori dapat ditampilkan', function () {
         ->assertSuccessful();
 })
     ->group('filament', 'pages');
+
+test('halaman kategori menggunakan label aktivitas', function () {
+    $user = createRegularUserWithBukuKas();
+    $halaman = Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class);
+
+    expect(\App\Filament\Pages\Kategori::getNavigationLabel())->toBe('Aktivitas')
+        ->and($halaman->instance()->getTitle())->toBe('Aktivitas');
+})
+    ->group('filament', 'pages', 'label-aktivitas');

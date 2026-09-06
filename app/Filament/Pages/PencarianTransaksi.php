@@ -49,7 +49,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ? $query
                     : $query->whereRaw('1 = 0');
             })
-            ->searchPlaceholder('Cari deskripsi, kategori, buku kas, tipe, nominal, atau pengguna...')
+            ->searchPlaceholder('Cari deskripsi, aktivitas, kas, tipe, nominal, atau pengguna...')
             ->emptyStateHeading(fn (): string => filled($this->getTableSearch())
                 ? 'Transaksi tidak ditemukan'
                 : 'Masukkan kata pencarian')
@@ -77,7 +77,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->sortable(),
 
                 TextColumn::make('buku_kas.nama_buku')
-                    ->label('Buku Kas')
+                    ->label('Kas')
                     ->searchable()
                     ->sortable(),
 
@@ -86,11 +86,11 @@ class PencarianTransaksi extends Page implements HasTable
                     ->getStateUsing(fn (Transaksi $record): string => $record->labelDompetUntuk(auth()->user())),
 
                 TextColumn::make('kategori_pencarian')
-                    ->label('Kategori')
+                    ->label('Aktivitas')
                     ->state(fn (Transaksi $record): string => match ($record->jenis) {
                         'Transfer Pemasukan' => 'Transfer dari '.($record->asal_buku_tabungan?->nama_buku ?? '-'),
                         'Transfer Pengeluaran' => 'Transfer ke '.($record->tujuan_buku_tabungan?->nama_buku ?? '-'),
-                        default => $record->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori',
+                        default => $record->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas',
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function (Builder $query) use ($search): void {
@@ -134,7 +134,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ]),
 
                 SelectFilter::make('buku_kas_id')
-                    ->label('Buku kas')
+                    ->label('Kas')
                     ->options(fn (): array => OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
                         ->pluck('nama_buku', 'id')
                         ->all(), auth()->id()))

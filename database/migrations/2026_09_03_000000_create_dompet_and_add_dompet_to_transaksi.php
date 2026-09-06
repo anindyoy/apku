@@ -52,7 +52,7 @@ return new class extends Migration
                     'nama_buku' => 'Kas Utama',
                     'saldo' => 0,
                     'is_default' => true,
-                    'description' => 'Buku kas utama',
+                    'description' => 'Kas utama',
                     'created_at' => $waktu,
                     'updated_at' => $waktu,
                 ]);

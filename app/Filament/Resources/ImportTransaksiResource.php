@@ -85,7 +85,7 @@ class ImportTransaksiResource extends Resource
                 Action::make('Batalkan')
                     ->requiresConfirmation()
                     ->modalHeading('Batalkan seluruh transaksi dari import ini?')
-                    ->modalDescription('Seluruh transaksi dalam batch akan dihapus dan saldo buku kas serta dompet akan dipulihkan.')
+                    ->modalDescription('Seluruh transaksi dalam batch akan dihapus dan saldo kas serta dompet akan dipulihkan.')
                     ->visible(fn (ImportTransaksi $record): bool => $record->status === 'berhasil')
                     ->action(function (ImportTransaksi $record): void {
                         app(ImportTransaksiService::class)->batalkan(auth()->user(), $record);

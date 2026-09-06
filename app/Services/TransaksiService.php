@@ -99,7 +99,7 @@ class TransaksiService
         }
 
         if ($bukuKasAsal->is($bukuKasTujuan)) {
-            throw ValidationException::withMessages(['buku_kas_id_tujuan' => 'Buku kas tujuan harus berbeda dari buku kas asal.']);
+            throw ValidationException::withMessages(['buku_kas_id_tujuan' => 'Kas tujuan harus berbeda dari kas asal.']);
         }
 
         if (
@@ -111,7 +111,7 @@ class TransaksiService
             || ! $user->dapatMengelolaTransaksiPada($bukuKasTujuan)
             || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
         ) {
-            throw new AuthorizationException('Dompet atau buku kas tidak dapat dikelola.');
+            throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
         }
 
         return DB::transaction(function () use ($user, $bukuKasAsal, $bukuKasTujuan, $dompetAsal, $dompetTujuan, $nominal, $tanggal, $deskripsi): array {
@@ -129,7 +129,7 @@ class TransaksiService
                 ->keyBy('id');
 
             if ($bukuKas->count() !== 2 || $dompet->count() !== ($dompetAsal->is($dompetTujuan) ? 1 : 2)) {
-                throw new AuthorizationException('Dompet atau buku kas tidak tersedia.');
+                throw new AuthorizationException('Dompet atau kas tidak tersedia.');
             }
 
             $kodeTransfer = (string) Str::uuid();
@@ -285,7 +285,7 @@ class TransaksiService
             : null;
 
         if (! $kategori || $kategori->user_id !== $user->id || $kategori->tipe !== $jenis) {
-            throw new AuthorizationException('Kategori transaksi tidak dapat digunakan.');
+            throw new AuthorizationException('Aktivitas transaksi tidak dapat digunakan.');
         }
     }
 

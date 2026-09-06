@@ -17,6 +17,13 @@ test('buku kas resource dapat menampilkan halaman list', function () {
 })
     ->group('filament', 'buku-kas');
 
+test('buku kas resource menggunakan label kas', function () {
+    expect(\App\Filament\Resources\BukuKasResource::getModelLabel())->toBe('Kas')
+        ->and(\App\Filament\Resources\BukuKasResource::getPluralModelLabel())->toBe('Kas')
+        ->and(\App\Filament\Resources\BukuKasResource::getNavigationLabel())->toBe('Kas');
+})
+    ->group('filament', 'buku-kas', 'label-kas');
+
 test('buku kas resource dapat membuat record baru', function () {
     $user = createRegularUserWithBukuKas();
 

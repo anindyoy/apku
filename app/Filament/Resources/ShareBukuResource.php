@@ -29,9 +29,13 @@ class ShareBukuResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationLabel = 'Kolaborator Buku';
+    protected static ?string $navigationLabel = 'Kolaborator Kas';
 
-    protected static ?string $pluralLabel = 'Kolaborator Buku';
+    protected static ?string $modelLabel = 'Kolaborator Kas';
+
+    protected static ?string $pluralModelLabel = 'Kolaborator Kas';
+
+    protected static ?string $pluralLabel = 'Kolaborator Kas';
 
     protected static ?string $slug = 'kolaborator-buku';
 
@@ -43,7 +47,7 @@ class ShareBukuResource extends Resource
     {
         return $schema->schema([
             Select::make('buku_kas_id')
-                ->label('Buku Kas')
+                ->label('Kas')
                 ->options(fn (): array => BukuKas::withoutGlobalScopes()
                     ->where('user_id', auth()->id())
                     ->pluck('nama_buku', 'id')->all())
@@ -89,7 +93,7 @@ class ShareBukuResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('buku_kas.nama_buku')->label('Buku Kas')->searchable(),
+                TextColumn::make('buku_kas.nama_buku')->label('Kas')->searchable(),
                 TextColumn::make('user.name')->label('Kolaborator')
                     ->description(fn (ShareBuku $record): string => $record->user->email),
                 TextColumn::make('privilege')->label('Akses')->badge(),

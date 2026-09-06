@@ -15,9 +15,9 @@ test('toolbar filter transaksi menampilkan kontrol periode buku kas dan reset', 
         ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertSeeText('Periode transaksi')
-        ->assertSeeText('Buku Kas')
+        ->assertSeeText('Kas')
         ->assertSeeText('Kas Test')
-        ->assertSeeText('Semua Buku Kas')
+        ->assertSeeText('Semua Kas')
         ->assertSeeText('Reset filter')
         ->assertSeeHtml('aria-label="Bulan sebelumnya"')
         ->assertSeeHtml('aria-label="Bulan berikutnya"');

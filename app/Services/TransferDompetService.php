@@ -38,7 +38,7 @@ class TransferDompetService
             || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
         ) {
-            throw new AuthorizationException('Dompet atau buku kas tidak dapat dikelola.');
+            throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
         }
 
         $prosesTransfer = function () use ($user, $dompetAsal, $dompetTujuan, $bukuKas, $nominal, $tanggal, $deskripsi): array {
@@ -118,7 +118,7 @@ class TransferDompetService
             || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
         ) {
-            throw new AuthorizationException('Dompet atau buku kas tidak dapat dikelola.');
+            throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
         }
 
         $prosesPenghapusan = function () use ($user, $dompetAsal, $dompetTujuan, $bukuKas): void {

@@ -22,9 +22,9 @@
         <section class="laporan-filter">
             <div class="laporan-filter__controls">
                 <div class="laporan-filter__input">
-                    <label for="buku-kas">Buku kas</label>
+                    <label for="buku-kas">Kas</label>
                     <select id="buku-kas" wire:model.live="bukuKasId">
-                        <option value="semua">Semua Buku Kas</option>
+                        <option value="semua">Semua Kas</option>
                         @foreach (\App\Models\BukuKas::all() as $buku)
                             <option value="{{ $buku->id }}">{{ $buku->nama_buku }}</option>
                         @endforeach
@@ -121,7 +121,7 @@
 
         <nav class="laporan-tabs" aria-label="Tampilan laporan">
             <button type="button" wire:click="pilihTabLaporan('umum')" @class(['active' => $tabLaporan === 'umum'])>Umum</button>
-            <button type="button" wire:click="pilihTabLaporan('aktivitas')" @class(['active' => $tabLaporan === 'aktivitas'])>Kategori</button>
+            <button type="button" wire:click="pilihTabLaporan('aktivitas')" @class(['active' => $tabLaporan === 'aktivitas'])>Aktivitas</button>
         </nav>
 
         <div class="laporan-loading" wire:loading.block wire:loading.delay role="status" aria-live="polite" aria-label="Memuat laporan">
@@ -134,7 +134,7 @@
         <div class="laporan-content">
             @if ($tabLaporan === 'umum')
                 <section class="laporan-card laporan-summary">
-            <header><x-heroicon-o-book-open /> <h2>{{ $bukuKasId === 'semua' ? 'Semua Buku Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }}</h2></header>
+            <header><x-heroicon-o-book-open /> <h2>{{ $bukuKasId === 'semua' ? 'Semua Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }}</h2></header>
             <div class="laporan-summary__content">
                 <div class="laporan-totals">
                     <div><span>Saldo awal periode</span><strong>{{ $formatRupiah($laporan['saldoAwal']) }}</strong></div>
@@ -161,7 +161,7 @@
                             <h2>{{ $judul }}</h2>
                         </header>
                         @if (count($laporan[$key]))
-                            <div class="donut" style="background: {{ $buatGradien($laporan[$key]) }}"><span>{{ count($laporan[$key]) }}<small>kategori</small></span></div>
+                            <div class="donut" style="background: {{ $buatGradien($laporan[$key]) }}"><span>{{ count($laporan[$key]) }}<small>aktivitas</small></span></div>
                             <div class="category-list">
                                 @foreach ($laporan[$key] as $item)
                                     <div><span><i style="background: {{ $item['warna'] }}"></i>{{ $item['nama'] }}</span><strong>{{ $formatRupiah($item['nominal']) }}</strong></div>
@@ -180,7 +180,7 @@
                     <section class="laporan-card activity-card {{ $kelas }}">
                         <header>
                             @if ($kelas === 'income') <x-heroicon-o-arrow-trending-up /> @else <x-heroicon-o-arrow-trending-down /> @endif
-                            <h2>{{ $bukuKasId === 'semua' ? 'Semua Buku Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }} - {{ $judul }}</h2>
+                            <h2>{{ $bukuKasId === 'semua' ? 'Semua Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }} - {{ $judul }}</h2>
                         </header>
                         @forelse ($laporan[$key] as $aktivitas)
                             <details class="activity-group">

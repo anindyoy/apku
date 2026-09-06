@@ -32,7 +32,7 @@ class KasOverview extends BaseWidget
             )
                 ->description($filterDompet
                     ? 'Saldo dompet terpilih'
-                    : 'Semua Buku Kas Rp '.number_format(BukuKas::sum('saldo')))
+                    : 'Semua Kas Rp '.number_format(BukuKas::sum('saldo')))
                 ->color(($saldoDompet ?? $saldoBukuKas) < 0 ? 'danger' : 'primary'),
         ];
     }

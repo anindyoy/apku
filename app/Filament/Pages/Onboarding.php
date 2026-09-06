@@ -53,12 +53,12 @@ class Onboarding extends Page implements HasForms
         return $schema
             ->schema([
                 Wizard::make([
-                    Step::make('Buku Kas Utama')
-                        ->description('Atur buku kas pertama Anda')
+                    Step::make('Kas Utama')
+                        ->description('Atur kas pertama Anda')
                         ->icon('heroicon-o-book-open')
                         ->schema([
                             TextInput::make('nama_buku')
-                                ->label('Label buku kas utama')
+                                ->label('Label kas utama')
                                 ->placeholder('Contoh: Dompet Harian atau Rekening Usaha')
                                 ->required()
                                 ->maxLength(50),
@@ -67,7 +67,7 @@ class Onboarding extends Page implements HasForms
                                 ->required()
                                 ->maxLength(50),
                             Textarea::make('description')
-                                ->label('Deskripsi buku kas')
+                                ->label('Deskripsi kas')
                                 ->placeholder('Contoh: Catatan pemasukan dan pengeluaran sehari-hari')
                                 ->rows(3)
                                 ->maxLength(200),
@@ -79,12 +79,12 @@ class Onboarding extends Page implements HasForms
                                 ->numeric()
                                 ->minValue(0),
                         ]),
-                    Step::make('Kategori Pemasukan')
-                        ->description('Tambahkan kategori yang sering digunakan')
+                    Step::make('Aktivitas Pemasukan')
+                        ->description('Tambahkan aktivitas yang sering digunakan')
                         ->icon('heroicon-o-arrow-trending-up')
                         ->schema([
                             Repeater::make('kategori_pemasukan')
-                                ->label('Kategori pemasukan')
+                                ->label('Aktivitas pemasukan')
                                 ->simple(
                                     TextInput::make('nama_jenis')
                                         ->placeholder('Contoh: Gaji, Bonus, atau Penjualan')
@@ -94,14 +94,14 @@ class Onboarding extends Page implements HasForms
                                 ->defaultItems(2)
                                 ->minItems(2)
                                 ->maxItems(10)
-                                ->addActionLabel('Tambah kategori pemasukan'),
+                                ->addActionLabel('Tambah aktivitas pemasukan'),
                         ]),
-                    Step::make('Kategori Pengeluaran')
-                        ->description('Lengkapi kategori pengeluaran Anda')
+                    Step::make('Aktivitas Pengeluaran')
+                        ->description('Lengkapi aktivitas pengeluaran Anda')
                         ->icon('heroicon-o-arrow-trending-down')
                         ->schema([
                             Repeater::make('kategori_pengeluaran')
-                                ->label('Kategori pengeluaran')
+                                ->label('Aktivitas pengeluaran')
                                 ->simple(
                                     TextInput::make('nama_jenis')
                                         ->placeholder('Contoh: Makan, Transportasi, atau Tagihan')
@@ -111,7 +111,7 @@ class Onboarding extends Page implements HasForms
                                 ->defaultItems(2)
                                 ->minItems(2)
                                 ->maxItems(10)
-                                ->addActionLabel('Tambah kategori pengeluaran'),
+                                ->addActionLabel('Tambah aktivitas pengeluaran'),
                         ]),
                 ])
                     ->submitAction(new HtmlString('<button type="submit" class="fi-btn fi-btn-color-primary fi-color-primary fi-size-md">Mulai menggunakan APKu</button>')),

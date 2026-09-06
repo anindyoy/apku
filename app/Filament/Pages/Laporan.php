@@ -30,7 +30,7 @@ class Laporan extends Page
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $title = 'Laporan Buku Kas';
+    protected static ?string $title = 'Laporan Kas';
 
     protected string $view = 'filament.pages.laporan';
 
@@ -231,7 +231,7 @@ class Laporan extends Page
             ->whereIn('jenis', $jenisYangDipilih)
             ->groupBy(fn (Transaksi $item) => str_starts_with($item->jenis, 'Transfer')
                 ? 'Transfer'
-                : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'))
+                : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas'))
             ->map(fn (Collection $items, string $nama) => ['nama' => $nama, 'nominal' => (int) $items->sum('nominal')])
             ->sortByDesc('nominal')
             ->values();
@@ -256,7 +256,7 @@ class Laporan extends Page
             ->whereIn('jenis', $jenisYangDipilih)
             ->groupBy(fn (Transaksi $item): string => str_starts_with($item->jenis, 'Transfer')
                 ? 'Transfer'
-                : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'))
+                : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas'))
             ->map(fn (Collection $items, string $nama): array => [
                 'nama' => $nama,
                 'nominal' => (int) $items->sum('nominal'),
@@ -283,7 +283,7 @@ class Laporan extends Page
         return [
             'laporan' => $this->dataLaporan,
             'namaBuku' => $this->bukuKasId === 'semua'
-                ? 'Semua Buku Kas'
+                ? 'Semua Kas'
                 : BukuKas::findOrFail($this->bukuKasId)->nama_buku,
             'namaDompet' => $this->dompetId === 'semua'
                 ? 'Semua Dompet'
@@ -297,8 +297,8 @@ class Laporan extends Page
     {
         $laporan = $data['laporan'];
         $baris = [
-            ['LAPORAN BUKU KAS'],
-            ['Buku Kas', $data['namaBuku']],
+            ['LAPORAN KAS'],
+            ['Kas', $data['namaBuku']],
             ['Dompet', $data['namaDompet']],
             ['Tipe Periode', $data['tipePeriode']],
             ['Periode', $laporan['label']],
@@ -311,7 +311,7 @@ class Laporan extends Page
             ['Saldo Akhir', $laporan['saldoAkhir']],
             [],
             ['RINCIAN TRANSAKSI'],
-            ['Tanggal', 'Buku Kas', 'Dompet', 'Jenis', 'Kategori', 'Deskripsi', 'Nominal'],
+            ['Tanggal', 'Kas', 'Dompet', 'Jenis', 'Aktivitas', 'Deskripsi', 'Nominal'],
         ];
 
         foreach ($laporan['transaksi'] as $transaksi) {
@@ -320,7 +320,7 @@ class Laporan extends Page
                 $transaksi->buku_kas?->nama_buku ?? '-',
                 $transaksi->labelDompetUntuk(auth()->user()),
                 $transaksi->jenis,
-                str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->jenis_transaksi?->nama_jenis ?? 'Tanpa kategori'),
+                str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas'),
                 $transaksi->deskripsi ?? '',
                 $transaksi->nominal,
             ];

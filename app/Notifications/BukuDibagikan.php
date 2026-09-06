@@ -21,7 +21,7 @@ class BukuDibagikan extends Notification
     {
         return [
             'format' => 'filament',
-            'title' => 'Buku kas dibagikan kepada Anda',
+            'title' => 'Kas dibagikan kepada Anda',
             'body' => $this->share->buku_kas->nama_buku.' dibagikan dengan akses '.ucfirst($this->share->privilege).'.',
             'status' => 'info',
             'duration' => 'persistent',

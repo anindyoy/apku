@@ -33,7 +33,7 @@ class PastikanAkunKeuanganDefault
                     'nama_buku' => 'Kas Utama',
                     'saldo' => (int) Dompet::withoutGlobalScopes()->where('user_id', $user->id)->sum('saldo'),
                     'is_default' => true,
-                    'description' => 'Buku kas utama',
+                    'description' => 'Kas utama',
                 ]);
             }
 

@@ -98,7 +98,7 @@
 
                 <div class="space-y-1.5">
                     <label for="buku-kas-filter" class="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                        Buku Kas
+                        Kas
                     </label>
 
                     <div class="flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm ring-1 ring-inset ring-gray-950/10 dark:bg-white/5 dark:ring-white/10">
@@ -106,7 +106,7 @@
                         <select id="buku-kas-filter"
                             onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
                             class="period-filter-select h-full w-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
-                            <option value="" {{ blank($filterBukuKas) ? 'selected' : '' }}>Semua Buku Kas</option>
+                            <option value="" {{ blank($filterBukuKas) ? 'selected' : '' }}>Semua Kas</option>
                             @foreach($this->getBukuKasOptions() as $id => $nama)
                                 <option value="{{ $id }}" {{ (string) $filterBukuKas === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
                             @endforeach

@@ -106,7 +106,7 @@ class DompetResource extends Resource
                             ))
                             ->required(),
                         Select::make('buku_kas_id')
-                            ->label('Buku kas pencatatan')
+                            ->label('Kas pencatatan')
                             ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
                             ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
                             ->required(),

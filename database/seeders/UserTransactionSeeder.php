@@ -106,7 +106,7 @@ class UserTransactionSeeder extends Seeder
                 'nama_buku' => 'Kas Utama',
                 'saldo' => 0,
                 'is_default' => true,
-                'description' => 'Buku kas utama',
+                'description' => 'Kas utama',
             ]);
             $this->line("  Created BukuKas: {$bukuKas->nama_buku}");
         } else {

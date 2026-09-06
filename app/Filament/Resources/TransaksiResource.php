@@ -82,7 +82,7 @@ class TransaksiResource extends Resource
                     ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state))),
 
                 TextColumn::make('buku_kas.nama_buku')
-                    ->label('Buku Kas')
+                    ->label('Kas')
                     ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterBukuKas)),
 
                 TextColumn::make('dompet.nama_dompet')
@@ -91,7 +91,7 @@ class TransaksiResource extends Resource
                     ->visible(fn (ListTransaksis $livewire): bool => blank($livewire->filterDompet)),
 
                 TextColumn::make('kategori')
-                    ->label('Kategori')
+                    ->label('Aktivitas')
                     ->getStateUsing(fn (Transaksi $record) => static::getKategoriLabel($record))
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query

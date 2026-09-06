@@ -34,7 +34,7 @@ class AuditSaldoDompetResource extends Resource
             ->defaultSort('tanggal', 'desc')
             ->columns([
                 TextColumn::make('tanggal')->dateTime('d M Y, H:i')->sortable(),
-                TextColumn::make('bukuKas.nama_buku')->label('Buku kas'),
+                TextColumn::make('bukuKas.nama_buku')->label('Kas'),
                 TextColumn::make('total_saldo_aplikasi')->label('Saldo aplikasi')->money('IDR'),
                 TextColumn::make('total_saldo_riil')->label('Saldo riil')->money('IDR'),
                 TextColumn::make('total_selisih')

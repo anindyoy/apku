@@ -36,6 +36,12 @@ class BukuKasResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $modelLabel = 'Kas';
+
+    protected static ?string $pluralModelLabel = 'Kas';
+
+    protected static ?string $navigationLabel = 'Kas';
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -124,7 +130,7 @@ class BukuKasResource extends Resource
                     ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()),
 
                 FilamentAction::make('kolaborator')
-                    ->label('Kelola Kolaborator')
+                    ->label('Kolaborator Kas')
                     ->icon('heroicon-o-user-group')
                     ->url(fn (): string => ShareBukuResource::getUrl())
                     ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()),
@@ -137,12 +143,12 @@ class BukuKasResource extends Resource
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->label('Hapus')
-                    ->modalHeading('Pindahkan transaksi dan hapus buku kas')
-                    ->modalDescription(fn (BukuKas $record): string => "Buku kas {$record->nama_buku} masih memiliki transaksi. Pilih buku kas tujuan sebelum menghapusnya.")
+                    ->modalHeading('Pindahkan transaksi dan hapus kas')
+                    ->modalDescription(fn (BukuKas $record): string => "Kas {$record->nama_buku} masih memiliki transaksi. Pilih kas tujuan sebelum menghapusnya.")
                     ->modalSubmitActionLabel('Pindahkan dan hapus')
                     ->form(fn (BukuKas $record): array => [
                         Select::make('buku_kas_id')
-                            ->label('Buku kas tujuan')
+                            ->label('Kas tujuan')
                             ->options(fn (): array => array_filter(
                                 OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
                                     ->where('user_id', $record->user_id)
@@ -151,7 +157,7 @@ class BukuKasResource extends Resource
                                 fn ($id): bool => (int) $id !== (int) $record->id,
                                 ARRAY_FILTER_USE_KEY,
                             ))
-                            ->helperText('Semua transaksi dan saldo buku kas ini akan digabungkan ke buku kas tujuan.')
+                            ->helperText('Semua transaksi dan saldo kas ini akan digabungkan ke kas tujuan.')
                             ->searchable()
                             ->rules([
                                 Rule::exists('buku_kas', 'id')
@@ -183,7 +189,7 @@ class BukuKasResource extends Resource
                             $bukuKasAsal->delete();
                         });
                     })
-                    ->successNotificationTitle('Transaksi dipindahkan dan buku kas berhasil dihapus'),
+                    ->successNotificationTitle('Transaksi dipindahkan dan kas berhasil dihapus'),
 
             ])
             ->bulkActions([

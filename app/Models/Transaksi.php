@@ -102,7 +102,7 @@ class Transaksi extends Model
                 ->visible(fn ($record) => $record),
 
             Select::make('buku_kas_id')
-                ->label('Buku Kas')
+                ->label('Kas')
                 ->live()
                 ->options(fn (): array => static::opsiBukuKasYangDapatDikelola())
                 ->disabled(fn (?Transaksi $record): bool => filled($record?->transfer_code))
@@ -121,7 +121,7 @@ class Transaksi extends Model
                 ->visible($transfer),
 
             Select::make('buku_kas_id_tujuan')
-                ->label('Buku Kas Tujuan')
+                ->label('Kas Tujuan')
                 ->options(fn ($get): array => array_filter(
                     static::opsiBukuKasYangDapatDikelola(),
                     fn ($id): bool => (int) $id !== (int) $get('buku_kas_id'),
@@ -131,7 +131,7 @@ class Transaksi extends Model
                 ->visible($transfer),
 
             Select::make('jenis_transaksi_id')
-                ->label('Kategori')
+                ->label('Aktivitas')
                 ->hidden(
                     fn ($record = null) => $transfer || ($record && in_array(
                         $record->jenis,

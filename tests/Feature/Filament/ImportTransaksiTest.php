@@ -313,7 +313,7 @@ test('laporan error xlsx memuat data asli dan alasan kegagalan', function () {
         ->and($baris[1][5])->toBe('Gaji')
         ->and($baris[1][6])->toBe('-25000')
         ->and($baris[1][8])->toContain('kolom nominal')
-        ->and($baris[1][8])->toContain('kolom kategori');
+        ->and($baris[1][8])->toContain('kolom aktivitas');
 })->group('filament', 'import-transaksi', 'laporan-error-import');
 
 test('file yang sama tidak dapat diimpor dua kali', function () {

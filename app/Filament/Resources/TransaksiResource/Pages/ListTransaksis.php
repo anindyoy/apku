@@ -217,7 +217,7 @@ class ListTransaksis extends ListRecords
                         ->live()
                         ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.buku_kas')
-                        ->label('Kolom buku kas')
+                        ->label('Kolom kas')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
@@ -229,7 +229,7 @@ class ListTransaksis extends ListRecords
                         ->live()
                         ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Select::make('pemetaan.kategori')
-                        ->label('Kolom kategori')
+                        ->label('Kolom aktivitas')
                         ->options(fn (Get $get): array => $get('header_options') ?? [])
                         ->required()
                         ->live()
@@ -247,8 +247,8 @@ class ListTransaksis extends ListRecords
                         ->live()
                         ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                     Toggle::make('buat_kategori_otomatis')
-                        ->label('Buat kategori yang belum tersedia')
-                        ->helperText('Kategori baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
+                        ->label('Buat aktivitas yang belum tersedia')
+                        ->helperText('Aktivitas baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
                         ->default(false)
                         ->live()
                         ->afterStateUpdated(fn (bool $state, Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $state, $set)),
@@ -324,7 +324,7 @@ class ListTransaksis extends ListRecords
                         ->different('dompet_asal_id')
                         ->required(),
                     Select::make('buku_kas_id')
-                        ->label('Buku kas pencatatan')
+                        ->label('Kas pencatatan')
                         ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
                         ->default(fn (): ?int => $this->filterBukuKas ? (int) $this->filterBukuKas : auth()->user()->idBukuKasUtama())
                         ->required(),
@@ -465,7 +465,7 @@ class ListTransaksis extends ListRecords
         $html = '<div class="space-y-2"><p><strong>'.$jumlah.'</strong> baris · Pemasukan Rp '.$pemasukan.' · Pengeluaran Rp '.$pengeluaran.'</p>';
 
         if ($kategoriBaru !== []) {
-            $html .= '<div class="text-warning-600"><strong>Kategori yang akan dibuat:</strong><ul class="list-disc pl-5 text-sm">';
+            $html .= '<div class="text-warning-600"><strong>Aktivitas yang akan dibuat:</strong><ul class="list-disc pl-5 text-sm">';
 
             foreach ($kategoriBaru as $jenis => $daftar) {
                 foreach ($daftar as $nama) {
