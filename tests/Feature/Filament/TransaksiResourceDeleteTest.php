@@ -147,6 +147,7 @@ test('transaksi list - header actions tersedia', function () {
             'filterBukuKas' => (string) $bukuKas->id,
         ])
         ->assertSuccessful()
+        ->assertSeeText('Aksi transaksi')
         ->assertSeeText('Transfer saldo')
         ->assertSeeText('Catat pemasukan')
         ->assertSeeText('Catat pengeluaran');

@@ -13,6 +13,9 @@ test('navbar menampilkan nama pengguna yang sedang login', function () {
 
     expect($html)
         ->toContain('data-testid="navbar-user-name"')
+        ->toContain('color: var(--color-gray-700)')
+        ->toContain('.dark [data-testid="navbar-user-name"]')
+        ->toContain('color: var(--color-gray-200)')
         ->toContain('Hai, Nama Pengguna Aktif');
 })->group('filament', 'navbar');
 

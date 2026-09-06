@@ -150,7 +150,8 @@ class TransaksiResource extends Resource
         return match ($jenis) {
             'Pemasukan' => 'danger',
             'Pengeluaran' => 'success',
-            default => 'primary',
+            'Transfer Pemasukan', 'Transfer Pengeluaran' => 'info',
+            default => 'gray',
         };
     }
 
