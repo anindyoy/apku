@@ -149,7 +149,7 @@ class UserTransactionSeeder extends Seeder
         $now = Carbon::now();
         $allTransactions = [];
 
-        $pemasukanNominals = [500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000];
+        $pemasukanNominals = [10000, 25000, 50000, 75000, 100000];
         $pemasukanDescriptions = [
             'Gaji bulanan',
             'Bonus project',
@@ -158,7 +158,7 @@ class UserTransactionSeeder extends Seeder
             'Pemasukan lainnya',
         ];
 
-        $pengeluaranNominals = [15000, 25000, 35000, 50000, 75000, 100000, 150000, 200000, 250000, 500000];
+        $pengeluaranNominals = [15000, 25000, 35000, 50000, 75000, 100000];
         $pengeluaranDescriptions = [
             'Makan siang',
             'Belanja groceries',

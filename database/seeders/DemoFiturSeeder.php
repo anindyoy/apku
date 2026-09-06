@@ -57,7 +57,7 @@ class DemoFiturSeeder extends Seeder
             $dompetBank = Dompet::withoutGlobalScopes()->create([
                 'user_id' => $user->id,
                 'nama_dompet' => 'Rekening Bank',
-                'saldo' => 650000,
+                'saldo' => 0,
                 'is_default' => false,
                 'description' => 'Rekening untuk tabungan dan pembayaran digital',
             ]);
@@ -69,7 +69,7 @@ class DemoFiturSeeder extends Seeder
                     'buku_kas_id' => $bukuKas->id,
                     'dompet_id' => $dompetBank->id,
                     'tanggal' => $waktu->copy()->subDay(),
-                    'nominal' => 750000,
+                    'nominal' => 100000,
                     'jenis' => 'Pemasukan',
                     'deskripsi' => 'Saldo awal rekening bank',
                 ]);
@@ -97,7 +97,7 @@ class DemoFiturSeeder extends Seeder
             });
 
             $dompetUtama->increment('saldo', 100000);
-            $bukuKas->increment('saldo', 750000);
+            $bukuKas->increment('saldo', 100000);
         }
     }
 

@@ -8,6 +8,7 @@ use App\Models\PaketLangganan;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Models\UtangPiutang;
+use App\Models\UtangPiutangDetail;
 use App\Models\Voucher;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,9 @@ test('database seeder memberi gambaran untuk seluruh fitur utama', function () {
         ->and($user->buku_kas()->count())->toBeGreaterThanOrEqual(2)
         ->and(Dompet::withoutGlobalScopes()->where('user_id', $user->id)->count())->toBeGreaterThanOrEqual(2)
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $user->id)->exists())->toBeTrue()
+        ->and(Transaksi::withoutGlobalScopes()->get()->every(fn (Transaksi $item): bool => $item->nominal >= 1000 && $item->nominal <= 100000 && $item->nominal % 1000 === 0))->toBeTrue()
         ->and(UtangPiutang::withoutGlobalScopes()->where('user_id', $user->id)->exists())->toBeTrue()
+        ->and(UtangPiutangDetail::withoutGlobalScopes()->get()->every(fn (UtangPiutangDetail $item): bool => $item->nominal >= 1000 && $item->nominal <= 100000 && $item->nominal % 1000 === 0))->toBeTrue()
         ->and(PaketLangganan::count())->toBeGreaterThanOrEqual(3)
         ->and(MetodePembayaran::count())->toBeGreaterThanOrEqual(3)
         ->and(Voucher::whereHas('codes')->count())->toBeGreaterThanOrEqual(2)

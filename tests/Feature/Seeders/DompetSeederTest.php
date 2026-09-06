@@ -29,6 +29,7 @@ test('user transaction seeder mengisi buku kas dan dompet yang valid', function 
 
     expect($transaksi)->not->toBeEmpty()
         ->and($transaksi->every(fn (Transaksi $item): bool => filled($item->buku_kas_id) && filled($item->dompet_id)))->toBeTrue()
+        ->and($transaksi->every(fn (Transaksi $item): bool => $item->nominal >= 1000 && $item->nominal <= 100000 && $item->nominal % 1000 === 0))->toBeTrue()
         ->and($user->buku_kas()->firstOrFail()->is_default)->toBeTrue()
         ->and($user->dompet()->firstOrFail()->is_default)->toBeTrue();
 });
@@ -49,6 +50,7 @@ test('transaksi seeder menghasilkan relasi valid saldo konsisten dan kode transf
 
     expect($transaksi)->not->toBeEmpty()
         ->and($transaksi->every(fn (Transaksi $item): bool => filled($item->buku_kas_id) && filled($item->dompet_id)))->toBeTrue()
+        ->and($transaksi->every(fn (Transaksi $item): bool => $item->nominal >= 1000 && $item->nominal <= 100000 && $item->nominal % 1000 === 0))->toBeTrue()
         ->and($bukuKas->where('is_default', true))->toHaveCount(1)
         ->and($dompet->saldo)->toBe($saldoHistori)
         ->and($transaksi->whereNotNull('transfer_code')->every(

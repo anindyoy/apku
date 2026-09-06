@@ -55,7 +55,7 @@ class TransaksiSeeder extends Seeder
             $bukuCount = rand(2, 4);
 
             for ($i = 0; $i < $bukuCount; $i++) {
-                $nominal = rand(1, 100);
+                $nominal = rand(1, 100) * 1000;
 
                 $bukuKasRows[] = [
                     'user_id' => $user->id,
@@ -124,7 +124,7 @@ class TransaksiSeeder extends Seeder
                     $tujuanIdx = $availableIdxs[array_rand($availableIdxs)];
                     $tujuanId = $bukuIdMap[$tujuanIdx];
                     $transferCode = (string) Str::uuid();
-                    $nominal = rand(1, 100);
+                    $nominal = rand(1, 100) * 1000;
 
                     // Ambil tanggal transaksi paling awal sebagai batas rentang.
                     $baseTanggal = DB::table('transaksi')
@@ -183,7 +183,7 @@ class TransaksiSeeder extends Seeder
                     $baseTanggal = DB::table('transaksi')
                         ->where('buku_kas_id', $kasId)
                         ->min('tanggal') ?? '-3 weeks';
-                    $nominal = rand(1, 100);
+                    $nominal = rand(1, 100) * 1000;
 
                     $transaksiRows[] = [
                         'user_id' => $user->id,
