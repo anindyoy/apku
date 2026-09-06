@@ -155,7 +155,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Antarmuka berbahasa Indonesia.
 - Opsi input pilihan yang berasal dari data master disimpan dalam cache selama 3 hari dan otomatis diperbarui ketika entitas terkait ditambah, diubah, atau dihapus.
 - Pencarian cepat menu melalui Spotlight.
-- Login cepat akun pengembangan pada lingkungan lokal.
+- Login cepat akun pengembangan pada lingkungan lokal. Saat `APP_DEMO=true`, akun admin tidak ditampilkan dalam pilihan login cepat.
 - Pencatatan aktivitas dan debugging melalui Laravel Telescope serta Debugbar pada lingkungan yang sesuai.
 - Notifikasi otomatis ke Telegram untuk exception yang dilaporkan pada lingkungan production apabila kredensial bot dan chat telah dikonfigurasi.
 

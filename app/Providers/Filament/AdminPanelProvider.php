@@ -63,15 +63,18 @@ class AdminPanelProvider extends PanelProvider
                     ->enabled(app()->environment('local'))
                     ->users(function () {
                         $users = [];
+                        $appDemo = config('app.demo', false);
 
                         // Tambahkan admin@apku.com sebagai Admin jika tersedia.
                         $admin = User::where('email', 'admin@apku.com')->first();
-                        if ($admin) {
+                        if ($admin && ! $appDemo) {
                             $users['Admin'] = $admin->email;
                         }
 
                         // Tambahkan pengguna dengan transaksi terbanyak.
-                        $topUser = User::withCount('transaksi')
+                        $topUser = User::query()
+                            ->when($appDemo, fn ($query) => $query->notAdmin())
+                            ->withCount('transaksi')
                             ->orderBy('transaksi_count', 'desc')
                             ->first();
 
