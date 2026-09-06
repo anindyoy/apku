@@ -32,7 +32,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
 - Menampilkan saldo berjalan untuk kas atau dompet yang sedang dipilih.
-- Penanda visual untuk pemasukan, pengeluaran, dan transfer.
+- Penanda visual pada ikon dan teks record: pemasukan berwarna merah, pengeluaran berwarna hijau, dan transfer berwarna biru.
 - Nama aktivitas pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
 - Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal, sedangkan dompet ditampilkan di bawah kas. Saat filter kas atau dompet aktif, saldo berjalan ditampilkan di bawah nominal.
 - Filter transaksi berdasarkan bulan, tahun, kas, dan dompet.

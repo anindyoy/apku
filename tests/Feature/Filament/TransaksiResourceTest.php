@@ -46,6 +46,14 @@ test('kolom aktivitas transaksi selalu diawali huruf kapital', function () {
 })
     ->group('filament', 'transaksi', 'aktivitas-kapital');
 
+test('warna record transaksi dibedakan berdasarkan tipe transaksi', function () {
+    expect(TransaksiResource::getWarnaTipeTransaksi('Pemasukan'))->toBe('danger')
+        ->and(TransaksiResource::getWarnaTipeTransaksi('Pengeluaran'))->toBe('success')
+        ->and(TransaksiResource::getWarnaTipeTransaksi('Transfer Pemasukan'))->toBe('primary')
+        ->and(TransaksiResource::getWarnaTipeTransaksi('Transfer Pengeluaran'))->toBe('primary');
+})
+    ->group('filament', 'transaksi', 'warna-tipe-transaksi');
+
 test('tabel transaksi merangkum pencatat dan dompet pada deskripsi kolom', function () {
     $user = createRegularUserWithBukuKas();
     $transaksi = Transaksi::factory()->create([
