@@ -167,6 +167,12 @@ class TransaksiService
     {
         $this->pastikanDapatMengelola($user, $transaksi);
 
+        if ($transaksi->audit_saldo_dompet_detail_id) {
+            throw ValidationException::withMessages([
+                'transaksi' => 'Transaksi penyesuaian saldo tidak dapat diubah. Lakukan audit saldo baru.',
+            ]);
+        }
+
         $proses = function () use ($user, $transaksi, $data): Transaksi {
             $terkunci = Transaksi::withoutGlobalScopes()->whereKey($transaksi->id)->lockForUpdate()->firstOrFail();
 
@@ -194,6 +200,12 @@ class TransaksiService
     public function hapus(User $user, Transaksi $transaksi): bool
     {
         $this->pastikanDapatMengelola($user, $transaksi);
+
+        if ($transaksi->audit_saldo_dompet_detail_id) {
+            throw ValidationException::withMessages([
+                'transaksi' => 'Transaksi penyesuaian saldo tidak dapat dihapus. Lakukan audit saldo baru.',
+            ]);
+        }
 
         $proses = function () use ($transaksi): bool {
             $query = $transaksi->transfer_code

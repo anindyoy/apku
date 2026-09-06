@@ -83,6 +83,12 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Menjadikan dompet tertentu sebagai dompet default.
 - Memindahkan saldo ke dompet lain sebelum menghapus dompet.
 - Tetap menampilkan nama dompet yang sudah dihapus pada riwayat transaksi dan laporan.
+- Pengguna dapat mengaudit saldo seluruh dompet yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
+- Audit menyimpan snapshot saldo aplikasi, saldo riil, selisih, tanggal, buku kas pencatatan, serta catatan umum dan catatan per dompet.
+- Selisih positif dicatat sebagai pemasukan dan selisih negatif sebagai pengeluaran berkategori sistem **Audit Saldo** pada buku kas yang dipilih; buku kas utama dipilih secara default.
+- Dompet tanpa selisih tetap tercatat dalam riwayat audit tanpa membuat transaksi penyesuaian.
+- Seluruh penyesuaian dalam satu audit disimpan secara atomik dan dibatalkan jika saldo berubah selama proses audit.
+- Transaksi penyesuaian saldo tidak dapat diubah atau dihapus langsung. Koreksi dilakukan melalui audit saldo baru agar jejak rekonsiliasi tetap terjaga.
 
 ## 7. Kategori transaksi
 

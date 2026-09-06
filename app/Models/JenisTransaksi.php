@@ -30,6 +30,11 @@ class JenisTransaksi extends Model
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return ['is_system' => 'boolean'];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -87,12 +92,12 @@ class JenisTransaksi extends Model
     {
         return [
             EditAction::make()
-                ->hidden(auth()->user()->isAdmin())
+                ->hidden(fn ($record) => auth()->user()->isAdmin() || $record->is_system)
                 ->modalWidth('small') // Filament v5 uses string
                 ->form(self::form($type)),
 
             DeleteAction::make()
-                ->visible(fn ($record) => ! $record->transaksi_count && ! auth()->user()->isAdmin()),
+                ->visible(fn ($record) => ! $record->is_system && ! $record->transaksi_count && ! auth()->user()->isAdmin()),
 
             Action::make('Hapus')
                 ->hidden(auth()->user()->isAdmin())
@@ -125,7 +130,7 @@ class JenisTransaksi extends Model
                 })
                 ->color('danger')
                 ->icon('heroicon-m-trash')
-                ->visible(fn ($record) => $record->transaksi_count),
+                ->visible(fn ($record) => ! $record->is_system && $record->transaksi_count),
         ];
     }
 

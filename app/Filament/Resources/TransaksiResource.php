@@ -133,6 +133,7 @@ class TransaksiResource extends Resource
             ->actions([
                 EditAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isAdmin()
+                        || filled($record->audit_saldo_dompet_detail_id)
                         || $record->user_id !== auth()->id()
                         || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
                         || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
@@ -140,6 +141,7 @@ class TransaksiResource extends Resource
 
                 DeleteAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isAdmin()
+                        || filled($record->audit_saldo_dompet_detail_id)
                         || $record->user_id !== auth()->id()
                         || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
                         || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))

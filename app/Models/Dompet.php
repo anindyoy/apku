@@ -37,6 +37,11 @@ class Dompet extends Model
         return $this->hasMany(Transaksi::class);
     }
 
+    public function detailAuditSaldo()
+    {
+        return $this->hasMany(AuditSaldoDompetDetail::class);
+    }
+
     protected function cacheOpsiSelectEntitas(): string
     {
         return 'dompet';

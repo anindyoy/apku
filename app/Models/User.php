@@ -197,6 +197,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(Transaksi::class);
     }
 
+    public function auditSaldoDompet(): HasMany
+    {
+        return $this->hasMany(AuditSaldoDompet::class);
+    }
+
     public function shareBukuDiterima(): HasMany
     {
         return $this->hasMany(ShareBuku::class);

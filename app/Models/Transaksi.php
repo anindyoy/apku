@@ -73,6 +73,11 @@ class Transaksi extends Model
         return $this->belongsTo(ImportTransaksi::class);
     }
 
+    public function detailAuditSaldo()
+    {
+        return $this->belongsTo(AuditSaldoDompetDetail::class, 'audit_saldo_dompet_detail_id');
+    }
+
     public function tujuan_buku_tabungan()
     {
         return $this->belongsTo(BukuKas::class);
