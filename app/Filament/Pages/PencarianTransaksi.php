@@ -3,11 +3,15 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Resources\TransaksiResource;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
 use App\Services\OpsiSelectCache;
+use App\Services\TransaksiService;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -37,7 +41,7 @@ class PencarianTransaksi extends Page implements HasTable
         return $table
             ->query(function (): Builder {
                 $query = Transaksi::query()->with([
-                    'buku_kas:id,nama_buku',
+                    'buku_kas:id,user_id,nama_buku',
                     'jenis_transaksi:id,nama_jenis',
                     'asal_buku_tabungan:id,nama_buku',
                     'tujuan_buku_tabungan:id,nama_buku',
@@ -60,68 +64,51 @@ class PencarianTransaksi extends Page implements HasTable
             ->columns([
                 IconColumn::make('jenis')
                     ->label('Tipe')
+                    ->searchable()
                     ->tooltip(fn (string $state): string => $state)
                     ->icon(fn (string $state): string => match ($state) {
                         'Pemasukan' => 'heroicon-o-arrow-down-on-square',
                         'Pengeluaran' => 'heroicon-o-arrow-up-on-square',
-                        default => 'heroicon-o-arrow-path-rounded-square',
+                        'Transfer Pemasukan', 'Transfer Pengeluaran' => 'heroicon-o-arrow-path-rounded-square',
                     })
-                    ->color(fn (string $state): string => match ($state) {
-                        'Pemasukan' => 'success',
-                        'Pengeluaran' => 'danger',
-                        default => 'primary',
-                    }),
+                    ->color(fn (string $state): string => TransaksiResource::getWarnaTipeTransaksi($state)),
 
                 TextColumn::make('tanggal')
-                    ->dateTime('d M Y, H:i')
-                    ->sortable(),
+                    ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
+                    ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
+                    ->sortable()
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis)),
 
                 TextColumn::make('buku_kas.nama_buku')
                     ->label('Kas')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis)),
 
-                TextColumn::make('dompet.nama_dompet')
-                    ->label('Dompet')
-                    ->getStateUsing(fn (Transaksi $record): string => $record->labelDompetUntuk(auth()->user())),
-
-                TextColumn::make('kategori_pencarian')
+                TextColumn::make('kategori')
                     ->label('Aktivitas')
-                    ->state(fn (Transaksi $record): string => match ($record->jenis) {
-                        'Transfer Pemasukan' => 'Transfer dari '.($record->asal_buku_tabungan?->nama_buku ?? '-'),
-                        'Transfer Pengeluaran' => 'Transfer ke '.($record->tujuan_buku_tabungan?->nama_buku ?? '-'),
-                        default => $record->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas',
-                    })
+                    ->getStateUsing(fn (Transaksi $record): ?string => TransaksiResource::getKategoriLabel($record))
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function (Builder $query) use ($search): void {
                             $query
-                                ->whereHas('jenis_transaksi', fn (Builder $query) => $query->where('nama_jenis', 'like', "%{$search}%"))
+                                ->where('deskripsi', 'like', "%{$search}%")
+                                ->orWhereHas('jenis_transaksi', fn (Builder $query) => $query->where('nama_jenis', 'like', "%{$search}%"))
                                 ->orWhereHas('asal_buku_tabungan', fn (Builder $query) => $query->where('nama_buku', 'like', "%{$search}%"))
-                                ->orWhereHas('tujuan_buku_tabungan', fn (Builder $query) => $query->where('nama_buku', 'like', "%{$search}%"));
+                                ->orWhereHas('tujuan_buku_tabungan', fn (Builder $query) => $query->where('nama_buku', 'like', "%{$search}%"))
+                                ->orWhereHas('user', fn (Builder $query) => $query->where('name', 'like', "%{$search}%"));
                         });
                     })
-                    ->description(fn (Transaksi $record): ?string => $record->deskripsi)
+                    ->description(fn (Transaksi $record): string => $record->deskripsi ? 'Deskripsi: '.$record->deskripsi : '')
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis))
                     ->wrap(),
 
-                TextColumn::make('jenis')
-                    ->label('Jenis')
-                    ->badge()
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('deskripsi')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
                 TextColumn::make('nominal')
-                    ->money('IDR', locale: 'id')
+                    ->numeric()
+                    ->prefix('Rp ')
                     ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('user.name')
-                    ->label('Dicatat oleh')
-                    ->searchable()
-                    ->visible(fn (): bool => ! auth()->user()->isAdmin()),
+                    ->sortable()
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis)),
             ])
             ->filters([
                 SelectFilter::make('jenis')
@@ -149,7 +136,30 @@ class PencarianTransaksi extends Page implements HasTable
                     ->searchable()
                     ->preload(),
             ])
+            ->recordUrl(null)
+            ->recordAction(null)
+            ->actions([
+                EditAction::make()
+                    ->modalHeading('Ubah transaksi')
+                    ->modalSubmitActionLabel('Simpan')
+                    ->form(Transaksi::form())
+                    ->hidden(fn (Transaksi $record): bool => ! $this->dapatMengelola($record))
+                    ->action(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
+
+                DeleteAction::make()
+                    ->hidden(fn (Transaksi $record): bool => ! $this->dapatMengelola($record))
+                    ->using(fn (Transaksi $record): bool => app(TransaksiService::class)->hapus(auth()->user(), $record)),
+            ])
             ->defaultSort('tanggal', 'desc')
             ->paginated([10, 25, 50]);
+    }
+
+    private function dapatMengelola(Transaksi $transaksi): bool
+    {
+        return ! auth()->user()->isAdmin()
+            && blank($transaksi->audit_saldo_dompet_detail_id)
+            && $transaksi->user_id === auth()->id()
+            && auth()->user()->dapatMengelolaTransaksiPada($transaksi->buku_kas)
+            && auth()->user()->dapatMengelolaTransaksiPadaDompet($transaksi->dompet);
     }
 }

@@ -63,6 +63,9 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 - Mencari transaksi berdasarkan deskripsi, aktivitas, kas, dompet, tipe transaksi, nominal, atau pengguna.
 - Memfilter hasil berdasarkan jenis transaksi, kas, dan dompet.
+- Hasil pencarian memakai lima kolom dan format yang sama seperti daftar transaksi: pencatat berada di bawah tanggal, dompet di bawah kas, serta deskripsi di bawah aktivitas.
+- Menampilkan tipe transaksi dan warna teks hasil sesuai tipe tersebut dengan pola yang sama seperti daftar transaksi.
+- Pengguna dapat mengubah atau menghapus transaksi yang dapat dikelolanya langsung dari hasil pencarian.
 - Menampilkan pengguna pemilik transaksi khusus untuk admin.
 - Mengurutkan hasil berdasarkan transaksi terbaru.
 
