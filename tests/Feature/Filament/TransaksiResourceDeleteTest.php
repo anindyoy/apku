@@ -1,6 +1,8 @@
 <?php
 
+use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
+use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use Livewire\Livewire;
 
@@ -14,7 +16,7 @@ use Livewire\Livewire;
 test('transaksi list - page dapat ditampilkan dengan data pemasukan', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $jenis = \App\Models\JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
 
     Transaksi::create([
         'user_id' => $user->id,
@@ -27,7 +29,7 @@ test('transaksi list - page dapat ditampilkan dengan data pemasukan', function (
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful();
 })
     ->group('filament', 'transaksi-delete');
@@ -35,7 +37,7 @@ test('transaksi list - page dapat ditampilkan dengan data pemasukan', function (
 test('transaksi list - page dapat ditampilkan dengan data pengeluaran', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $jenis = \App\Models\JenisTransaksi::where('tipe', 'Pengeluaran')->first();
+    $jenis = JenisTransaksi::where('tipe', 'Pengeluaran')->first();
 
     Transaksi::create([
         'user_id' => $user->id,
@@ -48,7 +50,7 @@ test('transaksi list - page dapat ditampilkan dengan data pengeluaran', function
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful();
 })
     ->group('filament', 'transaksi-delete');
@@ -88,7 +90,7 @@ test('transaksi list - page dapat ditampilkan dengan data transfer', function ()
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful();
 })
     ->group('filament', 'transaksi-delete');
@@ -133,7 +135,7 @@ test('list transaksi - transaksi exist di database', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
+        ->test(ListTransaksis::class)
         ->assertSuccessful();
 })
     ->group('filament', 'transaksi-delete');
@@ -143,11 +145,11 @@ test('transaksi list - header actions tersedia', function () {
     $bukuKas = $user->buku_kas()->firstOrFail();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class, [
+        ->test(ListTransaksis::class, [
             'filterBukuKas' => (string) $bukuKas->id,
         ])
         ->assertSuccessful()
-        ->assertSeeText('Aksi transaksi')
+        ->assertSeeText('Aksi lainnya')
         ->assertSeeText('Transfer saldo')
         ->assertSeeText('Catat pemasukan')
         ->assertSeeText('Catat pengeluaran');

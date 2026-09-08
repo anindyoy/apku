@@ -29,7 +29,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Menentukan tanggal, kas, dompet, aktivitas, nominal, dan deskripsi transaksi.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Mencatat beberapa transaksi berurutan melalui aksi **Tambah yang lain**.
-- Aksi pada header daftar transaksi diringkas dalam satu kelompok **Aksi transaksi**.
+- Tombol **Transfer saldo**, **Catat Pemasukan**, dan **Catat Pengeluaran** langsung terlihat pada header daftar transaksi; aksi pendukung diringkas dalam kelompok **Aksi lainnya**.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
 - Menampilkan saldo berjalan untuk kas atau dompet yang sedang dipilih.

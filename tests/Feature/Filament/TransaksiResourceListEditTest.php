@@ -35,6 +35,50 @@ test('transaksi resource - list page menampilkan kolom yang benar', function () 
 })
     ->group('filament', 'transaksi');
 
+test('transaksi resource - tombol ubah pada daftar membuka modal edit', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+    $jenis = JenisTransaksi::factory()->create([
+        'user_id' => $user->id,
+        'nama_jenis' => 'Pemasukan',
+        'tipe' => 'Pemasukan',
+    ]);
+    $transaksi = Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Pemasukan',
+        'nominal' => 100000,
+        'deskripsi' => 'Transaksi yang akan diubah',
+        'jenis_transaksi_id' => $jenis->id,
+        'tanggal' => now(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountTableAction('edit', $transaksi)
+        ->assertSet('mountedActions.0.name', 'edit')
+        ->assertSchemaStateSet([
+            'nominal' => 100000,
+            'deskripsi' => 'Transaksi yang akan diubah',
+        ]);
+})
+    ->group('filament', 'transaksi', 'ubah-transaksi');
+
+test('transaksi resource - tombol tambah membuka modal transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertActionVisible('Catat Pemasukan')
+        ->assertActionVisible('Catat Pengeluaran')
+        ->mountAction('Catat Pemasukan')
+        ->assertSet('mountedActions.0.name', 'Catat Pemasukan')
+        ->unmountAction()
+        ->mountAction('Catat Pengeluaran')
+        ->assertSet('mountedActions.0.name', 'Catat Pengeluaran');
+})
+    ->group('filament', 'transaksi', 'tambah-transaksi');
+
 test('transaksi resource - edit page dapat update nominal', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();

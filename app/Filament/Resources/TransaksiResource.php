@@ -9,9 +9,9 @@ use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\Transaksi;
 use App\Services\TransaksiService;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
@@ -121,16 +121,25 @@ class TransaksiResource extends Resource
                     }),
             ])
             ->defaultSort('tanggal', 'desc')
+            ->recordUrl(null)
+            ->recordAction(null)
             ->filters([
             ])
             ->actions([
-                EditAction::make()
+                Action::make('edit')
+                    ->label('Ubah')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
+                    ->modalHeading('Ubah transaksi')
+                    ->modalSubmitActionLabel('Simpan')
+                    ->form(Transaksi::form())
+                    ->fillForm(fn (Transaksi $record): array => $record->attributesToArray())
                     ->hidden(fn ($record): bool => auth()->user()->isAdmin()
                         || filled($record->audit_saldo_dompet_detail_id)
                         || $record->user_id !== auth()->id()
                         || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
                         || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
-                    ->using(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
+                    ->action(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
 
                 DeleteAction::make()
                     ->hidden(fn ($record): bool => auth()->user()->isAdmin()

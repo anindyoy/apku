@@ -24,8 +24,13 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\EmbeddedTable;
+use Filament\Schemas\Components\RenderHook;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\View;
+use Filament\Schemas\Schema;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\HtmlString;
@@ -40,8 +45,6 @@ class ListTransaksis extends ListRecords
 
     protected static ?string $navigationLabel = 'Transaksi';
 
-    protected string $view = 'filament.resources.transaksi-resource.pages.list-transaksis';
-
     public $list_kas = [];
 
     public string $filterMonth = '';
@@ -54,6 +57,8 @@ class ListTransaksis extends ListRecords
 
     public function mount(?string $filterBukuKas = null): void
     {
+        parent::mount();
+
         $this->filterMonth = request()->query('filter_month', date('m'));
         $this->filterYear = request()->query('filter_year', date('Y'));
         $requestedBukuKas = $filterBukuKas ?? request()->query('filter_buku_kas');
@@ -62,8 +67,24 @@ class ListTransaksis extends ListRecords
         $this->filterDompet = filled($requestedDompet) && Dompet::withTrashed()->whereKey($requestedDompet)->exists()
             ? (string) $requestedDompet
             : null;
+    }
 
-        $this->authorizeAccess();
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                $this->getTabsContentComponent(),
+                RenderHook::make(PanelsRenderHook::RESOURCE_PAGES_LIST_RECORDS_TABLE_BEFORE),
+                View::make('filament.resources.transaksi-resource.pages.list-transaksis')
+                    ->viewData(fn (): array => [
+                        'filterMonth' => $this->filterMonth,
+                        'filterYear' => $this->filterYear,
+                        'filterBukuKas' => $this->filterBukuKas,
+                        'filterDompet' => $this->filterDompet,
+                    ]),
+                EmbeddedTable::make(),
+                RenderHook::make(PanelsRenderHook::RESOURCE_PAGES_LIST_RECORDS_TABLE_AFTER),
+            ]);
     }
 
     public function getPreviousPeriodUrl(): string
@@ -157,6 +178,11 @@ class ListTransaksis extends ListRecords
 
         return $bukuKas !== null
             && auth()->user()->dapatMengelolaTransaksiPada($bukuKas);
+    }
+
+    public function memilikiBukuKasYangDapatDikelola(): bool
+    {
+        return Transaksi::opsiBukuKasYangDapatDikelola() !== [];
     }
 
     public function bukuKasTerpilihMilikSendiri(): bool
@@ -349,110 +375,110 @@ class ListTransaksis extends ListRecords
                     })
                     ->color('warning')
                     ->icon('heroicon-o-arrows-right-left'),
-
-                Action::make('Transfer saldo')
-                    ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih() && $this->bukuKasTerpilihMilikSendiri())
-                    ->before(function (): void {
-                        abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
-                    })
-                    ->tooltip('Transfer saldo ke kas lain')
-                    ->action(function ($form, $action, $livewire, array $data, array $arguments) {
-                        app(TransaksiService::class)->transferBukuKas(
-                            auth()->user(),
-                            BukuKas::findOrFail($data['buku_kas_id']),
-                            BukuKas::findOrFail($data['buku_kas_id_tujuan']),
-                            Dompet::findOrFail($data['dompet_id']),
-                            Dompet::findOrFail($data['dompet_id_tujuan']),
-                            (int) $data['nominal'],
-                            $data['tanggal'],
-                            $data['deskripsi'] ?? null,
-                        );
-
-                        Notification::make()
-                            ->title('Berhasil Transfer Saldo')
-                            ->success()
-                            ->send();
-
-                        if ($arguments['another'] ?? false) {
-                            $form->fill($this->dataAwalTransaksi($livewire));
-                            $action->halt();
-                        }
-
-                        $action->cancel();
-                    })
-                    ->fillForm(fn ($livewire): array => $this->dataAwalTransaksi($livewire))
-                    ->extraModalFooterActions(fn (Action $action): array => [
-                        $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
-                            ->label('Tambah yang lain'),
-                    ])
-                    ->form(Transaksi::form(true))
-                    ->color('primary')
-                    ->icon('heroicon-o-arrow-path-rounded-square'),
-
-                Action::make('Catat Pemasukan')
-                    ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih())
-                    ->before(function (): void {
-                        abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
-                    })
-                    ->action(function ($form, $action, $livewire, array $data, array $arguments) {
-                        app(TransaksiService::class)->buat(auth()->user(), $data, 'Pemasukan');
-
-                        Notification::make()
-                            ->title('Berhasil Catat Pemasukan')
-                            ->success()
-                            ->send();
-
-                        if ($arguments['another'] ?? false) {
-                            $form->fill($this->dataAwalTransaksi($livewire));
-                            $action->halt();
-                        }
-
-                        $action->cancel();
-                    })
-                    ->fillForm(fn ($livewire): array => $this->dataAwalTransaksi($livewire))
-                    ->extraModalFooterActions(fn (Action $action): array => [
-                        $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
-                            ->label('Tambah yang lain'),
-                    ])
-                    ->form(Transaksi::form())
-                    ->color('success')
-                    ->icon('heroicon-o-arrow-down-on-square'),
-
-                Action::make('Catat Pengeluaran')
-                    ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih())
-                    ->before(function (): void {
-                        abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
-                    })
-                    ->action(function (?Transaksi $record, array $data, $livewire, $form, $action, array $arguments) {
-                        app(TransaksiService::class)->buat(auth()->user(), $data, 'Pengeluaran');
-                        Notification::make()
-                            ->title('Berhasil Catat Pengeluaran')
-                            ->success()
-                            ->send();
-
-                        if ($arguments['another'] ?? false) {
-                            $form->fill($this->dataAwalTransaksi($livewire));
-                            $action->halt();
-                        }
-
-                        $action->cancel();
-                    })
-                    ->fillForm(fn (): array => [
-                        'buku_kas_id' => $this->filterBukuKas ?: optional(BukuKas::first())->id,
-                        'dompet_id' => $this->filterDompet ?: auth()->user()->idDompetUtama(),
-                        'tanggal' => now(),
-                    ])
-                    ->extraModalFooterActions(fn (Action $action): array => [
-                        $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
-                            ->label('Tambah yang lain'),
-                    ])
-                    ->form(Transaksi::form())
-                    ->color('danger')
-                    ->icon('heroicon-o-arrow-up-on-square'),
             ])
-                ->label('Aksi transaksi')
+                ->label('Aksi lainnya')
                 ->icon('heroicon-o-ellipsis-vertical')
                 ->button(),
+
+            Action::make('Transfer saldo')
+                ->visible(fn (): bool => $this->dapatMengelolaBukuKasTerpilih() && $this->bukuKasTerpilihMilikSendiri())
+                ->before(function (): void {
+                    abort_unless($this->dapatMengelolaBukuKasTerpilih(), 403);
+                })
+                ->tooltip('Transfer saldo ke kas lain')
+                ->action(function ($form, $action, $livewire, array $data, array $arguments) {
+                    app(TransaksiService::class)->transferBukuKas(
+                        auth()->user(),
+                        BukuKas::findOrFail($data['buku_kas_id']),
+                        BukuKas::findOrFail($data['buku_kas_id_tujuan']),
+                        Dompet::findOrFail($data['dompet_id']),
+                        Dompet::findOrFail($data['dompet_id_tujuan']),
+                        (int) $data['nominal'],
+                        $data['tanggal'],
+                        $data['deskripsi'] ?? null,
+                    );
+
+                    Notification::make()
+                        ->title('Berhasil Transfer Saldo')
+                        ->success()
+                        ->send();
+
+                    if ($arguments['another'] ?? false) {
+                        $form->fill($this->dataAwalTransaksi($livewire));
+                        $action->halt();
+                    }
+
+                    $action->cancel();
+                })
+                ->fillForm(fn ($livewire): array => $this->dataAwalTransaksi($livewire))
+                ->extraModalFooterActions(fn (Action $action): array => [
+                    $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                        ->label('Tambah yang lain'),
+                ])
+                ->form(Transaksi::form(true))
+                ->color('primary')
+                ->icon('heroicon-o-arrow-path-rounded-square'),
+
+            Action::make('Catat Pemasukan')
+                ->visible(fn (): bool => $this->memilikiBukuKasYangDapatDikelola())
+                ->before(function (): void {
+                    abort_unless($this->memilikiBukuKasYangDapatDikelola(), 403);
+                })
+                ->action(function ($form, $action, $livewire, array $data, array $arguments) {
+                    app(TransaksiService::class)->buat(auth()->user(), $data, 'Pemasukan');
+
+                    Notification::make()
+                        ->title('Berhasil Catat Pemasukan')
+                        ->success()
+                        ->send();
+
+                    if ($arguments['another'] ?? false) {
+                        $form->fill($this->dataAwalTransaksi($livewire));
+                        $action->halt();
+                    }
+
+                    $action->cancel();
+                })
+                ->fillForm(fn ($livewire): array => $this->dataAwalTransaksi($livewire))
+                ->extraModalFooterActions(fn (Action $action): array => [
+                    $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                        ->label('Tambah yang lain'),
+                ])
+                ->form(Transaksi::form())
+                ->color('success')
+                ->icon('heroicon-o-arrow-down-on-square'),
+
+            Action::make('Catat Pengeluaran')
+                ->visible(fn (): bool => $this->memilikiBukuKasYangDapatDikelola())
+                ->before(function (): void {
+                    abort_unless($this->memilikiBukuKasYangDapatDikelola(), 403);
+                })
+                ->action(function (?Transaksi $record, array $data, $livewire, $form, $action, array $arguments) {
+                    app(TransaksiService::class)->buat(auth()->user(), $data, 'Pengeluaran');
+                    Notification::make()
+                        ->title('Berhasil Catat Pengeluaran')
+                        ->success()
+                        ->send();
+
+                    if ($arguments['another'] ?? false) {
+                        $form->fill($this->dataAwalTransaksi($livewire));
+                        $action->halt();
+                    }
+
+                    $action->cancel();
+                })
+                ->fillForm(fn (): array => [
+                    'buku_kas_id' => $this->filterBukuKas ?: optional(BukuKas::first())->id,
+                    'dompet_id' => $this->filterDompet ?: auth()->user()->idDompetUtama(),
+                    'tanggal' => now(),
+                ])
+                ->extraModalFooterActions(fn (Action $action): array => [
+                    $action->makeModalSubmitAction('createAnother', arguments: ['another' => true])
+                        ->label('Tambah yang lain'),
+                ])
+                ->form(Transaksi::form())
+                ->color('danger')
+                ->icon('heroicon-o-arrow-up-on-square'),
         ];
     }
 

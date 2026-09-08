@@ -10,8 +10,8 @@ use App\Models\Transaksi;
 use App\Services\OpsiSelectCache;
 use App\Services\TransaksiService;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -139,10 +139,14 @@ class PencarianTransaksi extends Page implements HasTable
             ->recordUrl(null)
             ->recordAction(null)
             ->actions([
-                EditAction::make()
+                Action::make('edit')
+                    ->label('Ubah')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
                     ->modalHeading('Ubah transaksi')
                     ->modalSubmitActionLabel('Simpan')
                     ->form(Transaksi::form())
+                    ->fillForm(fn (Transaksi $record): array => $record->attributesToArray())
                     ->hidden(fn (Transaksi $record): bool => ! $this->dapatMengelola($record))
                     ->action(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
 

@@ -37,8 +37,7 @@
     }
 </style>
 
-<x-filament-panels::page>
-        @php
+@php
             $filterUrl = fn(string $bukuKasId, ?string $dompetId = null) => request()->url() . '?' . http_build_query(
                 array_filter([
                     'filter_month' => $filterMonth,
@@ -52,7 +51,7 @@
                 'filter_month' => date('m'),
                 'filter_year' => date('Y'),
             ]);
-        @endphp
+@endphp
 
     <section aria-labelledby="filter-transaksi-title"
         class="-mb-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5 dark:bg-white/5 dark:ring-white/10">
@@ -142,6 +141,3 @@
             </a>
         </div>
     </section>
-
-    {{ $this->content }}
-</x-filament-panels::page>
