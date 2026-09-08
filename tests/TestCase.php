@@ -3,6 +3,7 @@
 namespace Tests;
 
 use App\Filament\Pages\AkunSaya;
+use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Kategori;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
@@ -13,7 +14,6 @@ use App\Filament\Resources\UtangResource\Pages\ListUtangs;
 use App\Filament\Resources\UtangResource\Pages\UtangDetail;
 use App\Models\User;
 use App\Models\UtangPiutang;
-use Filament\Auth\Pages\Register;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Livewire\Livewire;

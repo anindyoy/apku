@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\EnsureUserHasCompletedOnboarding;
 use App\Models\User;
@@ -49,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(true),
             ])
             ->profile()
-            ->registration()
+            ->registration(Register::class)
             ->emailVerification()
             ->passwordReset()
             ->databaseNotifications()

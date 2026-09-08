@@ -46,4 +46,16 @@ return [
         'cache_hours' => env('HARGA_EMAS_CACHE_HOURS', 3),
     ],
 
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+        'verify_url' => env('TURNSTILE_VERIFY_URL', 'https://challenges.cloudflare.com/turnstile/v0/siteverify'),
+        'hostnames' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', env('TURNSTILE_HOSTNAMES', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost')),
+        ))),
+        'action' => 'register',
+        'timeout' => env('TURNSTILE_TIMEOUT', 5),
+    ],
+
 ];

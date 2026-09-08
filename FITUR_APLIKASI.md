@@ -4,7 +4,7 @@ APKu adalah aplikasi web untuk mencatat dan memantau keuangan pribadi melalui ka
 
 ## 1. Akun dan autentikasi
 
-- Registrasi dan login pengguna.
+- Registrasi pengguna dilindungi Cloudflare Turnstile Managed yang divalidasi di server, serta tersedia login pengguna.
 - Verifikasi alamat email.
 - Lupa dan reset password.
 - Pengaturan profil melalui halaman **Akun Saya**, meliputi nama, email, nomor HP, penggunaan aplikasi, dan perubahan password.
