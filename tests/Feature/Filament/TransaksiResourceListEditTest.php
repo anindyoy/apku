@@ -69,15 +69,32 @@ test('transaksi resource - tombol tambah membuka modal transaksi', function () {
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class)
-        ->assertActionVisible('Catat Pemasukan')
-        ->assertActionVisible('Catat Pengeluaran')
-        ->mountAction('Catat Pemasukan')
-        ->assertSet('mountedActions.0.name', 'Catat Pemasukan')
-        ->unmountAction()
-        ->mountAction('Catat Pengeluaran')
-        ->assertSet('mountedActions.0.name', 'Catat Pengeluaran');
+        ->assertActionVisible('Tambah transaksi')
+        ->mountAction('Tambah transaksi')
+        ->assertSet('mountedActions.0.name', 'Tambah transaksi')
+        ->assertActionDataSet(['jenis_form' => 'pemasukan']);
 })
     ->group('filament', 'transaksi', 'tambah-transaksi');
+
+test('warna tombol submit mengikuti jenis transaksi yang dipilih', function () {
+    $user = createRegularUserWithBukuKas();
+    $komponen = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountAction('Tambah transaksi');
+
+    foreach ([
+        'pemasukan' => 'success',
+        'pengeluaran' => 'danger',
+        'transfer_kas' => 'info',
+        'transfer_dompet' => 'warning',
+    ] as $jenisForm => $warna) {
+        $komponen->set('mountedActions.0.data.jenis_form', $jenisForm);
+
+        expect($komponen->instance()->getMountedAction()?->getModalSubmitAction()?->getColor())
+            ->toBe($warna);
+    }
+})
+    ->group('filament', 'transaksi', 'tambah-transaksi', 'warna-submit');
 
 test('transaksi resource - edit page dapat update nominal', function () {
     $user = createRegularUserWithBukuKas();

@@ -72,7 +72,8 @@ test('action transaksi biasa menggunakan service untuk memperbarui saldo', funct
     $komponen = Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id]);
 
-    $komponen->callAction('Catat Pemasukan', data: [
+    $komponen->callAction('Tambah transaksi', data: [
+        'jenis_form' => 'pemasukan',
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $cash->id,
         'jenis_transaksi_id' => $kategoriMasuk->id,
@@ -80,7 +81,8 @@ test('action transaksi biasa menggunakan service untuk memperbarui saldo', funct
         'nominal' => 25000,
         'deskripsi' => 'Pemasukan lewat service',
     ])->assertHasNoActionErrors();
-    $komponen->callAction('Catat Pengeluaran', data: [
+    $komponen->callAction('Tambah transaksi', data: [
+        'jenis_form' => 'pengeluaran',
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $cash->id,
         'jenis_transaksi_id' => $kategoriKeluar->id,
@@ -161,10 +163,11 @@ test('action transfer dompet tersedia tanpa masa aktif dan menghasilkan saldo ne
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class)
-        ->assertActionVisible('Pindah saldo dompet')
-        ->callAction('Pindah saldo dompet', data: [
-            'dompet_asal_id' => $cash->id,
-            'dompet_tujuan_id' => $bank->id,
+        ->assertActionVisible('Tambah transaksi')
+        ->callAction('Tambah transaksi', data: [
+            'jenis_form' => 'transfer_dompet',
+            'dompet_id' => $cash->id,
+            'dompet_id_tujuan' => $bank->id,
             'buku_kas_id' => $bukuKas->id,
             'tanggal' => now(),
             'nominal' => 125000,
@@ -187,10 +190,11 @@ test('action transfer mengizinkan saldo keluar dari dompet terbatas', function (
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class)
-        ->assertActionVisible('Pindah saldo dompet')
-        ->callAction('Pindah saldo dompet', data: [
-            'dompet_asal_id' => $dompetKetiga->id,
-            'dompet_tujuan_id' => $cash->id,
+        ->assertActionVisible('Tambah transaksi')
+        ->callAction('Tambah transaksi', data: [
+            'jenis_form' => 'transfer_dompet',
+            'dompet_id' => $dompetKetiga->id,
+            'dompet_id_tujuan' => $cash->id,
             'buku_kas_id' => $bukuKas->id,
             'tanggal' => now(),
             'nominal' => 20000,
@@ -234,7 +238,8 @@ test('transfer buku kas dengan dompet sama menjaga saldo bersih dompet', functio
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id])
-        ->callAction('Transfer saldo', data: [
+        ->callAction('Tambah transaksi', data: [
+            'jenis_form' => 'transfer_kas',
             'buku_kas_id' => $bukuKas->id,
             'buku_kas_id_tujuan' => $bukuKasTujuan->id,
             'dompet_id' => $cash->id,
@@ -265,7 +270,8 @@ test('transfer buku kas dengan dompet berbeda turut memindahkan saldo dompet', f
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id])
-        ->callAction('Transfer saldo', data: [
+        ->callAction('Tambah transaksi', data: [
+            'jenis_form' => 'transfer_kas',
             'buku_kas_id' => $bukuKas->id,
             'buku_kas_id_tujuan' => $bukuKasTujuan->id,
             'dompet_id' => $cash->id,

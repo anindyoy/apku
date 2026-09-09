@@ -71,20 +71,20 @@ class PencarianTransaksi extends Page implements HasTable
                         'Pengeluaran' => 'heroicon-o-arrow-up-on-square',
                         'Transfer Pemasukan', 'Transfer Pengeluaran' => 'heroicon-o-arrow-path-rounded-square',
                     })
-                    ->color(fn (string $state): string => TransaksiResource::getWarnaTipeTransaksi($state)),
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('tanggal')
                     ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
                     ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
                     ->sortable()
-                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis)),
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('buku_kas.nama_buku')
                     ->label('Kas')
                     ->searchable()
                     ->sortable()
                     ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
-                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis)),
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('kategori')
                     ->label('Aktivitas')
@@ -100,7 +100,7 @@ class PencarianTransaksi extends Page implements HasTable
                         });
                     })
                     ->description(fn (Transaksi $record): string => $record->deskripsi ? 'Deskripsi: '.$record->deskripsi : '')
-                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis))
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
                     ->wrap(),
 
                 TextColumn::make('nominal')
@@ -108,7 +108,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->prefix('Rp ')
                     ->searchable()
                     ->sortable()
-                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis)),
+                    ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
             ])
             ->filters([
                 SelectFilter::make('jenis')

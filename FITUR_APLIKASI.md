@@ -29,11 +29,11 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Menentukan tanggal, kas, dompet, aktivitas, nominal, dan deskripsi transaksi.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Mencatat beberapa transaksi berurutan melalui aksi **Tambah yang lain**.
-- Tombol **Transfer saldo**, **Catat Pemasukan**, dan **Catat Pengeluaran** langsung terlihat pada header daftar transaksi; aksi pendukung diringkas dalam kelompok **Aksi lainnya**.
+- Pemasukan, pengeluaran, transfer kas, dan transfer dompet dicatat melalui satu modal **Tambah transaksi**; jenis transaksi menentukan field serta warna form yang digunakan.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
 - Menampilkan saldo berjalan untuk kas atau dompet yang sedang dipilih.
-- Penanda visual pada ikon dan teks record: pemasukan berwarna merah, pengeluaran berwarna hijau, dan transfer berwarna biru.
+- Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer dompet berwarna kuning.
 - Nama aktivitas pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
 - Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal, sedangkan dompet ditampilkan di bawah kas. Saat filter kas atau dompet aktif, saldo berjalan ditampilkan di bawah nominal.
 - Filter transaksi berdasarkan bulan, tahun, kas, dan dompet.

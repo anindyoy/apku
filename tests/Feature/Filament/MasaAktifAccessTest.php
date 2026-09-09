@@ -71,25 +71,20 @@ test('user kedaluwarsa dapat mengelola kas utama dan satu buku tambahan pertama'
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $kasTambahanGratis->id])
-        ->assertActionVisible('Transfer saldo')
-        ->assertActionVisible('Catat Pemasukan')
-        ->assertActionVisible('Catat Pengeluaran')
+        ->assertActionVisible('Tambah transaksi')
         ->assertTableActionVisible('edit', $transaksiTambahanGratis)
         ->assertTableActionVisible('delete', $transaksiTambahanGratis);
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $kasTambahanBerbayar->id])
-        ->assertActionHidden('Transfer saldo')
-        ->assertActionHidden('Catat Pemasukan')
-        ->assertActionHidden('Catat Pengeluaran')
+        ->assertActionHidden('Tambah transaksi')
         ->assertTableActionHidden('edit', $transaksiTambahanBerbayar)
         ->assertTableActionHidden('delete', $transaksiTambahanBerbayar)
         ->assertCanSeeTableRecords([$transaksiTambahanBerbayar]);
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $kasUtama->id])
-        ->assertActionVisible('Catat Pemasukan')
-        ->assertActionVisible('Catat Pengeluaran')
+        ->assertActionVisible('Tambah transaksi')
         ->assertTableActionVisible('edit', $transaksiUtama)
         ->assertTableActionVisible('delete', $transaksiUtama);
 })->group('filament', 'masa-aktif');
@@ -110,9 +105,7 @@ test('user dengan masa aktif dapat membuat buku dan mengelola transaksi kas lain
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $kasLain->id])
-        ->assertActionVisible('Transfer saldo')
-        ->assertActionVisible('Catat Pemasukan')
-        ->assertActionVisible('Catat Pengeluaran')
+        ->assertActionVisible('Tambah transaksi')
         ->assertTableActionVisible('edit', $transaksi)
         ->assertTableActionVisible('delete', $transaksi);
 })->group('filament', 'masa-aktif');

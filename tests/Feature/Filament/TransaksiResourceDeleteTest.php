@@ -150,8 +150,6 @@ test('transaksi list - header actions tersedia', function () {
         ])
         ->assertSuccessful()
         ->assertSeeText('Aksi lainnya')
-        ->assertSeeText('Transfer saldo')
-        ->assertSeeText('Catat pemasukan')
-        ->assertSeeText('Catat pengeluaran');
+        ->assertSeeText('Tambah transaksi');
 })
     ->group('filament', 'transaksi-delete');

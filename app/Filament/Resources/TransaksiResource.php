@@ -68,17 +68,17 @@ class TransaksiResource extends Resource
                         'Transfer Pemasukan' => 'heroicon-o-arrow-path-rounded-square',
                         'Transfer Pengeluaran' => 'heroicon-o-arrow-path-rounded-square',
                     })
-                    ->color(fn (string $state): string => static::getWarnaTipeTransaksi($state)),
+                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('tanggal')
                     ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
                     ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis)),
+                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('buku_kas.nama_buku')
                     ->label('Kas')
                     ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis)),
+                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('kategori')
                     ->label('Aktivitas')
@@ -91,7 +91,7 @@ class TransaksiResource extends Resource
                         fn ($record) => $record->deskripsi
                             ? ('Deskripsi: '.$record->deskripsi) : ''
                     )
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis))
+                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
                     ->wrap(),
 
                 TextColumn::make('created_at')
@@ -105,7 +105,7 @@ class TransaksiResource extends Resource
                 TextColumn::make('nominal')
                     ->numeric()
                     ->prefix('Rp ')
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis))
+                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
                     ->description(function (Transaksi $record, ListTransaksis $livewire): ?string {
                         $saldo = [];
 
@@ -154,12 +154,12 @@ class TransaksiResource extends Resource
             ]);
     }
 
-    public static function getWarnaTipeTransaksi(string $jenis): string
+    public static function getWarnaTipeTransaksi(string $jenis, ?string $tipeTransfer = null): string
     {
         return match ($jenis) {
-            'Pemasukan' => 'danger',
-            'Pengeluaran' => 'success',
-            'Transfer Pemasukan', 'Transfer Pengeluaran' => 'info',
+            'Pemasukan' => 'success',
+            'Pengeluaran' => 'danger',
+            'Transfer Pemasukan', 'Transfer Pengeluaran' => $tipeTransfer === 'dompet' ? 'warning' : 'info',
             default => 'gray',
         };
     }
