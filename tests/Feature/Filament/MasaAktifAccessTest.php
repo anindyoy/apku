@@ -4,6 +4,7 @@ use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Transaksi;
+use Filament\Forms\Components\Select;
 use Livewire\Livewire;
 
 test('masa aktif hari ini masih berlaku sedangkan null dan tanggal lalu tidak berlaku', function () {
@@ -77,10 +78,18 @@ test('user kedaluwarsa dapat mengelola kas utama dan satu buku tambahan pertama'
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $kasTambahanBerbayar->id])
-        ->assertActionHidden('Tambah transaksi')
+        ->assertActionVisible('Tambah transaksi')
         ->assertTableActionHidden('edit', $transaksiTambahanBerbayar)
         ->assertTableActionHidden('delete', $transaksiTambahanBerbayar)
-        ->assertCanSeeTableRecords([$transaksiTambahanBerbayar]);
+        ->assertCanSeeTableRecords([$transaksiTambahanBerbayar])
+        ->mountAction('Tambah transaksi')
+        ->assertFormFieldExists('buku_kas_id', checkFieldUsing: function (Select $field) use ($kasUtama, $kasTambahanGratis, $kasTambahanBerbayar): bool {
+            expect($field->getOptions())
+                ->toHaveKeys([$kasUtama->id, $kasTambahanGratis->id])
+                ->not->toHaveKey($kasTambahanBerbayar->id);
+
+            return true;
+        });
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $kasUtama->id])

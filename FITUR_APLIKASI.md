@@ -29,6 +29,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Menentukan tanggal, kas, dompet, aktivitas, nominal, dan deskripsi transaksi.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Mencatat beberapa transaksi berurutan melalui aksi **Tambah yang lain**.
+- Tombol **Tambah transaksi** tetap tersedia selama pengguna memiliki kas yang dapat dikelola, termasuk ketika daftar difilter ke kas terbatas. Pilihan kas di modal hanya memuat kas yang dapat dikelola; transaksi pada kas terbatas tetap tidak dapat diubah atau dihapus.
 - Pemasukan, pengeluaran, transfer kas, dan transfer dompet dicatat melalui satu modal **Tambah transaksi**; jenis transaksi menentukan field serta warna form yang digunakan. Seluruh input dan tombol submit dinonaktifkan sementara ketika perubahan jenis sedang diproses. Transfer kas hanya meminta kas asal dan tujuan dengan dompet pencatatan otomatis, sedangkan transfer dompet hanya meminta dompet asal dan tujuan dengan kas pencatatan otomatis.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
