@@ -18,8 +18,8 @@ class TabunganEmas extends Model
     protected function casts(): array
     {
         return [
-            'kadar' => 'decimal:2',
             'berat_gram' => 'decimal:4',
+            'harga_beli' => 'integer',
             'total_modal' => 'integer',
         ];
     }

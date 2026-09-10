@@ -11,10 +11,7 @@ class TabunganEmasFactory extends Factory
     {
         return [
             'buku_kas_id' => BukuKas::factory(),
-            'nama' => 'Tabungan Emas',
-            'merek' => null,
-            'produk' => null,
-            'kadar' => 99.99,
+            'label' => 'Tabungan Emas',
             'berat_gram' => 0,
             'total_modal' => 0,
         ];

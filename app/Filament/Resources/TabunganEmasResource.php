@@ -4,9 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\TabunganEmasResource\Pages\ListTabunganEmas;
-use App\Models\Dompet;
 use App\Models\TabunganEmas;
-use App\Models\Transaksi;
 use App\Services\TabunganEmasService;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -14,10 +12,12 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
@@ -46,10 +46,11 @@ class TabunganEmasResource extends Resource
                 ->options(fn (): array => auth()->user()->buku_kas()->pluck('nama_buku', 'id')->all())
                 ->disabled(fn (?TabunganEmas $record): bool => filled($record))
                 ->required(),
-            TextInput::make('nama')->required()->maxLength(100),
-            TextInput::make('merek')->maxLength(100),
-            TextInput::make('produk')->maxLength(150),
-            TextInput::make('kadar')->suffix('%')->numeric()->minValue(0.01)->maxValue(100)->default(99.99)->required(),
+            static::inputBerat()->disabled(fn (?TabunganEmas $record): bool => filled($record)),
+            TextInput::make('label')->label('Label emas')->placeholder('Emas Antam')->required()->maxLength(100),
+            TextInput::make('harga_beli')->label('Harga beli')->prefix('Rp')->placeholder('Contoh: 1500000')->numeric()->integer()->minValue(0)->nullable(),
+            DateTimePicker::make('created_at')->label('Dibeli pada')->seconds(false)->default(now())->maxDate(now())->required(),
+            Textarea::make('keterangan')->placeholder('Contoh: Disimpan di brankas')->nullable(),
         ]);
     }
 
@@ -57,20 +58,22 @@ class TabunganEmasResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('bukuKas.nama_buku')->label('Kas')->searchable(),
-                TextColumn::make('nama')->searchable(),
-                TextColumn::make('merek')->placeholder('-'),
-                TextColumn::make('produk')->placeholder('-'),
-                TextColumn::make('berat_gram')->label('Berat')->suffix(' gram')->numeric(decimalPlaces: 4),
-                TextColumn::make('total_modal')->label('Total modal')->money('IDR'),
+                TextColumn::make('label')->label('Label emas')->searchable(),
+                TextColumn::make('berat_gram')->label('Berat')->suffix(' gram')->formatStateUsing(fn ($state): string => rtrim(rtrim(number_format((float) $state, 4, ',', '.'), '0'), ',')),
+                TextColumn::make('harga_beli')->label('Harga beli')->money('IDR')->placeholder('-'),
+                TextColumn::make('keterangan')->placeholder('-')->wrap(),
+                TextColumn::make('created_at')->label('Dibeli pada')->dateTime('d M Y H:i')->sortable(),
             ])
+            ->defaultGroup(Group::make('buku_kas_id')->label('Kas')
+                ->getTitleFromRecordUsing(fn (TabunganEmas $record): string => $record->bukuKas->nama_buku)
+                ->getDescriptionFromRecordUsing(fn (TabunganEmas $record): string => 'Total berat: '.rtrim(rtrim(number_format((float) $record->bukuKas->tabungan_emas_sum_berat_gram, 4, ',', '.'), '0'), ',').' gram'))
             ->actions([
                 Action::make('saldoAwal')
                     ->label('Saldo awal')
                     ->icon('heroicon-o-plus-circle')
                     ->visible(fn (TabunganEmas $record): bool => $record->bukuKas->user_id === auth()->id() && (float) $record->berat_gram === 0.0)
                     ->form([
-                        TextInput::make('berat_gram')->label('Berat')->suffix('gram')->numeric()->minValue(0.0001)->required(),
+                        static::inputBerat(),
                         TextInput::make('total_modal')->label('Total modal')->prefix('Rp')->numeric()->minValue(0)->default(0)->required(),
                         TextInput::make('catatan')->maxLength(255),
                     ])
@@ -78,17 +81,6 @@ class TabunganEmasResource extends Resource
                         auth()->user(), $record, (float) $data['berat_gram'], (int) $data['total_modal'], $data['catatan'] ?? null
                     ))
                     ->successNotificationTitle('Saldo awal emas berhasil dicatat'),
-                static::aksiMutasi('beli', 'Beli emas', 'Pengeluaran'),
-                static::aksiMutasi('jual', 'Jual emas', 'Pemasukan'),
-                Action::make('histori')
-                    ->label('Histori')
-                    ->icon('heroicon-o-clock')
-                    ->modalHeading(fn (TabunganEmas $record): string => 'Histori '.$record->nama)
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Tutup')
-                    ->modalContent(fn (TabunganEmas $record) => view('filament.tabungan-emas-histori', [
-                        'items' => $record->transaksiEmas()->with('user')->latest('tanggal')->get(),
-                    ])),
                 EditAction::make()->visible(fn (TabunganEmas $record): bool => $record->bukuKas->user_id === auth()->id()),
                 DeleteAction::make()
                     ->visible(fn (TabunganEmas $record): bool => $record->bukuKas->user_id === auth()->id() && ! $record->transaksiEmas()->exists()),
@@ -99,12 +91,14 @@ class TabunganEmasResource extends Resource
     {
         $user = auth()->user();
 
-        return parent::getEloquentQuery()->whereHas('bukuKas', fn (Builder $query): Builder => $query
-            ->withoutGlobalScopes()
-            ->where(function (Builder $query) use ($user): void {
-                $query->where('user_id', $user->id)
-                    ->orWhereHas('shares', fn (Builder $query): Builder => $query->aktif()->where('user_id', $user->id));
-            }));
+        return parent::getEloquentQuery()
+            ->with(['bukuKas' => fn ($query) => $query->withSum('tabunganEmas', 'berat_gram')])
+            ->whereHas('bukuKas', fn (Builder $query): Builder => $query
+                ->withoutGlobalScopes()
+                ->where(function (Builder $query) use ($user): void {
+                    $query->where('user_id', $user->id)
+                        ->orWhereHas('shares', fn (Builder $query): Builder => $query->aktif()->where('user_id', $user->id));
+                }));
     }
 
     public static function getPages(): array
@@ -112,25 +106,14 @@ class TabunganEmasResource extends Resource
         return ['index' => ListTabunganEmas::route('/')];
     }
 
-    private static function aksiMutasi(string $jenis, string $label, string $tipeKategori): Action
+    private static function inputBerat(): TextInput
     {
-        return Action::make($jenis)
-            ->label($label)
-            ->icon($jenis === 'beli' ? 'heroicon-o-shopping-cart' : 'heroicon-o-currency-dollar')
-            ->visible(fn (TabunganEmas $record): bool => auth()->user()->dapatMengelolaTransaksiPada($record->bukuKas))
-            ->form([
-                TextInput::make('berat_gram')->label('Berat')->suffix('gram')->numeric()->minValue(0.0001)->required(),
-                TextInput::make('harga_per_gram')->label('Harga per gram')->prefix('Rp')->numeric()->minValue(1)->required(),
-                TextInput::make('biaya_tambahan')->label('Biaya tambahan')->prefix('Rp')->numeric()->minValue(0)->default(0)->required(),
-                Select::make('dompet_id')->label('Dompet')->options(fn (): array => Transaksi::opsiDompetYangDapatDikelola())->required(),
-                Select::make('jenis_transaksi_id')->label('Aktivitas')->options(fn (): array => Transaksi::opsiJenisTransaksi($tipeKategori))->required(),
-                DateTimePicker::make('tanggal')->seconds(false)->maxDate(now())->default(now())->required(),
-                TextInput::make('catatan')->maxLength(255),
-            ])
-            ->action(function (TabunganEmas $record, array $data) use ($jenis): void {
-                $dompet = Dompet::findOrFail($data['dompet_id']);
-                app(TabunganEmasService::class)->{$jenis}(auth()->user(), $record, $dompet, $data);
-            })
-            ->successNotificationTitle($label.' berhasil dicatat');
+        return TextInput::make('berat_gram')
+            ->label('Berat')->suffix('gram')->placeholder('Contoh: 0,5')
+            ->inputMode('decimal')
+            ->rules(['numeric', 'min:0.0001', 'max:99999999.9999', 'regex:/^\d+(?:[.,]\d{1,4})?$/'])
+            ->mutateStateForValidationUsing(fn ($state) => str_replace(',', '.', (string) $state))
+            ->dehydrateStateUsing(fn ($state) => str_replace(',', '.', (string) $state))
+            ->required();
     }
 }

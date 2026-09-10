@@ -81,9 +81,10 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Viewer dapat melihat transaksi dan laporan buku bersama, sedangkan editor juga dapat mencatat transaksi.
 - Kas bersama tidak dihitung sebagai kuota kas milik kolaborator.
 - Pemilik dapat mengubah peran atau mencabut akses kolaborator kapan saja.
-- Satu kas dapat memiliki beberapa tabungan emas logam mulia dengan merek dan produk opsional.
-- Pemilik dapat mencatat saldo awal emas, sedangkan pemilik dan editor kas dapat mencatat pembelian atau penjualan emas menggunakan dompet serta kategori miliknya sendiri.
-- Pembelian emas mengurangi saldo rupiah kas dan dompet, sedangkan penjualan menambah saldo rupiah; seluruh perubahan rupiah dan emas disimpan secara atomik.
+- Satu kas dapat memiliki beberapa tabungan emas logam mulia dengan label emas (contoh: Emas Antam), tanpa atribut kadar. Form menempatkan berat gram setelah Kas, tanpa nilai default, dan menerima desimal koma seperti `0,5` (maksimal empat angka desimal). Berat saat pembuatan dicatat sebagai saldo awal tanpa modal; aksi saldo awal tersedia untuk tabungan yang beratnya masih nol.
+- Daftar tabungan emas dikelompokkan berdasarkan kas dengan total gram seluruh tabungan pada setiap grup (tetap menghitung seluruh isi kas saat pencarian atau pergantian halaman), tanpa kolom Kas terpisah dan menampilkan tanggal **Dibeli pada** (`created_at`), harga beli, serta keterangan. Tanggal pembelian dapat diisi saat membuat dan mengubah tabungan, dengan nilai awal waktu sekarang dan tidak boleh di masa depan. Harga beli dan keterangan bersifat opsional. Berat ditampilkan tanpa nol desimal berlebih, misalnya `1` atau `0,5` gram; total modal tidak ditampilkan pada daftar.
+- Pemilik dapat mencatat saldo awal emas. Aksi Beli emas, Jual emas, dan Histori tidak tersedia pada halaman tabungan emas.
+- Layanan internal pembelian dan penjualan emas beserta riwayatnya tetap tersedia; pembelian mengurangi saldo rupiah kas dan dompet, sedangkan penjualan menambah saldo rupiah secara atomik.
 - Modal emas mencakup harga dasar, biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
 - Pengguna dapat mengambil harga buyback emas dari endpoint publik, menggunakan snapshot terakhir ketika layanan gagal, atau menyimpan harga manual privat untuk kas terkait.
 - Kestabilan endpoint harga emas dipantau setiap enam jam melalui smoke test terpisah yang memvalidasi ketersediaan, waktu respons, struktur data, dan kesegaran harga buyback.
