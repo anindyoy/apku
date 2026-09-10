@@ -11,6 +11,17 @@
         border: 1px solid #d1d5db;
     }
 
+    /* Kontras tombol reset pada mode terang */
+    .transaction-reset-filter {
+        color: #4b5563 !important;
+        background-color: #ffffff !important;
+    }
+
+    .transaction-reset-filter:hover {
+        color: #111827 !important;
+        background-color: #e5e7eb !important;
+    }
+
     /* Warna opsi select pada mode terang */
     .period-filter-select option {
         color: #1f2937;
@@ -24,6 +35,16 @@
 
     .dark .transaction-filter-control {
         border-color: rgb(255 255 255 / 0.1);
+    }
+
+    .dark .transaction-reset-filter {
+        color: #d1d5db !important;
+        background-color: rgb(255 255 255 / 0.05) !important;
+    }
+
+    .dark .transaction-reset-filter:hover {
+        color: #ffffff !important;
+        background-color: rgb(255 255 255 / 0.1) !important;
     }
 
     /* Warna opsi select pada mode gelap */
@@ -135,7 +156,7 @@
             </div>
 
             <a href="{{ $resetFilterUrl }}"
-                class="transaction-filter-control inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg bg-white px-3 text-sm font-semibold text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-950 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white lg:self-auto">
+                class="transaction-filter-control transaction-reset-filter inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg px-3 text-sm font-semibold shadow-sm transition lg:self-auto">
                 <x-filament::icon icon="heroicon-m-arrow-path" class="h-4 w-4" />
                 Reset filter
             </a>

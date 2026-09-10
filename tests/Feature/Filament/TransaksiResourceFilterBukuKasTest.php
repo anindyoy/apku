@@ -37,6 +37,10 @@ test('toolbar filter transaksi menggunakan warna teks yang kontras pada setiap t
         ->toContain('color: #111827 !important;')
         ->toContain('.transaction-filter-control {')
         ->toContain('border: 1px solid #d1d5db;')
+        ->toContain('.transaction-reset-filter:hover {')
+        ->toContain('color: #111827 !important;')
+        ->toContain('background-color: #e5e7eb !important;')
+        ->toContain('class="transaction-filter-control transaction-reset-filter')
         ->toContain('.dark .period-filter-select {')
         ->toContain('color: #ffffff !important;')
         ->toContain('.dark .transaction-filter-control {');

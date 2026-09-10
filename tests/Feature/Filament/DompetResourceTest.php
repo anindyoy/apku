@@ -255,7 +255,7 @@ test('transfer buku kas dengan dompet sama menjaga saldo bersih dompet', functio
         ->and($cash->fresh()->saldo)->toBe(100000);
 });
 
-test('transfer buku kas dengan dompet berbeda turut memindahkan saldo dompet', function () {
+test('transfer buku kas menggunakan dompet pencatatan otomatis meski data dompet dikirim', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
     $bukuKasTujuan = BukuKas::create([
         'user_id' => $user->id,
@@ -284,6 +284,6 @@ test('transfer buku kas dengan dompet berbeda turut memindahkan saldo dompet', f
 
     expect($bukuKas->fresh()->saldo)->toBe(-25000)
         ->and($bukuKasTujuan->fresh()->saldo)->toBe(25000)
-        ->and($cash->fresh()->saldo)->toBe(75000)
-        ->and($bank->fresh()->saldo)->toBe(25000);
+        ->and($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(0);
 });

@@ -1,2 +1,34 @@
 @tailwind components;
 @tailwind utilities;
+
+/* Penanda input nonaktif selama jenis transaksi sedang diganti */
+.transaction-form-changing {
+    cursor: wait;
+}
+
+.transaction-form-changing .fi-input-wrp {
+    background-color: #f3f4f6 !important;
+    box-shadow: inset 0 0 0 1px #d1d5db !important;
+}
+
+.transaction-form-changing .fi-input,
+.transaction-form-changing .fi-select-input {
+    color: #9ca3af !important;
+    cursor: wait !important;
+}
+
+.transaction-form-changing .fi-fo-toggle-buttons .fi-btn {
+    filter: grayscale(0.65);
+    opacity: 0.55;
+    cursor: wait !important;
+}
+
+.dark .transaction-form-changing .fi-input-wrp {
+    background-color: rgb(255 255 255 / 0.05) !important;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1) !important;
+}
+
+.dark .transaction-form-changing .fi-input,
+.dark .transaction-form-changing .fi-select-input {
+    color: #6b7280 !important;
+}

@@ -4,6 +4,8 @@ use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Grid;
 use Livewire\Livewire;
 
 // Pengujian halaman daftar dan edit transaksi.
@@ -95,6 +97,87 @@ test('warna tombol submit mengikuti jenis transaksi yang dipilih', function () {
     }
 })
     ->group('filament', 'transaksi', 'tambah-transaksi', 'warna-submit');
+
+test('opsi transfer kas aktif tanpa filter ketika tersedia dua kas milik sendiri', function () {
+    $user = createRegularUserWithBukuKas();
+    $user->buku_kas()->create([
+        'nama_buku' => 'Kas kedua',
+        'saldo' => 0,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountAction('Tambah transaksi')
+        ->assertFormFieldExists('jenis_form', checkFieldUsing: fn (ToggleButtons $field): bool => ! $field->isOptionDisabled(
+            'transfer_kas',
+            'Transfer kas',
+        ));
+})
+    ->group('filament', 'transaksi', 'tambah-transaksi', 'transfer-kas');
+
+test('field modal transfer hanya menampilkan sumber dan tujuan yang relevan', function () {
+    $user = createRegularUserWithBukuKas();
+    $user->buku_kas()->create(['nama_buku' => 'Kas kedua', 'saldo' => 0]);
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountAction('Tambah transaksi')
+        ->set('mountedActions.0.data.jenis_form', 'transfer_kas')
+        ->assertFormFieldVisible('buku_kas_id')
+        ->assertFormFieldVisible('buku_kas_id_tujuan')
+        ->assertFormFieldHidden('dompet_id')
+        ->assertFormFieldHidden('dompet_id_tujuan');
+
+    $komponen
+        ->set('mountedActions.0.data.jenis_form', 'transfer_dompet')
+        ->assertFormFieldHidden('buku_kas_id')
+        ->assertFormFieldHidden('buku_kas_id_tujuan')
+        ->assertFormFieldVisible('dompet_id')
+        ->assertFormFieldVisible('dompet_id_tujuan');
+})
+    ->group('filament', 'transaksi', 'tambah-transaksi', 'field-transfer');
+
+test('input dan tombol submit nonaktif selama perubahan jenis transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+    $komponen = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountAction('Tambah transaksi');
+
+    $submit = $komponen->instance()->getMountedAction()?->getModalSubmitAction();
+    $schema = $komponen->instance()->getSchema($komponen->instance()->getMountedActionSchemaName());
+    $grid = collect($schema?->getComponents())
+        ->first(fn ($component): bool => $component instanceof Grid);
+
+    expect(ListTransaksis::targetLoadingPerubahanJenisForm())
+        ->toBe('mountedActions.0.data.jenis_form')
+        ->and($submit?->getExtraAttributes())
+        ->toMatchArray([
+            'wire:loading.attr' => 'disabled',
+            'wire:target' => 'mountedActions.0.data.jenis_form',
+        ])
+        ->and($grid)->toBeInstanceOf(Grid::class)
+        ->and($grid?->getExtraAttributes())->toMatchArray([
+            'x-data' => '{ changingTransactionType: false }',
+            'x-bind:inert' => 'changingTransactionType',
+            'x-bind:class' => "{ 'transaction-form-changing': changingTransactionType }",
+            'wire:loading.attr' => 'inert',
+            'wire:loading.class' => 'transaction-form-changing pointer-events-none',
+            'wire:target' => 'mountedActions.0.data.jenis_form',
+        ])
+        ->and($grid?->getExtraAttributes()['x-on:change.capture'] ?? '')
+        ->toContain('changingTransactionType = true')
+        ->toContain('$wire.$hook(\'commit\'')
+        ->toContain('changingTransactionType = false');
+
+    $css = file_get_contents(resource_path('css/filament-toolbar.css'));
+
+    expect($css)
+        ->toContain('.transaction-form-changing .fi-input-wrp')
+        ->toContain('background-color: #f3f4f6 !important;')
+        ->toContain('.transaction-form-changing .fi-fo-toggle-buttons .fi-btn')
+        ->toContain('cursor: wait !important;');
+})
+    ->group('filament', 'transaksi', 'tambah-transaksi', 'loading-jenis');
 
 test('transaksi resource - edit page dapat update nominal', function () {
     $user = createRegularUserWithBukuKas();
