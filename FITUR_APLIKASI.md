@@ -78,6 +78,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Menghapus kas kosong secara langsung.
 - Memindahkan seluruh transaksi dan saldo ke kas lain sebelum menghapus kas yang masih berisi transaksi.
 - Melalui fitur **Kolaborator Kas**, pemilik dapat membagikan kas kepada pengguna APKu lain yang sudah terdaftar dan terverifikasi.
+- Form tambah dan ubah kolaborator dibuka melalui modal pada daftar **Kolaborator Kas**; akses dapat dicabut melalui aksi pada baris atau pilihan massal.
 - Kolaborator memiliki peran **Viewer** atau **Editor**, dengan masa akses yang dapat dijadwalkan atau dibatasi.
 - Viewer dapat melihat transaksi dan laporan buku bersama, sedangkan editor juga dapat mencatat transaksi.
 - Kas bersama tidak dihitung sebagai kuota kas milik kolaborator.

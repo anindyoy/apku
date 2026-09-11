@@ -1,8 +1,10 @@
 <?php
 
-use App\Models\BukuKas;
+use App\Filament\Resources\BukuKasResource\Pages\EditBukuKas;
+use App\Filament\Resources\ShareBukuResource\Pages\ListShareBukus;
 use App\Models\ShareBuku;
-use App\Models\UtangPiutang;
+use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 // ==================== EDIT PAGES ====================
@@ -12,7 +14,7 @@ test('edit buku kas page dapat ditampilkan', function () {
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\BukuKasResource\Pages\EditBukuKas::class, ['record' => $bukuKas->id])
+        ->test(EditBukuKas::class, ['record' => $bukuKas->id])
         ->assertSuccessful();
 })
     ->group('filament', 'edit');
@@ -22,7 +24,7 @@ test('edit buku kas page dapat update nama', function () {
     $bukuKas = $user->buku_kas()->first();
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\BukuKasResource\Pages\EditBukuKas::class, ['record' => $bukuKas->id])
+        ->test(EditBukuKas::class, ['record' => $bukuKas->id])
         ->fillForm(['nama_buku' => 'Kas Updated'])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -31,12 +33,12 @@ test('edit buku kas page dapat update nama', function () {
 })
     ->group('filament', 'edit');
 
-test('edit share buku page dapat ditampilkan', function () {
+test('edit share buku modal dapat ditampilkan', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    // Create another user to share with
-    $otherUser = \App\Models\User::factory()->create([
+    // Buat pengguna lain sebagai kolaborator.
+    $otherUser = User::factory()->create([
         'role' => 'reguler',
         'email_verified_at' => now(),
     ]);
@@ -48,16 +50,18 @@ test('edit share buku page dapat ditampilkan', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\ShareBukuResource\Pages\EditShareBuku::class, ['record' => $shareBuku->id])
+        ->test(ListShareBukus::class)
+        ->mountTableAction('edit', $shareBuku)
+        ->assertActionMounted(TestAction::make('edit')->table($shareBuku))
         ->assertSuccessful();
 })
     ->group('filament', 'edit');
 
-test('edit share buku page dapat update privilege', function () {
+test('edit share buku modal dapat update privilege', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $otherUser = \App\Models\User::factory()->create([
+    $otherUser = User::factory()->create([
         'role' => 'reguler',
         'email_verified_at' => now(),
     ]);
@@ -69,10 +73,10 @@ test('edit share buku page dapat update privilege', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test(\App\Filament\Resources\ShareBukuResource\Pages\EditShareBuku::class, ['record' => $shareBuku->id])
-        ->fillForm(['privilege' => 'editor'])
-        ->call('save')
-        ->assertHasNoFormErrors();
+        ->test(ListShareBukus::class)
+        ->assertTableActionExists('edit', fn ($action): bool => $action->getUrl() === null, $shareBuku)
+        ->callTableAction('edit', $shareBuku, data: ['privilege' => 'editor'])
+        ->assertHasNoTableActionErrors();
 
     expect($shareBuku->fresh()->privilege)->toBe('editor');
 })

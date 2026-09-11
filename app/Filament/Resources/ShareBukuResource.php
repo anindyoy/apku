@@ -9,6 +9,7 @@ use App\Models\ShareBuku;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -105,7 +106,7 @@ class ShareBukuResource extends Resource
                 TextColumn::make('berlaku_mulai')->label('Mulai')->dateTime('d M Y, H:i'),
                 TextColumn::make('berlaku_sampai')->label('Berakhir')->dateTime('d M Y, H:i')->placeholder('Tanpa batas'),
             ])
-            ->actions([EditAction::make()])
+            ->actions([EditAction::make(), DeleteAction::make()->label('Cabut akses')])
             ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make()->label('Cabut akses')])]);
     }
 
@@ -121,8 +122,6 @@ class ShareBukuResource extends Resource
     {
         return [
             'index' => Pages\ListShareBukus::route('/'),
-            'create' => Pages\CreateShareBuku::route('/create'),
-            'edit' => Pages\EditShareBuku::route('/{record}/edit'),
         ];
     }
 }
