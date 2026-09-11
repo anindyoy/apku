@@ -62,6 +62,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'email_verified_at' => 'datetime',
             'masa_aktif' => 'date',
             'password' => 'hashed',
+            'dashboard_settings' => 'array',
         ];
     }
 

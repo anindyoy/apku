@@ -62,7 +62,7 @@ test('menu keuangan pengguna reguler tetap tersedia', function () {
 
     expect(TransaksiResource::shouldRegisterNavigation())->toBeTrue()
         ->and(Laporan::shouldRegisterNavigation())->toBeTrue()
-        ->and(Dashboard::shouldRegisterNavigation())->toBeFalse();
+        ->and(Dashboard::shouldRegisterNavigation())->toBeTrue();
 });
 
 test('daftar pengguna tidak memuat metadata aktivitas keuangan', function () {

@@ -58,100 +58,110 @@ class TransaksiResource extends Resource
             )
             ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
-            ->columns([
-                IconColumn::make('jenis')
-                    ->label('Tipe')
-                    ->tooltip(fn ($state) => $state)
-                    ->icon(fn (string $state): string => match ($state) {
-                        'Pemasukan' => 'heroicon-o-arrow-down-on-square',
-                        'Pengeluaran' => 'heroicon-o-arrow-up-on-square',
-                        'Transfer Pemasukan' => 'heroicon-o-arrow-path-rounded-square',
-                        'Transfer Pengeluaran' => 'heroicon-o-arrow-path-rounded-square',
-                    })
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
-
-                TextColumn::make('tanggal')
-                    ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
-                    ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
-
-                TextColumn::make('buku_kas.nama_buku')
-                    ->label('Kas')
-                    ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
-
-                TextColumn::make('kategori')
-                    ->label('Aktivitas')
-                    ->getStateUsing(fn (Transaksi $record) => static::getKategoriLabel($record))
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->where('deskripsi', 'like', "%{$search}%");
-                    })
-                    ->description(
-                        fn ($record) => $record->deskripsi
-                            ? ('Deskripsi: '.$record->deskripsi) : ''
-                    )
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
-                    ->wrap(),
-
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('nominal')
-                    ->numeric()
-                    ->prefix('Rp ')
-                    ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
-                    ->description(function (Transaksi $record, ListTransaksis $livewire): ?string {
-                        $saldo = [];
-
-                        if (filled($livewire->filterBukuKas)) {
-                            $saldo[] = 'Saldo kas: Rp '.number_format((float) $record->saldo, 0, ',', '.');
-                        }
-
-                        if (filled($livewire->filterDompet)) {
-                            $saldo[] = 'Saldo dompet: Rp '.number_format((float) $record->saldo_dompet, 0, ',', '.');
-                        }
-
-                        return filled($saldo) ? implode(' · ', $saldo) : null;
-                    }),
-            ])
+            ->columns(static::transactionColumns())
             ->defaultSort('tanggal', 'desc')
             ->recordUrl(null)
             ->recordAction(null)
             ->filters([
             ])
-            ->actions([
-                Action::make('edit')
-                    ->label('Ubah')
-                    ->icon('heroicon-o-pencil-square')
-                    ->color('warning')
-                    ->modalHeading('Ubah transaksi')
-                    ->modalSubmitActionLabel('Simpan')
-                    ->form(Transaksi::form())
-                    ->fillForm(fn (Transaksi $record): array => $record->attributesToArray())
-                    ->hidden(fn ($record): bool => auth()->user()->isAdmin()
-                        || filled($record->audit_saldo_dompet_detail_id)
-                        || $record->user_id !== auth()->id()
-                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
-                        || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
-                    ->action(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
-
-                DeleteAction::make()
-                    ->hidden(fn ($record): bool => auth()->user()->isAdmin()
-                        || filled($record->audit_saldo_dompet_detail_id)
-                        || $record->user_id !== auth()->id()
-                        || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
-                        || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
-                    ->using(fn (Transaksi $record): bool => app(TransaksiService::class)->hapus(auth()->user(), $record)),
-            ])
+            ->actions(static::transactionActions())
             ->bulkActions([
                 // DeleteBulkAction::make(),
             ]);
+    }
+
+    public static function transactionActions(): array
+    {
+        return [
+            Action::make('edit')
+                ->label('Ubah')
+                ->icon('heroicon-o-pencil-square')
+                ->color('warning')
+                ->modalHeading('Ubah transaksi')
+                ->modalSubmitActionLabel('Simpan')
+                ->form(Transaksi::form())
+                ->fillForm(fn (Transaksi $record): array => $record->attributesToArray())
+                ->hidden(fn ($record): bool => auth()->user()->isAdmin()
+                    || filled($record->audit_saldo_dompet_detail_id)
+                    || $record->user_id !== auth()->id()
+                    || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
+                    || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
+                ->action(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
+
+            DeleteAction::make()
+                ->hidden(fn ($record): bool => auth()->user()->isAdmin()
+                    || filled($record->audit_saldo_dompet_detail_id)
+                    || $record->user_id !== auth()->id()
+                    || ! auth()->user()->dapatMengelolaTransaksiPada($record->buku_kas)
+                    || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
+                ->using(fn (Transaksi $record): bool => app(TransaksiService::class)->hapus(auth()->user(), $record)),
+        ];
+    }
+
+    public static function transactionColumns(): array
+    {
+        return [
+            IconColumn::make('jenis')
+                ->label('Tipe')
+                ->tooltip(fn ($state) => $state)
+                ->icon(fn (string $state): string => match ($state) {
+                    'Pemasukan' => 'heroicon-o-arrow-down-on-square',
+                    'Pengeluaran' => 'heroicon-o-arrow-up-on-square',
+                    'Transfer Pemasukan' => 'heroicon-o-arrow-path-rounded-square',
+                    'Transfer Pengeluaran' => 'heroicon-o-arrow-path-rounded-square',
+                })
+                ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
+
+            TextColumn::make('tanggal')
+                ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
+                ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
+                ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
+
+            TextColumn::make('buku_kas.nama_buku')
+                ->label('Kas')
+                ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
+                ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
+
+            TextColumn::make('kategori')
+                ->label('Aktivitas')
+                ->getStateUsing(fn (Transaksi $record) => static::getKategoriLabel($record))
+                ->searchable(query: function (Builder $query, string $search): Builder {
+                    return $query
+                        ->where('deskripsi', 'like', "%{$search}%");
+                })
+                ->description(
+                    fn ($record) => $record->deskripsi
+                        ? ('Deskripsi: '.$record->deskripsi) : ''
+                )
+                ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
+                ->wrap(),
+
+            TextColumn::make('created_at')
+                ->dateTime()
+                ->toggleable(isToggledHiddenByDefault: true),
+
+            TextColumn::make('updated_at')
+                ->dateTime()
+                ->toggleable(isToggledHiddenByDefault: true),
+
+            TextColumn::make('nominal')
+                ->numeric()
+                ->prefix('Rp ')
+                ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
+                ->description(function (Transaksi $record, $livewire): ?string {
+                    $saldo = [];
+
+                    if (filled($livewire->filterBukuKas ?? null)) {
+                        $saldo[] = 'Saldo kas: Rp '.number_format((float) $record->saldo, 0, ',', '.');
+                    }
+
+                    if (filled($livewire->filterDompet ?? null)) {
+                        $saldo[] = 'Saldo dompet: Rp '.number_format((float) $record->saldo_dompet, 0, ',', '.');
+                    }
+
+                    return filled($saldo) ? implode(' · ', $saldo) : null;
+                }),
+        ];
     }
 
     public static function getWarnaTipeTransaksi(string $jenis, ?string $tipeTransfer = null): string

@@ -184,6 +184,20 @@ Fitur berikut hanya tersedia untuk admin:
 - Satu voucher dapat memiliki banyak kode unik. Kode voucher berulang dapat dipakai berkali-kali oleh user mana pun, sedangkan kode non-berulang hanya dapat dipakai pada satu order yang tidak dibatalkan.
 - User dapat memasukkan kode voucher saat membuat order. Kode, persentase, nominal diskon, dan total pembayaran disimpan sebagai snapshot order.
 
+## 14. Dashboard pengguna
+
+- Dashboard menjadi halaman utama pengguna biasa setelah login dan onboarding.
+- Layout dashboard menggunakan tiga kolom pada layar besar, dua kolom pada tablet, dan satu kolom pada ponsel. Tabel transaksi memakai lebar penuh agar lima kolomnya tetap mudah dibaca.
+- Menampilkan seluruh kas dan dompet milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Kartu juga menampilkan total saldo dan jumlah kas atau dompet, dengan ikon serta warna aksen berbeda dan dukungan tema gelap.
+- Menampilkan total sisa utang dan piutang setelah pembayaran, masing-masing disertai tiga catatan dengan aktivitas terbaru.
+- Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.
+- Menampilkan lima transaksi milik pengguna yang terbaru berdasarkan tanggal transaksi, dengan ID terbaru sebagai pembeda apabila tanggal sama. Tabel memakai definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat, kas dan dompet, aktivitas dan deskripsi, serta nominal.
+- Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian serta mengubah urutannya dengan geser atau tombol urutan. Pengaturan disimpan per akun dan tetap berlaku ketika halaman dibuka kembali; seluruh bagian tampil secara default.
+- Baris tabel transaksi dashboard menyediakan aksi **Ubah** dan **Hapus** yang sama dengan daftar transaksi, mengikuti kepemilikan dan hak pengelolaan kas/dompet. Transaksi audit saldo tidak dapat diubah atau dihapus langsung.
+- Kartu transaksi menyediakan tombol rata kanan di atas tabel: **Tambah** untuk membuka modal pencatatan yang sama dengan daftar transaksi (mengikuti hak akses kas), dan **Lihat lengkap** untuk menuju daftar transaksi.
+- Setiap kartu dashboard pengguna dapat dilipat atau dibuka melalui header atau tombol panah. Semua kartu terbuka secara default; melipat kartu tetap menampilkan judulnya.
+- Dashboard admin tetap hanya berisi statistik agregat administrasi.
+
 ## Catatan implementasi
 
 Transfer kas, pemindahan saldo dompet, dan import transaksi pada kas bersama hanya tersedia bagi pemilik kas pada versi awal fitur kolaborasi.
