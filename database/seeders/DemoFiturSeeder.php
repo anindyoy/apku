@@ -7,11 +7,14 @@ use App\Models\Dompet;
 use App\Models\Langganan;
 use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
+use App\Models\ShareBuku;
+use App\Models\TabunganEmas;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Models\VoucherCode;
 use App\Notifications\PengingatPerpanjanganMasaAktif;
+use App\Services\TabunganEmasService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -30,14 +33,18 @@ class DemoFiturSeeder extends Seeder
         $users = User::notAdmin()->orderBy('id')->get();
 
         $this->buatDompetDanTransfer($users);
+        $this->buatTabunganEmasDanKolaboratorKas($users);
         $this->buatDataLangganan($admin, $users);
         $this->buatNotifikasiPengingat($users);
     }
 
-    private function bersihkanDataDemo(): void
+    public function bersihkanDataDemo(): void
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::table('notifications')->delete();
+        DB::table('transaksi_emas')->delete();
+        DB::table('tabungan_emas')->delete();
+        DB::table('share_buku')->delete();
         DB::table('langganans')->delete();
         DB::table('voucher_codes')->delete();
         DB::table('vouchers')->delete();
@@ -98,6 +105,46 @@ class DemoFiturSeeder extends Seeder
 
             $dompetUtama->increment('saldo', 100000);
             $bukuKas->increment('saldo', 100000);
+        }
+    }
+
+    private function buatTabunganEmasDanKolaboratorKas($users): void
+    {
+        foreach ($users as $index => $user) {
+            $bukuKas = $user->buku_kas()->orderByDesc('is_default')->firstOrFail();
+
+            for ($nomor = 0; $nomor < 1 + $index % 2; $nomor++) {
+                $tabungan = TabunganEmas::create([
+                    'buku_kas_id' => $bukuKas->id,
+                    'label' => $nomor === 0 ? 'Emas Antam' : 'Emas UBS',
+                    'berat_gram' => 0,
+                    'total_modal' => 0,
+                    'harga_beli' => $nomor === 0 ? 1500000 : 750000,
+                    'keterangan' => 'Contoh tabungan emas logam mulia.',
+                    'created_at' => now()->subDays(10 + $nomor),
+                ]);
+
+                app(TabunganEmasService::class)->catatSaldoAwal(
+                    $user,
+                    $tabungan,
+                    $nomor === 0 ? 1 : 0.5,
+                    0,
+                    'Saldo awal emas contoh.',
+                );
+            }
+
+            for ($nomor = 1; $nomor <= min(2, $users->count() - 1); $nomor++) {
+                $kolaborator = $users[($index + $nomor) % $users->count()];
+
+                ShareBuku::create([
+                    'buku_kas_id' => $bukuKas->id,
+                    'user_id' => $kolaborator->id,
+                    'invited_by_user_id' => $user->id,
+                    'privilege' => $nomor === 1 ? 'viewer' : 'editor',
+                    'berlaku_mulai' => now()->subDay(),
+                    'berlaku_sampai' => null,
+                ]);
+            }
         }
     }
 

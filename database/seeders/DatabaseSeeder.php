@@ -11,6 +11,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        app(DemoFiturSeeder::class)->bersihkanDataDemo();
+
         $this->call([
             UserSeeder::class,
             JenisTransaksiSeeder::class,

@@ -200,6 +200,8 @@ Fitur berikut hanya tersedia untuk admin:
 
 ## Catatan implementasi
 
+Seeder demo menyediakan 1–2 tabungan emas dengan saldo awal tanpa modal dan dua kolaborator kas aktif (Viewer dan Editor) untuk setiap pengguna non-admin. Setiap pengguna juga menerima akses ke dua kas pengguna lain.
+
 Transfer kas, pemindahan saldo dompet, dan import transaksi pada kas bersama hanya tersedia bagi pemilik kas pada versi awal fitur kolaborasi.
 
 Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 5 September 2026.

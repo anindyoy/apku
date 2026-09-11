@@ -5,6 +5,8 @@ use App\Models\Dompet;
 use App\Models\Langganan;
 use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
+use App\Models\ShareBuku;
+use App\Models\TabunganEmas;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Models\UtangPiutang;
@@ -43,4 +45,30 @@ test('database seeder dapat dijalankan ulang tanpa menggandakan data demo', func
         ->and(MetodePembayaran::count())->toBe(3)
         ->and(Voucher::count())->toBe(2)
         ->and(Langganan::count())->toBe(count(StatusLangganan::cases()));
+});
+
+test('database seeder memberi setiap pengguna tabungan emas dan kolaborator kas tanpa duplikasi', function () {
+    app(DatabaseSeeder::class)->run();
+    app(DatabaseSeeder::class)->run();
+
+    foreach (User::notAdmin()->orderBy('id')->get() as $index => $user) {
+        $kasIds = $user->buku_kas()->pluck('id');
+        $tabungan = TabunganEmas::whereIn('buku_kas_id', $kasIds)->get();
+        $kolaborator = ShareBuku::whereIn('buku_kas_id', $kasIds)->get();
+
+        expect($tabungan)->toHaveCount(1 + $index % 2)
+            ->and($tabungan->every(fn (TabunganEmas $emas): bool => $emas->berat_gram > 0 && $emas->total_modal === 0 && $emas->harga_beli > 0 && $emas->created_at->lte(now())))->toBeTrue()
+            ->and($kolaborator)->toHaveCount(2)
+            ->and($kolaborator->pluck('privilege')->sort()->values()->all())->toBe(['editor', 'viewer'])
+            ->and($kolaborator->every(fn (ShareBuku $share): bool => $share->user_id !== $user->id && $share->invited_by_user_id === $user->id && $share->sedangAktif() && $share->user->email_verified_at !== null))->toBeTrue()
+            ->and(ShareBuku::where('user_id', $user->id)->count())->toBe(2);
+
+        foreach ($tabungan as $emas) {
+            $saldoAwal = $emas->transaksiEmas()->sole();
+
+            expect($saldoAwal->user_id)->toBe($user->id)
+                ->and((float) $saldoAwal->berat_gram)->toBe((float) $emas->berat_gram)
+                ->and((int) $saldoAwal->total_rupiah)->toBe(0);
+        }
+    }
 });
