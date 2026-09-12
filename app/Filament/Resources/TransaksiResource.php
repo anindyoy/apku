@@ -73,6 +73,17 @@ class TransaksiResource extends Resource
     public static function transactionActions(): array
     {
         return [
+            Action::make('infoAkses')
+                ->label(fn (Transaksi $record): string => static::alasanTransaksiTidakDapatDikelola($record)['label'] ?? 'Informasi akses')
+                ->icon('heroicon-o-exclamation-triangle')
+                ->color('warning')
+                ->visible(fn (Transaksi $record): bool => static::alasanTransaksiTidakDapatDikelola($record) !== null)
+                ->modalHeading(fn (Transaksi $record): string => static::alasanTransaksiTidakDapatDikelola($record)['label'] ?? 'Informasi akses')
+                ->modalDescription(fn (Transaksi $record): string => static::alasanTransaksiTidakDapatDikelola($record)['description'] ?? '')
+                ->modalIcon('heroicon-o-exclamation-triangle')
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Tutup'),
+
             Action::make('edit')
                 ->label('Ubah')
                 ->icon('heroicon-o-pencil-square')
@@ -96,6 +107,30 @@ class TransaksiResource extends Resource
                     || ! auth()->user()->dapatMengelolaTransaksiPadaDompet($record->dompet))
                 ->using(fn (Transaksi $record): bool => app(TransaksiService::class)->hapus(auth()->user(), $record)),
         ];
+    }
+
+    public static function alasanTransaksiTidakDapatDikelola(Transaksi $record): ?array
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return null;
+        }
+        if (filled($record->audit_saldo_dompet_detail_id)) {
+            return ['label' => 'Transaksi audit saldo', 'description' => 'Transaksi penyesuaian audit saldo tidak dapat diubah atau dihapus langsung. Lakukan audit saldo baru untuk mengoreksi saldo.'];
+        }
+        if ($record->user_id !== $user->id) {
+            return ['label' => 'Hanya dapat dilihat', 'description' => 'Transaksi ini dicatat oleh pengguna lain. Hanya pencatat yang memiliki hak pengelolaan kas dan dompet yang dapat mengubah atau menghapusnya.'];
+        }
+        if (! $record->buku_kas || ! $user->dapatMengelolaTransaksiPada($record->buku_kas)) {
+            return $record->buku_kas?->user_id === $user->id
+                ? ['label' => 'Kas tidak aktif', 'description' => 'Kas ini memiliki akses terbatas. Akun Reguler dapat mengelola kas utama dan satu kas tambahan gratis. Aktifkan atau perpanjang Premium untuk mengubah dan menghapus transaksi pada kas tambahan lainnya.']
+                : ['label' => 'Akses kas terbatas', 'description' => 'Hak pengelolaan kas bersama tidak tersedia. Periksa masa akses dan peran Editor dengan pemilik kas, serta status akses kas milik pemiliknya.'];
+        }
+        if (! $record->dompet || ! $user->dapatMengelolaTransaksiPadaDompet($record->dompet)) {
+            return ['label' => 'Dompet tidak aktif', 'description' => 'Dompet transaksi ini tidak dapat dikelola. Akun Reguler dapat mengelola dompet utama dan satu dompet tambahan gratis. Periksa kepemilikan dompet dan masa aktif Premium Anda.'];
+        }
+
+        return null;
     }
 
     public static function transactionColumns(): array

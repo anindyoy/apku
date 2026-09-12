@@ -277,6 +277,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.
 - Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat, kas dan dompet, aktivitas dan deskripsi, serta nominal.
 - Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian serta mengubah urutannya dengan geser atau tombol urutan. Seluruh bagian tampil secara default.
+- Baris transaksi yang tidak dapat dikelola menampilkan aksi informasi berwarna kuning, misalnya **Kas tidak aktif**, **Dompet tidak aktif**, atau **Transaksi audit saldo**. Klik penanda untuk membaca alasan dan langkah yang dapat dilakukan; aturan ubah/hapus tetap berlaku. Penanda tersedia di dashboard dan daftar transaksi.
 - Baris tabel transaksi dashboard menyediakan aksi **Ubah** dan **Hapus** yang sama dengan daftar transaksi, sesuai hak pengelolaan pengguna. Aksi tersebut tidak tersedia untuk transaksi audit saldo.
 - Kartu kas, dompet, utang, piutang, dan langganan menyediakan tombol **Kelola** yang membuka daftar resource masing-masing, termasuk ketika kartu belum memiliki data.
 - Kartu transaksi menyediakan tombol rata kanan di atas tabel: **Tambah** untuk membuka modal pencatatan yang sama dengan daftar transaksi (mengikuti hak akses kas), dan **Lihat lengkap** untuk menuju daftar transaksi.

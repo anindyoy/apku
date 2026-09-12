@@ -270,3 +270,48 @@ test('dashboard user tombol kelola menuju resource setiap kartu selain transaksi
     }
     expect($xpath->query('//section[@data-section="transaksi"]//a[normalize-space(.)="Kelola"]')->length)->toBe(0);
 });
+
+test('informasi akses transaksi menjelaskan kas terbatas pada dashboard dan daftar', function () {
+    $user = User::factory()->create(['masa_aktif' => null]);
+    BukuKas::factory()->count(2)->create(['user_id' => $user->id]);
+    $kas = BukuKas::factory()->create(['user_id' => $user->id]);
+    $dompet = Dompet::factory()->create(['user_id' => $user->id, 'is_default' => true]);
+    $record = Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
+        'user_id' => $user->id, 'buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id, 'tanggal' => now(),
+    ]));
+    foreach ([Dashboard::class, ListTransaksis::class] as $class) {
+        $page = Livewire::actingAs($user)->test($class)
+            ->assertTableActionVisible('infoAkses', $record)
+            ->assertTableActionHidden('edit', $record)
+            ->assertTableActionHidden('delete', $record)
+            ->mountTableAction('infoAkses', $record);
+        $action = $page->instance()->getMountedAction();
+        expect($action->getLabel())->toBe('Kas tidak aktif')
+            ->and($action->getColor())->toBe('warning')
+            ->and($action->getModalDescription())->toContain('Premium')
+            ->and($action->getModalSubmitAction())->toBeNull();
+    }
+});
+
+test('informasi akses transaksi membedakan alasan dan hilang saat akses aktif', function () {
+    $user = User::factory()->create(['masa_aktif' => today()->addWeek()]);
+    $this->actingAs($user);
+    $kas = BukuKas::factory()->create(['user_id' => $user->id]);
+    Dompet::factory()->count(2)->create(['user_id' => $user->id]);
+    $dompet = Dompet::factory()->create(['user_id' => $user->id]);
+    $record = new Transaksi(['user_id' => $user->id]);
+    $record->setRelation('buku_kas', $kas)->setRelation('dompet', $dompet);
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record))->toBeNull();
+    $user->masa_aktif = null;
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Dompet tidak aktif');
+    $record->user_id = $user->id + 100;
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Hanya dapat dilihat');
+    $record->audit_saldo_dompet_detail_id = 123;
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Transaksi audit saldo');
+    $record->audit_saldo_dompet_detail_id = null;
+    $record->user_id = $user->id;
+    $record->setRelation('buku_kas', null);
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Akses kas terbatas');
+    $user->role = 'admin';
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record))->toBeNull();
+});
