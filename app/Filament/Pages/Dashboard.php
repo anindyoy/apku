@@ -6,6 +6,7 @@ use App\Filament\Concerns\HasTambahTransaksiAction;
 use App\Filament\Resources\TransaksiResource;
 use App\Filament\Widgets\AdminOverview;
 use App\Models\Transaksi;
+use App\Services\DashboardCache;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -16,6 +17,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -58,7 +60,7 @@ class Dashboard extends BaseDashboard implements HasTable
 
     public function sections(): array
     {
-        $saved = auth()->user()->dashboard_settings ?? [];
+        $saved = DashboardCache::remember('settings', auth()->id(), fn () => auth()->user()->dashboard_settings ?? []);
         $sections = [];
         foreach ($saved as $item) {
             if (is_array($item) && isset(self::SECTIONS[$item['key'] ?? ''])) {
@@ -128,7 +130,11 @@ class Dashboard extends BaseDashboard implements HasTable
         abort_if(auth()->user()->isAdmin(), 403);
         $user = auth()->user();
 
-        return match ($key) {
+        if (! in_array($key, ['kas', 'dompet', 'utang', 'piutang', 'langganan'], true)) {
+            return null;
+        }
+
+        return DashboardCache::remember($key, $user->id, fn () => match ($key) {
             'kas' => $user->buku_kas()->get(),
             'dompet' => $user->dompet()->get(),
             'utang', 'piutang' => $this->debtData($key),
@@ -138,7 +144,7 @@ class Dashboard extends BaseDashboard implements HasTable
                 'days' => $user->masaAktifBerlaku() ? (int) today()->diffInDays($user->masa_aktif) : 0,
             ],
             default => null,
-        };
+        });
     }
 
     private function debtData(string $type): array
@@ -150,6 +156,11 @@ class Dashboard extends BaseDashboard implements HasTable
             'total' => (clone $query)->get()->sum('nominal'),
             'latest' => $query->orderByDesc('created_at')->orderByDesc('id')->limit(3)->get(),
         ];
+    }
+
+    public function getTableRecords(): Collection
+    {
+        return DashboardCache::remember('transaksi', auth()->id(), fn () => $this->getFilteredSortedTableQuery()->get());
     }
 
     public function table(Table $table): Table

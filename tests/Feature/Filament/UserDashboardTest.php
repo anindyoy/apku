@@ -153,7 +153,7 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     foreach (['kas' => 'Rp 100.000', 'dompet' => 'Rp 80.000'] as $key => $total) {
         $card = $xpath->query('//section[@data-section="'.$key.'"]')->item(0);
         expect($card->getAttribute('class'))->toContain('dashboard-card');
-        expect($xpath->query('.//header//*[local-name()="svg"]', $card)->length)->toBe(1);
+        expect($xpath->query('.//header/*[local-name()="svg"]', $card)->length)->toBe(1);
         expect(trim($xpath->query('.//p[@class="dashboard-amount"]', $card)->item(0)->textContent))->toBe($total);
     }
 });

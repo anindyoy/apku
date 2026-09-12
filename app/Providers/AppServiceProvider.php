@@ -2,12 +2,11 @@
 
 namespace App\Providers;
 
+use App\Services\DashboardCache;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use Filament\Tables\Enums\FiltersLayout;
-use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
-use Filament\Actions\CreateAction;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,7 +24,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         App::setLocale('id');
-        
+        DB::listen(DashboardCache::invalidateWrite(...));
+
         Table::configureUsing(function (Table $table): void {
             $table
                 ->striped();
