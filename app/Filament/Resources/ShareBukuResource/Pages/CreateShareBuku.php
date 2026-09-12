@@ -15,7 +15,9 @@ class CreateShareBuku extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if (ShareBuku::query()->where('buku_kas_id', $data['buku_kas_id'])->where('user_id', $data['user_id'])->exists()) {
-            throw ValidationException::withMessages(['data.user_id' => 'Pengguna sudah menjadi kolaborator kas ini.']);
+            throw ValidationException::withMessages(['data.user_id' => $data['user_id'] === null
+                ? 'Link publik untuk kas ini sudah tersedia.'
+                : 'Pengguna sudah menjadi kolaborator kas ini.']);
         }
 
         $data['invited_by_user_id'] = auth()->id();
@@ -25,6 +27,6 @@ class CreateShareBuku extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $this->record->user->notify(new BukuDibagikan($this->record));
+        $this->record->user?->notify(new BukuDibagikan($this->record));
     }
 }

@@ -20,7 +20,9 @@ class ListShareBukus extends ListRecords
                 ->mutateFormDataUsing(function (array $data): array {
                     if (ShareBuku::query()->where('buku_kas_id', $data['buku_kas_id'])->where('user_id', $data['user_id'])->exists()) {
                         throw ValidationException::withMessages([
-                            $this->getMountedActionSchema()->getStatePath().'.user_id' => 'Pengguna sudah menjadi kolaborator kas ini.',
+                            $this->getMountedActionSchema()->getStatePath().'.user_id' => $data['user_id'] === null
+                                ? 'Link publik untuk kas ini sudah tersedia.'
+                                : 'Pengguna sudah menjadi kolaborator kas ini.',
                         ]);
                     }
 
@@ -29,7 +31,7 @@ class ListShareBukus extends ListRecords
                     return $data;
                 })
                 ->after(function (ShareBuku $record): void {
-                    $record->user->notify(new BukuDibagikan($record));
+                    $record->user?->notify(new BukuDibagikan($record));
                 }),
         ];
     }

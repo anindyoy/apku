@@ -52,7 +52,9 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Menghapus kas kosong secara langsung.
 - Memindahkan seluruh transaksi dan saldo ke kas lain sebelum menghapus kas yang masih berisi transaksi.
 - Melalui fitur **Kolaborator Kas**, pemilik dapat membagikan kas kepada pengguna APKu lain yang sudah terdaftar dan terverifikasi.
-- Kolaborator memiliki peran **Viewer** atau **Editor**, dengan masa akses yang dapat dijadwalkan atau dibatasi.
+- Email kolaborator boleh kosong untuk membuat link kas publik bertoken acak. Akses publik selalu **Viewer**, tanpa login, dan diperiksa pada setiap permintaan berdasarkan tanggal mulai serta berakhir. Mencabut akses langsung menonaktifkan link; kolaborasi dengan email tetap privat.
+- Email kolaborator diketik melalui input teks tanpa daftar email pengguna. Setelah input ditinggalkan, status terdaftar ditampilkan berwarna hijau atau belum terdaftar berwarna merah. Jika diisi, email yang belum terdaftar gagal validasi; pembatasan akun terverifikasi, bukan diri sendiri, dan bukan admin tetap berlaku.
+- Kolaborator memiliki peran **Viewer** atau **Editor**, dengan masa akses yang dapat dijadwalkan atau dibatasi. Input **Mulai Berlaku** dan **Berakhir Pada** menggunakan tanggal saja tanpa jam; tanggal berakhir opsional dan harus setelah tanggal mulai.
 - Viewer dapat melihat transaksi dan laporan buku bersama, sedangkan editor juga dapat mencatat transaksi.
 - Kas bersama tidak dihitung sebagai kuota kas milik kolaborator.
 - Pemilik dapat mengubah peran atau mencabut akses kolaborator kapan saja.
@@ -197,6 +199,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 - Menampilkan saldo serta jumlah transaksi pada setiap kas.
 - Form tambah dan ubah kolaborator dibuka melalui modal pada daftar **Kolaborator Kas**; akses dapat dicabut melalui aksi pada baris atau pilihan massal.
+- Daftar kolaborator menampilkan link publik yang dapat disalin atau dibuka. Halaman publik menampilkan saldo kas, transaksi berhalaman, filter bulan, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama dompet dan identitas pengguna tidak ditampilkan.
 - Daftar tabungan emas dikelompokkan berdasarkan kas dengan total gram seluruh tabungan pada setiap grup, tanpa kolom Kas terpisah. Daftar menampilkan tanggal **Dibeli pada**, harga beli, dan keterangan. Tanggal pembelian dapat diisi saat membuat dan mengubah tabungan, dengan nilai awal waktu sekarang. Harga beli dan keterangan opsional. Berat ditampilkan tanpa nol desimal berlebih, misalnya `1` atau `0,5` gram; total modal tidak ditampilkan pada daftar.
 - Aksi Beli emas, Jual emas, dan Histori tidak tersedia pada halaman tabungan emas.
 - Aksi cek nilai emas menampilkan total berat, nilai pasar emas, modal, estimasi untung/rugi, saldo rupiah, dan total nilai kas gabungan.

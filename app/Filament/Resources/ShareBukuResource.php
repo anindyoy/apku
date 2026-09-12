@@ -12,9 +12,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -55,36 +58,60 @@ class ShareBukuResource extends Resource
                 ->rules([Rule::exists('buku_kas', 'id')->where('user_id', auth()->id())])
                 ->searchable()
                 ->required(),
-            Select::make('user_id')
+            TextInput::make('user_id')
                 ->label('Email Kolaborator')
-                ->options(fn (): array => User::query()->notAdmin()
-                    ->whereKeyNot(auth()->id())
-                    ->whereNotNull('email_verified_at')
-                    ->orderBy('email')
-                    ->pluck('email', 'id')->all())
-                ->searchable()
-                ->preload()
+                ->email()
+                ->maxLength(255)
+                ->live(onBlur: true)
+                ->afterStateHydrated(function (TextInput $component, ?ShareBuku $record): void {
+                    if ($record !== null) {
+                        $component->state($record->user?->email);
+                    }
+                })
+                ->hint(function (?string $state): ?string {
+                    if (blank($state)) {
+                        return null;
+                    }
+
+                    return User::where('email', trim($state))->exists()
+                        ? 'Email sudah terdaftar di aplikasi.'
+                        : 'Email belum terdaftar di aplikasi.';
+                })
+                ->hintColor(fn (?string $state): string => filled($state) && User::where('email', trim($state))->exists() ? 'success' : 'danger')
+                ->helperText('Kosongkan untuk membuat link publik. Siapa pun yang memiliki link dapat melihat kas tanpa login selama akses berlaku.')
+                ->afterStateUpdated(function (?string $state, Set $set): void {
+                    if (blank($state)) {
+                        $set('privilege', 'viewer');
+                    }
+                })
                 ->disabled(fn (?ShareBuku $record): bool => $record !== null)
                 ->dehydrated()
+                ->mutateStateForValidationUsing(fn (?string $state): string => trim($state ?? ''))
+                ->dehydrateStateUsing(fn (?string $state, ?ShareBuku $record): ?int => $record !== null
+                    ? $record->user_id
+                    : (blank($state) ? null : User::where('email', trim($state))->firstOrFail()->id))
                 ->rules([
-                    Rule::exists('users', 'id')
+                    Rule::exists('users', 'email')
                         ->whereNot('id', auth()->id())
-                        ->where('role', '!=', 'admin')
+                        ->whereNot('role', 'admin')
                         ->whereNotNull('email_verified_at'),
                 ])
-                ->required(),
+                ->validationMessages([
+                    'exists' => 'Email harus terdaftar dan terverifikasi, bukan email sendiri atau admin.',
+                ])
+                ->nullable(),
             Select::make('privilege')
                 ->label('Hak Akses')
-                ->options(['viewer' => 'Viewer', 'editor' => 'Editor'])
+                ->options(fn (Get $get): array => blank($get('user_id')) ? ['viewer' => 'Viewer'] : ['viewer' => 'Viewer', 'editor' => 'Editor'])
+                ->default('viewer')
+                ->dehydrateStateUsing(fn (string $state, Get $get): string => blank($get('user_id')) ? 'viewer' : $state)
                 ->required(),
-            DateTimePicker::make('berlaku_mulai')
+            DatePicker::make('berlaku_mulai')
                 ->label('Mulai Berlaku')
-                ->seconds(false)
-                ->default(now())
+                ->default(today())
                 ->required(),
-            DateTimePicker::make('berlaku_sampai')
+            DatePicker::make('berlaku_sampai')
                 ->label('Berakhir Pada')
-                ->seconds(false)
                 ->after('berlaku_mulai')
                 ->nullable(),
         ]);
@@ -96,7 +123,15 @@ class ShareBukuResource extends Resource
             ->columns([
                 TextColumn::make('buku_kas.nama_buku')->label('Kas')->searchable(),
                 TextColumn::make('user.name')->label('Kolaborator')
-                    ->description(fn (ShareBuku $record): string => $record->user->email),
+                    ->placeholder('Publik — siapa pun dengan link')
+                    ->description(fn (ShareBuku $record): ?string => $record->user?->email),
+                TextColumn::make('link_publik')->label('Link publik')
+                    ->state(fn (ShareBuku $record): ?string => $record->urlPublik())
+                    ->url(fn (ShareBuku $record): ?string => $record->urlPublik())
+                    ->openUrlInNewTab()
+                    ->copyable()
+                    ->limit(35)
+                    ->placeholder('—'),
                 TextColumn::make('privilege')->label('Akses')->badge(),
                 TextColumn::make('status')->badge()->state(fn (ShareBuku $record): string => match (true) {
                     $record->berlaku_mulai?->isFuture() => 'Terjadwal',
