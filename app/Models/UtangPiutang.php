@@ -48,7 +48,6 @@ class UtangPiutang extends Model
         return [
             Action::make('Detail')
                 ->tooltip('Lihat detail')
-                ->hiddenLabel()
                 ->icon('heroicon-o-magnifying-glass')
                 ->url(
                     fn (?Model $record): string => $record->tipe == 'utang'
@@ -57,8 +56,9 @@ class UtangPiutang extends Model
                 ),
 
             DeleteAction::make()
-                ->tooltip('Hapus')
-                ->hiddenLabel(),
+                ->label('Hapus')
+                ->icon('heroicon-o-trash')
+                ->tooltip('Hapus'),
         ];
     }
 

@@ -234,6 +234,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 ### 9. Utang dan piutang
 
 - Pencatatan utang dan piutang pada menu terpisah.
+- Aksi tabel **Detail** dan **Hapus** pada daftar utang dan piutang ditampilkan dengan ikon beserta label teks.
 - Menampilkan total utang atau piutang dan status selesai/belum selesai.
 - Halaman detail berisi riwayat penambahan dan pembayaran.
 - Menampilkan saldo tersisa secara berjalan pada setiap riwayat.
