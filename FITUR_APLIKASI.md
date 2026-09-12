@@ -277,6 +277,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat, kas dan dompet, aktivitas dan deskripsi, serta nominal.
 - Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian serta mengubah urutannya dengan geser atau tombol urutan. Seluruh bagian tampil secara default.
 - Baris tabel transaksi dashboard menyediakan aksi **Ubah** dan **Hapus** yang sama dengan daftar transaksi, sesuai hak pengelolaan pengguna. Aksi tersebut tidak tersedia untuk transaksi audit saldo.
+- Kartu kas, dompet, utang, piutang, dan langganan menyediakan tombol **Kelola** yang membuka daftar resource masing-masing, termasuk ketika kartu belum memiliki data.
 - Kartu transaksi menyediakan tombol rata kanan di atas tabel: **Tambah** untuk membuka modal pencatatan yang sama dengan daftar transaksi (mengikuti hak akses kas), dan **Lihat lengkap** untuk menuju daftar transaksi.
 - Setiap kartu dashboard pengguna dapat dilipat atau dibuka melalui header atau tombol panah. Semua kartu terbuka secara default; melipat kartu tetap menampilkan judulnya.
 - Dashboard admin tetap hanya berisi statistik agregat administrasi.

@@ -1,8 +1,13 @@
 <?php
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Resources\BukuKasResource;
+use App\Filament\Resources\DompetResource;
+use App\Filament\Resources\LanggananResource;
+use App\Filament\Resources\PiutangResource;
 use App\Filament\Resources\TransaksiResource;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
+use App\Filament\Resources\UtangResource;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\JenisTransaksi;
@@ -243,4 +248,25 @@ test('dashboard user aksi baris disembunyikan pada kas terbatas', function () {
         ->assertCanSeeTableRecords([$record])
         ->assertTableActionHidden('edit', $record)
         ->assertTableActionHidden('delete', $record);
+});
+
+test('dashboard user tombol kelola menuju resource setiap kartu selain transaksi', function () {
+    $user = User::factory()->create();
+    $page = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful();
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$page->html());
+    $xpath = new DOMXPath($dom);
+    $resources = [
+        'kas' => BukuKasResource::class,
+        'dompet' => DompetResource::class,
+        'utang' => UtangResource::class,
+        'piutang' => PiutangResource::class,
+        'langganan' => LanggananResource::class,
+    ];
+    foreach ($resources as $key => $resource) {
+        $links = $xpath->query('//section[@data-section="'.$key.'"]//a[normalize-space(.)="Kelola"]');
+        expect($links->length)->toBe(1);
+        expect($links->item(0)->getAttribute('href'))->toBe($resource::getUrl('index'));
+    }
+    expect($xpath->query('//section[@data-section="transaksi"]//a[normalize-space(.)="Kelola"]')->length)->toBe(0);
 });

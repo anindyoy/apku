@@ -50,6 +50,14 @@
                         'langganan' => 'heroicon-o-sparkles',
                         default => 'heroicon-o-arrows-right-left',
                     };
+                    $manageUrl = match ($key) {
+                        'kas' => \App\Filament\Resources\BukuKasResource::getUrl('index'),
+                        'dompet' => \App\Filament\Resources\DompetResource::getUrl('index'),
+                        'utang' => \App\Filament\Resources\UtangResource::getUrl('index'),
+                        'piutang' => \App\Filament\Resources\PiutangResource::getUrl('index'),
+                        'langganan' => \App\Filament\Resources\LanggananResource::getUrl('index'),
+                        default => null,
+                    };
                 @endphp
                 <x-filament::section :heading="\App\Filament\Pages\Dashboard::SECTIONS[$key]" wire:key="dashboard-{{ $key }}" collapsible :icon="$icon" data-section="{{ $key }}" :class="'dashboard-card '.($key === 'transaksi' ? 'dashboard-full-width' : '')">
                     @if ($key === 'transaksi')
@@ -97,8 +105,10 @@
                         @else
                             <p class="dashboard-caption">Belum memiliki langganan premium aktif.</p>
                         @endif
+                    @endif
+                    @if ($manageUrl)
                         <div class="dashboard-footer">
-                            <x-filament::link :href="\App\Filament\Resources\LanggananResource::getUrl()">Kelola langganan</x-filament::link>
+                            <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.\App\Filament\Pages\Dashboard::SECTIONS[$key]">Kelola</x-filament::button>
                         </div>
                     @endif
                 </x-filament::section>
