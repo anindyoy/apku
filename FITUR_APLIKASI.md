@@ -90,6 +90,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Modal emas mencakup harga dasar, biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
 - Pengguna dapat mengambil harga buyback emas dari endpoint publik, menggunakan snapshot terakhir ketika layanan gagal, atau menyimpan harga manual privat untuk kas terkait.
 - Kestabilan endpoint harga emas dipantau setiap enam jam melalui smoke test terpisah yang memvalidasi ketersediaan, waktu respons, struktur data, dan kesegaran harga buyback.
+- Setelah pemantauan berhasil, workflow menghapus run sukses sebelumnya agar daftar GitHub Actions tidak menumpuk. Run terbaru dan seluruh run gagal tetap disimpan; kegagalan pembersihan tidak menggagalkan hasil pemantauan.
 - Aksi cek nilai emas menampilkan total berat, nilai pasar emas, modal, estimasi untung/rugi, saldo rupiah, dan total nilai kas gabungan tanpa mencatat perubahan harga sebagai transaksi.
 - Kas yang masih memiliki emas hanya dapat dihapus setelah tabungan emasnya ikut dipindahkan ke kas lain milik pengguna yang sama.
 
