@@ -74,6 +74,7 @@ class JenisTransaksi extends Model
     {
         return [
             CreateAction::make()
+                ->label('Tambah')
                 ->hidden(auth()->user()->isAdmin())
                 ->model(self::class)
                 ->mutateFormDataUsing(function (array $data) use ($type): array {

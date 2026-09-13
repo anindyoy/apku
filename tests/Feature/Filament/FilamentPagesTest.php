@@ -67,3 +67,22 @@ test('halaman kategori menggunakan label aktivitas', function () {
         ->and($halaman->instance()->getTitle())->toBe('Aktivitas');
 })
     ->group('filament', 'pages', 'label-aktivitas');
+
+test('halaman kategori menampilkan panel aktivitas responsif dengan tabel terpisah', function () {
+    $user = createRegularUserWithBukuKas();
+    $halaman = Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class);
+
+    $halaman->assertSuccessful();
+    $dom = new \DOMDocument;
+    @$dom->loadHTML('<?xml encoding="UTF-8">'.$halaman->html());
+    $xpath = new \DOMXPath($dom);
+
+    foreach (['pemasukan' => 'Pemasukan', 'pengeluaran' => 'Pengeluaran'] as $jenis => $judul) {
+        $panel = $xpath->query('//section[@aria-labelledby="aktivitas-'.$jenis.'-title"]');
+        expect($panel->length)->toBe(1)
+            ->and($xpath->query('.//h2', $panel->item(0))->item(0)->textContent)->toBe($judul)
+            ->and($xpath->query('.//*[@*[name()="wire:id"]]', $panel->item(0))->length)->toBeGreaterThan(0);
+    }
+
+    expect($xpath->query('//section[contains(@class, "aktivitas-panel--pengeluaran")]')->length)->toBe(1);
+})->group('filament', 'pages');

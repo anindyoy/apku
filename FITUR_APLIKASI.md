@@ -217,6 +217,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 ### 7. Aktivitas transaksi
 
 - Aktivitas pemasukan dan pengeluaran dikelola secara terpisah.
+- Halaman aktivitas menggunakan panel beraksen hijau untuk pemasukan dan merah untuk pengeluaran, disertai penjelasan singkat. Panel tersusun dua kolom pada layar besar dan satu kolom pada layar lebih kecil, dengan dukungan tema gelap.
 - Menambah, mengubah, dan menghapus aktivitas.
 
 ### 8. Laporan keuangan
