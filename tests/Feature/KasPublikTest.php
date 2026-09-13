@@ -29,10 +29,12 @@ test('kas publik dapat dibuat tanpa email hanya viewer dan dikelola pemilik', fu
         ->and($share->invited_by_user_id)->toBe($owner->id)
         ->and($share->urlPublik())->toBe(route('kas.publik', $share->public_token));
     $token = $share->public_token;
-    $component->assertTableColumnStateSet('link_publik', $share->urlPublik(), $share)
+    $component->assertTableColumnDoesNotExist('link_publik')
+        ->assertTableColumnFormattedStateSet('berlaku_mulai', $share->berlaku_mulai->format('d M Y'), $share)
         ->callTableAction('edit', $share, data: ['berlaku_sampai' => today()->addDays(3)->toDateString()])
         ->assertHasNoTableActionErrors();
     expect($share->fresh()->public_token)->toBe($token);
+    $component->assertTableColumnFormattedStateSet('berlaku_sampai', $share->fresh()->berlaku_sampai->format('d M Y'), $share->fresh());
     $component->callAction('create', data: ['buku_kas_id' => $kas->id, 'user_id' => null])
         ->assertHasActionErrors(['user_id']);
 
