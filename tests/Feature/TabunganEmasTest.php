@@ -170,7 +170,8 @@ test('halaman tabungan emas membuat label dan berat desimal dengan histori saldo
         'label' => 'Emas Antam',
         'berat_gram' => 0.5,
     ]);
-    $tabungan = TabunganEmas::where('label', 'Emas Antam')->firstOrFail();
+    $tabungan = TabunganEmas::where('buku_kas_id', $data['kas']->id)
+        ->where('label', 'Emas Antam')->sole();
     expect((float) $tabungan->transaksiEmas()->sole()->berat_gram)->toBe(0.5)
         ->and($data['kas']->fresh()->saldo)->toBe(100000);
 })->group('tabungan-emas', 'filament-emas');

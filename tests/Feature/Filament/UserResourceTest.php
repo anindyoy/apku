@@ -8,18 +8,15 @@ use Livewire\Livewire;
 // ==================== USER RESOURCE ====================
 
 test('user resource dapat menampilkan halaman list (admin only)', function () {
-    // Hapus semua user factory agar tidak ada user lain yang mengganggu
-    User::query()->where('email', '!=', 'admin@test.com')->forceDelete();
-
     $adminUser = createAdminUser();
 
-    User::factory(5)->create();
+    $users = User::factory(5)->create();
 
     Livewire::actingAs($adminUser)
         ->test(ListUsers::class)
         ->assertSuccessful()
-        ->assertSeeText($adminUser->name)
-        ->assertSeeText($adminUser->email);
+        ->set('tableRecordsPerPage', 25)
+        ->assertCanSeeTableRecords($users->push($adminUser));
 })
     ->group('filament', 'user');
 

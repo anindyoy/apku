@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -13,7 +14,18 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::notAdmin()->delete();
+        DB::transaction(function () {
+            $userIds = User::notAdmin()->pluck('id');
+            $kasIds = DB::table('buku_kas')->whereIn('user_id', $userIds)->pluck('id');
+            $tabunganIds = DB::table('tabungan_emas')->whereIn('buku_kas_id', $kasIds)->pluck('id');
+
+            DB::table('transaksi_emas')
+                ->whereIn('tabungan_emas_id', $tabunganIds)
+                ->orWhereIn('user_id', $userIds)
+                ->delete();
+            DB::table('tabungan_emas')->whereIn('id', $tabunganIds)->delete();
+            User::notAdmin()->delete();
+        });
 
         User::factory()->create([
             'name' => 'Pengguna Reguler',
