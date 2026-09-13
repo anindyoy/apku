@@ -169,3 +169,21 @@ test('user dapat membuka halaman order sedangkan admin tidak dapat membuat order
         ->get(route('filament.admin.resources.langganans.create'))
         ->assertForbidden();
 })->group('langganan');
+
+test('kartu perbandingan akun langganan tampil untuk user dan tersembunyi bagi admin', function (string $role) {
+    $user = User::factory()->create(['role' => $role]);
+    $component = Livewire::actingAs($user)->test(ListLangganans::class)->assertSuccessful();
+    $document = new DOMDocument;
+    @$document->loadHTML(mb_convert_encoding($component->html(), 'HTML-ENTITIES', 'UTF-8'));
+    $xpath = new DOMXPath($document);
+    $cards = $xpath->query('//article[@data-plan]');
+
+    expect($cards->length)->toBe($role === 'admin' ? 0 : 2);
+
+    if ($role === 'user') {
+        expect($xpath->query('//article[@data-plan="reguler"]//li')->length)->toBe(3)
+            ->and($xpath->query('//article[@data-plan="premium"]//li')->length)->toBe(3)
+            ->and($xpath->query('//h2[@id="subscription-plans-title"]')->item(0)->textContent)->toBe('Pilih akun yang sesuai kebutuhan Anda')
+            ->and($xpath->query('//div[@class="plan-shared"]/span')->length)->toBe(2);
+    }
+})->with(['user', 'admin'])->group('langganan');

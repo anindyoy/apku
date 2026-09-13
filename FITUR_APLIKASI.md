@@ -197,12 +197,13 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 5. Kas
 
-- Menampilkan saldo serta jumlah transaksi pada setiap kas.
+- Tabel kas menampilkan tiga kolom utama: Kas dengan deskripsi di bawah nama, Akses dengan keterangan kepemilikan, serta Saldo dengan jumlah transaksi dan produk emas. Pencarian tetap mencakup nama dan deskripsi kas; tanggal dibuat dan diperbarui tersedia sebagai kolom opsional.
+- Aksi baris tabel `/admin/buku-kas` dikelompokkan dalam menu **Aksi**, dengan pilihan yang mengikuti hak akses dan kondisi kas.
 - Form tambah dan ubah kolaborator dibuka melalui modal pada daftar **Kolaborator Kas**; akses dapat dicabut melalui aksi pada baris atau pilihan massal.
 - Daftar kolaborator menyediakan tombol **Salin link** pada setiap kolaborator publik, dengan notifikasi keberhasilan atau kegagalan penyalinan, tanpa kolom URL terpisah. Tanggal mulai dan berakhir pada tabel ditampilkan tanpa jam. Halaman publik menampilkan saldo kas, transaksi berhalaman, filter bulan, pencarian berdasarkan deskripsi/aktivitas/jenis transaksi, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama dompet dan identitas pengguna tidak ditampilkan. Saat kata pencarian diisi, pencarian mencakup seluruh tanggal pada kas tersebut tanpa dibatasi bulan terpilih dan tetap dipertahankan saat berpindah halaman. Menghapus pencarian mengembalikan filter bulan; ringkasan total bulanan tetap mengikuti bulan terpilih.
 - Daftar tabungan emas dikelompokkan berdasarkan kas dengan total gram seluruh tabungan pada setiap grup, tanpa kolom Kas terpisah. Daftar menampilkan tanggal **Dibeli pada**, harga beli, dan keterangan. Tanggal pembelian dapat diisi saat membuat dan mengubah tabungan, dengan nilai awal waktu sekarang. Harga beli dan keterangan opsional. Berat ditampilkan tanpa nol desimal berlebih, misalnya `1` atau `0,5` gram; total modal tidak ditampilkan pada daftar.
 - Aksi Beli emas, Jual emas, dan Histori tidak tersedia pada halaman tabungan emas.
-- Aksi cek nilai emas menampilkan total berat, nilai pasar emas, modal, estimasi untung/rugi, saldo rupiah, dan total nilai kas gabungan.
+- Aksi cek nilai emas menampilkan total nilai kas dalam ringkasan beraksen emas, kartu nilai emas dan saldo rupiah, rincian berat/harga/modal, serta estimasi untung/rugi berwarna sesuai hasil. Modal responsif mendukung mode gelap dan menampilkan status sumber harga serta waktu berlakunya.
 - Form tabungan emas menempatkan berat gram setelah Kas, tanpa nilai default, dan menerima desimal koma seperti `0,5`. Aksi saldo awal tersedia untuk tabungan yang beratnya masih nol.
 - Halaman kas menyediakan pembuatan, perubahan, pemilihan kas utama/default, dan penghapusan kas; kas berisi transaksi atau emas menyediakan alur pemindahan sebelum penghapusan.
 
@@ -266,7 +267,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 ### 13. Langganan premium
 
-- User dapat membandingkan benefit akun Reguler dan Premium berdasarkan batas kas serta dompet.
+- User dapat membandingkan benefit akun Reguler dan Premium melalui dua kartu responsif di atas tabel langganan, dengan aksen Premium, rincian batas kas serta dompet, dan ringkasan fitur bersama. Tampilan mendukung mode gelap.
 - Form pengiriman bukti pembayaran mendukung JPG, JPEG, PNG, atau PDF dengan ukuran maksimal 3 MB.
 - User dan admin menerima notifikasi dalam aplikasi saat pembayaran dikonfirmasi, disetujui, atau ditolak sesuai perannya.
 - Pengguna dapat membuat order dengan memilih paket dan metode pembayaran yang tersedia serta memasukkan kode voucher.
