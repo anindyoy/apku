@@ -259,6 +259,7 @@ Fitur berikut hanya tersedia untuk admin:
 ### 12. Fitur pendukung
 
 - Antarmuka berbahasa Indonesia.
+- Seluruh input pilihan kas dan dompet menggunakan dropdown tanpa pencarian, termasuk pilihan kas kolaborator dan tujuan pemindahan sebelum penghapusan.
 - Pencarian cepat menu melalui Spotlight.
 - Login cepat akun pengembangan pada lingkungan lokal. Saat `APP_DEMO=true`, akun admin tidak ditampilkan dalam pilihan login cepat.
 

@@ -56,7 +56,7 @@ class ShareBukuResource extends Resource
                     ->where('user_id', auth()->id())
                     ->pluck('nama_buku', 'id')->all())
                 ->rules([Rule::exists('buku_kas', 'id')->where('user_id', auth()->id())])
-                ->searchable()
+                ->searchable(false)
                 ->required(),
             TextInput::make('user_id')
                 ->label('Email Kolaborator')

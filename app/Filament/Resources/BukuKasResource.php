@@ -195,7 +195,7 @@ class BukuKasResource extends Resource
                                 ARRAY_FILTER_USE_KEY,
                             ))
                             ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
-                            ->searchable()
+                            ->searchable(false)
                             ->rules([
                                 Rule::exists('buku_kas', 'id')
                                     ->where('user_id', $record->user_id)
