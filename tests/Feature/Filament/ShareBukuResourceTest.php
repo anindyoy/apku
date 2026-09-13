@@ -16,6 +16,15 @@ test('share buku resource menggunakan label kolaborator kas', function () {
         ->and(ShareBukuResource::getPluralModelLabel())->toBe('Kolaborator Kas');
 })->group('filament', 'share-buku', 'label-kolaborator-kas');
 
+test('share buku resource menggunakan url kolaborator kas', function () {
+    $user = createRegularUserWithBukuKas();
+    $url = ShareBukuResource::getUrl();
+
+    expect(parse_url($url, PHP_URL_PATH))->toBe('/admin/kolaborator-kas');
+    $this->actingAs($user)->get($url)->assertOk();
+    $this->get('/admin/kolaborator-buku')->assertNotFound();
+})->group('filament', 'share-buku');
+
 // ==================== SHARE BUKU RESOURCE ====================
 
 test('share buku resource dapat menampilkan halaman list', function () {

@@ -43,7 +43,7 @@ class ShareBukuResource extends Resource
 
     protected static ?string $pluralLabel = 'Kolaborator Kas';
 
-    protected static ?string $slug = 'kolaborator-buku';
+    protected static ?string $slug = 'kolaborator-kas';
 
     protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
 
