@@ -59,10 +59,12 @@
     </section>
     <section class="panel" aria-label="Riwayat transaksi">
         <div class="toolbar">
-            <div><h2>Riwayat transaksi</h2><p class="muted">{{ $transaksi->total() }} transaksi · termasuk transfer</p></div>
+            <div><h2>Riwayat transaksi</h2><p class="muted">{{ $transaksi->total() }} transaksi · termasuk transfer@if ($pencarian !== '') · Semua tanggal@endif</p></div>
             <form method="get" action="{{ route('kas.publik', ['token' => $share->public_token]) }}">
                 <label>Bulan<input type="month" name="bulan" value="{{ $bulan }}" required></label>
+                <label>Cari transaksi (semua tanggal)<input type="search" name="q" value="{{ $pencarian }}" placeholder="Deskripsi, aktivitas, atau jenis" maxlength="200"></label>
                 <button type="submit">Tampilkan</button>
+                @if ($pencarian !== '')<a href="{{ route('kas.publik', ['token' => $share->public_token, 'bulan' => $bulan]) }}">Hapus pencarian</a>@endif
             </form>
         </div>
         <div class="table-wrap">
@@ -77,7 +79,7 @@
                         <td class="number {{ in_array($item->jenis, ['Pemasukan', 'Transfer Pemasukan']) ? 'incoming' : 'outgoing' }}">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" class="muted">Belum ada transaksi pada bulan ini.</td></tr>
+                    <tr><td colspan="4" class="muted">{{ $pencarian !== '' ? 'Tidak ada transaksi yang cocok.' : 'Belum ada transaksi pada bulan ini.' }}</td></tr>
                 @endforelse
                 </tbody>
             </table>

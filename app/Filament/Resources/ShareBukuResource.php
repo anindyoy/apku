@@ -8,6 +8,7 @@ use App\Models\BukuKas;
 use App\Models\ShareBuku;
 use App\Models\User;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -22,6 +23,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Js;
 use Illuminate\Validation\Rule;
 use UnitEnum;
 
@@ -141,7 +143,30 @@ class ShareBukuResource extends Resource
                 TextColumn::make('berlaku_mulai')->label('Mulai')->dateTime('d M Y, H:i'),
                 TextColumn::make('berlaku_sampai')->label('Berakhir')->dateTime('d M Y, H:i')->placeholder('Tanpa batas'),
             ])
-            ->actions([EditAction::make(), DeleteAction::make()->label('Cabut akses')])
+            ->actions([
+                Action::make('salinLinkPublik')
+                    ->label('Salin link')
+                    ->icon('heroicon-o-clipboard-document')
+                    ->button()
+                    ->color('gray')
+                    ->visible(fn (ShareBuku $record): bool => filled($record->urlPublik()))
+                    ->alpineClickHandler(function (ShareBuku $record): string {
+                        $url = Js::from($record->urlPublik());
+
+                        return <<<JS
+                            (async () => {
+                                try {
+                                    await window.navigator.clipboard.writeText({$url});
+                                    new FilamentNotification().title('Link publik berhasil disalin').success().send();
+                                } catch (error) {
+                                    new FilamentNotification().title('Link gagal disalin').body('Izinkan akses clipboard atau salin alamat link secara manual.').danger().send();
+                                }
+                            })()
+                            JS;
+                    }),
+                EditAction::make(),
+                DeleteAction::make()->label('Cabut akses'),
+            ])
             ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make()->label('Cabut akses')])]);
     }
 
