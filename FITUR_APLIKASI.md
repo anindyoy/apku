@@ -263,6 +263,7 @@ Fitur berikut hanya tersedia untuk admin:
 ### 12. Fitur pendukung
 
 - Antarmuka berbahasa Indonesia.
+- Halaman publik **Tutorial Penggunaan** di `/tutorial` dapat dibaca tanpa login, dengan 18 topik fitur pengguna non-admin (Reguler, Premium, dan kas bersama), langkah bernomor, contoh, serta catatan hak akses. Konten dikelola melalui `resources/content/tutorial.json` dan ditampilkan sebagai kartu responsif dengan dukungan tema gelap, daftar isi, dan pencarian. Tautan tersedia pada halaman login dan navigasi pengguna non-admin, serta tombol berikon tanda tanya di sisi kanan topbar panel untuk pengguna yang sudah login, termasuk admin. Tombol tutorial di topbar membuka panduan di tab baru dan langsung menuju topik sesuai URL halaman pengguna saat diklik, termasuk halaman detail/tambah dan perpindahan navigasi panel. Sidebar tutorial menampilkan nomor urut, posisi topik dari jumlah hasil yang ditampilkan, dan penanda aktif yang mengikuti tautan topik serta scroll. Topik tujuan ditandai secara visual; halaman tanpa pemetaan membuka daftar tutorial.
 - Seluruh input pilihan kas dan dompet menggunakan dropdown tanpa pencarian, termasuk pilihan kas kolaborator dan tujuan pemindahan sebelum penghapusan.
 - Pencarian cepat menu melalui Spotlight.
 - Login cepat akun pengembangan pada lingkungan lokal. Saat `APP_DEMO=true`, akun admin tidak ditampilkan dalam pilihan login cepat.

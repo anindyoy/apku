@@ -1,0 +1,128 @@
+[
+  {
+    "id": "akun", "category": "Mulai di sini", "title": "Daftar, masuk, dan pemulihan akun",
+    "intro": "Gunakan akun pribadi untuk menyimpan catatan keuangan Anda.",
+    "steps": ["Buka aplikasi, pilih daftar, lalu lengkapi formulir registrasi dan pemeriksaan keamanan yang muncul.", "Buka email verifikasi dan ikuti tautannya. Jika belum diterima, periksa folder spam atau kirim ulang melalui halaman verifikasi.", "Masuk dengan email dan password, kemudian selesaikan pengaturan awal jika diminta.", "Jika lupa password, pilih lupa password pada halaman login, masukkan email, lalu ikuti tautan reset yang dikirim. Setelah mengganti password, masuk kembali."],
+    "example": "Daftar menggunakan email yang aktif agar tautan verifikasi dan pemulihan password dapat diterima.",
+    "note": "Simpan password dengan aman. Tutorial ini dapat dibuka tanpa akun, sedangkan data keuangan pribadi memerlukan login."
+  },
+  {
+    "id": "pengaturan-awal", "category": "Mulai di sini", "title": "Pengaturan awal: kas, dompet, dan saldo",
+    "intro": "Kas menunjukkan pengelompokan uang, sedangkan dompet menunjukkan tempat uang disimpan.",
+    "steps": ["Ikuti wizard pengguna baru untuk membuat kas utama dan deskripsinya.", "Buat dompet utama sesuai tempat penyimpanan uang Anda.", "Masukkan saldo awal sesuai uang yang tersedia agar pencatatan dimulai dari kondisi yang benar.", "Tambahkan aktivitas pemasukan dan pengeluaran yang sering dipakai, lalu selesaikan wizard."],
+    "example": "Kas: Keuangan Rumah Tangga. Dompet: Rekening Bank. Saldo awal: Rp1.000.000. Aktivitas: Gaji dan Belanja.",
+    "note": "Kas dan dompet adalah dua sudut pandang atas uang yang sama. Jangan menjumlahkan total saldo kas dan total saldo dompet sebagai total kekayaan."
+  },
+  {
+    "id": "dashboard", "category": "Ringkasan", "title": "Membaca dan mengatur dashboard",
+    "intro": "Dashboard merangkum kas, dompet, utang, piutang, langganan, dan lima transaksi terbaru.",
+    "steps": ["Buka Dashboard setelah login untuk memeriksa saldo serta ringkasan keuangan.", "Gunakan Kelola pada kartu untuk membuka daftar terkait. Pada kartu transaksi, gunakan Tambah atau Lihat lengkap.", "Buka Atur dashboard untuk menampilkan atau menyembunyikan bagian dan mengubah urutan dengan geser atau tombol urutan.", "Klik header atau panah kartu untuk melipat dan membukanya. Gunakan Ubah atau Hapus pada transaksi jika aksi tersedia."],
+    "example": "Letakkan kartu dompet di urutan pertama jika Anda paling sering mengecek saldo rekening.",
+    "note": "Pengaturan tampilan dan urutan disimpan per akun. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi audit saldo."
+  },
+  {
+    "id": "transaksi", "category": "Pencatatan", "title": "Mencatat pemasukan dan pengeluaran",
+    "intro": "Catat uang masuk dan keluar dengan kas, dompet, serta aktivitas yang sesuai.",
+    "steps": ["Buka Transaksi atau gunakan Tambah pada dashboard, lalu buka Tambah transaksi.", "Pilih pemasukan atau pengeluaran. Tunggu formulir selesai menyesuaikan jenis transaksi.", "Isi tanggal, kas, dompet, aktivitas, nominal, dan deskripsi, kemudian simpan. Gunakan Tambah yang lain untuk mencatat secara berurutan.", "Periksa hasil di daftar. Gunakan Ubah untuk memperbaiki catatan atau Hapus jika transaksi memang perlu dihapus, lalu periksa kembali saldo."],
+    "example": "Catat belanja Rp75.000 sebagai pengeluaran, pilih kas Rumah Tangga, dompet Tunai, aktivitas Belanja, dan deskripsi Belanja mingguan.",
+    "note": "Pemasukan ditandai hijau dan pengeluaran merah. Aksi ubah/hapus mengikuti hak akses; transaksi audit saldo harus dikoreksi melalui audit baru."
+  },
+  {
+    "id": "transfer", "category": "Pencatatan", "title": "Transfer antar-kas dan antar-dompet",
+    "intro": "Gunakan jenis transfer untuk memindahkan saldo sesuai tujuan pemindahannya.",
+    "steps": ["Buka Tambah transaksi, lalu pilih transfer kas atau transfer dompet.", "Untuk transfer kas, tentukan kas asal dan kas tujuan. Dompet pencatatan dipilih otomatis oleh aplikasi.", "Untuk transfer dompet, tentukan dompet asal dan tujuan. Kas pencatatan dipilih otomatis oleh aplikasi.", "Lengkapi tanggal, nominal, dan deskripsi yang tersedia, simpan, kemudian periksa saldo asal serta tujuan."],
+    "example": "Memindahkan uang dari rekening bank ke uang tunai dicatat sebagai transfer dompet. Mengalokasikan uang dari kas Harian ke kas Liburan menggunakan transfer kas.",
+    "note": "Transfer kas ditandai biru dan transfer dompet kuning. Transfer pada kas bersama hanya tersedia bagi pemilik kas."
+  },
+  {
+    "id": "pencarian", "category": "Pencatatan", "title": "Filter dan pencarian transaksi",
+    "intro": "Temukan catatan lama melalui filter periode atau pencarian transaksi global.",
+    "steps": ["Di daftar Transaksi, pilih bulan, tahun, kas, atau dompet. Gunakan navigasi periode untuk berpindah ke periode sebelum atau sesudahnya.", "Gunakan pencarian deskripsi untuk menemukan catatan pada daftar transaksi.", "Buka Pencarian Transaksi untuk mencari berdasarkan deskripsi, aktivitas, kas, dompet, jenis transaksi, atau nominal; persempit dengan filter yang tersedia.", "Periksa detail hasil, lalu gunakan Ubah atau Hapus jika Anda memiliki hak pengelolaan."],
+    "example": "Pilih dompet Rekening Bank dan bulan yang diinginkan untuk menelusuri pembayaran, atau cari kata listrik pada pencarian global.",
+    "note": "Saldo berjalan tampil ketika filter kas atau dompet aktif pada daftar transaksi. Informasi dompet anggota lain pada kas bersama disamarkan."
+  },
+  {
+    "id": "import", "category": "Pencatatan", "title": "Import transaksi dari CSV atau Excel",
+    "intro": "Masukkan banyak pemasukan dan pengeluaran sekaligus melalui file CSV atau XLSX.",
+    "steps": ["Unduh template XLSX dari halaman Transaksi, lalu siapkan data mengikuti format contoh.", "Buka import dan unggah file CSV atau XLSX. Petakan header file ke kolom transaksi jika nama kolom berbeda.", "Periksa pratinjau: jumlah baris, total pemasukan/pengeluaran, dan kesalahan. Unduh laporan error XLSX bila tersedia, perbaiki file, lalu unggah ulang.", "Jika ada aktivitas baru, tinjau daftarnya dan konfirmasikan pembuatannya sebelum menyimpan import.", "Buka Riwayat Import untuk memantau status, progres, atau pesan kegagalan. Untuk membatalkan, gunakan aksi pembatalan pada batch yang masih lengkap."],
+    "example": "Pindahkan 200 transaksi bulanan dari spreadsheet: cocokkan kolom tanggal dan nominal, periksa total pratinjau, lalu simpan.",
+    "note": "Maksimal 10 MB dan 10.000 baris. Hingga 1.000 baris diproses langsung; selebihnya melalui antrean. Transfer belum didukung. File yang sama tidak dapat diimpor dua kali kecuali batch telah dibatalkan. Pembatalan menghapus seluruh transaksi batch dan memulihkan dampak saldo. Import kas bersama hanya untuk pemilik."
+  },
+  {
+    "id": "kas", "category": "Pengelolaan uang", "title": "Mengelola kas",
+    "intro": "Pisahkan pencatatan menurut kebutuhan, misalnya pribadi, rumah tangga, atau usaha.",
+    "steps": ["Buka Kas dan gunakan aksi tambah untuk membuat kas dengan nama serta deskripsi yang mudah dikenali.", "Buka menu Aksi pada baris kas untuk mengubah data atau menjadikannya kas utama/default.", "Periksa kolom Akses dan Saldo untuk mengetahui kepemilikan, saldo, serta jumlah transaksi dan produk emas.", "Untuk menghapus kas kosong, gunakan Hapus. Jika masih berisi transaksi atau emas, ikuti alur pemindahan ke kas lain milik Anda sebelum menyelesaikan penghapusan."],
+    "example": "Buat kas Liburan untuk memisahkan alokasi liburan dari kas kebutuhan harian.",
+    "note": "Reguler dapat mengelola kas utama dan satu kas tambahan gratis. Kas tambahan lainnya mengikuti masa aktif Premium. Transaksi pada kas terbatas tidak dapat diubah atau dihapus."
+  },
+  {
+    "id": "dompet", "category": "Pengelolaan uang", "title": "Mengelola dompet",
+    "intro": "Dompet merepresentasikan uang tunai, rekening bank, atau tempat penyimpanan uang lainnya.",
+    "steps": ["Buka Dompet, tambahkan dompet, lalu isi nama dan deskripsi sesuai tempat penyimpanan uang.", "Gunakan aksi ubah untuk memperbarui informasi, atau jadikan dompet yang paling sering digunakan sebagai default.", "Periksa saldo dan status Aktif atau Terbatas sebelum mencatat transaksi.", "Saat menghapus dompet, ikuti alur pemindahan saldo ke dompet lain dan periksa kembali hasilnya."],
+    "example": "Gunakan dompet Tunai dan Rekening Bank untuk mengetahui di mana uang Anda berada.",
+    "note": "Reguler dapat mengelola dompet utama dan satu dompet tambahan gratis. Dompet tambahan lainnya mengikuti masa aktif Premium. Nama dompet yang dihapus tetap tersedia pada riwayat transaksi dan laporan."
+  },
+  {
+    "id": "audit-saldo", "category": "Pengelolaan uang", "title": "Audit dan penyesuaian saldo dompet",
+    "intro": "Cocokkan saldo aplikasi dengan saldo riil dari uang tunai atau rekening Anda.",
+    "steps": ["Periksa uang tunai dan saldo rekening di luar aplikasi terlebih dahulu.", "Buka audit saldo dompet. Pilih tanggal serta kas pencatatan; kas utama dipilih secara default.", "Masukkan saldo riil setiap dompet yang dapat dikelola. Tambahkan catatan umum dan catatan per dompet jika diperlukan.", "Tinjau selisih, simpan audit, lalu periksa riwayat audit dan transaksi penyesuaian. Jika saldo berubah selama proses, ulangi berdasarkan saldo terbaru."],
+    "example": "Saldo aplikasi Rp100.000 dan uang tunai sebenarnya Rp95.000 menghasilkan pengeluaran penyesuaian Rp5.000 dengan aktivitas Audit Saldo.",
+    "note": "Selisih positif menjadi pemasukan, selisih negatif menjadi pengeluaran. Tanpa selisih, audit tetap tercatat tanpa transaksi baru. Transaksi penyesuaian tidak dapat diubah/dihapus langsung; lakukan audit baru untuk koreksi."
+  },
+  {
+    "id": "aktivitas", "category": "Pengelolaan uang", "title": "Mengelola aktivitas transaksi",
+    "intro": "Aktivitas mengelompokkan pemasukan dan pengeluaran agar laporan mudah dipahami.",
+    "steps": ["Buka Aktivitas untuk melihat panel pemasukan berwarna hijau dan pengeluaran berwarna merah.", "Tambahkan aktivitas pada jenis yang sesuai, lalu beri nama yang jelas.", "Pilih aktivitas tersebut ketika mencatat transaksi.", "Gunakan aksi ubah atau hapus untuk merapikan daftar sesuai aksi yang tersedia, kemudian periksa pengelompokan pada laporan."],
+    "example": "Gunakan Gaji dan Bonus untuk pemasukan; gunakan Belanja, Transportasi, dan Tagihan untuk pengeluaran.",
+    "note": "Gunakan penamaan yang konsisten agar transaksi serupa tidak tersebar di banyak aktivitas."
+  },
+  {
+    "id": "kolaborasi", "category": "Kolaborasi", "title": "Berbagi kas dengan Viewer atau Editor",
+    "intro": "Pemilik Premium aktif dapat memberikan akses kas kepada pengguna APKu lain.",
+    "steps": ["Buka Kolaborator Kas, pilih tambah, lalu pilih kas milik Anda.", "Isi email pengguna yang sudah terdaftar dan terverifikasi. Tinggalkan input untuk memeriksa status email.", "Pilih Viewer untuk melihat atau Editor untuk ikut mencatat. Tentukan Mulai Berlaku dan, bila diperlukan, Berakhir Pada setelah tanggal mulai, lalu simpan.", "Kolaborator masuk dengan akunnya sendiri untuk mengakses kas bersama. Pemilik dapat mengubah peran atau mencabut akses dari daftar kolaborator."],
+    "example": "Berikan peran Editor kepada pasangan agar bisa mencatat belanja rumah tangga, atau Viewer kepada anggota yang hanya perlu melihat laporan.",
+    "note": "Editor memakai dompet dan aktivitas sendiri serta hanya dapat mengubah/menghapus transaksi buatannya. Viewer hanya melihat transaksi dan laporan. Kas bersama tidak mengurangi kuota kas kolaborator. Pembuatan kolaborasi memerlukan Premium aktif; kolaborasi yang sudah ada tetap dapat dikelola atau dicabut pemilik."
+  },
+  {
+    "id": "kas-publik", "category": "Kolaborasi", "title": "Membagikan dan membaca link kas publik",
+    "intro": "Bagikan kas dalam mode hanya lihat kepada orang yang tidak memiliki akun APKu.",
+    "steps": ["Sebagai pemilik Premium aktif, buka tambah Kolaborator Kas, pilih kas, dan kosongkan email untuk membuat akses publik.", "Atur tanggal mulai serta tanggal berakhir bila diperlukan, lalu simpan. Akses publik selalu Viewer.", "Gunakan Salin link pada baris kolaborator publik, lalu bagikan kepada penerima yang Anda tuju.", "Penerima membuka link tanpa login untuk melihat saldo dan transaksi. Pilih bulan atau cari deskripsi, aktivitas, maupun jenis transaksi; pindah halaman untuk melihat hasil lainnya.", "Cabut akses dari daftar kolaborator ketika link tidak diperlukan lagi."],
+    "example": "Bagikan catatan kas kegiatan kepada peserta selama periode kegiatan berlangsung.",
+    "note": "Siapa pun yang memiliki link dapat melihat kas selama akses berlaku. Nama dompet dan identitas pengguna disembunyikan. Pencarian mencakup seluruh tanggal, sedangkan ringkasan total tetap mengikuti bulan terpilih. Hapus pencarian untuk kembali ke filter bulan. Pencabutan langsung menonaktifkan link."
+  },
+  {
+    "id": "emas", "category": "Pengelolaan uang", "title": "Tabungan emas dan estimasi nilainya",
+    "intro": "Catat tabungan emas logam mulia pada kas dan periksa estimasi nilainya.",
+    "steps": ["Buka Tabungan Emas, tambah catatan, pilih kas, isi berat gram dan label emas, misalnya Emas Antam.", "Isi Dibeli pada tanpa memilih tanggal di masa depan. Harga beli dan keterangan dapat diisi jika diperlukan, lalu simpan.", "Gunakan aksi ubah untuk memperbarui informasi. Untuk tabungan yang beratnya masih nol, pemilik dapat memakai Saldo awal.", "Dari kas, buka aksi cek nilai emas. Periksa total nilai kas, saldo rupiah, berat emas, harga, dan estimasi untung/rugi.", "Periksa sumber dan waktu harga. Ambil harga buyback yang tersedia atau simpan harga manual untuk kas terkait jika diperlukan."],
+    "example": "Masukkan berat 0,5 gram dan label Emas Antam untuk mencatat kepemilikan setengah gram.",
+    "note": "Berat mendukung empat desimal dan desimal koma. Pembuatan mencatat berat sebagai saldo awal tanpa modal. Tombol Beli emas, Jual emas, dan Histori belum tersedia pada halaman. Estimasi harga tidak membuat transaksi; saat layanan harga gagal, aplikasi dapat memakai snapshot terakhir."
+  },
+  {
+    "id": "laporan", "category": "Ringkasan", "title": "Membaca dan mengekspor laporan",
+    "intro": "Lihat arus uang pada periode tertentu dan simpan laporan dalam PDF atau Excel.",
+    "steps": ["Buka Laporan, pilih harian, bulanan, tahunan, atau rentang tanggal khusus.", "Tentukan filter kas dan dompet sesuai kebutuhan. Gunakan navigasi untuk berpindah periode dan tunggu pemrosesan selesai.", "Baca saldo awal, pemasukan, pengeluaran, akumulasi, dan saldo akhir, lalu periksa rincian transaksi.", "Buka tab aktivitas untuk melihat pengelompokan pemasukan/pengeluaran dan persentasenya. Buka kelompok aktivitas untuk membaca rinciannya.", "Gunakan ekspor PDF untuk laporan lanskap atau Excel untuk file XLSX sesuai periode dan filter yang dipilih."],
+    "example": "Pilih laporan bulanan dan kas Rumah Tangga untuk meninjau aktivitas pengeluaran terbesar bulan ini.",
+    "note": "Periksa filter sebelum mengekspor. Dompet anggota lain pada kas bersama disamarkan, termasuk dalam hasil ekspor."
+  },
+  {
+    "id": "utang-piutang", "category": "Pencatatan", "title": "Mencatat utang dan piutang",
+    "intro": "Utang adalah kewajiban Anda kepada pihak lain; piutang adalah uang yang perlu dibayar pihak lain kepada Anda.",
+    "steps": ["Buka menu Utang atau Piutang sesuai jenis catatan, lalu pilih tambah.", "Isi nama pihak terkait, nominal awal, tanggal pencatatan, dan tanggal jatuh tempo jika diperlukan.", "Buka Detail untuk mencatat penambahan nominal atau pembayaran. Isi nominal, tanggal, serta deskripsi yang tersedia.", "Periksa riwayat dan saldo tersisa untuk mengetahui status selesai atau belum selesai. Gunakan pencarian nama untuk menemukan pihak tertentu.", "Jika terdapat kesalahan, gunakan aksi ubah/hapus pada catatan atau riwayat yang sesuai dan periksa kembali sisa nominal."],
+    "example": "Piutang Rp500.000 kepada Budi dengan pembayaran Rp200.000 menyisakan Rp300.000 yang belum diterima.",
+    "note": "Pilih menu yang tepat sebelum mencatat agar utang dan piutang tidak tertukar. Periksa riwayat pembayaran sebelum menghapus catatan."
+  },
+  {
+    "id": "langganan", "category": "Akun", "title": "Premium, voucher, dan bukti pembayaran",
+    "intro": "Bandingkan manfaat akun dan ajukan langganan melalui pembayaran manual yang tersedia.",
+    "steps": ["Buka Langganan Premium dan bandingkan kartu Reguler serta Premium.", "Buat order, pilih paket dan metode pembayaran, lalu masukkan kode voucher jika ada. Periksa diskon dan total pembayaran sebelum melanjutkan.", "Ikuti instruksi tujuan pembayaran pada order, lalu lakukan pembayaran sesuai total yang tercantum.", "Gunakan Konfirmasi pembayaran untuk mengunggah bukti JPG, JPEG, PNG, atau PDF maksimal 3 MB, dan tambahkan catatan jika diperlukan.", "Pantau status order dan notifikasi. Jika ditolak, baca catatan admin dan gunakan Kirim ulang bukti setelah diperbaiki. Gunakan Batalkan jika tersedia untuk order yang tidak dilanjutkan."],
+    "example": "Masukkan voucher sebelum membuat order dan bayar sesuai total setelah diskon yang tercatat pada order tersebut.",
+    "note": "Premium aktif memungkinkan kas/dompet tambahan serta pembuatan kolaborasi. Aktivasi menunggu persetujuan pembayaran; perpanjangan mempertahankan sisa masa aktif. Order tidak kedaluwarsa otomatis. Ketentuan masa berlaku dan pemakaian ulang voucher mengikuti kode yang digunakan."
+  },
+  {
+    "id": "profil-notifikasi", "category": "Akun", "title": "Profil, notifikasi, dan navigasi cepat",
+    "intro": "Perbarui informasi akun dan gunakan fitur pendukung untuk mengakses aplikasi dengan nyaman.",
+    "steps": ["Buka Akun Saya untuk memperbarui nama, email, nomor HP, dan penggunaan aplikasi, kemudian simpan perubahan.", "Gunakan bagian perubahan password bila perlu mengganti password akun.", "Periksa tipe akun dan masa aktif Premium pada akun atau dashboard.", "Buka notifikasi dalam aplikasi untuk membaca pembaruan terkait pembayaran dan status yang tersedia.", "Gunakan Spotlight untuk mencari menu berdasarkan namanya, lalu pilih hasil yang sesuai. Klik tombol berikon tanda tanya di sisi kanan topbar untuk membuka panduan di tab baru, langsung pada topik yang sesuai dengan halaman saat ini. Misalnya, dari Dompet Anda langsung menuju panduan dompet. Halaman tanpa topik khusus membuka daftar tutorial. Anda juga dapat membuka Tutorial Penggunaan pada navigasi. Sidebar tutorial menampilkan nomor urut, posisi Topik X dari Y yang ditampilkan, dan penanda Sedang dibaca yang mengikuti topik saat halaman digulir."],
+    "example": "Cari Laporan melalui Spotlight ketika ingin langsung memeriksa ringkasan bulanan.",
+    "note": "Akun Reguler atau Premium yang kedaluwarsa memiliki pembatasan pengelolaan kas dan dompet tambahan. Periksa penanda akses dan status langganan jika suatu aksi tidak tersedia."
+  }
+]

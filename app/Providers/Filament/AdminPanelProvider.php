@@ -11,6 +11,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -38,6 +39,17 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->maxContentWidth(Width::Full)
             ->login()
+            ->navigationItems([
+                NavigationItem::make('Tutorial Penggunaan')
+                    ->url(fn (): string => route('tutorial'))
+                    ->icon('heroicon-o-book-open')
+                    ->sort(100)
+                    ->visible(fn (): bool => ! auth()->user()?->isAdmin()),
+            ])
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn (): View => view('filament.components.tutorial-link'),
+            )
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Langganan')
@@ -57,6 +69,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
                 fn (): View => view('filament.components.navbar-user-name'),
+            )
+            ->renderHook(
+                PanelsRenderHook::GLOBAL_SEARCH_AFTER,
+                fn (): View => view('filament.components.topbar-tutorial'),
             )
             ->plugins([
                 SpotlightPlugin::make(),

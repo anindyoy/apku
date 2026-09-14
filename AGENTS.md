@@ -8,6 +8,14 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 - Jika suatu perubahan menambah, mengubah, menonaktifkan, atau menghapus fitur aplikasi, perbarui [`FITUR_APLIKASI.md`](FITUR_APLIKASI.md) agar tetap sesuai dengan implementasi terbaru.
 - Jika terdapat perbedaan antara rangkuman fitur dan implementasi, source code serta test yang berlaku menjadi sumber kebenaran; sesuaikan rangkuman fitur dalam pekerjaan yang sama.
 
+## Pemeliharaan Tutorial Pengguna
+
+- Setiap penambahan, perubahan, penonaktifan, atau penghapusan fitur yang dapat diakses pengguna non-admin wajib disertai pembaruan [`resources/content/tutorial.json`](resources/content/tutorial.json) dalam pekerjaan yang sama, tanpa menunggu permintaan terpisah dari pengguna.
+- Baca tutorial yang berkaitan sebelum mengubah fitur. Sesuaikan langkah penggunaan, nama menu atau tombol, contoh, batasan, dan catatan hak akses dengan implementasi terbaru, termasuk perbedaan akun Reguler, Premium, serta akses kas bersama.
+- Tambahkan topik untuk fitur baru yang belum tercakup. Untuk fitur yang dinonaktifkan atau dihapus, perbarui atau hapus petunjuk terkait agar tutorial tidak mengarahkan pengguna ke aksi yang tidak tersedia. Fitur khusus admin tidak dimasukkan ke tutorial publik.
+- Pertahankan struktur JSON dan penyajian tutorial yang terformat. Jika struktur atau jumlah topik berubah, sesuaikan tampilan, test tutorial, dan keterangan terkait di [`FITUR_APLIKASI.md`](FITUR_APLIKASI.md). Jalankan test tutorial yang terdampak menggunakan filter sesuai aturan Testing.
+- Source code dan test yang berlaku menjadi sumber kebenaran. Pembaruan tutorial merupakan bagian dari penyelesaian fitur, bukan pekerjaan lanjutan yang ditunda.
+
 ## Klarifikasi Prompt
 
 - Jika prompt pengguna belum memuat konteks yang diperlukan untuk memberikan jawaban atau menjalankan tugas secara akurat, ajukan pertanyaan klarifikasi kepada pengguna sebelum melanjutkan. Pertanyaan harus spesifik pada informasi yang masih kurang dan relevan dengan tugas.
