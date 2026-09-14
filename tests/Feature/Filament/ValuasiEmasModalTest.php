@@ -4,23 +4,23 @@ use App\Models\BukuKas;
 use App\Services\HargaEmasService;
 use App\Services\TabunganEmasService;
 use Illuminate\Support\Carbon;
+use Symfony\Component\Process\Process;
 
 test('modal valuasi emas memakai konfigurasi sumber dari environment', function () {
-    $environment = \Illuminate\Support\Env::getRepository();
-    $original = $environment->get('HARGA_EMAS_SOURCE');
+    $original = \Illuminate\Support\Env::get('HARGA_EMAS_SOURCE');
+    $script = <<<'PHP'
+    require 'vendor/autoload.php';
+    $services = require 'config/services.php';
+    echo $services['harga_emas']['source'];
+    PHP;
 
-    try {
-        $environment->set('HARGA_EMAS_SOURCE', 'https://example.com/sumber-emas');
-        $services = require config_path('services.php');
+    $process = new Process([PHP_BINARY, '-r', $script], base_path(), [
+        'HARGA_EMAS_SOURCE' => 'https://example.com/sumber-emas',
+    ]);
+    $process->mustRun();
 
-        expect($services['harga_emas']['source'])->toBe('https://example.com/sumber-emas');
-    } finally {
-        if ($original === null) {
-            $environment->clear('HARGA_EMAS_SOURCE');
-        } else {
-            $environment->set('HARGA_EMAS_SOURCE', $original);
-        }
-    }
+    expect($process->getOutput())->toBe('https://example.com/sumber-emas')
+        ->and(\Illuminate\Support\Env::get('HARGA_EMAS_SOURCE'))->toBe($original);
 });
 
 test('modal valuasi emas merender ringkasan dan indikator hasil', function ($hasil, $trend, $status, $label) {
