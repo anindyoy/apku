@@ -42,6 +42,7 @@ return [
 
     'harga_emas' => [
         'url' => env('HARGA_EMAS_URL', 'https://logam-mulia-api.iamutaki.workers.dev/api/prices/anekalogam'),
+        'source' => env('HARGA_EMAS_SOURCE', 'https://anekalogam.co.id/id'),
         'timeout' => env('HARGA_EMAS_TIMEOUT', 8),
         'cache_hours' => env('HARGA_EMAS_CACHE_HOURS', 3),
     ],

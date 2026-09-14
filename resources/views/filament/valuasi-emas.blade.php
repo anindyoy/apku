@@ -28,6 +28,8 @@
     .valuasi-emas .emas-result[data-trend="profit"] { color: #047857; }
     .valuasi-emas .emas-result[data-trend="loss"], .valuasi-emas .emas-error { color: #be123c; }
     .valuasi-emas .emas-footer { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; border-top: 1px solid var(--emas-border); padding-top: 1rem; }
+    .valuasi-emas .emas-source { text-decoration: underline; text-underline-offset: .2em; }
+    .valuasi-emas .emas-source:hover { color: var(--emas-text); }
     .valuasi-emas .emas-badge { display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px; padding: .25rem .65rem; background: var(--emas-surface); color: var(--emas-text); font-size: .75rem; font-weight: 600; }
     .valuasi-emas .emas-error { padding: 1rem; border: 1px solid currentColor; border-radius: .85rem; display: flex; align-items: flex-start; gap: .75rem; }
     .dark .valuasi-emas { --emas-border: #374151; --emas-muted: #9ca3af; --emas-text: #f3f4f6; --emas-surface: #ffffff08; }
@@ -69,7 +71,13 @@
 
         <div class="emas-footer">
             <span class="emas-badge"><x-heroicon-o-clock />{{ match ($harga['status']) { 'terbaru' => 'Harga terbaru', 'manual' => 'Harga manual', 'cache' => 'Harga tersimpan', default => $harga['status'] } }}</span>
-            <span class="emas-meta">Sumber: {{ $harga['provider'] }}</span>
+            <span class="emas-meta">Sumber:
+                @if ($harga['status'] === 'manual')
+                    {{ $harga['provider'] }}
+                @else
+                    <a class="emas-source" href="{{ config('services.harga_emas.source') }}" target="_blank" rel="noopener noreferrer">{{ $harga['provider'] }}</a>
+                @endif
+            </span>
             <span class="emas-meta">Berlaku {{ $harga['berlaku_pada']->format('d M Y H:i') }}</span>
         </div>
     @endif

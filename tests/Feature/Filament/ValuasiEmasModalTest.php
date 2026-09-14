@@ -5,7 +5,27 @@ use App\Services\HargaEmasService;
 use App\Services\TabunganEmasService;
 use Illuminate\Support\Carbon;
 
+test('modal valuasi emas memakai konfigurasi sumber dari environment', function () {
+    $environment = \Illuminate\Support\Env::getRepository();
+    $original = $environment->get('HARGA_EMAS_SOURCE');
+
+    try {
+        $environment->set('HARGA_EMAS_SOURCE', 'https://example.com/sumber-emas');
+        $services = require config_path('services.php');
+
+        expect($services['harga_emas']['source'])->toBe('https://example.com/sumber-emas');
+    } finally {
+        if ($original === null) {
+            $environment->clear('HARGA_EMAS_SOURCE');
+        } else {
+            $environment->set('HARGA_EMAS_SOURCE', $original);
+        }
+    }
+});
+
 test('modal valuasi emas merender ringkasan dan indikator hasil', function ($hasil, $trend, $status, $label) {
+    config(['services.harga_emas.url' => 'https://logam-mulia-api.iamutaki.workers.dev/api/prices/anekalogam']);
+    config(['services.harga_emas.source' => 'https://anekalogam.co.id/id']);
     $kas = new BukuKas;
     $this->mock(HargaEmasService::class)->shouldReceive('hargaBuyback')->once()->with($kas, true)->andReturn([
         'harga_per_gram' => 1200000,
@@ -34,6 +54,15 @@ test('modal valuasi emas merender ringkasan dan indikator hasil', function ($has
         ->and($xpath->evaluate('string(//*[@data-value="result"])'))->toBe(($hasil > 0 ? '+' : ($hasil < 0 ? '−' : '')).'Rp '.number_format(abs($hasil), 0, ',', '.'))
         ->and($xpath->evaluate('normalize-space(//*[@class="emas-badge"])'))->toBe($label)
         ->and($xpath->evaluate('count(//*[@role="alert"])'))->toBe(0.0);
+
+    if ($status === 'manual') {
+        expect($xpath->evaluate('count(//a[@class="emas-source"])'))->toBe(0.0);
+    } else {
+        expect($xpath->evaluate('string(//a[@class="emas-source"]/@href)'))->toBe(config('services.harga_emas.source'))
+            ->and($xpath->evaluate('string(//a[@class="emas-source"]/@target)'))->toBe('_blank')
+            ->and($xpath->evaluate('string(//a[@class="emas-source"]/@rel)'))->toBe('noopener noreferrer')
+            ->and($xpath->evaluate('normalize-space(//a[@class="emas-source"])'))->toBe('Penyedia uji');
+    }
 })->with([
     'untung dengan harga terbaru' => [500000, 'profit', 'terbaru', 'Harga terbaru'],
     'rugi dengan harga tersimpan' => [-500000, 'loss', 'cache', 'Harga tersimpan'],
