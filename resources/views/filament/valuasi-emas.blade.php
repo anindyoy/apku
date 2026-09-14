@@ -75,7 +75,7 @@
                 @if ($harga['status'] === 'manual')
                     {{ $harga['provider'] }}
                 @else
-                    <a class="emas-source" href="{{ config('services.harga_emas.source') }}" target="_blank" rel="noopener noreferrer">{{ $harga['provider'] }}</a>
+                    <a class="emas-source" href="{{ app(\App\Services\PengaturanHargaEmas::class)->semua()['source'] }}" target="_blank" rel="noopener noreferrer">{{ $harga['provider'] }}</a>
                 @endif
             </span>
             <span class="emas-meta">Berlaku {{ $harga['berlaku_pada']->format('d M Y H:i') }}</span>

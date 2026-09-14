@@ -15,10 +15,13 @@ class HargaEmasService
     /** @return array{harga_per_gram:int, berlaku_pada:Carbon, provider:string, sumber:string, status:string} */
     public function hargaBuyback(BukuKas $bukuKas, bool $segarkan = false): array
     {
+        $pengaturan = app(PengaturanHargaEmas::class)->semua();
+        $cacheKey = app(PengaturanHargaEmas::class)->kunciCache($pengaturan);
+
         try {
             $data = $segarkan
-                ? $this->ambilDariApi()
-                : Cache::remember('harga-emas:buyback', now()->addHours((int) config('services.harga_emas.cache_hours', 3)), fn (): array => $this->ambilDariApi());
+                ? $this->ambilDariApi($pengaturan)
+                : Cache::remember($cacheKey, now()->addHours((int) $pengaturan['cache_hours']), fn (): array => $this->ambilDariApi($pengaturan));
 
             $snapshot = HargaEmas::firstOrCreate([
                 'provider' => $data['provider'],
@@ -76,12 +79,12 @@ class HargaEmasService
     }
 
     /** @return array{harga_per_gram:int, berlaku_pada:Carbon, provider:string, metadata:array<string,mixed>} */
-    private function ambilDariApi(): array
+    private function ambilDariApi(array $pengaturan): array
     {
         $response = Http::acceptJson()
-            ->timeout((int) config('services.harga_emas.timeout', 8))
+            ->timeout((int) $pengaturan['timeout'])
             ->retry(2, 250)
-            ->get((string) config('services.harga_emas.url'))
+            ->get((string) $pengaturan['url'])
             ->throw()
             ->json();
 

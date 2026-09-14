@@ -26,6 +26,11 @@ test('modal valuasi emas memakai konfigurasi sumber dari environment', function 
 test('modal valuasi emas merender ringkasan dan indikator hasil', function ($hasil, $trend, $status, $label) {
     config(['services.harga_emas.url' => 'https://logam-mulia-api.iamutaki.workers.dev/api/prices/anekalogam']);
     config(['services.harga_emas.source' => 'https://anekalogam.co.id/id']);
+    $source = config('services.harga_emas.source');
+    if ($status === 'cache') {
+        $source = 'https://example.com/sumber-dari-setting';
+        \App\Models\ApplicationSetting::create(['key' => 'harga_emas', 'value' => ['source' => $source]]);
+    }
     $kas = new BukuKas;
     $this->mock(HargaEmasService::class)->shouldReceive('hargaBuyback')->once()->with($kas, true)->andReturn([
         'harga_per_gram' => 1200000,
@@ -58,7 +63,7 @@ test('modal valuasi emas merender ringkasan dan indikator hasil', function ($has
     if ($status === 'manual') {
         expect($xpath->evaluate('count(//a[@class="emas-source"])'))->toBe(0.0);
     } else {
-        expect($xpath->evaluate('string(//a[@class="emas-source"]/@href)'))->toBe(config('services.harga_emas.source'))
+        expect($xpath->evaluate('string(//a[@class="emas-source"]/@href)'))->toBe($source)
             ->and($xpath->evaluate('string(//a[@class="emas-source"]/@target)'))->toBe('_blank')
             ->and($xpath->evaluate('string(//a[@class="emas-source"]/@rel)'))->toBe('noopener noreferrer')
             ->and($xpath->evaluate('normalize-space(//a[@class="emas-source"])'))->toBe('Penyedia uji');

@@ -62,6 +62,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Layanan internal pembelian dan penjualan emas beserta riwayatnya tetap tersedia; pembelian mengurangi saldo rupiah kas dan dompet, sedangkan penjualan menambah saldo rupiah secara atomik.
 - Modal emas mencakup harga dasar, biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
 - Pengguna dapat mengambil harga buyback emas dari endpoint publik, menggunakan snapshot terakhir ketika layanan gagal, atau menyimpan harga manual privat untuk kas terkait.
+- Admin dapat mengubah URL API, URL sumber, timeout (1–60 detik), dan durasi cache harga emas (1–168 jam) melalui Setting. Nilai disimpan di database dan berlaku global; kolom kosong mengikuti default `services.harga_emas`. Perubahan pengaturan membatalkan cache harga terkait dan digunakan pada permintaan berikutnya.
 - Kestabilan endpoint harga emas dipantau setiap enam jam melalui smoke test terpisah yang memvalidasi ketersediaan, waktu respons, struktur data, dan kesegaran harga buyback.
 - Setelah pemantauan berhasil, workflow menghapus run sukses sebelumnya agar daftar GitHub Actions tidak menumpuk. Run terbaru dan seluruh run gagal tetap disimpan; kegagalan pembersihan tidak menggagalkan hasil pemantauan.
 - Kas yang masih memiliki emas hanya dapat dihapus setelah tabungan emasnya ikut dipindahkan ke kas lain milik pengguna yang sama.
@@ -203,7 +204,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Daftar kolaborator menyediakan tombol **Salin link** pada setiap kolaborator publik, dengan notifikasi keberhasilan atau kegagalan penyalinan, tanpa kolom URL terpisah. Tanggal mulai dan berakhir pada tabel ditampilkan tanpa jam. Halaman publik menampilkan saldo kas, transaksi berhalaman, filter bulan, pencarian berdasarkan deskripsi/aktivitas/jenis transaksi, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama dompet dan identitas pengguna tidak ditampilkan. Saat kata pencarian diisi, pencarian mencakup seluruh tanggal pada kas tersebut tanpa dibatasi bulan terpilih dan tetap dipertahankan saat berpindah halaman. Menghapus pencarian mengembalikan filter bulan; ringkasan total bulanan tetap mengikuti bulan terpilih.
 - Daftar tabungan emas dikelompokkan berdasarkan kas dengan total gram seluruh tabungan pada setiap grup, tanpa kolom Kas terpisah. Daftar menampilkan tanggal **Dibeli pada**, harga beli, dan keterangan. Tanggal pembelian dapat diisi saat membuat dan mengubah tabungan, dengan nilai awal waktu sekarang. Harga beli dan keterangan opsional. Berat ditampilkan tanpa nol desimal berlebih, misalnya `1` atau `0,5` gram; total modal tidak ditampilkan pada daftar.
 - Aksi Beli emas, Jual emas, dan Histori tidak tersedia pada halaman tabungan emas.
-- Aksi cek nilai emas menampilkan total nilai kas dalam ringkasan beraksen emas, kartu nilai emas dan saldo rupiah, rincian berat/harga/modal, serta estimasi untung/rugi berwarna sesuai hasil. Modal responsif mendukung mode gelap dan menampilkan status sumber harga serta waktu berlakunya. Label sumber harga API menjadi tautan ke URL sumber dari `HARGA_EMAS_SOURCE` melalui konfigurasi `services.harga_emas.source` dan dibuka di tab baru; sumber manual tetap berupa teks.
+- Aksi cek nilai emas menampilkan total nilai kas dalam ringkasan beraksen emas, kartu nilai emas dan saldo rupiah, rincian berat/harga/modal, serta estimasi untung/rugi berwarna sesuai hasil. Modal responsif mendukung mode gelap dan menampilkan status sumber harga serta waktu berlakunya. Label sumber harga API menjadi tautan ke URL sumber dari Setting, dengan default `services.harga_emas.source` (`HARGA_EMAS_SOURCE`), dan dibuka di tab baru; sumber manual tetap berupa teks.
 - Form tabungan emas menempatkan berat gram setelah Kas, tanpa nilai default, dan menerima desimal koma seperti `0,5`. Aksi saldo awal tersedia untuk tabungan yang beratnya masih nol.
 - Halaman kas menyediakan pembuatan, perubahan, pemilihan kas utama/default, dan penghapusan kas; kas berisi transaksi atau emas menyediakan alur pemindahan sebelum penghapusan.
 
@@ -255,8 +256,9 @@ Fitur berikut hanya tersedia untuk admin:
 - Melihat status verifikasi email.
 - Dashboard admin menjadi halaman utama setelah login dan hanya menampilkan data agregat: jumlah pengguna, jumlah akun premium aktif, serta jumlah pembayaran yang menunggu verifikasi.
 - Daftar pengguna tidak menampilkan jumlah kas, transaksi, atau utang-piutang dan tidak menyediakan aksi impersonasi.
-- Navigasi admin difokuskan pada dashboard, pengguna, dan operasional langganan. Menu transaksi, pencarian transaksi, laporan, kas, dompet, aktivitas, utang, piutang, dan Akun Saya disembunyikan untuk admin.
+- Navigasi admin difokuskan pada dashboard, pengguna, operasional langganan, dan Setting. Menu transaksi, pencarian transaksi, laporan, kas, dompet, aktivitas, utang, piutang, dan Akun Saya disembunyikan untuk admin.
 - Admin dapat membuat, mengubah, dan menghapus pengguna serta mengatur tipe akun dan masa aktif.
+- Halaman **Setting** (`/admin/setting`) khusus admin menyediakan form pengaturan harga emas. Nilai default ditampilkan sebagai placeholder; kosongkan kolom dan simpan untuk kembali memakai default.
 
 ### 12. Fitur pendukung
 
