@@ -10,6 +10,41 @@ use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
+test('share buku hanya mengizinkan pembuatan selama premium aktif', function (?int $days, string $role, bool $allowed) {
+    $user = User::factory()->create([
+        'role' => $role,
+        'masa_aktif' => $days === null ? null : today()->addDays($days),
+    ]);
+
+    expect($user->can('create', ShareBuku::class))->toBe($allowed);
+})->with([
+    'reguler' => [null, 'reguler', false],
+    'premium kedaluwarsa' => [-1, 'reguler', false],
+    'premium berakhir hari ini' => [0, 'reguler', true],
+    'premium aktif' => [30, 'reguler', true],
+    'admin' => [30, 'admin', false],
+]);
+
+test('share buku menolak aksi tambah akun tanpa premium aktif', function (?int $days, bool $public) {
+    Notification::fake();
+    $user = createRegularUserWithBukuKas();
+    $user->update(['masa_aktif' => $days === null ? null : today()->addDays($days)]);
+    $member = User::factory()->create();
+    $kas = $user->buku_kas()->first();
+
+    Livewire::actingAs($user)->test(ListShareBukus::class)
+        ->assertActionHidden('create')
+        ->call('mountAction', 'create', [], ['data' => [
+            'buku_kas_id' => $kas->id,
+            'user_id' => $public ? null : $member->email,
+            'privilege' => 'viewer',
+        ]])
+        ->assertActionNotMounted();
+
+    $this->assertDatabaseMissing('share_buku', ['buku_kas_id' => $kas->id]);
+    Notification::assertNothingSent();
+})->with([null, -1])->with([true, false]);
+
 test('share buku resource menggunakan label kolaborator kas', function () {
     expect(ShareBukuResource::getNavigationLabel())->toBe('Kolaborator Kas')
         ->and(ShareBukuResource::getModelLabel())->toBe('Kolaborator Kas')
@@ -91,6 +126,7 @@ test('share buku resource menolak duplikat melalui modal', function () {
 
 test('share buku resource dapat mencabut akses melalui modal', function () {
     $user = createRegularUserWithBukuKas();
+    $user->update(['masa_aktif' => null]);
     $share = ShareBuku::factory()->create(['buku_kas_id' => $user->buku_kas()->first()->id]);
 
     Livewire::actingAs($user)
@@ -138,6 +174,7 @@ test('share buku email menolak email yang tidak dapat menjadi kolaborator', func
 
 test('share buku email pada modal edit tetap milik kolaborator semula', function () {
     $owner = createRegularUserWithBukuKas();
+    $owner->update(['masa_aktif' => today()->subDay()]);
     $member = User::factory()->create();
     $other = User::factory()->create();
     $share = ShareBuku::factory()->create(['buku_kas_id' => $owner->buku_kas()->first()->id, 'user_id' => $member->id]);

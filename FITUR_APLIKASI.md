@@ -51,7 +51,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Menentukan kas utama/default.
 - Menghapus kas kosong secara langsung.
 - Memindahkan seluruh transaksi dan saldo ke kas lain sebelum menghapus kas yang masih berisi transaksi.
-- Melalui fitur **Kolaborator Kas**, pemilik dapat membagikan kas kepada pengguna APKu lain yang sudah terdaftar dan terverifikasi.
+- Melalui fitur **Kolaborator Kas**, hanya pemilik dengan masa aktif premium yang masih berlaku dapat membuat kolaborasi kas, baik kepada pengguna APKu lain yang sudah terdaftar dan terverifikasi maupun melalui link publik. Tombol tambah tidak tersedia untuk akun reguler atau premium kedaluwarsa, dan pembuatan juga ditolak oleh otorisasi server. Kolaborasi yang sudah ada tetap dapat dikelola dan dicabut oleh pemilik.
 - Email kolaborator boleh kosong untuk membuat link kas publik bertoken acak. Akses publik selalu **Viewer**, tanpa login, dan diperiksa pada setiap permintaan berdasarkan tanggal mulai serta berakhir. Mencabut akses langsung menonaktifkan link; kolaborasi dengan email tetap privat.
 - Email kolaborator diketik melalui input teks tanpa daftar email pengguna. Setelah input ditinggalkan, status terdaftar ditampilkan berwarna hijau atau belum terdaftar berwarna merah. Jika diisi, email yang belum terdaftar gagal validasi; pembatasan akun terverifikasi, bukan diri sendiri, dan bukan admin tetap berlaku.
 - Kolaborator memiliki peran **Viewer** atau **Editor**, dengan masa akses yang dapat dijadwalkan atau dibatasi. Input **Mulai Berlaku** dan **Berakhir Pada** menggunakan tanggal saja tanpa jam; tanggal berakhir opsional dan harus setelah tanggal mulai.

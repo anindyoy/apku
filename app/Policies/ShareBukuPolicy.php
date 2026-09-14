@@ -14,7 +14,7 @@ class ShareBukuPolicy
 
     public function create(User $user): bool
     {
-        return ! $user->isAdmin();
+        return ! $user->isAdmin() && $user->masaAktifBerlaku();
     }
 
     public function view(User $user, ShareBuku $share): bool
