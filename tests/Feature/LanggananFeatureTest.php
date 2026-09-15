@@ -236,20 +236,52 @@ test('user dapat membuka halaman order sedangkan admin tidak dapat membuat order
         ->assertForbidden();
 })->group('langganan');
 
-test('kartu perbandingan akun langganan tampil untuk user dan tersembunyi bagi admin', function (string $role) {
+test('tabel perbandingan akun langganan sesuai batasan dan tersembunyi bagi admin', function (string $role) {
     $user = User::factory()->create(['role' => $role]);
     $component = Livewire::actingAs($user)->test(ListLangganans::class)->assertSuccessful();
     $document = new DOMDocument;
     @$document->loadHTML(mb_convert_encoding($component->html(), 'HTML-ENTITIES', 'UTF-8'));
     $xpath = new DOMXPath($document);
-    $cards = $xpath->query('//article[@data-plan]');
+    $tables = $xpath->query('//table[@data-testid="plan-comparison"]');
 
-    expect($cards->length)->toBe($role === 'admin' ? 0 : 2);
+    expect($tables->length)->toBe($role === 'admin' ? 0 : 1);
 
     if ($role === 'user') {
-        expect($xpath->query('//article[@data-plan="reguler"]//li')->length)->toBe(3)
-            ->and($xpath->query('//article[@data-plan="premium"]//li')->length)->toBe(3)
-            ->and($xpath->query('//h2[@id="subscription-plans-title"]')->item(0)->textContent)->toBe('Pilih akun yang sesuai kebutuhan Anda')
-            ->and($xpath->query('//div[@class="plan-shared"]/span')->length)->toBe(2);
+        $table = $tables->item(0);
+        expect($xpath->query('.//thead//th[@scope="col"]', $table))->toHaveCount(3);
+        expect($xpath->query('.//tbody/tr', $table))->toHaveCount(9);
+        expect($table->textContent)->not->toContain(
+            'Aktivitas pemasukan dan pengeluaran',
+            'Transfer antar-kas dan antar-dompet',
+            'Pencatatan pemasukan dan pengeluaran',
+            'Menerima akses kas bersama',
+            'Mengelola atau mencabut kolaborasi milik sendiri yang sudah ada',
+        );
+        $expected = [
+            'Jumlah kas' => ['Maksimal 2', 'Tidak terbatas'],
+            'Jumlah Dompet' => ['Maksimal 2', 'Tidak terbatas'],
+            'Membuat kolaborasi kas (Viewer / Editor)' => ['Tidak tersedia', 'Tersedia'],
+            'Membuat link kas publik tanpa login (hanya lihat)' => ['Tidak tersedia', 'Tersedia'],
+        ];
+        foreach ($xpath->query('.//tbody/tr', $table) as $row) {
+            $label = $xpath->query('./th[@scope="row"]', $row)->item(0)->textContent;
+            $cells = $xpath->query('./td', $row);
+            expect($cells)->toHaveCount(2);
+            $values = [];
+            foreach ($cells as $cell) {
+                $status = $xpath->query('./span[@role="img"]', $cell)->item(0);
+                if ($status !== null) {
+                    expect(trim($cell->textContent))->toBe('');
+                    expect($xpath->query('.//*[local-name()="svg" and @aria-hidden="true"]', $status))->toHaveCount(1);
+                }
+                $values[] = $status?->getAttribute('aria-label') ?? trim($cell->textContent);
+            }
+            expect($values)
+                ->toBe($expected[$label] ?? ['Tersedia', 'Tersedia']);
+        }
+        expect($xpath->query('.//thead', $table)->item(0)->textContent)
+            ->toContain('Free (Reguler)', 'Premium', 'Selama masa aktif berlaku');
+        expect($xpath->query('//ul[@id="plan-access-notes"]')->item(0)->textContent)
+            ->toContain('tidak mengurangi kuota kas sendiri', 'Saat Premium berakhir', 'Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik', 'hanya tersedia bagi pemilik kas');
     }
 })->with(['user', 'admin'])->group('langganan');
