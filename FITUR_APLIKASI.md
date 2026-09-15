@@ -263,6 +263,7 @@ Fitur berikut hanya tersedia untuk admin:
 ### 12. Fitur pendukung
 
 - Antarmuka berbahasa Indonesia.
+- Nominal rupiah ditampilkan tanpa digit desimal, termasuk total langganan, harga paket, audit saldo, dan harga beli emas. Perubahan format tampilan tidak mengubah nilai tersimpan atau presisi berat emas.
 - Halaman publik **Tutorial Penggunaan** di `/tutorial` dapat dibaca tanpa login, dengan 18 topik fitur pengguna non-admin (Reguler, Premium, dan kas bersama), langkah bernomor, contoh, serta catatan hak akses. Konten dikelola melalui `resources/content/tutorial.json` dan ditampilkan sebagai kartu responsif dengan dukungan tema gelap, daftar isi, dan pencarian. Tautan tersedia pada halaman login dan navigasi pengguna non-admin, serta tombol berikon tanda tanya di sisi kanan topbar panel untuk pengguna yang sudah login, termasuk admin. Tombol tutorial di topbar membuka panduan di tab baru dan langsung menuju topik sesuai URL halaman pengguna saat diklik, termasuk halaman detail/tambah dan perpindahan navigasi panel. Sidebar tutorial menampilkan nomor urut, posisi topik dari jumlah hasil yang ditampilkan, dan penanda aktif yang mengikuti tautan topik serta scroll. Topik tujuan ditandai secara visual; halaman tanpa pemetaan membuka daftar tutorial.
 - Seluruh input pilihan kas dan dompet menggunakan dropdown tanpa pencarian, termasuk pilihan kas kolaborator dan tujuan pemindahan sebelum penghapusan.
 - Pencarian cepat menu melalui Spotlight.
@@ -270,11 +271,12 @@ Fitur berikut hanya tersedia untuk admin:
 
 ### 13. Langganan premium
 
-- User dapat membandingkan benefit akun Reguler dan Premium melalui dua kartu responsif di atas tabel langganan, dengan aksen Premium, rincian batas kas serta dompet, dan ringkasan fitur bersama. Tampilan mendukung mode gelap.
+- User dapat membandingkan benefit akun Reguler dan Premium melalui dua kartu responsif di atas daftar kartu langganan, dengan aksen Premium, rincian batas kas serta dompet, dan ringkasan fitur bersama. Tampilan mendukung mode gelap.
 - Form pengiriman bukti pembayaran mendukung JPG, JPEG, PNG, atau PDF dengan ukuran maksimal 3 MB.
 - User dan admin menerima notifikasi dalam aplikasi saat pembayaran dikonfirmasi, disetujui, atau ditolak sesuai perannya.
 - Pengguna dapat membuat order dengan memilih paket dan metode pembayaran yang tersedia serta memasukkan kode voucher.
 - Riwayat order pengguna menampilkan order miliknya; admin dapat melihat seluruh order dan menyetujui atau menolak pembayaran yang menunggu verifikasi.
+- Riwayat langganan ditampilkan sebagai daftar kartu dengan dua kartu per baris dan isi setiap kartu juga dua kolom mulai layar tablet; kedua grid menjadi satu kolom di ponsel, mendukung mode gelap. Setiap kartu memuat kode dan tanggal order, paket serta harga tanpa atribut durasi, total pembayaran, voucher (hanya jika terisi), diskon, detail pembayaran, status, masa aktif, dan catatan admin. Identitas user hanya ditampilkan bagi admin. Pencarian, filter status, pengurutan, paginasi, dan aksi pembayaran atau verifikasi tetap tersedia sesuai hak akses.
 - Admin memiliki halaman pengelolaan paket langganan, rekening atau metode pembayaran manual, serta voucher dan kode uniknya.
 
 ### 14. Dashboard pengguna

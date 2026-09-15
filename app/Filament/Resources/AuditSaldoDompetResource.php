@@ -35,11 +35,11 @@ class AuditSaldoDompetResource extends Resource
             ->columns([
                 TextColumn::make('tanggal')->dateTime('d M Y, H:i')->sortable(),
                 TextColumn::make('bukuKas.nama_buku')->label('Kas'),
-                TextColumn::make('total_saldo_aplikasi')->label('Saldo aplikasi')->money('IDR'),
-                TextColumn::make('total_saldo_riil')->label('Saldo riil')->money('IDR'),
+                TextColumn::make('total_saldo_aplikasi')->label('Saldo aplikasi')->money('IDR', decimalPlaces: 0),
+                TextColumn::make('total_saldo_riil')->label('Saldo riil')->money('IDR', decimalPlaces: 0),
                 TextColumn::make('total_selisih')
                     ->label('Selisih')
-                    ->money('IDR')
+                    ->money('IDR', decimalPlaces: 0)
                     ->color(fn (int $state): string => $state === 0 ? 'success' : 'warning'),
                 TextColumn::make('catatan')->limit(50)->wrap(),
             ])

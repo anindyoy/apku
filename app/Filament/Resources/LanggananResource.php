@@ -22,6 +22,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Layout\Grid;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -86,30 +88,46 @@ class LanggananResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->contentGrid(['default' => 1, 'md' => 2])
+            ->striped(false)
             ->columns([
-                TextColumn::make('kode_order')->label('Kode order')->searchable()->copyable(),
-                TextColumn::make('user.name')->label('User')->searchable()->visible(fn (): bool => auth()->user()->isAdmin()),
-                TextColumn::make('label_paket')->label('Paket')->searchable(),
-                TextColumn::make('harga')->money('IDR')->sortable(),
-                TextColumn::make('kode_voucher')->label('Voucher')->placeholder('-'),
-                TextColumn::make('nominal_diskon')->label('Diskon')->money('IDR')->toggleable(),
-                TextColumn::make('total_pembayaran')->label('Total')->money('IDR')->sortable(),
-                TextColumn::make('durasi_hari')->label('Durasi')->suffix(' hari'),
-                TextColumn::make('label_metode_pembayaran')
-                    ->label('Pembayaran')
-                    ->description(fn (Langganan $record): string => collect([
-                        data_get($record->detail_pembayaran, 'nama_penyedia'),
-                        data_get($record->detail_pembayaran, 'nomor_tujuan'),
-                        data_get($record->detail_pembayaran, 'nama_pemilik'),
-                        data_get($record->detail_pembayaran, 'instruksi'),
-                    ])->filter()->implode(' • ')),
-                TextColumn::make('status')
-                    ->badge()
-                    ->formatStateUsing(fn (StatusLangganan $state): string => $state->label())
-                    ->color(fn (StatusLangganan $state): string => $state->warna()),
-                TextColumn::make('catatan_admin')->label('Catatan admin')->wrap()->toggleable(),
-                TextColumn::make('masa_aktif_sampai')->label('Aktif sampai')->date('d M Y')->sortable(),
-                TextColumn::make('created_at')->label('Tanggal order')->dateTime('d M Y H:i')->sortable(),
+                Grid::make(['default' => 1, 'md' => 2])->schema([
+                    Stack::make([
+                        TextColumn::make('kode_order')->label('Kode order')->searchable()->copyable()
+                            ->weight('bold')->icon('heroicon-o-document-text')
+                            ->description(fn (Langganan $record): string => 'Tanggal order: '.$record->created_at->format('d M Y H:i'))
+                            ->sortable(['created_at'])->wrap(),
+                        TextColumn::make('user.name')->label('User')->icon('heroicon-o-user')->searchable()->wrap()->visible(fn (): bool => auth()->user()->isAdmin()),
+                        TextColumn::make('label_paket')->label('Paket')->searchable()->wrap()
+                            ->icon('heroicon-o-sparkles')->weight('medium')
+                            ->description(fn (Langganan $record): string => 'Harga: Rp '.number_format($record->harga, 0, ',', '.')),
+                    ])->space(2),
+                    Stack::make([
+                        TextColumn::make('total_pembayaran')->label('Total')->money('IDR', decimalPlaces: 0)->sortable()->wrap()
+                            ->icon('heroicon-o-banknotes')->weight('bold')->size('lg')
+                            ->description(fn (Langganan $record): string => collect([
+                                filled($record->kode_voucher) ? 'Voucher: '.$record->kode_voucher : null,
+                                'Diskon: Rp '.number_format($record->nominal_diskon, 0, ',', '.'),
+                            ])->filter()->implode(' • ')),
+                        TextColumn::make('label_metode_pembayaran')
+                            ->label('Pembayaran')->icon('heroicon-o-credit-card')->wrap()
+                            ->description(fn (Langganan $record): string => collect([
+                                data_get($record->detail_pembayaran, 'nama_penyedia'),
+                                data_get($record->detail_pembayaran, 'nomor_tujuan'),
+                                data_get($record->detail_pembayaran, 'nama_pemilik'),
+                                data_get($record->detail_pembayaran, 'instruksi'),
+                            ])->filter()->implode(' • ')),
+                        TextColumn::make('status')
+                            ->badge()
+                            ->formatStateUsing(fn (StatusLangganan $state): string => $state->label())
+                            ->color(fn (StatusLangganan $state): string => $state->warna())
+                            ->wrap()
+                            ->description(fn (Langganan $record): string => collect([
+                                'Aktif sampai: '.($record->masa_aktif_sampai?->format('d M Y') ?? '-'),
+                                filled($record->catatan_admin) ? 'Catatan admin: '.$record->catatan_admin : null,
+                            ])->filter()->implode(' • ')),
+                    ])->space(2),
+                ])->extraAttributes(['data-subscription-card' => 'true']),
             ])
             ->filters([
                 SelectFilter::make('status')->options(collect(StatusLangganan::cases())

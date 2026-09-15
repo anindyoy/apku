@@ -15,6 +15,72 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
+test('kartu langganan mempertahankan rincian pencarian filter dan aksi', function (string $role, bool $denganVoucher) {
+    $user = User::factory()->create(['role' => $role]);
+    $order = Langganan::factory()->create([
+        'user_id' => $user->id,
+        'kode_voucher' => $denganVoucher ? 'HEMAT' : null,
+        'nominal_diskon' => $denganVoucher ? 5000 : 0,
+        'total_pembayaran' => $denganVoucher ? 20000 : 25000,
+        'masa_aktif_sampai' => $denganVoucher ? '2026-10-14' : null,
+        'catatan_admin' => $denganVoucher ? 'Pembayaran sudah diperiksa' : null,
+    ]);
+
+    $component = Livewire::actingAs($user)->test(ListLangganans::class)
+        ->assertSuccessful()->searchTable($order->kode_order)->assertCanSeeTableRecords([$order]);
+    $columns = $component->instance()->getTable()->getVisibleColumns();
+    expect(array_keys($columns))->toBe($role === 'admin'
+        ? ['kode_order', 'user.name', 'label_paket', 'total_pembayaran', 'label_metode_pembayaran', 'status']
+        : ['kode_order', 'label_paket', 'total_pembayaran', 'label_metode_pembayaran', 'status']);
+
+    $document = new DOMDocument;
+    @$document->loadHTML(mb_convert_encoding($component->html(), 'HTML-ENTITIES', 'UTF-8'));
+    $xpath = new DOMXPath($document);
+    expect($xpath->query('//*[@data-subscription-card]')->length)->toBe(1)
+        ->and($xpath->query('//table')->length)->toBe(0)
+        ->and($component->instance()->getTable()->getContentGrid())->toBe(['default' => 1, 'md' => 2]);
+    $list = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " fi-ta-content-grid ")]')->item(0);
+    expect($list)->not->toBeNull();
+    expect($list->getAttribute('class'))->toContain('md:fi-grid-cols')
+        ->and($list->getAttribute('style'))->toContain('--cols-md: repeat(2, minmax(0, 1fr))');
+    $card = $xpath->query('//*[@data-subscription-card]')->item(0);
+    expect($card->getAttribute('class'))->toContain('md:fi-grid-cols')
+        ->and($card->getAttribute('style'))->toContain('--cols-md: repeat(2, minmax(0, 1fr))')
+        ->and($xpath->query('./div', $card)->length)->toBe(2);
+    $text = $document->textContent;
+    foreach ([
+        'Tanggal order: '.$order->created_at->format('d M Y H:i'),
+        'Harga: Rp 25.000',
+        $denganVoucher ? 'Voucher: HEMAT • Diskon: Rp 5.000' : 'Diskon: Rp 0',
+        $denganVoucher ? 'Aktif sampai: 14 Oct 2026 • Catatan admin: Pembayaran sudah diperiksa' : 'Aktif sampai: -',
+        'Bank Contoh • 1234567890 • APKu • Transfer sesuai total order.',
+    ] as $detail) {
+        expect($text)->toContain($detail);
+    }
+
+    expect($text)->not->toContain('Durasi:');
+    if (! $denganVoucher) {
+        expect($text)->not->toContain('Voucher:');
+    }
+
+    $component->searchTable($order->label_paket)->assertCanSeeTableRecords([$order]);
+    $component->searchTable($order->kode_order)->assertCanSeeTableRecords([$order]);
+    $component->filterTable('status', StatusLangganan::Disetujui->value)->assertCanNotSeeTableRecords([$order]);
+    $component->filterTable('status', StatusLangganan::MenungguPembayaran->value)->assertCanSeeTableRecords([$order]);
+    if ($role === 'user') {
+        $component->assertTableActionVisible('konfirmasiPembayaran', $order)
+            ->assertTableActionVisible('batalkan', $order)
+            ->assertTableActionHidden('setujui', $order);
+    } else {
+        $order->update(['status' => StatusLangganan::MenungguVerifikasi]);
+        $component->filterTable('status', StatusLangganan::MenungguVerifikasi->value)
+            ->assertCanSeeTableRecords([$order])
+            ->assertTableActionVisible('setujui', $order)
+            ->assertTableActionVisible('tolak', $order)
+            ->assertTableActionHidden('konfirmasiPembayaran', $order);
+    }
+})->with(['user', 'admin'])->with([true, false])->group('langganan');
+
 test('order menyimpan snapshot paket dan metode pembayaran', function () {
     $user = User::factory()->create(['role' => 'user', 'type' => 'reguler', 'masa_aktif' => null]);
     $paket = PaketLangganan::factory()->create(['label' => 'Premium 30 Hari', 'harga' => 25000, 'durasi_hari' => 30]);

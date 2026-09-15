@@ -60,7 +60,7 @@ class TabunganEmasResource extends Resource
             ->columns([
                 TextColumn::make('label')->label('Label emas')->searchable(),
                 TextColumn::make('berat_gram')->label('Berat')->suffix(' gram')->formatStateUsing(fn ($state): string => rtrim(rtrim(number_format((float) $state, 4, ',', '.'), '0'), ',')),
-                TextColumn::make('harga_beli')->label('Harga beli')->money('IDR')->placeholder('-'),
+                TextColumn::make('harga_beli')->label('Harga beli')->money('IDR', decimalPlaces: 0)->placeholder('-'),
                 TextColumn::make('keterangan')->placeholder('-')->wrap(),
                 TextColumn::make('created_at')->label('Dibeli pada')->dateTime('d M Y H:i')->sortable(),
             ])

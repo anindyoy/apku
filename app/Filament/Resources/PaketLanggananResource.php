@@ -48,7 +48,7 @@ class PaketLanggananResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('label')->searchable()->sortable(),
-                TextColumn::make('harga')->money('IDR')->sortable(),
+                TextColumn::make('harga')->money('IDR', decimalPlaces: 0)->sortable(),
                 TextColumn::make('durasi_hari')->label('Durasi')->suffix(' hari')->sortable(),
                 IconColumn::make('is_active')->label('Aktif')->boolean(),
                 TextColumn::make('langganans_count')->counts('langganans')->label('Total order'),

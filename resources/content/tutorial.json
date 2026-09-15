@@ -8,7 +8,7 @@
   },
   {
     "id": "pengaturan-awal", "category": "Mulai di sini", "title": "Pengaturan awal: kas, dompet, dan saldo",
-    "intro": "Kas menunjukkan pengelompokan uang, sedangkan dompet menunjukkan tempat uang disimpan.",
+    "intro": "Kas menunjukkan pengelompokan uang, sedangkan dompet menunjukkan tempat uang disimpan. Nominal rupiah di aplikasi ditampilkan tanpa digit desimal, misalnya Rp25.000; berat emas tetap dapat memiliki angka desimal.",
     "steps": ["Ikuti wizard pengguna baru untuk membuat kas utama dan deskripsinya.", "Buat dompet utama sesuai tempat penyimpanan uang Anda.", "Masukkan saldo awal sesuai uang yang tersedia agar pencatatan dimulai dari kondisi yang benar.", "Tambahkan aktivitas pemasukan dan pengeluaran yang sering dipakai, lalu selesaikan wizard."],
     "example": "Kas: Keuangan Rumah Tangga. Dompet: Rekening Bank. Saldo awal: Rp1.000.000. Aktivitas: Gaji dan Belanja.",
     "note": "Kas dan dompet adalah dua sudut pandang atas uang yang sama. Jangan menjumlahkan total saldo kas dan total saldo dompet sebagai total kekayaan."
@@ -113,7 +113,7 @@
   },
   {
     "id": "langganan", "category": "Akun", "title": "Premium, voucher, dan bukti pembayaran",
-    "intro": "Bandingkan manfaat akun dan ajukan langganan melalui pembayaran manual yang tersedia.",
+      "intro": "Bandingkan manfaat akun dan ajukan langganan melalui pembayaran manual yang tersedia. Riwayat ditampilkan sebagai dua kartu per baris dengan isi setiap kartu juga dua kolom (daftar dan isi kartu menjadi satu kolom di ponsel), berisi kode dan tanggal order, paket dan harga, total pembayaran, voucher (jika terisi), diskon, detail pembayaran, status, masa aktif, serta catatan admin. Gunakan pencarian atau filter status untuk menemukan order dan tombol aksi pada kartu untuk mengelolanya.",
     "steps": ["Buka Langganan Premium dan bandingkan kartu Reguler serta Premium.", "Buat order, pilih paket dan metode pembayaran, lalu masukkan kode voucher jika ada. Periksa diskon dan total pembayaran sebelum melanjutkan.", "Ikuti instruksi tujuan pembayaran pada order, lalu lakukan pembayaran sesuai total yang tercantum.", "Gunakan Konfirmasi pembayaran untuk mengunggah bukti JPG, JPEG, PNG, atau PDF maksimal 3 MB, dan tambahkan catatan jika diperlukan.", "Pantau status order dan notifikasi. Jika ditolak, baca catatan admin dan gunakan Kirim ulang bukti setelah diperbaiki. Gunakan Batalkan jika tersedia untuk order yang tidak dilanjutkan."],
     "example": "Masukkan voucher sebelum membuat order dan bayar sesuai total setelah diskon yang tercatat pada order tersebut.",
     "note": "Premium aktif memungkinkan kas/dompet tambahan serta pembuatan kolaborasi. Aktivasi menunggu persetujuan pembayaran; perpanjangan mempertahankan sisa masa aktif. Order tidak kedaluwarsa otomatis. Ketentuan masa berlaku dan pemakaian ulang voucher mengikuti kode yang digunakan."
