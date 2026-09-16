@@ -12,18 +12,24 @@ it('tutorial sidebar mengikuti topik hash scroll dan hasil pencarian', function 
     import { initTutorialSidebar } from './public/js/tutorial-sidebar.js';
     const events = {};
     let tops = [0, 500, 1000];
+    const chapters = [{ open: true }, { open: true }, { open: false }];
     const links = ['akun', 'dompet', 'laporan'].map((id, i) => ({
         hash: `#${id}`, attrs: {},
         setAttribute(name, value) { this.attrs[name] = value; },
         removeAttribute(name) { delete this.attrs[name]; },
+        addEventListener(name, callback) { this[name] = callback; },
         getBoundingClientRect: () => ({ top: i * 100, bottom: i * 100 + 40 }),
     }));
-    const articles = Object.fromEntries(links.map((link, i) => [link.hash.slice(1), { getBoundingClientRect: () => ({ top: tops[i] }) }]));
+    const articles = Object.fromEntries(links.map((link, i) => [link.hash.slice(1), {
+        closest: () => chapters[i],
+        getBoundingClientRect: () => ({ top: tops[i] }),
+    }]));
     const position = { textContent: '' };
     const sidebar = { querySelectorAll: () => links, scrollHeight: 400, clientHeight: 150, scrollTop: 0, getBoundingClientRect: () => ({ top: 0, bottom: 150 }) };
     const doc = { querySelector: selector => selector === '[data-tutorial-sidebar]' ? sidebar : position, getElementById: id => articles[id] };
     const win = { location: { hash: '#laporan' }, addEventListener: (name, fn) => { events[name] = fn; }, requestAnimationFrame: fn => fn() };
     initTutorialSidebar(doc, win);
+    assert.equal(chapters[2].open, true);
     assert.equal(position.textContent, 'Topik 3 dari 3 yang ditampilkan');
     assert.equal(links[2].attrs['aria-current'], 'location');
     assert.ok(sidebar.scrollTop > 0);
@@ -31,6 +37,9 @@ it('tutorial sidebar mengikuti topik hash scroll dan hasil pencarian', function 
     events.hashchange();
     assert.equal(links[1].attrs['aria-current'], 'location');
     assert.equal(links[2].attrs['aria-current'], undefined);
+    chapters[1].open = false;
+    links[1].click();
+    assert.equal(chapters[1].open, true);
     tops = [-500, -20, 450];
     events.scroll();
     assert.equal(position.textContent, 'Topik 2 dari 3 yang ditampilkan');
@@ -60,8 +69,8 @@ it('tutorial sidebar mengikuti topik hash scroll dan hasil pencarian', function 
         $xpath = new DOMXPath($document);
         $links = $xpath->query('//a[@data-topic-link]');
         expect($links)->toHaveCount($count);
-        foreach ($links as $index => $link) {
-            expect(trim($link->textContent))->toStartWith(($index + 1).'. ');
+        foreach ($links as $link) {
+            expect(trim($link->textContent))->not->toMatch('/^\d+\. /');
         }
         expect($xpath->query('//p[@data-topic-position]')->item(0)->textContent)->toBe($count.' topik ditampilkan');
         expect($xpath->query('//script[@src="'.asset('js/tutorial-sidebar.js').'"]'))->toHaveCount(1);
@@ -157,14 +166,15 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
     expect($topics)->toHaveCount(18);
     expect(array_column($topics, 'id'))->toBe([
         'akun', 'pengaturan-awal', 'dashboard', 'transaksi', 'transfer', 'pencarian',
-        'import', 'kas', 'dompet', 'audit-saldo', 'aktivitas', 'kolaborasi',
-        'kas-publik', 'emas', 'laporan', 'utang-piutang', 'langganan', 'profil-notifikasi',
+        'import', 'kas', 'kolaborasi', 'kas-publik', 'dompet', 'audit-saldo',
+        'aktivitas', 'emas', 'laporan', 'utang-piutang', 'langganan', 'profil-notifikasi',
     ]);
 
     $document = new DOMDocument;
     @$document->loadHTML($response->getContent());
     $xpath = new DOMXPath($document);
     foreach ($topics as $topic) {
+        expect($topic['page'])->not->toBeEmpty();
         expect($topic['category'])->not->toBeEmpty();
         expect($topic['intro'])->not->toBeEmpty();
         expect($topic['example'])->not->toBeEmpty();
@@ -173,8 +183,27 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
         expect($xpath->query('//article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
         expect($xpath->query('//a[@href="#'.$topic['id'].'"]'))->toHaveCount(1);
         expect($xpath->query('//article[@id="'.$topic['id'].'"]/ol/li'))->toHaveCount(count($topic['steps']));
+        expect($xpath->query('//main/details[@data-tutorial-chapter]/summary[text()="'.$topic['page'].'"]/../article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
     }
+    expect($xpath->query('//aside/nav/div[@class="page-group"]'))->toHaveCount(count($response->viewData('groups')));
+    expect($xpath->query('//main/details[@data-tutorial-chapter]'))->toHaveCount(count($response->viewData('groups')));
+    expect($xpath->query('//main/details[@data-tutorial-chapter and @open]'))->toHaveCount(1);
     $this->assertGuest();
+});
+
+it('tutorial mengelompokkan topik menurut halaman fitur dan menyembunyikan kelompok tanpa hasil', function () {
+    $response = $this->get(route('tutorial', ['q' => 'Viewer']))->assertOk();
+    $groups = $response->viewData('groups');
+
+    expect($groups->keys()->all())->toBe(['Kas', 'Langganan Premium']);
+    expect(array_column($response->viewData('topics'), 'id'))->toBe(['kolaborasi', 'kas-publik', 'langganan']);
+
+    $document = new DOMDocument;
+    @$document->loadHTML($response->getContent());
+    $xpath = new DOMXPath($document);
+    expect($xpath->query('//aside/nav/div[@class="page-group"]'))->toHaveCount(2);
+    expect($xpath->query('//main/details[@data-tutorial-chapter]'))->toHaveCount(2);
+    expect($xpath->query('//aside/nav//a[@data-topic-link]'))->toHaveCount(3);
 });
 
 it('tutorial mencari isi panduan tanpa membedakan kapital dan mengabaikan spasi tepi', function () {

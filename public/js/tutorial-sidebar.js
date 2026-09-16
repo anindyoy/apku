@@ -4,9 +4,16 @@ export function initTutorialSidebar(doc, win) {
     if (!sidebar || !position) return;
 
     const entries = Array.from(sidebar.querySelectorAll('[data-topic-link]'))
-        .map(link => ({ link, article: doc.getElementById(link.hash.slice(1)) }))
+        .map(link => {
+            const article = doc.getElementById(link.hash.slice(1));
+            return { link, article, chapter: article?.closest?.('[data-tutorial-chapter]') };
+        })
         .filter(entry => entry.article);
     if (!entries.length) return;
+
+    entries.forEach(({ link, chapter }) => {
+        link.addEventListener?.('click', () => { if (chapter) chapter.open = true; });
+    });
 
     let active = -1;
     const select = (index) => {
@@ -28,14 +35,21 @@ export function initTutorialSidebar(doc, win) {
     };
     const trackScroll = () => {
         let index = 0;
-        entries.forEach(({ article }, i) => {
-            if (article.getBoundingClientRect().top <= 140) index = i;
+        entries.forEach(({ article, chapter }, i) => {
+            if ((!chapter || chapter.open) && article.getBoundingClientRect().top <= 140) index = i;
         });
         select(index);
     };
     const trackHash = () => {
         const index = entries.findIndex(({ link }) => link.hash === win.location.hash);
-        if (index >= 0) select(index);
+        if (index >= 0) {
+            const { article, chapter } = entries[index];
+            if (chapter && !chapter.open) {
+                chapter.open = true;
+                article.scrollIntoView?.();
+            }
+            select(index);
+        }
         else trackScroll();
     };
 

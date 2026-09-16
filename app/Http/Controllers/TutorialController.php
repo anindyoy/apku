@@ -16,7 +16,9 @@ class TutorialController extends Controller
         $filtered = array_filter($topics, fn (array $topic): bool => $query === '' || Str::contains(
             json_encode($topic, JSON_UNESCAPED_UNICODE), $query, ignoreCase: true,
         ));
+        $groups = collect($filtered)->groupBy('page');
+        $filtered = $groups->flatten(1)->all();
 
-        return view('tutorial', ['topics' => $filtered, 'total' => count($topics), 'query' => $query]);
+        return view('tutorial', ['topics' => $filtered, 'groups' => $groups, 'total' => count($topics), 'query' => $query]);
     }
 }
