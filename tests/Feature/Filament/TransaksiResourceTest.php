@@ -75,6 +75,52 @@ test('tabel transaksi merangkum pencatat dan dompet pada deskripsi kolom', funct
 })
     ->group('filament', 'transaksi', 'ringkasan-kolom');
 
+test('filter transaksi berada dalam section Filament yang tertutup secara default', function () {
+    $user = createRegularUserWithBukuKas();
+
+    $html = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertSuccessful()
+        ->html();
+
+    expect($html)
+        ->toContain('data-testid="filter-transaksi-section"')
+        ->toContain('aria-expanded="false"')
+        ->toContain('fi-collapsible')
+        ->toContain('Filter transaksi')
+        ->toContain('Reset filter');
+})
+    ->group('filament', 'transaksi', 'filter-section');
+
+test('daftar transaksi mobile menampilkan ringkasan tanpa kolom desktop', function () {
+    $user = createRegularUserWithBukuKas();
+    $transaksi = Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $user->buku_kas()->firstOrFail()->id,
+        'jenis' => 'Pemasukan',
+        'nominal' => 123456,
+        'tanggal' => now(),
+    ]);
+
+    $html = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertCanSeeTableRecords([$transaksi])
+        ->html();
+
+    expect($html)
+        ->toContain('data-transaksi-mobile')
+        ->toContain('data-tone="success"')
+        ->toContain('transaction-mobile-amount')
+        ->toContain('Rp 123.456')
+        ->toContain('fi-ta-table-stacked-on-mobile');
+
+    $columns = collect(TransaksiResource::transactionColumns())->keyBy(fn ($column) => $column->getName());
+    expect($columns->get('ringkasan_mobile')->getHiddenFrom())->toBe('md')
+        ->and($columns->get('tanggal')->getVisibleFrom())->toBe('md')
+        ->and($columns->get('nominal')->getVisibleFrom())->toBe('md');
+})
+    ->group('filament', 'transaksi', 'mobile-ringkasan');
+
 test('transaksi resource dapat mengedit nominal transaksi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();

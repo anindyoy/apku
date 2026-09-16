@@ -23,7 +23,7 @@
   {
     "id": "transaksi", "page": "Transaksi", "category": "Pencatatan", "title": "Mencatat pemasukan dan pengeluaran",
     "intro": "Catat uang masuk dan keluar dengan kas, dompet, serta aktivitas yang sesuai.",
-    "steps": ["Buka Transaksi atau gunakan Tambah pada dashboard, lalu buka Tambah transaksi.", "Pilih pemasukan atau pengeluaran. Tunggu formulir selesai menyesuaikan jenis transaksi.", "Isi tanggal, kas, dompet, aktivitas, nominal, dan deskripsi, kemudian simpan. Gunakan Tambah yang lain untuk mencatat secara berurutan.", "Periksa hasil di daftar. Gunakan Ubah untuk memperbaiki catatan atau Hapus jika transaksi memang perlu dihapus, lalu periksa kembali saldo."],
+    "steps": ["Buka Transaksi atau gunakan Tambah pada dashboard, lalu buka Tambah transaksi.", "Pilih pemasukan atau pengeluaran. Tunggu formulir selesai menyesuaikan jenis transaksi.", "Isi tanggal, kas, dompet, aktivitas, nominal, dan deskripsi, kemudian simpan. Gunakan Tambah yang lain untuk mencatat secara berurutan.", "Periksa hasil di daftar. Pada layar mobile, lihat jenis, nominal, aktivitas, dan tanggal; buka Ubah untuk melihat rincian lain jika aksi tersedia. Gunakan Ubah untuk memperbaiki catatan atau Hapus jika transaksi memang perlu dihapus, lalu periksa kembali saldo."],
     "example": "Catat belanja Rp75.000 sebagai pengeluaran, pilih kas Rumah Tangga, dompet Tunai, aktivitas Belanja, dan deskripsi Belanja mingguan.",
     "note": "Pemasukan ditandai hijau dan pengeluaran merah. Aksi ubah/hapus mengikuti hak akses; transaksi audit saldo harus dikoreksi melalui audit baru."
   },
@@ -37,7 +37,7 @@
   {
     "id": "pencarian", "page": "Transaksi", "category": "Pencatatan", "title": "Filter dan pencarian transaksi",
     "intro": "Temukan catatan lama melalui filter periode atau pencarian transaksi global.",
-    "steps": ["Di daftar Transaksi, pilih bulan, tahun, kas, atau dompet. Gunakan navigasi periode untuk berpindah ke periode sebelum atau sesudahnya.", "Gunakan pencarian deskripsi untuk menemukan catatan pada daftar transaksi.", "Buka Pencarian Transaksi untuk mencari berdasarkan deskripsi, aktivitas, kas, dompet, jenis transaksi, atau nominal; persempit dengan filter yang tersedia.", "Periksa detail hasil, lalu gunakan Ubah atau Hapus jika Anda memiliki hak pengelolaan."],
+    "steps": ["Di daftar Transaksi, buka Filter transaksi yang awalnya tertutup, lalu pilih bulan, tahun, kas, atau dompet. Gunakan navigasi periode untuk berpindah ke periode sebelum atau sesudahnya.", "Gunakan pencarian deskripsi untuk menemukan catatan pada daftar transaksi.", "Buka Pencarian Transaksi untuk mencari berdasarkan deskripsi, aktivitas, kas, dompet, jenis transaksi, atau nominal; persempit dengan filter yang tersedia.", "Periksa detail hasil, lalu gunakan Ubah atau Hapus jika Anda memiliki hak pengelolaan."],
     "example": "Pilih dompet Rekening Bank dan bulan yang diinginkan untuk menelusuri pembayaran, atau cari kata listrik pada pencarian global.",
     "note": "Saldo berjalan tampil ketika filter kas atau dompet aktif pada daftar transaksi. Informasi dompet anggota lain pada kas bersama disamarkan."
   },

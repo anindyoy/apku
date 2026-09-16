@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,7 @@ class TransaksiResource extends Resource
                     )
                 )
             )
+            ->stackedOnMobile()
             ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
             ->columns(static::transactionColumns())
@@ -136,7 +138,13 @@ class TransaksiResource extends Resource
     public static function transactionColumns(): array
     {
         return [
+            ViewColumn::make('ringkasan_mobile')
+                ->label('Transaksi')
+                ->view('filament.tables.columns.transaksi-mobile')
+                ->hiddenFrom('md'),
+
             IconColumn::make('jenis')
+                ->visibleFrom('md')
                 ->label('Tipe')
                 ->tooltip(fn ($state) => $state)
                 ->icon(fn (string $state): string => match ($state) {
@@ -148,16 +156,19 @@ class TransaksiResource extends Resource
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('tanggal')
+                ->visibleFrom('md')
                 ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
                 ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('buku_kas.nama_buku')
+                ->visibleFrom('md')
                 ->label('Kas')
                 ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('kategori')
+                ->visibleFrom('md')
                 ->label('Aktivitas')
                 ->getStateUsing(fn (Transaksi $record) => static::getKategoriLabel($record))
                 ->searchable(query: function (Builder $query, string $search): Builder {
@@ -172,14 +183,17 @@ class TransaksiResource extends Resource
                 ->wrap(),
 
             TextColumn::make('created_at')
+                ->visibleFrom('md')
                 ->dateTime()
                 ->toggleable(isToggledHiddenByDefault: true),
 
             TextColumn::make('updated_at')
+                ->visibleFrom('md')
                 ->dateTime()
                 ->toggleable(isToggledHiddenByDefault: true),
 
             TextColumn::make('nominal')
+                ->visibleFrom('md')
                 ->numeric()
                 ->prefix('Rp ')
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))

@@ -25,6 +25,8 @@ Aturan bisnis dan pemrosesan data aplikasi.
 
 - Mencatat pemasukan dan pengeluaran.
 - Mengubah dan menghapus transaksi sesuai hak akses.
+- Filter periode, kas, dan dompet pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
+- Pada layar mobile, daftar transaksi menampilkan jenis, nominal, aktivitas, dan tanggal secara ringkas tanpa perlu menggeser tabel; kas, dompet, deskripsi, dan pencatat dapat diperiksa melalui aksi Ubah jika tersedia.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.

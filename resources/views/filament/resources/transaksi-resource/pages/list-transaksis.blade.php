@@ -74,12 +74,12 @@
             ]);
 @endphp
 
-    <section aria-labelledby="filter-transaksi-title"
-        class="-mb-2 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5 dark:bg-white/5 dark:ring-white/10">
+    <x-filament::section collapsible collapsed icon="heroicon-o-funnel" class="-mb-2" data-testid="filter-transaksi-section">
+        <x-slot name="heading">Filter transaksi</x-slot>
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
                 <div class="space-y-1.5">
-                    <label id="filter-transaksi-title" class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">
                         Periode transaksi
                     </label>
 
@@ -161,4 +161,4 @@
                 Reset filter
             </a>
         </div>
-    </section>
+    </x-filament::section>
