@@ -331,15 +331,26 @@ test('file yang sama tidak dapat diimpor dua kali', function () {
         ->and($data['bukuKas']->fresh()->saldo)->toBe(100000);
 })->group('filament', 'import-transaksi');
 
-test('halaman transaksi menyediakan aksi import dan unduh template', function () {
+test('halaman transaksi menyediakan aksi import dan riwayat import', function () {
     $data = siapkanDataImportTransaksi();
 
     Livewire::actingAs($data['user'])
         ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertActionExists('Import Transaksi')
-        ->assertActionExists('Unduh Template Import')
         ->assertActionExists('Riwayat Import');
+})->group('filament', 'import-transaksi');
+
+test('modal import menyediakan unduhan contoh template', function () {
+    $data = siapkanDataImportTransaksi();
+
+    expect(view('filament.resources.transaksi-resource.pages.import-template')->render())
+        ->toContain('Unduh contoh template XLSX', 'wire:click="unduhTemplateImport"', 'text-gray-800 dark:text-gray-800');
+
+    Livewire::actingAs($data['user'])
+        ->test(ListTransaksis::class)
+        ->call('unduhTemplateImport')
+        ->assertFileDownloaded('template-import-transaksi.xlsx');
 })->group('filament', 'import-transaksi');
 
 test('pembatalan batch menghapus transaksi dan memulihkan seluruh saldo', function () {

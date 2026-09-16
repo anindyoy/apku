@@ -28,6 +28,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
+- Modal import transaksi menyediakan unduhan contoh template XLSX sebelum pengguna mengunggah file.
 - Aktivitas yang belum tersedia dapat dibuat otomatis setelah konfirmasi pengguna. Pembuatannya ikut dibatalkan jika import transaksi gagal.
 - Seluruh baris import disimpan secara atomik dan saldo kas serta dompet diperbarui menggunakan aturan transaksi yang sama dengan pencatatan manual.
 - Import mengikuti kepemilikan dan hak pengelolaan kas, dompet, serta aktivitas pengguna. File yang sama tidak dapat diimpor lebih dari sekali.

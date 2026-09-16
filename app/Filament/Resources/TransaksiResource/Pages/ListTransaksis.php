@@ -17,6 +17,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
@@ -170,85 +171,79 @@ class ListTransaksis extends ListRecords
                     ->color('gray')
                     ->icon('heroicon-o-clock'),
 
-                Action::make('Unduh Template Import')
-                    ->visible(fn (): bool => blank($this->filterBukuKas) || $this->bukuKasTerpilihMilikSendiri())
-                    ->action(function () {
-                        $path = tempnam(sys_get_temp_dir(), 'template-import-transaksi-');
-                        app(ImportTransaksiService::class)->buatTemplateXlsx($path);
-
-                        return response()->download($path, 'template-import-transaksi.xlsx')->deleteFileAfterSend(true);
-                    })
-                    ->color('gray')
-                    ->icon('heroicon-o-arrow-down-tray'),
-
                 Action::make('Import Transaksi')
                     ->visible(fn (): bool => blank($this->filterBukuKas) || $this->bukuKasTerpilihMilikSendiri())
                     ->schema([
-                        FileUpload::make('file')
-                            ->label('File CSV atau XLSX')
-                            ->acceptedFileTypes([
-                                'text/csv',
-                                'text/plain',
-                                'application/csv',
-                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                            ])
-                            ->maxSize(10240)
-                            ->storeFiles(false)
-                            ->live()
-                            ->required()
-                            ->afterStateUpdated(function (mixed $state, Set $set): void {
-                                $this->siapkanPemetaanImport($state, $set);
-                            }),
+                        View::make('filament.resources.transaksi-resource.pages.import-template'),
                         Hidden::make('header_options'),
-                        Select::make('pemetaan.tanggal')
-                            ->label('Kolom tanggal')
-                            ->options(fn (Get $get): array => $get('header_options') ?? [])
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
-                        Select::make('pemetaan.jenis')
-                            ->label('Kolom jenis')
-                            ->options(fn (Get $get): array => $get('header_options') ?? [])
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
-                        Select::make('pemetaan.buku_kas')
-                            ->label('Kolom kas')
-                            ->options(fn (Get $get): array => $get('header_options') ?? [])
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
-                        Select::make('pemetaan.dompet')
-                            ->label('Kolom dompet')
-                            ->options(fn (Get $get): array => $get('header_options') ?? [])
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
-                        Select::make('pemetaan.kategori')
-                            ->label('Kolom aktivitas')
-                            ->options(fn (Get $get): array => $get('header_options') ?? [])
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
-                        Select::make('pemetaan.nominal')
-                            ->label('Kolom nominal')
-                            ->options(fn (Get $get): array => $get('header_options') ?? [])
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
-                        Select::make('pemetaan.deskripsi')
-                            ->label('Kolom deskripsi')
-                            ->placeholder('Tidak dipetakan')
-                            ->options(fn (Get $get): array => $get('header_options') ?? [])
-                            ->live()
-                            ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                        Hidden::make('pratinjau'),
+                        Grid::make(2)
+                            ->schema([
+                                FileUpload::make('file')
+                                    ->label('File CSV atau XLSX')
+                                    ->acceptedFileTypes([
+                                        'text/csv',
+                                        'text/plain',
+                                        'application/csv',
+                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    ])
+                                    ->maxSize(10240)
+                                    ->storeFiles(false)
+                                    ->live()
+                                    ->required()
+                                    ->afterStateUpdated(function (mixed $state, Set $set): void {
+                                        $this->siapkanPemetaanImport($state, $set);
+                                    })
+                                    ->columnSpanFull(),
+                                Select::make('pemetaan.tanggal')
+                                    ->label('Kolom tanggal')
+                                    ->options(fn (Get $get): array => $get('header_options') ?? [])
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                                Select::make('pemetaan.jenis')
+                                    ->label('Kolom jenis')
+                                    ->options(fn (Get $get): array => $get('header_options') ?? [])
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                                Select::make('pemetaan.buku_kas')
+                                    ->label('Kolom kas')
+                                    ->options(fn (Get $get): array => $get('header_options') ?? [])
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                                Select::make('pemetaan.dompet')
+                                    ->label('Kolom dompet')
+                                    ->options(fn (Get $get): array => $get('header_options') ?? [])
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                                Select::make('pemetaan.kategori')
+                                    ->label('Kolom aktivitas')
+                                    ->options(fn (Get $get): array => $get('header_options') ?? [])
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                                Select::make('pemetaan.nominal')
+                                    ->label('Kolom nominal')
+                                    ->options(fn (Get $get): array => $get('header_options') ?? [])
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                                Select::make('pemetaan.deskripsi')
+                                    ->label('Kolom deskripsi')
+                                    ->placeholder('Tidak dipetakan')
+                                    ->options(fn (Get $get): array => $get('header_options') ?? [])
+                                    ->live()
+                                    ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
+                            ]),
                         Toggle::make('buat_kategori_otomatis')
                             ->label('Buat aktivitas yang belum tersedia')
                             ->helperText('Aktivitas baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
                             ->default(false)
                             ->live()
                             ->afterStateUpdated(fn (bool $state, Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $state, $set)),
-                        Hidden::make('pratinjau'),
                         Placeholder::make('ringkasan_import')
                             ->label('Pratinjau')
                             ->content(fn (Get $get): HtmlString => $this->formatPratinjauImport($get('pratinjau'))),
@@ -415,6 +410,19 @@ class ListTransaksis extends ListRecords
             'total_pemasukan' => 0,
             'total_pengeluaran' => 0,
             'errors' => collect($exception->errors())->flatten()->all(),
+        ]);
+    }
+
+    public function unduhTemplateImport(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $path = tempnam(sys_get_temp_dir(), 'template-import-transaksi-');
+        app(ImportTransaksiService::class)->buatTemplateXlsx($path);
+
+        return response()->streamDownload(function () use ($path): void {
+            echo file_get_contents($path);
+            @unlink($path);
+        }, 'template-import-transaksi.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
 
