@@ -93,7 +93,7 @@ class TransaksiResource extends Resource
                 ->modalHeading('Ubah transaksi')
                 ->modalSubmitActionLabel('Simpan')
                 ->form(Transaksi::form())
-                ->fillForm(fn (Transaksi $record): array => $record->attributesToArray())
+                ->fillForm(fn (Transaksi $record): array => Transaksi::dataFormUbah($record))
                 ->hidden(fn ($record): bool => auth()->user()->isAdmin()
                     || filled($record->audit_saldo_dompet_detail_id)
                     || $record->user_id !== auth()->id()
@@ -135,13 +135,18 @@ class TransaksiResource extends Resource
         return null;
     }
 
+    public static function mobileSummaryColumn(): ViewColumn
+    {
+        return ViewColumn::make('ringkasan_mobile')
+            ->label('Transaksi')
+            ->view('filament.tables.columns.transaksi-mobile')
+            ->hiddenFrom('md');
+    }
+
     public static function transactionColumns(): array
     {
         return [
-            ViewColumn::make('ringkasan_mobile')
-                ->label('Transaksi')
-                ->view('filament.tables.columns.transaksi-mobile')
-                ->hiddenFrom('md'),
+            static::mobileSummaryColumn(),
 
             IconColumn::make('jenis')
                 ->visibleFrom('md')

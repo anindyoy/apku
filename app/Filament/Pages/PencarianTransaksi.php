@@ -61,8 +61,12 @@ class PencarianTransaksi extends Page implements HasTable
                 ? 'Coba gunakan kata pencarian atau filter yang berbeda.'
                 : 'Tabel akan menampilkan hasil setelah pencarian dilakukan.')
             ->emptyStateIcon('heroicon-o-magnifying-glass')
+            ->stackedOnMobile()
             ->columns([
+                TransaksiResource::mobileSummaryColumn(),
+
                 IconColumn::make('jenis')
+                    ->visibleFrom('md')
                     ->label('Tipe')
                     ->searchable()
                     ->tooltip(fn (string $state): string => $state)
@@ -74,12 +78,14 @@ class PencarianTransaksi extends Page implements HasTable
                     ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('tanggal')
+                    ->visibleFrom('md')
                     ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
                     ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
                     ->sortable()
                     ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('buku_kas.nama_buku')
+                    ->visibleFrom('md')
                     ->label('Kas')
                     ->searchable()
                     ->sortable()
@@ -87,6 +93,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('kategori')
+                    ->visibleFrom('md')
                     ->label('Aktivitas')
                     ->getStateUsing(fn (Transaksi $record): ?string => TransaksiResource::getKategoriLabel($record))
                     ->searchable(query: function (Builder $query, string $search): Builder {
@@ -104,6 +111,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->wrap(),
 
                 TextColumn::make('nominal')
+                    ->visibleFrom('md')
                     ->numeric()
                     ->prefix('Rp ')
                     ->searchable()
@@ -146,7 +154,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->modalHeading('Ubah transaksi')
                     ->modalSubmitActionLabel('Simpan')
                     ->form(Transaksi::form())
-                    ->fillForm(fn (Transaksi $record): array => $record->attributesToArray())
+                    ->fillForm(fn (Transaksi $record): array => Transaksi::dataFormUbah($record))
                     ->hidden(fn (Transaksi $record): bool => ! $this->dapatMengelola($record))
                     ->action(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
 

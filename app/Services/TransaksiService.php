@@ -241,11 +241,74 @@ class TransaksiService
             throw new \RuntimeException('Pasangan transaksi transfer tidak lengkap.');
         }
 
+        $keluar = $pasangan->firstWhere('jenis', 'Transfer Pengeluaran');
+        $masuk = $pasangan->firstWhere('jenis', 'Transfer Pemasukan');
+
+        if (! $keluar || ! $masuk || $keluar->tipe_transfer !== $masuk->tipe_transfer) {
+            throw new \RuntimeException('Pasangan transaksi transfer tidak valid.');
+        }
+
+        $tipeTransfer = $keluar->tipe_transfer ?: 'buku_kas';
+        $nominal = (int) ($data['nominal'] ?? $keluar->nominal);
+
+        if ($nominal <= 0) {
+            throw ValidationException::withMessages(['nominal' => 'Nominal transfer harus lebih dari nol.']);
+        }
+
+        $kasAsalId = (int) ($data['buku_kas_id'] ?? $keluar->buku_kas_id);
+        $kasTujuanId = (int) ($tipeTransfer === 'buku_kas'
+            ? ($data['buku_kas_id_tujuan'] ?? $masuk->buku_kas_id)
+            : ($data['buku_kas_id'] ?? $masuk->buku_kas_id));
+        $dompetAsalId = (int) ($data['dompet_id'] ?? $keluar->dompet_id);
+        $dompetTujuanId = (int) ($tipeTransfer === 'dompet'
+            ? ($data['dompet_id_tujuan'] ?? $masuk->dompet_id)
+            : ($data['dompet_id'] ?? $masuk->dompet_id));
+
+        if ($tipeTransfer === 'buku_kas' && $kasAsalId === $kasTujuanId) {
+            throw ValidationException::withMessages(['buku_kas_id_tujuan' => 'Kas tujuan harus berbeda dari kas asal.']);
+        }
+
+        if ($tipeTransfer === 'dompet' && $dompetAsalId === $dompetTujuanId) {
+            throw ValidationException::withMessages(['dompet_id_tujuan' => 'Dompet tujuan harus berbeda dari dompet asal.']);
+        }
+
+        $kas = BukuKas::withoutGlobalScopes()
+            ->whereKey(array_unique([$kasAsalId, $kasTujuanId]))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+        $dompet = Dompet::withoutGlobalScopes()
+            ->whereKey(array_unique([$dompetAsalId, $dompetTujuanId]))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
+        foreach ([[$kasAsalId, $dompetAsalId], [$kasTujuanId, $dompetTujuanId]] as [$kasId, $dompetId]) {
+            $bukuKas = $kas->get($kasId);
+            $dompetTerpilih = $dompet->get($dompetId);
+
+            if (! $bukuKas || ! $dompetTerpilih || $bukuKas->user_id !== $user->id) {
+                throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
+            }
+
+            $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompetTerpilih);
+        }
+
         foreach ($pasangan as $item) {
             $this->pastikanDapatMengelola($user, $item);
             $this->balikDampak($item);
+        }
+
+        foreach ($pasangan as $item) {
+            $pengeluaran = $item->jenis === 'Transfer Pengeluaran';
             Transaksi::withoutEvents(fn () => $item->update([
-                'nominal' => $data['nominal'] ?? $item->nominal,
+                'buku_kas_id' => $pengeluaran ? $kasAsalId : $kasTujuanId,
+                'dompet_id' => $pengeluaran ? $dompetAsalId : $dompetTujuanId,
+                'tujuan_buku_tabungan_id' => $tipeTransfer === 'buku_kas' && $pengeluaran ? $kasTujuanId : null,
+                'asal_buku_tabungan_id' => $tipeTransfer === 'buku_kas' && ! $pengeluaran ? $kasAsalId : null,
+                'nominal' => $nominal,
                 'tanggal' => $data['tanggal'] ?? $item->tanggal,
                 'deskripsi' => $data['deskripsi'] ?? $item->deskripsi,
             ]));

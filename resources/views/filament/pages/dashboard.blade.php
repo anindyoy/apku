@@ -1,4 +1,5 @@
 <x-filament-panels::page>
+    @vite('resources/css/filament-toolbar.css')
     @if (auth()->user()->isAdmin())
         {{ $this->content }}
     @else

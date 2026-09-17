@@ -3,7 +3,12 @@
 use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\JenisTransaksi;
+use App\Models\BukuKas;
+use App\Models\Dompet;
 use App\Models\Transaksi;
+use App\Services\TransaksiService;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Livewire\Livewire;
@@ -62,7 +67,51 @@ test('transaksi resource - tombol ubah pada daftar membuka modal edit', function
         ->assertSchemaStateSet([
             'nominal' => 100000,
             'deskripsi' => 'Transaksi yang akan diubah',
-        ]);
+        ])
+        ->assertFormFieldExists('nominal', fn (TextInput $field): bool => $field->getPrefixLabel() === 'Rp');
+})
+    ->group('filament', 'transaksi', 'ubah-transaksi');
+
+test('form ubah transfer menampilkan kas dan dompet yang dapat dipilih serta menonaktifkan opsi premium', function () {
+    $user = createRegularUserWithBukuKas();
+    $user->update(['masa_aktif' => today()->subDay()]);
+    $kasAsal = $user->buku_kas()->firstOrFail();
+    $kasTujuan = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Kedua', 'saldo' => 0]);
+    $kasTerbatas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Ketiga', 'saldo' => 0]);
+    $dompetAsal = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Cash', 'saldo' => 100000, 'is_default' => true]);
+    $dompetKedua = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 0]);
+    $dompetTerbatas = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Dompet Ketiga', 'saldo' => 0]);
+    $pasangan = app(TransaksiService::class)->transferBukuKas($user, $kasAsal, $kasTujuan, $dompetAsal, $dompetAsal, 10000);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountTableAction('edit', $pasangan['masuk'])
+        ->assertSchemaStateSet([
+            'buku_kas_id' => $kasAsal->id,
+            'buku_kas_id_tujuan' => $kasTujuan->id,
+            'dompet_id' => $dompetAsal->id,
+        ])
+        ->assertFormFieldExists('buku_kas_id', fn (Select $field): bool => ! $field->isDisabled()
+            && ! $field->isOptionDisabled($kasAsal->id, $kasAsal->nama_buku)
+            && $field->isOptionDisabled($kasTerbatas->id, $kasTerbatas->nama_buku))
+        ->assertFormFieldExists('buku_kas_id_tujuan', fn (Select $field): bool => ! $field->isOptionDisabled($kasTujuan->id, $kasTujuan->nama_buku))
+        ->assertFormFieldExists('dompet_id', fn (Select $field): bool => ! $field->isDisabled()
+            && ! $field->isOptionDisabled($dompetKedua->id, $dompetKedua->nama_dompet)
+            && $field->isOptionDisabled($dompetTerbatas->id, $dompetTerbatas->nama_dompet))
+        ->unmountTableAction()
+        ->callTableAction('edit', $pasangan['masuk'], data: [
+            'buku_kas_id' => $kasTujuan->id,
+            'buku_kas_id_tujuan' => $kasAsal->id,
+            'dompet_id' => $dompetKedua->id,
+            'tanggal' => $pasangan['masuk']->tanggal,
+            'nominal' => 15000,
+        ])
+        ->assertHasNoTableActionErrors();
+
+    expect($pasangan['keluar']->fresh()->buku_kas_id)->toBe($kasTujuan->id)
+        ->and($pasangan['masuk']->fresh()->buku_kas_id)->toBe($kasAsal->id)
+        ->and($pasangan['keluar']->fresh()->dompet_id)->toBe($dompetKedua->id)
+        ->and($pasangan['masuk']->fresh()->dompet_id)->toBe($dompetKedua->id);
 })
     ->group('filament', 'transaksi', 'ubah-transaksi');
 

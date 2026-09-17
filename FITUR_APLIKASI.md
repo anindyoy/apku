@@ -26,7 +26,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Mencatat pemasukan dan pengeluaran.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Filter periode, kas, dan dompet pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
-- Pada layar mobile, daftar transaksi menampilkan jenis, nominal, aktivitas, dan tanggal secara ringkas tanpa perlu menggeser tabel; kas, dompet, deskripsi, dan pencatat dapat diperiksa melalui aksi Ubah jika tersedia.
+- Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, aktivitas, dan tanggal secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
@@ -174,11 +174,13 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Mencatat beberapa transaksi berurutan melalui aksi **Tambah yang lain**.
 - Tombol **Tambah transaksi** tetap tersedia selama pengguna memiliki kas yang dapat dikelola, termasuk ketika daftar difilter ke kas terbatas. Pilihan kas di modal hanya memuat kas yang dapat dikelola; aksi ubah dan hapus tidak tersedia untuk transaksi pada kas terbatas.
 - Pemasukan, pengeluaran, transfer kas, dan transfer dompet dicatat melalui satu modal **Tambah transaksi**; jenis transaksi menentukan field serta warna form. Seluruh input dan tombol submit dinonaktifkan sementara ketika perubahan jenis sedang diproses. Transfer kas hanya meminta kas asal dan tujuan, sedangkan transfer dompet hanya meminta dompet asal dan tujuan.
+- Modal **Ubah transaksi** pada daftar transaksi, dashboard, dan pencarian memakai dua kolom pada layar yang cukup lebar serta satu kolom pada layar sempit. Deskripsi menggunakan lebar penuh, dan input nominal menampilkan prefix **Rp** seperti form Tambah.
+- Pada modal **Ubah transaksi**, kas dan dompet dapat diganti. Transfer kas menampilkan kas asal, kas tujuan, dan dompet; transfer dompet menampilkan kas, dompet asal, dan dompet tujuan. Perubahan memperbarui pasangan transfer dan saldo terkait secara atomik. Kas dan dompet ketiga dan seterusnya tetap terlihat tetapi tidak dapat dipilih saat masa Premium tidak berlaku; aturan hak akses juga diperiksa saat penyimpanan.
 - Menampilkan saldo berjalan untuk kas atau dompet yang sedang dipilih.
 - Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer dompet berwarna kuning.
 - Nama aktivitas pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
 - Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal, sedangkan dompet ditampilkan di bawah kas. Saat filter kas atau dompet aktif, saldo berjalan ditampilkan di bawah nominal.
-- Filter transaksi berdasarkan bulan, tahun, kas, dan dompet.
+- Filter transaksi berdasarkan bulan, tahun, kas, dan dompet; pilihan bulan dan tahun dibuat lebih ringkas, chevron filter lebih jelas, dan tombol reset sejajar di kanan ketika ruang tersedia.
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data.
@@ -204,7 +206,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Tabel kas menampilkan tiga kolom utama: Kas dengan deskripsi di bawah nama, Akses dengan keterangan kepemilikan, serta Saldo dengan jumlah transaksi dan produk emas. Pencarian tetap mencakup nama dan deskripsi kas; tanggal dibuat dan diperbarui tersedia sebagai kolom opsional.
 - Aksi baris tabel `/admin/buku-kas` dikelompokkan dalam menu **Aksi**, dengan pilihan yang mengikuti hak akses dan kondisi kas.
 - Daftar **Kolaborator Kas** tersedia di `/admin/kolaborator-kas`. Form tambah dan ubah kolaborator dibuka melalui modal; akses dapat dicabut melalui aksi pada baris atau pilihan massal.
-- Daftar kolaborator menyediakan tombol **Salin link** pada setiap kolaborator publik, dengan notifikasi keberhasilan atau kegagalan penyalinan, tanpa kolom URL terpisah. Tanggal mulai dan berakhir pada tabel ditampilkan tanpa jam. Halaman publik menampilkan saldo kas, transaksi berhalaman, filter bulan, pencarian berdasarkan deskripsi/aktivitas/jenis transaksi, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama dompet dan identitas pengguna tidak ditampilkan. Saat kata pencarian diisi, pencarian mencakup seluruh tanggal pada kas tersebut tanpa dibatasi bulan terpilih dan tetap dipertahankan saat berpindah halaman. Menghapus pencarian mengembalikan filter bulan; ringkasan total bulanan tetap mengikuti bulan terpilih.
+- Daftar kolaborator menyediakan tombol **Salin link** pada setiap kolaborator publik, dengan notifikasi keberhasilan atau kegagalan penyalinan, tanpa kolom URL terpisah. Tanggal mulai dan berakhir pada tabel ditampilkan tanpa jam. Halaman publik menampilkan saldo kas, transaksi berhalaman dengan ringkasan padat pada layar mobile, filter bulan, pencarian berdasarkan deskripsi/aktivitas/jenis transaksi, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama dompet dan identitas pengguna tidak ditampilkan. Saat kata pencarian diisi, pencarian mencakup seluruh tanggal pada kas tersebut tanpa dibatasi bulan terpilih dan tetap dipertahankan saat berpindah halaman. Menghapus pencarian mengembalikan filter bulan; ringkasan total bulanan tetap mengikuti bulan terpilih.
 - Daftar tabungan emas dikelompokkan berdasarkan kas dengan total gram seluruh tabungan pada setiap grup, tanpa kolom Kas terpisah. Daftar menampilkan tanggal **Dibeli pada**, harga beli, dan keterangan. Tanggal pembelian dapat diisi saat membuat dan mengubah tabungan, dengan nilai awal waktu sekarang. Harga beli dan keterangan opsional. Berat ditampilkan tanpa nol desimal berlebih, misalnya `1` atau `0,5` gram; total modal tidak ditampilkan pada daftar.
 - Aksi Beli emas, Jual emas, dan Histori tidak tersedia pada halaman tabungan emas.
 - Aksi cek nilai emas menampilkan total nilai kas dalam ringkasan beraksen emas, kartu nilai emas dan saldo rupiah, rincian berat/harga/modal, serta estimasi untung/rugi berwarna sesuai hasil. Modal responsif mendukung mode gelap dan menampilkan status sumber harga serta waktu berlakunya. Label sumber harga API menjadi tautan ke URL sumber dari Setting, dengan default `services.harga_emas.source` (`HARGA_EMAS_SOURCE`), dan dibuka di tab baru; sumber manual tetap berupa teks.
@@ -286,7 +288,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Dashboard menjadi halaman utama pengguna biasa setelah login dan onboarding.
 - Data kartu, lima transaksi terbaru, pengaturan tampilan, dan ringkasan admin menggunakan cache 30 menit yang dipisahkan per pengguna. Perubahan tabel model terkait membatalkan cache bagian yang bergantung padanya, termasuk query massal atau penulisan tanpa event model. Invalidasi berlaku untuk seluruh pengguna pada bagian terkait; data di dalam transaksi database dibaca langsung dan invalidasi diulang setelah commit. Status langganan diperbarui saat berganti tanggal.
-- Layout dashboard menggunakan tiga kolom pada layar besar, dua kolom pada tablet, dan satu kolom pada ponsel. Tabel transaksi memakai lebar penuh agar lima kolomnya tetap mudah dibaca.
+- Layout dashboard menggunakan tiga kolom pada layar besar, dua kolom pada tablet, dan satu kolom pada ponsel. Tabel transaksi memakai lebar penuh di desktop dan ringkasan satu kolom pada layar mobile.
 - Menampilkan seluruh kas dan dompet milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Kartu juga menampilkan total saldo dan jumlah kas atau dompet, dengan ikon serta warna aksen berbeda dan dukungan tema gelap.
 - Menampilkan total sisa utang dan piutang setelah pembayaran, masing-masing disertai tiga catatan dengan aktivitas terbaru.
 - Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.

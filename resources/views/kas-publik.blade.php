@@ -36,10 +36,36 @@
         td p { margin: 6px 0 0; overflow-wrap: anywhere; }
         .number { text-align: right; white-space: nowrap; }
         .date { white-space: nowrap; }
+        .mobile-cell { display: none; }
+        .public-mobile-main { display: grid; grid-template-columns: minmax(0, 1fr) max-content; align-items: baseline; gap: 8px; width: 100%; }
+        .public-mobile-type { min-width: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 600; }
+        .public-mobile-amount { text-align: right; white-space: nowrap; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .public-mobile-detail { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 3px; font-size: 12px; }
+        .public-mobile-activity { color: #374151; font-weight: 500; overflow-wrap: anywhere; }
+        .public-mobile-date { color: #6b7280; white-space: nowrap; }
+        .public-mobile-description { margin: 3px 0 0; color: #5a6d68; font-size: 12px; overflow-wrap: anywhere; }
+        .public-mobile-summary[data-tone="success"] .public-mobile-type,
+        .public-mobile-summary[data-tone="success"] .public-mobile-amount { color: #15803d; }
+        .public-mobile-summary[data-tone="danger"] .public-mobile-type,
+        .public-mobile-summary[data-tone="danger"] .public-mobile-amount { color: #b91c1c; }
+        .public-mobile-summary[data-tone="info"] .public-mobile-type,
+        .public-mobile-summary[data-tone="info"] .public-mobile-amount { color: #1d4ed8; }
+        .public-mobile-summary[data-tone="warning"] .public-mobile-type,
+        .public-mobile-summary[data-tone="warning"] .public-mobile-amount { color: #a16207; }
         nav { padding: 20px 22px; display: flex; gap: 20px; flex-wrap: wrap; }
         a { color: #176b56; }
         footer { margin-top: 20px; font-size: 13px; }
-        @media (max-width: 650px) { .summary { grid-template-columns: 1fr; gap: 10px; } .card { padding: 18px; } th, td { padding: 14px; } }
+        @media (max-width: 650px) {
+            .summary { grid-template-columns: 1fr; gap: 10px; }
+            .card { padding: 18px; }
+            .table-wrap { overflow-x: visible; }
+            table, tbody, tr { display: block; }
+            thead, .desktop-cell { display: none; }
+            tbody tr { border-top: 1px solid #e4ebe7; }
+            tbody tr:first-child { border-top: 0; }
+            .mobile-cell { display: block; padding: 11px 14px; border-top: 0; }
+            tbody tr > td[colspan] { display: block; padding: 14px; border-top: 0; }
+        }
     </style>
 </head>
 <body>
@@ -73,13 +99,26 @@
                 <tbody>
                 @forelse ($transaksi as $item)
                     <tr>
-                        <td class="date">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
-                        <td>{{ $item->jenis }}</td>
-                        <td>{{ $item->aktivitas ? ucfirst($item->aktivitas) : $item->jenis }}@if ($item->deskripsi)<p class="muted">{{ $item->deskripsi }}</p>@endif</td>
-                        <td class="number {{ in_array($item->jenis, ['Pemasukan', 'Transfer Pemasukan']) ? 'incoming' : 'outgoing' }}">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
+                        <td class="mobile-cell">
+                            <div class="public-mobile-summary" data-public-transaksi-mobile data-tone="{{ \App\Filament\Resources\TransaksiResource::getWarnaTipeTransaksi($item->jenis, $item->tipe_transfer) }}">
+                                <div class="public-mobile-main">
+                                    <span class="public-mobile-type">{{ $item->jenis }}</span>
+                                    <span class="public-mobile-amount">Rp {{ number_format($item->nominal, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="public-mobile-detail">
+                                    <span class="public-mobile-activity">{{ $item->aktivitas ? ucfirst($item->aktivitas) : $item->jenis }}</span>
+                                    <span class="public-mobile-date">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</span>
+                                </div>
+                                @if ($item->deskripsi)<p class="public-mobile-description">{{ $item->deskripsi }}</p>@endif
+                            </div>
+                        </td>
+                        <td class="desktop-cell date">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
+                        <td class="desktop-cell">{{ $item->jenis }}</td>
+                        <td class="desktop-cell">{{ $item->aktivitas ? ucfirst($item->aktivitas) : $item->jenis }}@if ($item->deskripsi)<p class="muted">{{ $item->deskripsi }}</p>@endif</td>
+                        <td class="desktop-cell number {{ in_array($item->jenis, ['Pemasukan', 'Transfer Pemasukan']) ? 'incoming' : 'outgoing' }}">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" class="muted">{{ $pencarian !== '' ? 'Tidak ada transaksi yang cocok.' : 'Belum ada transaksi pada bulan ini.' }}</td></tr>
+                    <tr><td colspan="5" class="muted">{{ $pencarian !== '' ? 'Tidak ada transaksi yang cocok.' : 'Belum ada transaksi pada bulan ini.' }}</td></tr>
                 @endforelse
                 </tbody>
             </table>

@@ -37,7 +37,7 @@ class KasPublikController extends Controller
                         ->orWhere('transaksi.jenis', 'like', '%'.$pencarian.'%');
                 });
             })
-            ->select(['transaksi.tanggal', 'transaksi.jenis', 'transaksi.nominal', 'transaksi.deskripsi', 'jenis_transaksi.nama_jenis as aktivitas'])
+            ->select(['transaksi.tanggal', 'transaksi.jenis', 'transaksi.tipe_transfer', 'transaksi.nominal', 'transaksi.deskripsi', 'jenis_transaksi.nama_jenis as aktivitas'])
             ->orderByDesc('transaksi.tanggal')->orderByDesc('transaksi.id')
             ->paginate(25)->appends(['bulan' => $bulan, 'q' => $pencarian]);
 

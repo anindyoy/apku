@@ -70,7 +70,7 @@ test('kas publik menyajikan transaksi dan ringkasan tanpa login dengan isolasi d
         ->assertViewHas('transaksi', fn ($rows): bool => $rows->total() === 2)
         ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
         ->assertHeader('Referrer-Policy', 'no-referrer');
-    expect($response->getContent())->toContain('Iuran warga', '&lt;script&gt;')
+    expect($response->getContent())->toContain('Iuran warga', '&lt;script&gt;', 'data-public-transaksi-mobile', 'public-mobile-amount')
         ->not->toContain('Transaksi rahasia', 'Kas rahasia', 'Dompet rahasia', $owner->email, '<script>alert(1)</script>', 'Bulan sebelumnya');
     expect($response->headers->get('Cache-Control'))->toContain('no-store');
     $this->assertGuest();

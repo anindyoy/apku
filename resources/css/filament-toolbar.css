@@ -43,6 +43,11 @@
         display: none;
     }
 
+    .fi-ta-table-stacked-on-mobile .fi-ta-cell:has([data-transaksi-mobile]) .fi-ta-cell-content,
+    .fi-ta-table-stacked-on-mobile .fi-ta-cell:has([data-transaksi-mobile]) .fi-ta-col {
+        width: 100%;
+    }
+
     .fi-ta-table-stacked-on-mobile tr:has([data-transaksi-mobile]) {
         padding: 0;
     }
@@ -58,23 +63,28 @@
 
 .transaction-mobile-summary {
     min-width: 0;
+    width: 100%;
     line-height: 1.35;
 }
 
 .transaction-mobile-main {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 3px 12px;
+    gap: 8px;
+    width: 100%;
 }
 
 .transaction-mobile-type {
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-size: 13px;
     font-weight: 600;
 }
 
 .transaction-mobile-amount {
+    text-align: right;
+    white-space: nowrap;
     font-size: 15px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;

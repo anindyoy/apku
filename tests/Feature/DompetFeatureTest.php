@@ -486,6 +486,81 @@ test('edit pasangan transfer memperbarui nominal dan kedua saldo secara atomik',
         ->and($bukuKas->fresh()->saldo)->toBe(0);
 });
 
+test('edit transfer kas memindahkan kas dan dompet pada kedua sisi', function () {
+    ['user' => $user, 'bukuKas' => $kasAsal, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $kasTujuan = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Tujuan', 'saldo' => 0]);
+    $kasBaru = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Baru', 'saldo' => 0]);
+    $pasangan = app(TransaksiService::class)->transferBukuKas($user, $kasAsal, $kasTujuan, $cash, $cash, 25000);
+
+    app(TransaksiService::class)->ubah($user, $pasangan['masuk'], [
+        'buku_kas_id' => $kasTujuan->id,
+        'buku_kas_id_tujuan' => $kasBaru->id,
+        'dompet_id' => $bank->id,
+        'nominal' => 40000,
+    ]);
+
+    expect($kasAsal->fresh()->saldo)->toBe(0)
+        ->and($kasTujuan->fresh()->saldo)->toBe(-40000)
+        ->and($kasBaru->fresh()->saldo)->toBe(40000)
+        ->and($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(0)
+        ->and($pasangan['keluar']->fresh()->buku_kas_id)->toBe($kasTujuan->id)
+        ->and($pasangan['keluar']->fresh()->tujuan_buku_tabungan_id)->toBe($kasBaru->id)
+        ->and($pasangan['masuk']->fresh()->buku_kas_id)->toBe($kasBaru->id)
+        ->and($pasangan['masuk']->fresh()->asal_buku_tabungan_id)->toBe($kasTujuan->id)
+        ->and($pasangan['keluar']->fresh()->dompet_id)->toBe($bank->id)
+        ->and($pasangan['masuk']->fresh()->dompet_id)->toBe($bank->id);
+});
+
+test('edit transfer dompet memindahkan kas serta dompet asal dan tujuan', function () {
+    ['user' => $user, 'bukuKas' => $kasAsal, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $kasBaru = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Baru', 'saldo' => 0]);
+    $dompetBaru = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'E-Wallet', 'saldo' => 0]);
+    $pasangan = app(TransferDompetService::class)->transfer($user, $cash, $bank, $kasAsal, 25000);
+
+    expect(Transaksi::dataFormUbah($pasangan['masuk']))->toMatchArray([
+        'buku_kas_id' => $kasAsal->id,
+        'dompet_id' => $cash->id,
+        'dompet_id_tujuan' => $bank->id,
+    ]);
+
+    app(TransaksiService::class)->ubah($user, $pasangan['keluar'], [
+        'buku_kas_id' => $kasBaru->id,
+        'dompet_id' => $bank->id,
+        'dompet_id_tujuan' => $dompetBaru->id,
+        'nominal' => 40000,
+    ]);
+
+    expect($kasAsal->fresh()->saldo)->toBe(0)
+        ->and($kasBaru->fresh()->saldo)->toBe(0)
+        ->and($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(-40000)
+        ->and($dompetBaru->fresh()->saldo)->toBe(40000)
+        ->and($pasangan['keluar']->fresh()->buku_kas_id)->toBe($kasBaru->id)
+        ->and($pasangan['masuk']->fresh()->buku_kas_id)->toBe($kasBaru->id)
+        ->and($pasangan['keluar']->fresh()->dompet_id)->toBe($bank->id)
+        ->and($pasangan['masuk']->fresh()->dompet_id)->toBe($dompetBaru->id);
+});
+
+test('edit transfer menolak pilihan kas atau dompet terbatas tanpa mengubah saldo', function () {
+    ['user' => $user, 'bukuKas' => $kasAsal, 'cash' => $cash, 'bank' => $bank] = buatDataDompet(['masa_aktif' => today()->subDay()]);
+    $kasTujuan = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Tujuan', 'saldo' => 0]);
+    $kasTerbatas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Terbatas', 'saldo' => 0]);
+    $dompetTerbatas = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Dompet Terbatas', 'saldo' => 0]);
+    $pasangan = app(TransaksiService::class)->transferBukuKas($user, $kasAsal, $kasTujuan, $cash, $cash, 25000);
+
+    expect(fn () => app(TransaksiService::class)->ubah($user, $pasangan['keluar'], [
+        'buku_kas_id_tujuan' => $kasTerbatas->id,
+        'dompet_id' => $dompetTerbatas->id,
+    ]))->toThrow(AuthorizationException::class);
+
+    expect($kasAsal->fresh()->saldo)->toBe(-25000)
+        ->and($kasTujuan->fresh()->saldo)->toBe(25000)
+        ->and($kasTerbatas->fresh()->saldo)->toBe(0)
+        ->and($dompetTerbatas->fresh()->saldo)->toBe(0)
+        ->and($pasangan['masuk']->fresh()->buku_kas_id)->toBe($kasTujuan->id);
+});
+
 test('hapus salah satu sisi transfer menghapus pasangan dan mengembalikan seluruh saldo', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
     $hasil = app(TransferDompetService::class)->transfer($user, $cash, $bank, $bukuKas, 25000);

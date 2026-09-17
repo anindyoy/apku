@@ -47,6 +47,19 @@ test('toolbar filter transaksi menggunakan warna teks yang kontras pada setiap t
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
+test('panah select filter transaksi memiliki jarak dari tepi kanan', function () {
+    $user = createRegularUserWithBukuKas();
+    $html = Livewire::actingAs($user)->test(ListTransaksis::class)->html();
+
+    expect(substr_count($html, 'data-testid="transaction-select-chevron"'))->toBe(4)
+        ->and(substr_count($html, 'appearance-none border-0 bg-transparent bg-none'))->toBe(4)
+        ->and(substr_count($html, 'absolute inset-y-0 right-3.5 my-auto h-5 w-5'))->toBe(4)
+        ->and($html)->toContain('relative h-full w-36')
+        ->and($html)->toContain('relative h-full w-24')
+        ->and($html)->toContain('transaction-reset-filter ml-auto');
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
 test('filter buku kas - getBukuKasOptions mengembalikan array dengan nama_buku dan id', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();

@@ -110,6 +110,10 @@ test('transaksi model - form method mengembalikan array', function () {
     $form = Transaksi::form();
     $this->assertIsArray($form);
     $this->assertNotEmpty($form);
+    $this->assertInstanceOf(\Filament\Schemas\Components\Grid::class, $form[0]);
+    $this->assertSame(1, $form[0]->getColumns('default'));
+    $this->assertSame(2, $form[0]->getColumns('sm'));
+    $this->assertCount(9, $form[0]->getDefaultChildComponents());
 })
     ->group('models', 'relationships');
 

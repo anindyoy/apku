@@ -76,8 +76,8 @@
 
     <x-filament::section collapsible collapsed icon="heroicon-o-funnel" class="-mb-2" data-testid="filter-transaksi-section">
         <x-slot name="heading">Filter transaksi</x-slot>
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div class="flex flex-wrap items-end gap-4">
+            <div class="flex flex-wrap items-end gap-4">
                 <div class="space-y-1.5">
                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">
                         Periode transaksi
@@ -91,23 +91,29 @@
                         </a>
 
                         <div class="transaction-filter-control flex h-10 items-center overflow-hidden rounded-lg bg-white shadow-sm dark:bg-white/5">
-                            <x-filament::icon icon="heroicon-m-calendar-days" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
+                            <x-filament::icon icon="heroicon-m-calendar-days" class="ml-3 h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400" />
 
-                            <select aria-label="Bulan" wire:model.live="filterMonth"
-                                class="period-filter-select h-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
-                                @foreach(['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'] as $value => $label)
-                                    <option value="{{ $value }}" {{ $filterMonth === $value ? 'selected' : '' }}>{{ $label }}</option>
-                                @endforeach
-                            </select>
+                            <div class="relative h-full w-36">
+                                <select aria-label="Bulan" wire:model.live="filterMonth"
+                                    class="period-filter-select h-full w-full appearance-none border-0 bg-transparent bg-none py-0 pl-2 pr-10 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                                    @foreach(['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'] as $value => $label)
+                                        <option value="{{ $value }}" {{ $filterMonth === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="pointer-events-none absolute inset-y-0 right-3.5 my-auto h-5 w-5 text-gray-600 dark:text-gray-300" />
+                            </div>
 
-                            <span class="h-5 w-px bg-gray-200 dark:bg-white/10"></span>
+                            <span class="h-5 w-px bg-gray-300 dark:bg-white/20"></span>
 
-                            <select aria-label="Tahun" wire:model.live="filterYear"
-                                class="period-filter-select h-full border-0 bg-transparent py-0 pl-3 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
-                                @for($year = date('Y'); $year >= date('Y') - 5; $year--)
-                                    <option value="{{ $year }}" {{ (string) $filterYear === (string) $year ? 'selected' : '' }}>{{ $year }}</option>
-                                @endfor
-                            </select>
+                            <div class="relative h-full w-24">
+                                <select aria-label="Tahun" wire:model.live="filterYear"
+                                    class="period-filter-select h-full w-full appearance-none border-0 bg-transparent bg-none py-0 pl-3 pr-10 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                                    @for($year = date('Y'); $year >= date('Y') - 5; $year--)
+                                        <option value="{{ $year }}" {{ (string) $filterYear === (string) $year ? 'selected' : '' }}>{{ $year }}</option>
+                                    @endfor
+                                </select>
+                                <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="pointer-events-none absolute inset-y-0 right-3.5 my-auto h-5 w-5 text-gray-600 dark:text-gray-300" />
+                            </div>
                         </div>
 
                         {{-- Navigasi ke bulan berikutnya --}}
@@ -125,14 +131,17 @@
 
                     <div class="transaction-filter-control flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm dark:bg-white/5">
                         <x-filament::icon icon="heroicon-m-wallet" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
-                        <select id="dompet-filter"
-                            onchange="window.location.href='{{ $filterUrl($filterBukuKas ?? '', '__VALUE__') }}'.replace('__VALUE__', this.value)"
-                            class="period-filter-select h-full w-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
-                            <option value="" {{ blank($filterDompet) ? 'selected' : '' }}>Semua Dompet</option>
-                            @foreach($this->getDompetOptions() as $id => $nama)
-                                <option value="{{ $id }}" {{ (string) $filterDompet === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative h-full min-w-0 flex-1">
+                            <select id="dompet-filter"
+                                onchange="window.location.href='{{ $filterUrl($filterBukuKas ?? '', '__VALUE__') }}'.replace('__VALUE__', this.value)"
+                                class="period-filter-select h-full w-full appearance-none border-0 bg-transparent bg-none py-0 pl-2 pr-10 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                                <option value="" {{ blank($filterDompet) ? 'selected' : '' }}>Semua Dompet</option>
+                                @foreach($this->getDompetOptions() as $id => $nama)
+                                    <option value="{{ $id }}" {{ (string) $filterDompet === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
+                                @endforeach
+                            </select>
+                            <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="pointer-events-none absolute inset-y-0 right-3.5 my-auto h-5 w-5 text-gray-600 dark:text-gray-300" />
+                        </div>
                     </div>
                 </div>
 
@@ -143,20 +152,23 @@
 
                     <div class="transaction-filter-control flex h-10 min-w-56 items-center rounded-lg bg-white shadow-sm dark:bg-white/5">
                         <x-filament::icon icon="heroicon-m-book-open" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
-                        <select id="buku-kas-filter"
-                            onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
-                            class="period-filter-select h-full w-full border-0 bg-transparent py-0 pl-2 pr-8 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
-                            <option value="" {{ blank($filterBukuKas) ? 'selected' : '' }}>Semua Kas</option>
-                            @foreach($this->getBukuKasOptions() as $id => $nama)
-                                <option value="{{ $id }}" {{ (string) $filterBukuKas === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
-                            @endforeach
-                        </select>
+                        <div class="relative h-full min-w-0 flex-1">
+                            <select id="buku-kas-filter"
+                                onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
+                                class="period-filter-select h-full w-full appearance-none border-0 bg-transparent bg-none py-0 pl-2 pr-10 text-sm font-semibold text-gray-950 focus:ring-0 dark:text-white">
+                                <option value="" {{ blank($filterBukuKas) ? 'selected' : '' }}>Semua Kas</option>
+                                @foreach($this->getBukuKasOptions() as $id => $nama)
+                                    <option value="{{ $id }}" {{ (string) $filterBukuKas === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
+                                @endforeach
+                            </select>
+                            <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="pointer-events-none absolute inset-y-0 right-3.5 my-auto h-5 w-5 text-gray-600 dark:text-gray-300" />
+                        </div>
                     </div>
                 </div>
             </div>
 
             <a href="{{ $resetFilterUrl }}"
-                class="transaction-filter-control transaction-reset-filter inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg px-3 text-sm font-semibold shadow-sm transition lg:self-auto">
+                class="transaction-filter-control transaction-reset-filter ml-auto inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg px-3 text-sm font-semibold shadow-sm transition">
                 <x-filament::icon icon="heroicon-m-arrow-path" class="h-4 w-4" />
                 Reset filter
             </a>

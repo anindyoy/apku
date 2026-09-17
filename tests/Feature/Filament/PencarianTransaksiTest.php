@@ -86,7 +86,9 @@ test('warna teks hasil pencarian mengikuti tipe transaksi seperti daftar transak
     }
 
     expect(array_keys($komponen->instance()->getTable()->getColumns()))
-        ->toBe(['jenis', 'tanggal', 'buku_kas.nama_buku', 'kategori', 'nominal']);
+        ->toBe(['ringkasan_mobile', 'jenis', 'tanggal', 'buku_kas.nama_buku', 'kategori', 'nominal']);
+    expect($komponen->html())->toContain('fi-ta-table-stacked-on-mobile', 'data-transaksi-mobile', 'filament-toolbar');
+    expect(str_starts_with($komponen->html(), '<div'))->toBeTrue();
 
     $komponen
         ->assertTableColumnExists('tanggal', fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Dicatat oleh: '.$user->name, $transaksi)

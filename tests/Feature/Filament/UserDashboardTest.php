@@ -46,7 +46,8 @@ test('dashboard user menampilkan saldo milik sendiri dan lima transaksi terbaru 
         ->assertCanNotSeeTableRecords($records->skip(5)->push($foreign));
     expect($page->instance()->getTableRecords())->toHaveCount(5);
     expect(array_keys($page->instance()->getTable()->getColumns()))
-        ->toBe(['jenis', 'tanggal', 'buku_kas.nama_buku', 'kategori', 'nominal']);
+        ->toBe(['ringkasan_mobile', 'jenis', 'tanggal', 'buku_kas.nama_buku', 'kategori', 'nominal']);
+    expect($page->html())->toContain('fi-ta-table-stacked-on-mobile', 'data-transaksi-mobile', 'filament-toolbar');
     Livewire::test(ListTransaksis::class)->assertSuccessful()->assertCanSeeTableRecords($records);
 });
 
@@ -225,8 +226,12 @@ test('dashboard user aksi baris mengubah dan menghapus transaksi beserta saldo',
     $page = Livewire::test(Dashboard::class)
         ->assertTableActionVisible('edit', $record)
         ->assertTableActionVisible('delete', $record)
+        ->mountTableAction('edit', $record)
+        ->assertActionMounted()
+        ->unmountTableAction()
         ->callTableAction('edit', $record, data: [...$data, 'nominal' => 75000])
         ->assertHasNoTableActionErrors();
+    expect(str_starts_with($page->html(), '<div'))->toBeTrue();
     expect((float) $record->fresh()->nominal)->toBe(75000.0)
         ->and((float) $kas->fresh()->saldo)->toBe(75000.0)
         ->and((float) $dompet->fresh()->saldo)->toBe(75000.0);
