@@ -302,7 +302,7 @@ class ListTransaksis extends ListRecords
                     ->icon('heroicon-o-arrow-up-tray'),
 
             ])
-                ->label('Aksi lainnya')
+                ->label('Import')
                 ->icon('heroicon-o-ellipsis-vertical')
                 ->button(),
 
@@ -356,6 +356,7 @@ class ListTransaksis extends ListRecords
             }
 
             $html .= '</ul>';
+
         }
 
         return new HtmlString($html.'</div>');

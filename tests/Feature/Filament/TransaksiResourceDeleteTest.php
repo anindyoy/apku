@@ -149,7 +149,7 @@ test('transaksi list - header actions tersedia', function () {
             'filterBukuKas' => (string) $bukuKas->id,
         ])
         ->assertSuccessful()
-        ->assertSeeText('Aksi lainnya')
+        ->assertSeeText('Import')
         ->assertSeeText('Tambah transaksi');
 })
     ->group('filament', 'transaksi-delete');

@@ -17,7 +17,7 @@
         @media(prefers-color-scheme:dark) { :root { --bg:#141b24; --card:#1d2733; --text:#edf0f5; --muted:#b6c2d1; --line:#354254; --accent:#f7c96b; --soft:#332b1c; } }
         article:target { border-color:#d89413; box-shadow:0 0 0 2px #d89413; }
         aside a[aria-current="location"] { background:var(--soft); color:var(--accent); font-weight:750; border-left:3px solid #d89413; }
-        aside a[aria-current="location"]::after { content:"Sedang dibaca"; display:block; font-size:11px; margin-top:4px; }
+        aside a[aria-current="location"]::after { display:block; font-size:11px; margin-top:4px; }
         .topic-position { font-size:13px; color:var(--muted); line-height:1.6; }
     </style>
 </head>

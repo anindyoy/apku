@@ -32,6 +32,12 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 
 - Setiap catatan atau komentar pada kode, baik satu baris maupun blok, harus ditulis dalam Bahasa Indonesia.
 
+## Styling CSS
+
+- Gunakan class Tailwind CSS dan komponen Flowbite untuk styling CSS pada file Blade atau view.
+- Hindari menulis CSS custom di luar Tailwind/Flowbite kecuali sangat diperlukan untuk kebutuhan yang tidak tercakup oleh framework.
+- Pastikan komponen Flowbite yang digunakan sudah terdaftar di package dependency proyek (`flowbite`).
+
 ## Dokumentasi Markdown
 
 - Setiap file Markdown (`.md`) baru harus diletakkan di folder [`docs`](docs), termasuk file rencana atau plan.
