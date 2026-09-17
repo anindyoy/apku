@@ -177,7 +177,7 @@ class ListTransaksis extends ListRecords
                         View::make('filament.resources.transaksi-resource.pages.import-template'),
                         Hidden::make('header_options'),
                         Hidden::make('pratinjau'),
-                        Grid::make(2)
+                        Grid::make(['default' => 1, 'md' => 2, 'xl' => 3])
                             ->schema([
                                 FileUpload::make('file')
                                     ->label('File CSV atau XLSX')
@@ -248,6 +248,7 @@ class ListTransaksis extends ListRecords
                             ->label('Pratinjau')
                             ->content(fn (Get $get): HtmlString => $this->formatPratinjauImport($get('pratinjau'))),
                     ])
+                    ->modalWidth('5xl')
                     ->modalSubmitActionLabel('Import')
                     ->extraModalFooterActions(fn (Action $action): array => [
                         $action->makeModalSubmitAction('unduhLaporanError', arguments: ['unduh_laporan_error' => true])
@@ -338,7 +339,13 @@ class ListTransaksis extends ListRecords
         if ($errors === []) {
             $html .= '<p class="text-success-600">Semua baris valid dan siap diimpor.</p>';
         } else {
-            $html .= '<p class="text-danger-600"><strong>'.count($errors).' masalah ditemukan:</strong></p><ul class="list-disc pl-5 text-sm text-danger-600">';
+            $html .= '<p class="text-danger-600"><strong>'.count($errors).' masalah ditemukan:</strong></p>';
+
+            if (collect($errors)->contains(fn (string $error): bool => str_contains($error, 'kolom tanggal: format tanggal tidak valid'))) {
+                $html .= '<p class="text-sm text-danger-600">Format tanggal yang benar: YYYY-MM-DD (contoh: 2026-09-15) atau YYYY-MM-DD HH:mm (contoh: 2026-09-15 14:30).</p>';
+            }
+
+            $html .= '<ul class="list-disc pl-5 text-sm text-danger-600">';
 
             foreach (array_slice($errors, 0, 20) as $error) {
                 $html .= '<li>'.e($error).'</li>';

@@ -184,9 +184,11 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data.
-- Pratinjau import sebelum disimpan menampilkan jumlah baris, kesalahan, serta total pemasukan dan pengeluaran.
+- Pratinjau import sebelum disimpan menampilkan jumlah baris, kesalahan, serta total pemasukan dan pengeluaran. Tanggal import menerima `YYYY-MM-DD` atau `YYYY-MM-DD HH:mm`; waktu yang tidak diisi menjadi `00:00`. Jika beberapa baris memiliki format tanggal salah, contoh kedua format ditampilkan sekali sebelum daftar masalah.
+- Nilai kas atau dompet yang kosong pada baris import memakai kas atau dompet default pengguna yang dapat dikelola.
 - Pengguna dapat mengunduh laporan error XLSX yang memuat nomor baris, data asli, dan alasan kegagalan untuk membantu memperbaiki file import.
 - Pengguna dapat memetakan header file ke kolom transaksi dan melihat saran untuk nama kolom umum dalam Bahasa Indonesia dan Inggris.
+- Pemetaan kolom pada modal import tersusun dalam tiga kolom di layar lebar dan menyesuaikan jumlah kolom pada layar lebih kecil.
 - Riwayat import menampilkan nama file, waktu, jumlah transaksi, dan status setiap batch milik pengguna.
 - Pratinjau import menampilkan daftar aktivitas baru dan konfirmasi untuk membuatnya otomatis.
 - Status, progres, dan pesan kegagalan pemrosesan antrean dapat dipantau pada riwayat import.

@@ -8,6 +8,8 @@ use App\Models\ImportTransaksi;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
 use App\Services\ImportTransaksiService;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -63,6 +65,48 @@ test('import transaksi csv menyimpan semua baris dan memperbarui saldo', functio
         ->and($data['dompet']->fresh()->saldo)->toBe(4965000)
         ->and(ImportTransaksi::query()->where('user_id', $data['user']->id)->count())->toBe(1)
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->whereNotNull('import_transaksi_id')->count())->toBe(2);
+})->group('filament', 'import-transaksi');
+
+test('baris import dengan kas atau dompet kosong memakai nilai default', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,,,Gaji,100000,Keduanya kosong',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,Kas Utama,,Gaji,20000,Dompet kosong',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,,Cash,Gaji,30000,Kas kosong',
+    ]));
+    $service = app(ImportTransaksiService::class);
+
+    expect($service->pratinjau($data['user'], $file)['errors'])->toBe([]);
+
+    $hasil = $service->impor($data['user'], $file);
+
+    expect($hasil['jumlah_baris'])->toBe(3)
+        ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)
+            ->where('buku_kas_id', $data['bukuKas']->id)
+            ->where('dompet_id', $data['dompet']->id)->count())->toBe(3)
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(150000)
+        ->and($data['dompet']->fresh()->saldo)->toBe(150000);
+})->group('filament', 'import-transaksi');
+
+test('import menerima tanggal tanpa waktu dan tetap menjaga waktu yang diisi', function () {
+    $data = siapkanDataImportTransaksi();
+    $tanggal = now()->subDay()->format('Y-m-d');
+    $file = fileCsvImport(implode("\n", [
+        'tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi',
+        $tanggal.',Pemasukan,Kas Utama,Cash,Gaji,100000,Tanggal saja',
+        $tanggal.' 14:30,Pemasukan,Kas Utama,Cash,Gaji,20000,Dengan waktu',
+    ]));
+    $service = app(ImportTransaksiService::class);
+
+    expect($service->pratinjau($data['user'], $file)['errors'])->toBe([]);
+
+    $service->impor($data['user'], $file);
+
+    expect(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)
+        ->where('deskripsi', 'Tanggal saja')->firstOrFail()->tanggal)->toBe($tanggal.' 00:00:00')
+        ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)
+            ->where('deskripsi', 'Dengan waktu')->firstOrFail()->tanggal)->toBe($tanggal.' 14:30:00');
 })->group('filament', 'import-transaksi');
 
 test('file besar disimpan privat dan diproses melalui antrean tanpa transaksi ganda', function () {
@@ -260,6 +304,30 @@ test('pratinjau xlsx tidak mengubah transaksi atau saldo', function () {
         ->and($data['dompet']->fresh()->saldo)->toBe(0);
 })->group('filament', 'import-transaksi');
 
+test('pratinjau import menjelaskan format tanggal yang salah dan tanggal masa depan', function () {
+    $data = siapkanDataImportTransaksi();
+    $file = fileCsvImport(implode("\n", [
+        'tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi',
+        '15/09/2026 14:30,Pemasukan,Kas Utama,Cash,Gaji,100000,Format salah',
+        '2026/09/15,Pemasukan,Kas Utama,Cash,Gaji,100000,Format salah lagi',
+        now()->addDay()->format('Y-m-d').',Pemasukan,Kas Utama,Cash,Gaji,100000,Masa depan',
+    ]));
+
+    $hasil = app(ImportTransaksiService::class)->pratinjau($data['user'], $file);
+    $html = Livewire::actingAs($data['user'])
+        ->test(ListTransaksis::class)
+        ->instance()
+        ->formatPratinjauImport($hasil)
+        ->toHtml();
+
+    expect($hasil['errors'])->toContain('Baris 2, kolom tanggal: format tanggal tidak valid.')
+        ->toContain('Baris 3, kolom tanggal: format tanggal tidak valid.')
+        ->toContain('Baris 4, kolom tanggal: tanggal tidak boleh berada di masa depan.')
+        ->and(substr_count($html, 'Format tanggal yang benar:'))->toBe(1)
+        ->and(substr_count($html, 'contoh: 2026-09-15'))->toBe(2)
+        ->and(strpos($html, 'Format tanggal yang benar:'))->toBeLessThan(strpos($html, 'Baris 2, kolom tanggal'));
+})->group('filament', 'import-transaksi');
+
 test('baris import yang tidak valid membatalkan seluruh batch', function () {
     $data = siapkanDataImportTransaksi();
     $file = fileCsvImport(implode("\n", [
@@ -339,6 +407,21 @@ test('halaman transaksi menyediakan aksi import dan riwayat import', function ()
         ->assertSuccessful()
         ->assertActionExists('Import Transaksi')
         ->assertActionExists('Riwayat Import');
+})->group('filament', 'import-transaksi');
+
+test('modal import menampilkan pemetaan dalam tiga kolom pada layar lebar', function () {
+    $data = siapkanDataImportTransaksi();
+
+    $component = Livewire::actingAs($data['user'])
+        ->test(ListTransaksis::class)
+        ->instance();
+    $action = $component->getAction('Import Transaksi');
+    $grid = collect($action->getSchema(Schema::make($component))->getComponents())
+        ->first(fn ($item): bool => $item instanceof Grid);
+
+    expect($grid)->not->toBeNull()
+        ->and($grid->getColumns())->toMatchArray(['default' => 1, 'md' => 2, 'xl' => 3])
+        ->and((string) $action->getModalWidth())->toBe('5xl');
 })->group('filament', 'import-transaksi');
 
 test('modal import menyediakan unduhan contoh template', function () {

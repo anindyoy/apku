@@ -556,8 +556,10 @@ class ImportTransaksiService
             $errors[] = "Baris {$nomorBaris}, kolom jenis: hanya Pemasukan atau Pengeluaran yang didukung.";
         }
 
-        if ($tanggal === null || $tanggal->isFuture()) {
-            $errors[] = "Baris {$nomorBaris}, kolom tanggal: tanggal tidak valid atau berada di masa depan.";
+        if ($tanggal === null) {
+            $errors[] = "Baris {$nomorBaris}, kolom tanggal: format tanggal tidak valid.";
+        } elseif ($tanggal->isFuture()) {
+            $errors[] = "Baris {$nomorBaris}, kolom tanggal: tanggal tidak boleh berada di masa depan.";
         }
 
         if ($nominal === false) {
@@ -595,6 +597,13 @@ class ImportTransaksiService
 
     private function cariBukuKas(User $user, mixed $nama): ?BukuKas
     {
+        if (blank(trim((string) $nama))) {
+            $hasil = BukuKas::withoutGlobalScopes()->where('user_id', $user->id)
+                ->where('is_default', true)->get();
+
+            return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPada($hasil->first()) ? $hasil->first() : null;
+        }
+
         $hasil = BukuKas::withoutGlobalScopes()->where('user_id', $user->id)
             ->whereRaw('LOWER(nama_buku) = ?', [mb_strtolower(trim((string) $nama))])->get();
 
@@ -603,6 +612,13 @@ class ImportTransaksiService
 
     private function cariDompet(User $user, mixed $nama): ?Dompet
     {
+        if (blank(trim((string) $nama))) {
+            $hasil = Dompet::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
+                ->where('is_default', true)->get();
+
+            return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;
+        }
+
         $hasil = Dompet::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
             ->whereRaw('LOWER(nama_dompet) = ?', [mb_strtolower(trim((string) $nama))])->get();
 
@@ -625,9 +641,10 @@ class ImportTransaksiService
 
         try {
             $teks = trim((string) $value);
-            $tanggal = CarbonImmutable::createFromFormat('Y-m-d H:i', $teks);
+            $format = strlen($teks) === 10 ? 'Y-m-d' : 'Y-m-d H:i';
+            $tanggal = CarbonImmutable::createFromFormat('!'.$format, $teks);
 
-            return $tanggal->format('Y-m-d H:i') === $teks ? $tanggal : null;
+            return $tanggal->format($format) === $teks ? $tanggal : null;
         } catch (Throwable) {
             return null;
         }
