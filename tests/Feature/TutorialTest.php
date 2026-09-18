@@ -161,6 +161,8 @@ it('tutorial tidak menampilkan tombol topbar bagi tamu', function () {
 
 it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login', function () {
     $response = $this->get(route('tutorial'))->assertOk()->assertViewIs('tutorial');
+
+    expect($response->getContent())->toContain('--accent:#0f766e', 'background:#0f766e', '--accent:#5eead4');
     $topics = $response->viewData('topics');
 
     expect($topics)->toHaveCount(18);
