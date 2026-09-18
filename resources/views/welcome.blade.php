@@ -50,7 +50,7 @@
                     ['02', 'Kas & dompet', 'Atur kelompok keuangan dan tempat penyimpanan uang, pilih yang utama, serta cocokkan saldo melalui audit dompet.'],
                     ['03', 'Laporan siap pakai', 'Lihat ringkasan dan rincian menurut periode, kas, atau dompet. Ekspor laporan ke PDF maupun Excel.'],
                     ['04', 'Utang & piutang', 'Pantau nominal, pihak terkait, jatuh tempo, penambahan, pembayaran, dan riwayatnya.'],
-                    ['05', 'Tabungan emas', 'Catat berat emas per kas dan lihat estimasi nilai berdasarkan harga buyback atau harga manual.'],
+                    ['05', 'Tabungan emas', 'Catat berat emas per kas dan lihat estimasi nilai berdasarkan harga buyback terakhir.'],
                     ['06', 'Kas bersama', 'Dengan Premium aktif, undang Viewer atau Editor ke kas, atau bagikan tautan publik dengan akses lihat saja.'],
                 ] as [$number, $title, $description])
                     <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-sm font-bold text-teal-700">{{ $number }}</span><h3 class="mt-5 text-xl font-bold">{{ $title }}</h3><p class="mt-3 leading-relaxed text-slate-600">{{ $description }}</p></article>
