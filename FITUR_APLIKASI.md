@@ -10,7 +10,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 
 ### 1. Akun dan autentikasi
 
-- Registrasi dan login pengguna, dengan validasi Cloudflare Turnstile Managed di server untuk registrasi.
+- Registrasi dan login pengguna, dengan verifikasi Cloudflare Turnstile Managed pada form dan validasi server hanya di environment production.
 - Verifikasi alamat email.
 - Lupa dan reset password.
 - Pengingat perpanjangan masa aktif pada H-30 dan H-7 sebelum masa aktif berakhir.
@@ -156,7 +156,7 @@ Tampilan dan alur interaksi pengguna aplikasi.
 - Pengaturan profil melalui halaman **Akun Saya**, meliputi nama, email, nomor HP, penggunaan aplikasi, dan perubahan password.
 - Tampilan tipe akun dan masa aktif akun premium.
 - Notifikasi di dalam aplikasi.
-- Halaman registrasi dengan Cloudflare Turnstile Managed, login, verifikasi email, lupa password, dan reset password.
+- Halaman registrasi dengan Cloudflare Turnstile Managed hanya di production, login, verifikasi email, lupa password, dan reset password.
 
 ### 2. Onboarding pengguna baru
 

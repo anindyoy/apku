@@ -19,7 +19,7 @@ class Register extends BaseRegister
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
-                $this->getTurnstileFormComponent(),
+                ... (config('app.env') === 'production' ? [$this->getTurnstileFormComponent()] : []),
             ]);
     }
 
@@ -28,7 +28,9 @@ class Register extends BaseRegister
         try {
             return parent::register();
         } finally {
-            $this->dispatch('turnstile-reset');
+            if (config('app.env') === 'production') {
+                $this->dispatch('turnstile-reset');
+            }
         }
     }
 

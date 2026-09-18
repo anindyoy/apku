@@ -6,9 +6,27 @@ use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
 beforeEach(function () {
+    config()->set('app.env', 'production');
     config()->set('services.turnstile.site_key', 'kunci-situs-pengujian');
     config()->set('services.turnstile.secret_key', 'kunci-rahasia-pengujian');
     config()->set('services.turnstile.hostnames', ['localhost']);
+});
+
+test('pendaftaran tanpa verifikasi keamanan di luar production', function () {
+    config()->set('app.env', 'local');
+
+    Livewire::test(Register::class)
+        ->assertDontSee('Verifikasi keamanan')
+        ->fillForm([
+            'name' => 'Pengguna Lokal',
+            'email' => 'pengguna.lokal@example.com',
+            'password' => 'Password123!',
+            'passwordConfirmation' => 'Password123!',
+        ])
+        ->call('register')
+        ->assertHasNoErrors();
+
+    expect(User::where('email', 'pengguna.lokal@example.com')->exists())->toBeTrue();
 });
 
 test('pendaftaran ditolak ketika turnstile menolak token', function () {

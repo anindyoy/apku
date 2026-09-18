@@ -2,7 +2,7 @@
   {
     "id": "akun", "page": "Mulai menggunakan APKu", "category": "Mulai di sini", "title": "Daftar, masuk, dan pemulihan akun",
     "intro": "Gunakan akun pribadi untuk menyimpan catatan keuangan Anda.",
-    "steps": ["Buka aplikasi, pilih daftar, lalu lengkapi formulir registrasi dan pemeriksaan keamanan yang muncul.", "Buka email verifikasi dan ikuti tautannya. Jika belum diterima, periksa folder spam atau kirim ulang melalui halaman verifikasi.", "Masuk dengan email dan password, kemudian selesaikan pengaturan awal jika diminta.", "Jika lupa password, pilih lupa password pada halaman login, masukkan email, lalu ikuti tautan reset yang dikirim. Setelah mengganti password, masuk kembali."],
+    "steps": ["Buka aplikasi, pilih daftar, lalu lengkapi formulir registrasi. Di aplikasi production, selesaikan juga verifikasi keamanan yang muncul.", "Buka email verifikasi dan ikuti tautannya. Jika belum diterima, periksa folder spam atau kirim ulang melalui halaman verifikasi.", "Masuk dengan email dan password, kemudian selesaikan pengaturan awal jika diminta.", "Jika lupa password, pilih lupa password pada halaman login, masukkan email, lalu ikuti tautan reset yang dikirim. Setelah mengganti password, masuk kembali."],
     "example": "Daftar menggunakan email yang aktif agar tautan verifikasi dan pemulihan password dapat diterima.",
     "note": "Simpan password dengan aman. Tutorial ini dapat dibuka tanpa akun, sedangkan data keuangan pribadi memerlukan login."
   },
