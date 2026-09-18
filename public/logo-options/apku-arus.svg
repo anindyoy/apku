@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">APKu - arus uang masuk dan keluar</title>
+  <rect width="256" height="256" rx="56" fill="#4C1D95"/>
+  <circle cx="128" cy="128" r="76" fill="#FFFFFF"/>
+  <path d="M78 143h36l21-33 21 22h23" fill="none" stroke="#7C3AED" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m163 116 16 16-16 16" fill="none" stroke="#7C3AED" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="89" cy="99" r="12" fill="#FBBF24"/>
+</svg>

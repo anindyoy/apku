@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">APKu - dompet dan catatan transaksi</title>
+  <rect width="256" height="256" rx="56" fill="#0F766E"/>
+  <path d="M61 84c0-12 10-22 22-22h99c12 0 22 10 22 22v92c0 12-10 22-22 22H74c-14 0-25-11-25-25V91c0-16 13-29 29-29h104" fill="none" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M143 109h67v45h-67c-12 0-22-10-22-22s10-23 22-23Z" fill="#99F6E4"/>
+  <circle cx="153" cy="132" r="8" fill="#0F766E"/>
+  <path d="M75 165h45" stroke="#99F6E4" stroke-width="13" stroke-linecap="round"/>
+</svg>
