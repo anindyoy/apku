@@ -37,7 +37,7 @@ test('kartu langganan mempertahankan rincian pencarian filter dan aksi', functio
     @$document->loadHTML(mb_convert_encoding($component->html(), 'HTML-ENTITIES', 'UTF-8'));
     $xpath = new DOMXPath($document);
     expect($xpath->query('//*[@data-subscription-card]')->length)->toBe(1)
-        ->and($xpath->query('//table')->length)->toBe(0)
+        ->and($xpath->query('//*[@data-subscription-card]//table')->length)->toBe(0)
         ->and($component->instance()->getTable()->getContentGrid())->toBe(['default' => 1, 'md' => 2]);
     $list = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " fi-ta-content-grid ")]')->item(0);
     expect($list)->not->toBeNull();

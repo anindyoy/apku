@@ -32,7 +32,7 @@ test('toolbar filter transaksi menggunakan warna teks yang kontras pada setiap t
         ->html();
 
     expect($html)
-        ->toContain('class="-mb-2 rounded-xl')
+        ->toContain('data-testid="filter-transaksi-section"')
         ->toContain('.period-filter-select {')
         ->toContain('color: #111827 !important;')
         ->toContain('.transaction-filter-control {')
