@@ -26,6 +26,11 @@ class Transaksi extends Model
 
     protected $table = 'transaksi';
 
+    protected function casts(): array
+    {
+        return ['pengaruhi_saldo' => 'boolean'];
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Transaksi $transaksi): void {

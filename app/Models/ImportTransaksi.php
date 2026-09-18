@@ -18,6 +18,7 @@ class ImportTransaksi extends Model
         return [
             'pemetaan' => 'array',
             'buat_kategori_otomatis' => 'boolean',
+            'pengaruhi_saldo' => 'boolean',
             'dibatalkan_at' => 'datetime',
             'mulai_diproses_at' => 'datetime',
             'selesai_diproses_at' => 'datetime',

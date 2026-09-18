@@ -67,6 +67,33 @@ test('import transaksi csv menyimpan semua baris dan memperbarui saldo', functio
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->whereNotNull('import_transaksi_id')->count())->toBe(2);
 })->group('filament', 'import-transaksi');
 
+test('import riwayat tanpa dampak saldo tetap dapat diubah dan dibatalkan', function () {
+    $data = siapkanDataImportTransaksi();
+    $data['bukuKas']->update(['saldo' => 750000]);
+    $data['dompet']->update(['saldo' => 750000]);
+    $file = fileCsvImport(implode("\n", [
+        'tanggal,jenis,buku_kas,dompet,kategori,nominal,deskripsi',
+        now()->subDay()->format('Y-m-d H:i').',Pemasukan,Kas Utama,Cash,Gaji,100000,Riwayat lama',
+    ]));
+
+    app(ImportTransaksiService::class)->impor($data['user'], $file, pengaruhiSaldo: false);
+    $batch = ImportTransaksi::query()->where('user_id', $data['user']->id)->firstOrFail();
+    $transaksi = $batch->transaksi()->firstOrFail();
+
+    expect($batch->pengaruhi_saldo)->toBeFalse()
+        ->and($transaksi->pengaruhi_saldo)->toBeFalse()
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(750000)
+        ->and($data['dompet']->fresh()->saldo)->toBe(750000);
+
+    app(\App\Services\TransaksiService::class)->ubah($data['user'], $transaksi, ['nominal' => 200000]);
+    expect($data['bukuKas']->fresh()->saldo)->toBe(750000)
+        ->and($data['dompet']->fresh()->saldo)->toBe(750000);
+
+    app(ImportTransaksiService::class)->batalkan($data['user'], $batch);
+    expect($data['bukuKas']->fresh()->saldo)->toBe(750000)
+        ->and($data['dompet']->fresh()->saldo)->toBe(750000);
+})->group('filament', 'import-transaksi', 'saldo-import');
+
 test('baris import dengan kas atau dompet kosong memakai nilai default', function () {
     $data = siapkanDataImportTransaksi();
     $file = fileCsvImport(implode("\n", [
@@ -120,13 +147,14 @@ test('file besar disimpan privat dan diproses melalui antrean tanpa transaksi ga
     }
 
     $service = app(ImportTransaksiService::class);
-    $batch = $service->antrekan($data['user'], fileCsvImport(implode("\n", $baris)));
+    $batch = $service->antrekan($data['user'], fileCsvImport(implode("\n", $baris)), pengaruhiSaldo: false);
     $pathFile = $batch->path_file;
 
     Queue::assertPushedOn('import-transaksi', ProsesImportTransaksi::class);
     Storage::disk('local')->assertExists($batch->path_file);
     expect($batch->status)->toBe('menunggu')
         ->and($batch->jumlah_baris)->toBe(1001)
+        ->and($batch->pengaruhi_saldo)->toBeFalse()
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->count())->toBe(0);
 
     (new ProsesImportTransaksi($batch->id))->handle($service);
@@ -137,8 +165,9 @@ test('file besar disimpan privat dan diproses melalui antrean tanpa transaksi ga
         ->and($batch->path_file)->toBeNull()
         ->and($batch->selesai_diproses_at)->not->toBeNull()
         ->and(Transaksi::withoutGlobalScopes()->where('import_transaksi_id', $batch->id)->count())->toBe(1001)
-        ->and($data['bukuKas']->fresh()->saldo)->toBe(1001)
-        ->and($data['dompet']->fresh()->saldo)->toBe(1001);
+        ->and(Transaksi::withoutGlobalScopes()->where('import_transaksi_id', $batch->id)->where('pengaruhi_saldo', false)->count())->toBe(1001)
+        ->and($data['bukuKas']->fresh()->saldo)->toBe(0)
+        ->and($data['dompet']->fresh()->saldo)->toBe(0);
     Storage::disk('local')->assertMissing($pathFile);
 })->group('filament', 'import-transaksi', 'antrean-import');
 
@@ -443,6 +472,20 @@ test('modal import menampilkan pemetaan dalam tiga kolom pada layar lebar', func
     expect($grid)->not->toBeNull()
         ->and($grid->getColumns())->toMatchArray(['default' => 1, 'md' => 2, 'xl' => 3])
         ->and((string) $action->getModalWidth())->toBe('5xl');
+})->group('filament', 'import-transaksi');
+
+test('modal import menempatkan dua pilihan dalam grid dua kolom', function () {
+    $data = siapkanDataImportTransaksi();
+    $component = Livewire::actingAs($data['user'])->test(ListTransaksis::class)->instance();
+    $action = $component->getAction('Import Transaksi');
+    $grid = collect($action->getSchema(Schema::make($component))->getComponents())
+        ->filter(fn ($item): bool => $item instanceof Grid)
+        ->last();
+
+    expect($grid)->not->toBeNull()
+        ->and($grid->getColumns())->toMatchArray(['default' => 1, 'md' => 2])
+        ->and(collect($grid->getChildSchema()->getComponents())->map(fn ($item): string => $item->getName())->all())
+        ->toBe(['pengaruhi_saldo', 'buat_kategori_otomatis']);
 })->group('filament', 'import-transaksi');
 
 test('modal import menyediakan unduhan contoh template', function () {

@@ -69,6 +69,7 @@ class TransaksiService
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
                 'user_id' => $user->id,
                 'import_transaksi_id' => $data['import_transaksi_id'] ?? null,
+                'pengaruhi_saldo' => $data['pengaruhi_saldo'] ?? true,
                 'buku_kas_id' => $bukuKas->id,
                 'dompet_id' => $dompet->id,
                 'jenis_transaksi_id' => $data['jenis_transaksi_id'] ?? null,
@@ -354,6 +355,10 @@ class TransaksiService
 
     private function balikDampak(Transaksi $transaksi): void
     {
+        if (! $transaksi->pengaruhi_saldo) {
+            return;
+        }
+
         $dampak = $this->dampak($transaksi);
         BukuKas::withoutGlobalScopes()->whereKey($transaksi->buku_kas_id)->decrement('saldo', $dampak);
         Dompet::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->dompet_id)->decrement('saldo', $dampak);
@@ -361,6 +366,10 @@ class TransaksiService
 
     private function terapkanDampak(Transaksi $transaksi): void
     {
+        if (! $transaksi->pengaruhi_saldo) {
+            return;
+        }
+
         $dampak = $this->dampak($transaksi);
         BukuKas::withoutGlobalScopes()->whereKey($transaksi->buku_kas_id)->increment('saldo', $dampak);
         Dompet::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->dompet_id)->increment('saldo', $dampak);

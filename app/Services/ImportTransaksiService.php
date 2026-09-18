@@ -270,6 +270,7 @@ class ImportTransaksiService
         array $pemetaan = [],
         bool $buatKategoriOtomatis = false,
         ?ImportTransaksi $batchAntrean = null,
+        bool $pengaruhiSaldo = true,
     ): array {
         [$path, $namaFile] = $this->informasiFile($file, $namaFile);
         $hasil = $this->pratinjau($user, $path, $namaFile, $pemetaan, $buatKategoriOtomatis);
@@ -278,7 +279,7 @@ class ImportTransaksiService
             throw ValidationException::withMessages(['file' => $hasil['errors']]);
         }
 
-        $prosesImport = function () use ($user, $namaFile, $hasil, $batchAntrean): array {
+        $prosesImport = function () use ($user, $namaFile, $hasil, $batchAntrean, $pengaruhiSaldo): array {
             $batch = $batchAntrean ?? ImportTransaksi::query()
                 ->where('user_id', $user->id)
                 ->where('hash_file', $hasil['hash_file'])
@@ -292,6 +293,7 @@ class ImportTransaksiService
             if ($batch) {
                 $batch->update([
                     'nama_file' => Str::limit(basename($namaFile), 255, ''),
+                    'pengaruhi_saldo' => $pengaruhiSaldo,
                     'jumlah_baris' => $hasil['jumlah_baris'],
                     'status' => 'berhasil',
                     'jumlah_diproses' => $hasil['jumlah_baris'],
@@ -304,6 +306,7 @@ class ImportTransaksiService
                 $batch = ImportTransaksi::query()->create([
                     'user_id' => $user->id,
                     'nama_file' => Str::limit(basename($namaFile), 255, ''),
+                    'pengaruhi_saldo' => $pengaruhiSaldo,
                     'hash_file' => $hasil['hash_file'],
                     'jumlah_baris' => $hasil['jumlah_baris'],
                     'status' => 'berhasil',
@@ -325,6 +328,7 @@ class ImportTransaksiService
                 app(TransaksiService::class)->buat($user, [
                     ...$data,
                     'import_transaksi_id' => $batch->id,
+                    'pengaruhi_saldo' => $pengaruhiSaldo,
                 ], $data['jenis']);
             }
 
@@ -344,6 +348,7 @@ class ImportTransaksiService
         ?string $namaFile = null,
         array $pemetaan = [],
         bool $buatKategoriOtomatis = false,
+        bool $pengaruhiSaldo = true,
     ): ImportTransaksi {
         [$path, $namaFile] = $this->informasiFile($file, $namaFile);
         $hasil = $this->pratinjau($user, $path, $namaFile, $pemetaan, $buatKategoriOtomatis);
@@ -377,6 +382,7 @@ class ImportTransaksiService
                 'path_file' => $pathFile,
                 'pemetaan' => $pemetaan,
                 'buat_kategori_otomatis' => $buatKategoriOtomatis,
+                'pengaruhi_saldo' => $pengaruhiSaldo,
                 'jumlah_baris' => $hasil['jumlah_baris'],
                 'jumlah_diproses' => 0,
                 'status' => 'menunggu',

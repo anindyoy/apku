@@ -238,12 +238,19 @@ class ListTransaksis extends ListRecords
                                     ->live()
                                     ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                             ]),
-                        Toggle::make('buat_kategori_otomatis')
-                            ->label('Buat aktivitas yang belum tersedia')
-                            ->helperText('Aktivitas baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
-                            ->default(false)
-                            ->live()
-                            ->afterStateUpdated(fn (bool $state, Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $state, $set)),
+                        Grid::make(['default' => 1, 'md' => 2])
+                            ->schema([
+                                Toggle::make('pengaruhi_saldo')
+                                    ->label('Perbarui saldo kas dan dompet')
+                                    ->helperText('Matikan saat mengimpor riwayat lama agar saldo saat ini tidak berubah.')
+                                    ->default(true),
+                                Toggle::make('buat_kategori_otomatis')
+                                    ->label('Buat aktivitas yang belum tersedia')
+                                    ->helperText('Aktivitas baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
+                                    ->default(false)
+                                    ->live()
+                                    ->afterStateUpdated(fn (bool $state, Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $state, $set)),
+                            ]),
                         Placeholder::make('ringkasan_import')
                             ->label('Pratinjau')
                             ->content(fn (Get $get): HtmlString => $this->formatPratinjauImport($get('pratinjau'))),
@@ -275,8 +282,9 @@ class ListTransaksis extends ListRecords
                         $opsi = [
                             'pemetaan' => $data['pemetaan'] ?? [],
                             'buatKategoriOtomatis' => (bool) ($data['buat_kategori_otomatis'] ?? false),
+                            'pengaruhiSaldo' => (bool) ($data['pengaruhi_saldo'] ?? true),
                         ];
-                        $pratinjau = $service->pratinjau(auth()->user(), $data['file'], ...$opsi);
+                        $pratinjau = $service->pratinjau(auth()->user(), $data['file'], pemetaan: $opsi['pemetaan'], buatKategoriOtomatis: $opsi['buatKategoriOtomatis']);
 
                         if ($pratinjau['jumlah_baris'] > ImportTransaksiService::BATAS_BARIS_LANGSUNG) {
                             $service->antrekan(auth()->user(), $data['file'], ...$opsi);

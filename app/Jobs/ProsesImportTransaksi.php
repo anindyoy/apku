@@ -42,6 +42,7 @@ class ProsesImportTransaksi implements ShouldQueue
                 $batch->pemetaan ?? [],
                 $batch->buat_kategori_otomatis,
                 $batch,
+                $batch->pengaruhi_saldo,
             );
         } finally {
             Storage::disk('local')->delete($pathFile);

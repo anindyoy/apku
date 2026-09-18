@@ -48,6 +48,9 @@ class ImportTransaksiResource extends Resource
                 TextColumn::make('nama_file')
                     ->label('Nama file')
                     ->searchable(),
+                TextColumn::make('pengaruhi_saldo')
+                    ->label('Dampak saldo')
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Memperbarui saldo' : 'Tanpa perubahan saldo'),
                 TextColumn::make('jumlah_baris')
                     ->label('Jumlah transaksi')
                     ->numeric(),
@@ -85,7 +88,9 @@ class ImportTransaksiResource extends Resource
                 Action::make('Batalkan')
                     ->requiresConfirmation()
                     ->modalHeading('Batalkan seluruh transaksi dari import ini?')
-                    ->modalDescription('Seluruh transaksi dalam batch akan dihapus dan saldo kas serta dompet akan dipulihkan.')
+                    ->modalDescription(fn (ImportTransaksi $record): string => $record->pengaruhi_saldo
+                        ? 'Seluruh transaksi dalam batch akan dihapus dan dampak saldo kas serta dompet akan dipulihkan.'
+                        : 'Seluruh transaksi dalam batch akan dihapus. Saldo kas dan dompet tetap sama.')
                     ->visible(fn (ImportTransaksi $record): bool => $record->status === 'berhasil')
                     ->action(function (ImportTransaksi $record): void {
                         app(ImportTransaksiService::class)->batalkan(auth()->user(), $record);

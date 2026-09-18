@@ -32,9 +32,9 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
 - Modal import transaksi menyediakan unduhan contoh template XLSX sebelum pengguna mengunggah file.
 - Aktivitas yang belum tersedia dapat dibuat otomatis setelah konfirmasi pengguna. Pembuatannya ikut dibatalkan jika import transaksi gagal.
-- Seluruh baris import disimpan secara atomik dan saldo kas serta dompet diperbarui menggunakan aturan transaksi yang sama dengan pencatatan manual.
+- Seluruh baris import disimpan secara atomik. Pengguna dapat memilih apakah import memperbarui saldo kas dan dompet; pilihan aktif secara default. Riwayat yang diimpor tanpa dampak saldo tetap tampil sebagai transaksi dan tidak mengubah saldo saat diubah, dihapus, atau saat batch dibatalkan.
 - Import mengikuti kepemilikan dan hak pengelolaan kas, dompet, serta aktivitas pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
-- Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo kas serta dompet dipulihkan.
+- Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo kas serta dompet dipulihkan jika opsi pembaruan saldo diaktifkan.
 - File dari batch yang sudah dibatalkan dapat diimpor kembali tanpa membuat catatan batch duplikat.
 - File hingga 1.000 baris diproses langsung, sedangkan file 1.001–10.000 baris diproses melalui antrean privat.
 - File import dibatasi maksimal 10 MB dan berkas antrean dihapus dari penyimpanan privat setelah selesai atau gagal diproses.
@@ -184,12 +184,13 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data; baris contohnya memakai tanggal `YYYY-MM-DD` tanpa waktu.
+- Form import menyediakan pilihan **Perbarui saldo kas dan dompet** yang aktif secara default. Pilihan dapat dimatikan untuk riwayat lama agar saldo saat ini tidak berubah. Pilihan ini dan **Buat aktivitas yang belum tersedia** tampil dalam dua kolom pada layar lebar.
 - Pratinjau import sebelum disimpan menampilkan jumlah baris, kesalahan, serta total pemasukan dan pengeluaran. Tanggal import menerima `YYYY-MM-DD` atau `YYYY-MM-DD HH:mm`; waktu yang tidak diisi menjadi `00:00`. Jika beberapa baris memiliki format tanggal salah, contoh kedua format ditampilkan sekali sebelum daftar masalah.
 - Nilai kas atau dompet yang kosong pada baris import memakai kas atau dompet default pengguna yang dapat dikelola.
 - Pengguna dapat mengunduh laporan error XLSX yang memuat nomor baris, data asli, dan alasan kegagalan untuk membantu memperbaiki file import.
 - Pengguna dapat memetakan header file ke kolom transaksi dan melihat saran untuk nama kolom umum dalam Bahasa Indonesia dan Inggris.
 - Pemetaan kolom pada modal import tersusun dalam tiga kolom di layar lebar dan menyesuaikan jumlah kolom pada layar lebih kecil.
-- Riwayat import menampilkan nama file, waktu, jumlah transaksi, dan status setiap batch milik pengguna.
+- Riwayat import menampilkan nama file, waktu, jumlah transaksi, dampak saldo, dan status setiap batch milik pengguna.
 - Pratinjau import menampilkan daftar aktivitas baru dan konfirmasi untuk membuatnya otomatis.
 - Status, progres, dan pesan kegagalan pemrosesan antrean dapat dipantau pada riwayat import.
 
