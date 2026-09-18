@@ -12,6 +12,5 @@ Route::get('/kas-publik/{token}', KasPublikController::class)
     ->name('kas.publik');
 
 Route::get('/', function () {
-    return redirect(url('/admin'));
-    // return view('welcome');
-});
+    return view('welcome');
+})->name('home');
