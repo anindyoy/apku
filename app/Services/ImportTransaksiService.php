@@ -50,7 +50,7 @@ class ImportTransaksiService
         $writer->openToFile($path);
         $writer->addRow(Row::fromValues(self::HEADER));
         $writer->addRow(Row::fromValues([
-            now()->startOfDay()->format('Y-m-d H:i'),
+            now()->format('Y-m-d'),
             'Pemasukan',
             'Kas Utama',
             'Cash',

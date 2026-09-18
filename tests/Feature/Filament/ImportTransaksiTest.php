@@ -292,12 +292,33 @@ test('pratinjau xlsx tidak mengubah transaksi atau saldo', function () {
     app(ImportTransaksiService::class)->buatTemplateXlsx($path);
 
     try {
+        $reader = new XlsxReader;
+        $reader->open($path);
+        $contohTanggal = null;
+        $nomorBaris = 0;
+
+        foreach ($reader->getSheetIterator() as $sheet) {
+            foreach ($sheet->getRowIterator() as $row) {
+                $nomorBaris++;
+
+                if ($nomorBaris === 2) {
+                    $contohTanggal = $row->getCells()[0]->getValue();
+
+                    break;
+                }
+            }
+
+            break;
+        }
+
+        $reader->close();
         $hasil = app(ImportTransaksiService::class)->pratinjau($data['user'], $path);
     } finally {
         @unlink($path);
     }
 
-    expect($hasil['jumlah_baris'])->toBe(1)
+    expect($contohTanggal)->toBe(now()->format('Y-m-d'))
+        ->and($hasil['jumlah_baris'])->toBe(1)
         ->and($hasil['errors'])->toBe([])
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->count())->toBe(0)
         ->and($data['bukuKas']->fresh()->saldo)->toBe(0)
