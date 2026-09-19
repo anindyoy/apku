@@ -72,10 +72,7 @@ test('voucher yang melewati tanggal kedaluwarsa ditolak', function () {
 test('resource voucher dan kode voucher hanya dapat diakses admin', function () {
     $user = createRegularUserWithBukuKas();
     $admin = User::factory()->create(['role' => 'admin']);
-    $voucher = Voucher::factory()->create();
 
     $this->actingAs($user)->get(route('filament.admin.resources.vouchers.index'))->assertForbidden();
-    $this->actingAs($user)->get(route('filament.admin.resources.vouchers.codes', $voucher))->assertForbidden();
     $this->actingAs($admin)->get(route('filament.admin.resources.vouchers.index'))->assertSuccessful();
-    $this->actingAs($admin)->get(route('filament.admin.resources.vouchers.codes', $voucher))->assertSuccessful();
 })->group('voucher');

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\VoucherResource\Pages\ListVouchers;
-use App\Filament\Resources\VoucherResource\Pages\ManageVoucherCodes;
+use App\Filament\Resources\VoucherResource\RelationManagers\CodesRelationManager;
 use App\Models\Voucher;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -12,6 +12,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -65,7 +66,17 @@ class VoucherResource extends Resource
                 Action::make('kelolaKode')
                     ->label('Kelola kode')
                     ->icon('heroicon-o-qr-code')
-                    ->url(fn (Voucher $record): string => static::getUrl('codes', ['record' => $record])),
+                    ->modalHeading(fn (Voucher $record): string => 'Kelola kode: '.$record->label)
+                    ->modalWidth('4xl')
+                    ->modalSubmitAction(false)
+                    ->formWrapper(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->schema(fn (Voucher $record): array => [
+                        Livewire::make(CodesRelationManager::class, [
+                            'ownerRecord' => $record,
+                            'pageClass' => ListVouchers::class,
+                        ])->key('kode-voucher-'.$record->getKey()),
+                    ]),
                 EditAction::make(),
             ]);
     }
@@ -74,7 +85,6 @@ class VoucherResource extends Resource
     {
         return [
             'index' => ListVouchers::route('/'),
-            'codes' => ManageVoucherCodes::route('/{record}/codes'),
         ];
     }
 }

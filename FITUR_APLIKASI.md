@@ -288,8 +288,8 @@ Fitur berikut hanya tersedia untuk admin:
 - Riwayat order pengguna menampilkan order miliknya; admin dapat melihat seluruh order dan menyetujui atau menolak pembayaran yang menunggu verifikasi.
 - Riwayat langganan ditampilkan sebagai daftar kartu dengan dua kartu per baris dan isi setiap kartu juga dua kolom mulai layar tablet; kedua grid menjadi satu kolom di ponsel, mendukung mode gelap. Setiap kartu memuat kode dan tanggal order, paket serta harga tanpa atribut durasi, total pembayaran, voucher (hanya jika terisi), diskon, detail pembayaran, status, masa aktif, dan catatan admin. Identitas user hanya ditampilkan bagi admin. Pencarian, filter status, pengurutan, paginasi, dan aksi pembayaran atau verifikasi tetap tersedia sesuai hak akses.
 - Admin memiliki halaman pengelolaan paket langganan, rekening atau metode pembayaran manual, serta voucher dan kode uniknya.
-- Form tambah dan edit voucher, kode voucher, metode pembayaran, serta paket langganan dibuka sebagai modal langsung dari halaman daftar masing-masing.
-- Kode voucher dikelola melalui aksi **Kelola kode** pada resource Voucher, tanpa menu resource Kode Voucher terpisah. Daftar kode dibatasi pada voucher yang dipilih dan form tambah/edit otomatis menggunakan voucher tersebut. Kode yang sudah dipakai pada order tidak dapat dihapus.
+- Form tambah dan edit voucher, metode pembayaran, serta paket langganan dibuka sebagai modal langsung dari halaman daftar masing-masing. Edit kode voucher juga menggunakan modal.
+- Kode voucher dikelola melalui modal **Kelola kode** pada resource Voucher, tanpa halaman atau menu Kode Voucher terpisah. Form tambah kode tersedia langsung di atas tabel dengan tombol **Buat kode baru**, tanpa membuka modal tambahan. Form otomatis menggunakan voucher yang dipilih, menolak kode kosong atau duplikat, dan dikosongkan setelah berhasil disimpan. Edit kode tetap menggunakan modal. Jumlah kode pada daftar voucher diperbarui setelah penambahan atau penghapusan. Kode yang sudah dipakai pada order tidak dapat dihapus.
 
 ### 14. Dashboard pengguna
 
