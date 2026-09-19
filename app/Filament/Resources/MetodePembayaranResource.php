@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MetodePembayaranResource\Pages\CreateMetodePembayaran;
-use App\Filament\Resources\MetodePembayaranResource\Pages\EditMetodePembayaran;
 use App\Filament\Resources\MetodePembayaranResource\Pages\ListMetodePembayarans;
 use App\Models\MetodePembayaran;
 use BackedEnum;
@@ -81,8 +79,6 @@ class MetodePembayaranResource extends Resource
     {
         return [
             'index' => ListMetodePembayarans::route('/'),
-            'create' => CreateMetodePembayaran::route('/create'),
-            'edit' => EditMetodePembayaran::route('/{record}/edit'),
         ];
     }
 }

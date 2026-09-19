@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\VoucherResource\Pages\CreateVoucher;
-use App\Filament\Resources\VoucherResource\Pages\EditVoucher;
 use App\Filament\Resources\VoucherResource\Pages\ListVouchers;
+use App\Filament\Resources\VoucherResource\Pages\ManageVoucherCodes;
 use App\Models\Voucher;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -61,15 +61,20 @@ class VoucherResource extends Resource
                 IconColumn::make('dapat_dipakai_berulang')->label('Berulang')->boolean(),
                 TextColumn::make('codes_count')->counts('codes')->label('Jumlah kode'),
             ])
-            ->actions([EditAction::make()]);
+            ->actions([
+                Action::make('kelolaKode')
+                    ->label('Kelola kode')
+                    ->icon('heroicon-o-qr-code')
+                    ->url(fn (Voucher $record): string => static::getUrl('codes', ['record' => $record])),
+                EditAction::make(),
+            ]);
     }
 
     public static function getPages(): array
     {
         return [
             'index' => ListVouchers::route('/'),
-            'create' => CreateVoucher::route('/create'),
-            'edit' => EditVoucher::route('/{record}/edit'),
+            'codes' => ManageVoucherCodes::route('/{record}/codes'),
         ];
     }
 }

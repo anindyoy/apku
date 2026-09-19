@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PaketLanggananResource\Pages\CreatePaketLangganan;
-use App\Filament\Resources\PaketLanggananResource\Pages\EditPaketLangganan;
 use App\Filament\Resources\PaketLanggananResource\Pages\ListPaketLangganans;
 use App\Models\PaketLangganan;
 use BackedEnum;
@@ -60,8 +58,6 @@ class PaketLanggananResource extends Resource
     {
         return [
             'index' => ListPaketLangganans::route('/'),
-            'create' => CreatePaketLangganan::route('/create'),
-            'edit' => EditPaketLangganan::route('/{record}/edit'),
         ];
     }
 }
