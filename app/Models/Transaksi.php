@@ -26,6 +26,10 @@ class Transaksi extends Model
 
     protected $table = 'transaksi';
 
+    protected $attributes = [
+        'pengaruhi_saldo' => true,
+    ];
+
     protected function casts(): array
     {
         return ['pengaruhi_saldo' => 'boolean'];

@@ -24,6 +24,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 ### 3. Pengelolaan transaksi
 
 - Mencatat pemasukan dan pengeluaran.
+- Transaksi baru memengaruhi saldo secara default, termasuk saldo awal dan transfer kas; pengecualian tersedia untuk import riwayat tanpa dampak saldo.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Filter periode, kas, dan dompet pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
 - Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, aktivitas, dan tanggal secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.

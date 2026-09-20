@@ -263,7 +263,7 @@ test('tabel tabungan emas menampilkan tanggal dan berat tanpa nol desimal berleb
     $records = collect(['1.0000', '0.5000', '1.2500', '0.0001', '1000.0000'])->map(
         fn ($berat) => TabunganEmas::factory()->create(['buku_kas_id' => $data['kas']->id, 'berat_gram' => $berat])
     );
-    $kasLain = BukuKas::factory()->create(['nama_buku' => $data['kas']->nama_buku]);
+    $kasLain = BukuKas::factory()->create(['user_id' => User::factory(), 'nama_buku' => $data['kas']->nama_buku]);
     ShareBuku::factory()->create(['buku_kas_id' => $kasLain->id, 'user_id' => $data['user']->id, 'privilege' => 'viewer']);
     $emasLain = TabunganEmas::factory()->create(['buku_kas_id' => $kasLain->id]);
     $page = Livewire::actingAs($data['user'])->test(ListTabunganEmas::class)
@@ -339,7 +339,7 @@ test('grup kas menampilkan total gram seluruh tabungan tanpa tercampur kas lain'
     $data = siapkanAkunTabunganEmas();
     $data['tabungan']->update(['berat_gram' => 0.5, 'label' => 'Emas dicari']);
     TabunganEmas::factory()->count(11)->create(['buku_kas_id' => $data['kas']->id, 'berat_gram' => 0.25]);
-    $kasLain = BukuKas::factory()->create(['nama_buku' => $data['kas']->nama_buku]);
+    $kasLain = BukuKas::factory()->create(['user_id' => User::factory(), 'nama_buku' => $data['kas']->nama_buku]);
     ShareBuku::factory()->create(['buku_kas_id' => $kasLain->id, 'user_id' => $data['user']->id, 'privilege' => 'viewer']);
     $emasLain = TabunganEmas::factory()->create(['buku_kas_id' => $kasLain->id, 'berat_gram' => 2]);
     $page = Livewire::actingAs($data['user'])->test(ListTabunganEmas::class)->assertSuccessful();

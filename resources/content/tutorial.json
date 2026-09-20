@@ -11,7 +11,7 @@
     "intro": "Kas menunjukkan pengelompokan uang, sedangkan dompet menunjukkan tempat uang disimpan. Nominal rupiah di aplikasi ditampilkan tanpa digit desimal, misalnya Rp25.000; berat emas tetap dapat memiliki angka desimal.",
     "steps": ["Ikuti wizard pengguna baru untuk membuat kas utama dan deskripsinya.", "Buat dompet utama sesuai tempat penyimpanan uang Anda.", "Masukkan saldo awal sesuai uang yang tersedia agar pencatatan dimulai dari kondisi yang benar.", "Tambahkan aktivitas pemasukan dan pengeluaran yang sering dipakai, lalu selesaikan wizard."],
     "example": "Kas: Keuangan Rumah Tangga. Dompet: Rekening Bank. Saldo awal: Rp1.000.000. Aktivitas: Gaji dan Belanja.",
-    "note": "Kas dan dompet adalah dua sudut pandang atas uang yang sama. Jangan menjumlahkan total saldo kas dan total saldo dompet sebagai total kekayaan."
+    "note": "Saldo awal langsung memperbarui saldo kas dan dompet setelah disimpan. Kas dan dompet adalah dua sudut pandang atas uang yang sama. Jangan menjumlahkan total saldo kas dan total saldo dompet sebagai total kekayaan."
   },
   {
     "id": "dashboard", "page": "Dashboard", "category": "Ringkasan", "title": "Membaca dan mengatur dashboard",
