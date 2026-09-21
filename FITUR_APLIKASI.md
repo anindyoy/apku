@@ -124,6 +124,7 @@ Fitur berikut hanya tersedia untuk admin:
 ### 12. Langganan premium
 
 - Admin mengelola paket langganan yang terdiri dari label, harga minimal Rp1, durasi dalam hari, dan status aktif.
+- Migration menyediakan pilihan awal 1 Tahun (365 hari), 9 Bulan (270 hari), 6 Bulan (180 hari), dan 3 Bulan (90 hari), dengan harga sementara Rp0 dan status nonaktif. Admin harus mengisi harga sebelum mengaktifkan paket. Paket dengan label yang sudah ada tidak ditimpa; rollback mempertahankan data paket.
 - Admin mengelola rekening atau metode pembayaran manual, termasuk bank, dompet digital, QR, dan instruksi transfer.
 - User dapat membuat beberapa order aktif dengan memilih paket dan metode pembayaran yang tersedia.
 - Detail paket, harga, durasi, dan tujuan pembayaran disimpan sebagai snapshot agar riwayat lama tidak berubah ketika data master diperbarui.
