@@ -2,8 +2,10 @@
 
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
+use App\Models\Dompet;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
+use App\Services\TransaksiService;
 use Livewire\Livewire;
 
 test('buku kas dengan transaksi menampilkan tombol hapus', function () {
@@ -35,11 +37,12 @@ test('buku kas tanpa transaksi tidak menampilkan tombol hapus', function () {
         ->assertSuccessful();
 })->group('filament', 'buku-kas-delete2');
 
-test('transaksi dan saldo dipindahkan sebelum buku kas dihapus', function () {
+test('transaksi dan saldo dipindahkan sebelum buku kas dihapus', function (int $jedaDetik) {
+    $this->freezeTime();
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $bukuKas->update(['saldo' => 50000]);
-    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $bukuKas->update(['saldo' => 0]);
+    $dompet = Dompet::factory()->create(['user_id' => $user->id, 'saldo' => 0]);
 
     $secondBukuKas = BukuKas::factory()->create([
         'user_id' => $user->id,
@@ -47,15 +50,11 @@ test('transaksi dan saldo dipindahkan sebelum buku kas dihapus', function () {
         'saldo' => 25000,
     ]);
 
-    $transaksi = Transaksi::create([
-        'user_id' => $user->id,
-        'buku_kas_id' => $bukuKas->id,
-        'jenis' => 'Pemasukan',
-        'nominal' => 50000,
-        'tanggal' => now(),
-        'jenis_transaksi_id' => $jenis->id,
-        'deskripsi' => 'Transaksi untuk test delete2 form',
-    ]);
+    $this->travel($jedaDetik)->seconds();
+    $transaksi = app(TransaksiService::class)->buatSaldoAwal($user, $bukuKas, $dompet, 50000);
+
+    expect($bukuKas->fresh()->saldo)->toBe(50000)
+        ->and($dompet->fresh()->saldo)->toBe(50000);
 
     Livewire::actingAs($user)
         ->test(ListBukuKas::class)
@@ -69,8 +68,9 @@ test('transaksi dan saldo dipindahkan sebelum buku kas dihapus', function () {
         'id' => $transaksi->id,
         'buku_kas_id' => $secondBukuKas->id,
     ]);
-    expect($secondBukuKas->fresh()->saldo)->toBe(75000);
-})->group('filament', 'buku-kas-delete2');
+    expect($secondBukuKas->fresh()->saldo)->toBe(75000)
+        ->and($dompet->fresh()->saldo)->toBe(50000);
+})->with([0, 2])->group('filament', 'buku-kas-delete2');
 
 test('buku kas tujuan wajib milik pengguna yang sama', function () {
     $user = createRegularUserWithBukuKas();
