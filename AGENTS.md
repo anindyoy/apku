@@ -51,3 +51,4 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 - MCP ClickUp proyek ini terhubung melalui konfigurasi `.codex/config.toml` dan autentikasi OAuth pengguna.
 - Untuk pekerjaan ClickUp terkait proyek APKu, gunakan list [APKu](https://app.clickup.com/9003017023/v/l/6-901604870720-1) dengan ID `901604870720` sebagai tujuan default. Konfirmasi hanya jika pengguna secara jelas meminta list lain atau tugas tidak dapat dipetakan ke list ini.
 - Jangan membuat, mengubah, atau memindahkan task ClickUp di luar list tersebut tanpa instruksi pengguna.
+- Setiap task ClickUp yang dibuat harus langsung diberi prioritas yang sesuai berdasarkan dampak bagi pengguna, urgensi, dan cakupan pekerjaan. Gunakan Urgent untuk gangguan kritis yang harus segera ditangani, High untuk masalah penting yang menghambat alur utama, Normal untuk pekerjaan terencana, dan Low untuk penyempurnaan yang tidak mendesak. Jangan biarkan prioritas task baru kosong.
