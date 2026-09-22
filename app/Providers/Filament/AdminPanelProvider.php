@@ -96,7 +96,7 @@ class AdminPanelProvider extends PanelProvider
                             ->first();
 
                         if ($topUser && (! isset($users['Admin']) || $topUser->email !== $admin?->email)) {
-                            $users['User'] = $topUser->email;
+                            $users['Pengguna'] = $topUser->email;
                         }
 
                         return $users;

@@ -2,9 +2,9 @@
   {
     "id": "akun", "page": "Mulai menggunakan APKu", "category": "Mulai di sini", "title": "Daftar, masuk, dan pemulihan akun",
     "intro": "Gunakan akun pribadi untuk menyimpan catatan keuangan Anda. Tombol dan aksen utama halaman tutorial serta panel setelah masuk berwarna teal seperti pada halaman utama APKu.",
-    "steps": ["Buka halaman utama APKu di /, pilih Daftar gratis atau Mulai gratis, lalu lengkapi formulir registrasi. Di aplikasi production, selesaikan juga verifikasi keamanan yang muncul.", "Buka email verifikasi dan ikuti tautannya. Jika belum diterima, periksa folder spam atau kirim ulang melalui halaman verifikasi.", "Pilih Masuk di halaman utama, gunakan email dan password, kemudian selesaikan pengaturan awal jika diminta.", "Jika lupa password, pilih lupa password pada halaman login, masukkan email, lalu ikuti tautan reset yang dikirim. Setelah mengganti password, masuk kembali."],
+    "steps": ["Buka halaman utama APKu di /, pilih Daftar gratis atau Mulai gratis, lalu lengkapi formulir registrasi. Di aplikasi production, selesaikan juga verifikasi keamanan yang muncul.", "Buka email verifikasi berbahasa Indonesia dan pilih Verifikasi Alamat Email. Jika belum diterima, periksa folder spam atau kirim ulang melalui halaman verifikasi.", "Pilih Masuk di halaman utama, gunakan email dan password, kemudian selesaikan pengaturan awal jika diminta.", "Jika lupa kata sandi, pilih tautan lupa kata sandi pada halaman masuk, masukkan alamat email, lalu pilih Atur Ulang Kata Sandi pada email yang dikirim. Setelah mengganti kata sandi, masuk kembali."],
     "example": "Daftar menggunakan email yang aktif agar tautan verifikasi dan pemulihan password dapat diterima.",
-    "note": "Simpan password dengan aman. Tutorial ini dapat dibuka tanpa akun, sedangkan data keuangan pribadi memerlukan login."
+    "note": "Simpan kata sandi dengan aman. Pesan validasi formulir dan status autentikasi ditampilkan dalam bahasa Indonesia. Tutorial ini dapat dibuka tanpa akun, sedangkan data keuangan pribadi memerlukan login."
   },
   {
     "id": "pengaturan-awal", "page": "Mulai menggunakan APKu", "category": "Mulai di sini", "title": "Pengaturan awal: kas, dompet, dan saldo",

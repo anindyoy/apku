@@ -13,6 +13,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Registrasi dan login pengguna, dengan verifikasi Cloudflare Turnstile Managed pada form dan validasi server hanya di environment production.
 - Verifikasi alamat email.
 - Lupa dan reset password.
+- Email verifikasi akun, email reset kata sandi, pesan validasi formulir, status autentikasi, dan navigasi halaman bawaan Laravel ditampilkan dalam bahasa Indonesia.
 - Pengingat perpanjangan masa aktif pada H-30 dan H-7 sebelum masa aktif berakhir.
 - Akun admin awal dibuat saat migration menggunakan password dari `ADMIN_PASSWORD` pada environment.
 - Penyimpanan perubahan profil pengguna: nama, email, nomor HP, penggunaan aplikasi, dan password.

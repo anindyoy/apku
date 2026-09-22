@@ -97,7 +97,7 @@ class LanggananResource extends Resource
                             ->weight('bold')->icon('heroicon-o-document-text')
                             ->description(fn (Langganan $record): string => 'Tanggal order: '.$record->created_at->format('d M Y H:i'))
                             ->sortable(['created_at'])->wrap(),
-                        TextColumn::make('user.name')->label('User')->icon('heroicon-o-user')->searchable()->wrap()->visible(fn (): bool => auth()->user()->isAdmin()),
+                        TextColumn::make('user.name')->label('Pengguna')->icon('heroicon-o-user')->searchable()->wrap()->visible(fn (): bool => auth()->user()->isAdmin()),
                         TextColumn::make('label_paket')->label('Paket')->searchable()->wrap()
                             ->icon('heroicon-o-sparkles')->weight('medium')
                             ->description(fn (Langganan $record): string => 'Harga: Rp '.number_format($record->harga, 0, ',', '.')),
