@@ -19,7 +19,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class TransaksiResource extends Resource
@@ -47,15 +46,7 @@ class TransaksiResource extends Resource
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->select(
-                    'transaksi.*',
-                    DB::raw(
-                        'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY buku_kas_id ORDER BY tanggal, id desc) as saldo'
-                    ),
-                    DB::raw(
-                        'SUM(CASE WHEN jenis in ("Pemasukan", "Transfer Pemasukan") THEN nominal ELSE -nominal END) OVER (PARTITION BY dompet_id ORDER BY tanggal, id desc) as saldo_dompet'
-                    )
-                )
+                fn (Builder $query) => static::queryDenganSaldo($query)
             )
             ->stackedOnMobile()
             ->searchPlaceholder('Cari deskripsi...')
@@ -70,6 +61,20 @@ class TransaksiResource extends Resource
             ->bulkActions([
                 // DeleteBulkAction::make(),
             ]);
+    }
+
+    public static function queryDenganSaldo(Builder $query): Builder
+    {
+        $dampakBerikutnya = static function (string $kolom): string {
+            return '(SELECT COALESCE(SUM(CASE WHEN riwayat.jenis IN (\'Pemasukan\', \'Transfer Pemasukan\') THEN riwayat.nominal ELSE -riwayat.nominal END), 0)'
+                .' FROM transaksi AS riwayat WHERE riwayat.'.$kolom.' = transaksi.'.$kolom
+                .' AND riwayat.pengaruhi_saldo = 1'
+                .' AND (riwayat.tanggal > transaksi.tanggal OR (riwayat.tanggal = transaksi.tanggal AND riwayat.id > transaksi.id)))';
+        };
+
+        return $query->select('transaksi.*')
+            ->selectRaw('(SELECT saldo FROM buku_kas WHERE buku_kas.id = transaksi.buku_kas_id) - '.$dampakBerikutnya('buku_kas_id').' AS saldo')
+            ->selectRaw('(SELECT saldo FROM dompet WHERE dompet.id = transaksi.dompet_id) - '.$dampakBerikutnya('dompet_id').' AS saldo_dompet');
     }
 
     public static function transactionActions(): array

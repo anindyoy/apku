@@ -25,7 +25,7 @@
     "intro": "Catat uang masuk dan keluar dengan kas, dompet, serta aktivitas yang sesuai.",
     "steps": ["Buka Transaksi atau gunakan Tambah pada dashboard, lalu buka Tambah transaksi.", "Pilih pemasukan atau pengeluaran. Tunggu formulir selesai menyesuaikan jenis transaksi.", "Isi tanggal, kas, dompet, aktivitas, nominal, dan deskripsi, kemudian simpan. Gunakan Tambah yang lain untuk mencatat secara berurutan.", "Periksa hasil di daftar. Pada layar mobile, lihat jenis, nominal, aktivitas, dan tanggal; buka Ubah untuk melihat rincian lain jika aksi tersedia. Form Ubah tersusun dua kolom pada layar lebar dan satu kolom pada layar sempit; input nominal diawali Rp. Ubah kas atau dompet jika perlu; pilihan ketiga dan seterusnya tidak dapat dipilih tanpa Premium aktif. Gunakan Hapus jika transaksi memang perlu dihapus, lalu periksa kembali saldo."],
     "example": "Catat belanja Rp75.000 sebagai pengeluaran, pilih kas Rumah Tangga, dompet Tunai, aktivitas Belanja, dan deskripsi Belanja mingguan.",
-    "note": "Pemasukan ditandai hijau dan pengeluaran merah. Aksi ubah/hapus mengikuti hak akses; transaksi audit saldo harus dikoreksi melalui audit baru."
+    "note": "Pemasukan ditandai hijau dan pengeluaran merah. Aksi ubah/hapus mengikuti hak akses; transaksi audit saldo harus dikoreksi melalui audit baru. Setelah menghapus transaksi lama, saldo pada baris transaksi sesudahnya ikut diperbarui menurut tanggal."
   },
   {
     "id": "transfer", "page": "Transaksi", "category": "Pencatatan", "title": "Transfer antar-kas dan antar-dompet",
