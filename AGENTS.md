@@ -45,3 +45,9 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 ## Git
 
 - Jangan melakukan `git commit` kecuali diminta secara eksplisit oleh pengguna. Perubahan boleh dibuat atau diedit di working tree, tetapi commit harus menunggu instruksi langsung.
+
+## ClickUp
+
+- MCP ClickUp proyek ini terhubung melalui konfigurasi `.codex/config.toml` dan autentikasi OAuth pengguna.
+- Untuk pekerjaan ClickUp terkait proyek APKu, gunakan list [APKu](https://app.clickup.com/9003017023/v/l/6-901604870720-1) dengan ID `901604870720` sebagai tujuan default. Konfirmasi hanya jika pengguna secara jelas meminta list lain atau tugas tidak dapat dipetakan ke list ini.
+- Jangan membuat, mengubah, atau memindahkan task ClickUp di luar list tersebut tanpa instruksi pengguna.
