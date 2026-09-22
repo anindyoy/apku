@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\DompetResource\Pages;
 
+use App\Filament\Concerns\CachesResourceListRecords;
 use App\Filament\Resources\AuditSaldoDompetResource;
 use App\Filament\Resources\DompetResource;
 use App\Models\BukuKas;
@@ -21,7 +22,14 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListDompet extends ListRecords
 {
+    use CachesResourceListRecords;
+
     protected static string $resource = DompetResource::class;
+
+    protected function resourceListCacheSection(): string
+    {
+        return 'dompet';
+    }
 
     protected function getHeaderActions(): array
     {

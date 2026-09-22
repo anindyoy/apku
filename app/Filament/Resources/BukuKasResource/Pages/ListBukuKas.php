@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BukuKasResource\Pages;
 
+use App\Filament\Concerns\CachesResourceListRecords;
 use App\Filament\Resources\BukuKasResource;
 use App\Models\Dompet;
 use App\Services\TransaksiService;
@@ -10,7 +11,14 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListBukuKas extends ListRecords
 {
+    use CachesResourceListRecords;
+
     protected static string $resource = BukuKasResource::class;
+
+    protected function resourceListCacheSection(): string
+    {
+        return 'kas';
+    }
 
     protected function getHeaderActions(): array
     {

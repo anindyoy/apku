@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class DashboardCache
 {
     private const DEPENDENCIES = [
-        'kas' => ['buku_kas'],
+        'kas' => ['buku_kas', 'tabungan_emas'],
         'dompet' => ['dompet'],
         'utang' => ['utang_piutang', 'utang_piutang_detail'],
         'piutang' => ['utang_piutang', 'utang_piutang_detail'],
@@ -30,15 +30,21 @@ class DashboardCache
 
         $versions = [];
         foreach (self::DEPENDENCIES[$section] as $table) {
-            $key = 'dashboard:version:'.$table;
-            Cache::add($key, (string) Str::uuid());
-            $versions[] = Cache::get($key);
+            $versions[] = self::tableVersion($table);
         }
 
         // Tanggal membatasi cache status langganan saat berganti hari.
         $key = 'dashboard:'.$userId.':'.$section.':'.today()->toDateString().':'.hash('sha256', implode('|', $versions));
 
         return Cache::remember($key, now()->addMinutes(30), $load);
+    }
+
+    public static function tableVersion(string $table): string
+    {
+        $key = 'dashboard:version:'.$table;
+        Cache::add($key, (string) Str::uuid());
+
+        return Cache::get($key);
     }
 
     public static function invalidateWrite(QueryExecuted $event): void
