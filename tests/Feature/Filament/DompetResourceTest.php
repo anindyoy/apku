@@ -57,6 +57,24 @@ test('halaman dompet dapat membuat dan mengubah dompet', function () {
     expect($bank->fresh()->nama_dompet)->toBe('Bank Bisnis');
 });
 
+test('daftar dompet menggunakan kartu responsif', function () {
+    ['user' => $user, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+
+    $component = Livewire::actingAs($user)->test(ListDompet::class)
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$cash]);
+
+    $table = $component->instance()->getTable();
+    $record = $component->instance()->getTableRecords()->firstWhere('id', $cash->id);
+
+    expect($table->getContentGrid())->toBe(['default' => 1, 'md' => 2, 'xl' => 3])
+        ->and($table->getColumn('saldo')->record($record)->getPrefix())->toBe('Saldo: Rp ')
+        ->and($table->getColumn('is_default')->record($record)->getPrefix())->toBe('Default: ')
+        ->and($table->getColumn('is_default')->record($record)->formatState(true))->toBe('Default: Ya')
+        ->and($table->getColumn('status_akses')->record($record)->getPrefix())->toBe('Status: ')
+        ->and($table->getColumn('description')->record($record)->getPrefix())->toBe('Deskripsi: ');
+});
+
 test('action transaksi biasa menggunakan service untuk memperbarui saldo', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
     $kategoriMasuk = JenisTransaksi::create([

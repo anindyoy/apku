@@ -1,15 +1,18 @@
 <?php
 
+use App\Filament\Resources\BukuKasResource;
 use App\Filament\Resources\BukuKasResource\Pages\CreateBukuKas;
 use App\Filament\Resources\BukuKasResource\Pages\EditBukuKas;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
+use App\Models\TabunganEmas;
+use Filament\Actions\ActionGroup;
 use Livewire\Livewire;
 
 test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
     $user = createRegularUserWithBukuKas();
     $kas = $user->buku_kas()->first();
     $kas->update(['description' => 'Dana perjalanan keluarga']);
-    \App\Models\TabunganEmas::factory()->count(2)->create(['buku_kas_id' => $kas->id]);
+    TabunganEmas::factory()->count(2)->create(['buku_kas_id' => $kas->id]);
 
     $component = Livewire::actingAs($user)->test(ListBukuKas::class)
         ->assertSuccessful()
@@ -18,15 +21,28 @@ test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
     $record = $component->instance()->getTableRecords()->firstWhere('id', $kas->id);
 
     expect(array_keys($table->getColumns()))->toBe(['nama_buku', 'akses', 'saldo', 'created_at', 'updated_at'])
-        ->and($table->getColumn('nama_buku')->record($record)->getDescriptionBelow())->toBe('Dana perjalanan keluarga')
-        ->and($table->getColumn('akses')->record($record)->getDescriptionBelow())->toBe('Milik saya')
-        ->and($table->getColumn('saldo')->record($record)->getDescriptionBelow())->toBe('0 transaksi · 2 produk emas')
+        ->and($table->getContentGrid())->toBe(['default' => 1, 'md' => 2, 'xl' => 3])
+        ->and($table->getColumn('nama_buku')->record($record)->getDescriptionBelow())->toBe('Deskripsi: Dana perjalanan keluarga')
+        ->and($table->getColumn('akses')->record($record)->getPrefix())->toBe('Akses: ')
+        ->and($table->getColumn('akses')->record($record)->getDescriptionBelow())->toBe('Kepemilikan: Milik saya')
+        ->and($table->getColumn('saldo')->record($record)->getPrefix())->toBe('Saldo: Rp ')
+        ->and($table->getColumn('saldo')->record($record)->getDescriptionBelow())->toBe('Jumlah transaksi: 0 · Produk emas: 2')
         ->and($table->getColumn('created_at')->isToggledHiddenByDefault())->toBeTrue()
         ->and($table->getColumn('updated_at')->isToggledHiddenByDefault())->toBeTrue();
 
     $component->searchTable('perjalanan')->assertCanSeeTableRecords([$kas])
         ->searchTable('tidak ditemukan')->assertCanNotSeeTableRecords([$kas])
         ->searchTable($kas->nama_buku)->assertCanSeeTableRecords([$kas]);
+})->group('filament', 'buku-kas');
+
+test('card kas menyembunyikan informasi emas saat tidak ada produk', function () {
+    $user = createRegularUserWithBukuKas();
+    $kas = $user->buku_kas()->firstOrFail();
+    $component = Livewire::actingAs($user)->test(ListBukuKas::class)->assertSuccessful();
+    $record = $component->instance()->getTableRecords()->firstWhere('id', $kas->id);
+
+    expect($component->instance()->getTable()->getColumn('saldo')->record($record)->getDescriptionBelow())
+        ->toBe('Jumlah transaksi: 0');
 })->group('filament', 'buku-kas');
 
 test('buku kas mengelompokkan aksi baris dalam menu aksi', function () {
@@ -45,7 +61,7 @@ test('buku kas mengelompokkan aksi baris dalam menu aksi', function () {
     $actions = $component->instance()->getTable()->getRecordActions();
 
     expect($actions)->toHaveCount(1)
-        ->and($actions[0])->toBeInstanceOf(\Filament\Actions\ActionGroup::class)
+        ->and($actions[0])->toBeInstanceOf(ActionGroup::class)
         ->and($actions[0]->getLabel())->toBe('Aksi')
         ->and(array_map(fn ($action) => $action->getName(), $actions[0]->getActions()))->toBe([
             'edit', 'kolaborator', 'cekNilaiEmas', 'hargaEmasManual', 'delete', 'hapusDanPindahkan',
@@ -72,9 +88,9 @@ test('buku kas resource dapat menampilkan halaman list', function () {
     ->group('filament', 'buku-kas');
 
 test('buku kas resource menggunakan label kas', function () {
-    expect(\App\Filament\Resources\BukuKasResource::getModelLabel())->toBe('Kas')
-        ->and(\App\Filament\Resources\BukuKasResource::getPluralModelLabel())->toBe('Kas')
-        ->and(\App\Filament\Resources\BukuKasResource::getNavigationLabel())->toBe('Kas');
+    expect(BukuKasResource::getModelLabel())->toBe('Kas')
+        ->and(BukuKasResource::getPluralModelLabel())->toBe('Kas')
+        ->and(BukuKasResource::getNavigationLabel())->toBe('Kas');
 })
     ->group('filament', 'buku-kas', 'label-kas');
 

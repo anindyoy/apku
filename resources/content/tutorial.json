@@ -51,14 +51,14 @@
   {
     "id": "kas", "page": "Kas", "category": "Pengelolaan uang", "title": "Mengelola kas",
     "intro": "Pisahkan pencatatan menurut kebutuhan, misalnya pribadi, rumah tangga, atau usaha.",
-    "steps": ["Buka Kas dan gunakan aksi tambah untuk membuat kas dengan nama serta deskripsi yang mudah dikenali.", "Buka menu Aksi pada baris kas untuk mengubah data atau menjadikannya kas utama/default.", "Periksa kolom Akses dan Saldo untuk mengetahui kepemilikan, saldo, serta jumlah transaksi dan produk emas.", "Untuk menghapus kas kosong, gunakan Hapus. Jika masih berisi transaksi atau emas, ikuti alur pemindahan ke kas lain milik Anda sebelum menyelesaikan penghapusan."],
+    "steps": ["Buka Kas dan gunakan aksi tambah untuk membuat kas dengan nama serta deskripsi yang mudah dikenali.", "Buka menu Aksi pada card kas untuk mengubah data atau menjadikannya kas utama/default.", "Periksa label Akses, Kepemilikan, Saldo, dan Jumlah transaksi pada card. Jumlah produk emas ditampilkan hanya jika kas memiliki produk emas.", "Untuk menghapus kas kosong, gunakan Hapus. Jika masih berisi transaksi atau emas, ikuti alur pemindahan ke kas lain milik Anda sebelum menyelesaikan penghapusan."],
     "example": "Buat kas Liburan untuk memisahkan alokasi liburan dari kas kebutuhan harian.",
     "note": "Reguler dapat mengelola kas utama dan satu kas tambahan gratis. Kas tambahan lainnya mengikuti masa aktif Premium. Transaksi pada kas terbatas tidak dapat diubah atau dihapus."
   },
   {
     "id": "dompet", "page": "Dompet", "category": "Pengelolaan uang", "title": "Mengelola dompet",
     "intro": "Dompet merepresentasikan uang tunai, rekening bank, atau tempat penyimpanan uang lainnya.",
-    "steps": ["Buka Dompet, tambahkan dompet, lalu isi nama dan deskripsi sesuai tempat penyimpanan uang.", "Gunakan aksi ubah untuk memperbarui informasi, atau jadikan dompet yang paling sering digunakan sebagai default.", "Periksa saldo dan status Aktif atau Terbatas sebelum mencatat transaksi.", "Saat menghapus dompet, ikuti alur pemindahan saldo ke dompet lain dan periksa kembali hasilnya."],
+    "steps": ["Buka Dompet, tambahkan dompet, lalu isi nama dan deskripsi sesuai tempat penyimpanan uang.", "Gunakan aksi ubah untuk memperbarui informasi, atau jadikan dompet yang paling sering digunakan sebagai default.", "Periksa label Saldo, Default, Status, dan Deskripsi pada card dompet sebelum mencatat transaksi.", "Saat menghapus dompet, ikuti alur pemindahan saldo ke dompet lain dan periksa kembali hasilnya."],
     "example": "Gunakan dompet Tunai dan Rekening Bank untuk mengetahui di mana uang Anda berada.",
     "note": "Reguler dapat mengelola dompet utama dan satu dompet tambahan gratis. Dompet tambahan lainnya mengikuti masa aktif Premium. Nama dompet yang dihapus tetap tersedia pada riwayat transaksi dan laporan."
   },

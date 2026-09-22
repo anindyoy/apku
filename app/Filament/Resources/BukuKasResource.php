@@ -20,6 +20,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
@@ -80,48 +81,58 @@ class BukuKasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
                 // Tables\Columns\TextColumn::make('user_id')
                 //     ->numeric()
                 //     ->sortable(),
 
-                TextColumn::make('nama_buku')
-                    ->label('Kas')
-                    ->searchable(['nama_buku', 'description'])
-                    ->description(fn (BukuKas $record): ?string => $record->description)
-                    ->wrap(),
+                Stack::make([
+                    TextColumn::make('nama_buku')
+                        ->label('Kas')
+                        ->searchable(['nama_buku', 'description'])
+                        ->description(fn (BukuKas $record): ?string => filled($record->description) ? 'Deskripsi: '.$record->description : null)
+                        ->weight('bold')
+                        ->size('lg')
+                        ->wrap(),
 
-                TextColumn::make('akses')
-                    ->badge()
-                    ->state(fn (BukuKas $record): string => ucfirst(auth()->user()->hakAksesPada($record) ?? 'Tidak ada'))
-                    ->description(fn (BukuKas $record): string => $record->user_id === auth()->id()
-                        ? 'Milik saya'
-                        : 'Dibagikan kepada saya'),
+                    TextColumn::make('akses')
+                        ->badge()
+                        ->prefix('Akses: ')
+                        ->state(fn (BukuKas $record): string => ucfirst(auth()->user()->hakAksesPada($record) ?? 'Tidak ada'))
+                        ->description(fn (BukuKas $record): string => $record->user_id === auth()->id()
+                            ? 'Kepemilikan: Milik saya'
+                            : 'Kepemilikan: Dibagikan kepada saya'),
 
-                TextColumn::make('saldo')
-                    ->prefix('Rp ')
-                    ->numeric()
-                    ->sortable()
-                    ->counts(['transaksi', 'tabunganEmas'])
-                    ->description(fn (BukuKas $record): string => number_format($record->transaksi_count, 0, ',', '.')
-                        .' transaksi · '.number_format($record->tabungan_emas_count, 0, ',', '.').' produk emas'),
+                    TextColumn::make('saldo')
+                        ->prefix('Saldo: Rp ')
+                        ->numeric()
+                        ->sortable()
+                        ->counts(['transaksi', 'tabunganEmas'])
+                        ->description(fn (BukuKas $record): string => 'Jumlah transaksi: '.number_format($record->transaksi_count, 0, ',', '.')
+                            .($record->tabungan_emas_count > 0
+                                ? ' · Produk emas: '.number_format($record->tabungan_emas_count, 0, ',', '.')
+                                : '')),
 
-                // Tables\Columns\TextColumn::make('goal')
-                //     ->numeric()
-                //     ->sortable(),
-                // Tables\Columns\TextColumn::make('tanggal_goal')
-                //     ->date()
-                //     ->sortable(),
+                    // Tables\Columns\TextColumn::make('goal')
+                    //     ->numeric()
+                    //     ->sortable(),
+                    // Tables\Columns\TextColumn::make('tanggal_goal')
+                    //     ->date()
+                    //     ->sortable(),
 
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('created_at')
+                        ->prefix('Dibuat: ')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('updated_at')
+                        ->prefix('Diperbarui: ')
+                        ->dateTime()
+                        ->sortable()
+                        ->toggleable(isToggledHiddenByDefault: true),
+                ])->space(3),
             ])
             ->filters([
                 //

@@ -208,8 +208,8 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 5. Kas
 
-- Tabel kas menampilkan tiga kolom utama: Kas dengan deskripsi di bawah nama, Akses dengan keterangan kepemilikan, serta Saldo dengan jumlah transaksi dan produk emas. Pencarian tetap mencakup nama dan deskripsi kas; tanggal dibuat dan diperbarui tersedia sebagai kolom opsional.
-- Aksi baris tabel `/admin/buku-kas` dikelompokkan dalam menu **Aksi**, dengan pilihan yang mengikuti hak akses dan kondisi kas.
+- Daftar kas menggunakan card Filament responsif yang menampilkan nama dan deskripsi kas, akses dan kepemilikan, serta saldo dan jumlah transaksi dengan label yang jelas. Jumlah produk emas hanya tampil jika lebih dari nol. Pencarian tetap mencakup nama dan deskripsi kas; tanggal dibuat dan diperbarui tersedia sebagai kolom opsional.
+- Aksi pada card `/admin/buku-kas` dikelompokkan dalam menu **Aksi**, dengan pilihan yang mengikuti hak akses dan kondisi kas.
 - Daftar **Kolaborator Kas** tersedia di `/admin/kolaborator-kas`. Form tambah dan ubah kolaborator dibuka melalui modal; akses dapat dicabut melalui aksi pada baris atau pilihan massal.
 - Daftar kolaborator menyediakan tombol **Salin link** pada setiap kolaborator publik, dengan notifikasi keberhasilan atau kegagalan penyalinan, tanpa kolom URL terpisah. Tanggal mulai dan berakhir pada tabel ditampilkan tanpa jam. Halaman publik menampilkan saldo kas, transaksi berhalaman dengan ringkasan padat pada layar mobile, filter bulan, pencarian berdasarkan deskripsi/aktivitas/jenis transaksi, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama dompet dan identitas pengguna tidak ditampilkan. Saat kata pencarian diisi, pencarian mencakup seluruh tanggal pada kas tersebut tanpa dibatasi bulan terpilih dan tetap dipertahankan saat berpindah halaman. Menghapus pencarian mengembalikan filter bulan; ringkasan total bulanan tetap mengikuti bulan terpilih.
 - Daftar tabungan emas dikelompokkan berdasarkan kas dengan total gram seluruh tabungan pada setiap grup, tanpa kolom Kas terpisah. Daftar menampilkan tanggal **Dibeli pada**, harga beli, dan keterangan. Tanggal pembelian dapat diisi saat membuat dan mengubah tabungan, dengan nilai awal waktu sekarang. Harga beli dan keterangan opsional. Berat ditampilkan tanpa nol desimal berlebih, misalnya `1` atau `0,5` gram; total modal tidak ditampilkan pada daftar.
@@ -220,7 +220,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 6. Dompet
 
-- Menampilkan saldo, status akses, deskripsi, dan penanda dompet default.
+- Daftar dompet menggunakan card Filament responsif yang menampilkan saldo, status akses, deskripsi, dan status dompet default dengan label yang jelas.
 - Tetap menampilkan nama dompet yang sudah dihapus pada riwayat transaksi dan laporan.
 - Pengguna dapat mengaudit saldo seluruh dompet yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
 - Halaman dompet menyediakan pembuatan, perubahan, pemilihan dompet default, serta pemindahan saldo sebelum penghapusan.
