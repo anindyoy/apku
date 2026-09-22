@@ -24,7 +24,13 @@ php artisan filament:optimize
 php artisan optimize
 ```
 
-Integrasikan kedua perintah ke mekanisme deploy yang benar-benar dipakai, bukan ke workflow test. Hindari menjalankan cache setelah trafik dilayani sebelum cache siap. Pastikan `APP_ENV=production` dan `APP_DEBUG=false` pada target produksi. Hook `filament:upgrade` di Composer perlu tetap dipertahankan; jika instalasi sengaja memakai `--no-scripts`, jalankan `php artisan filament:upgrade` secara eksplisit sebelum optimasi.
+Skrip `scripts/release-optimize.php` menjalankan kedua perintah tersebut secara berurutan dan berhenti ketika salah satunya gagal. Jalankan dengan binary PHP 8.4+ yang dipakai hosting: `/path/to/php scripts/release-optimize.php`. Skrip memeriksa `.env`, `vendor/autoload.php`, `public/build/manifest.json`, `APP_ENV=production`, dan `APP_DEBUG=false` sebelum mengubah cache. Gunakan `--dry-run` untuk memeriksa urutan perintah tanpa membangun cache. Jalankan skrip setelah Composer, build aset, konfigurasi environment, dan migrasi selesai, sebelum trafik diarahkan ke rilis baru. Hook `filament:upgrade` di Composer tetap dipertahankan; jika instalasi memakai `--no-scripts`, jalankan `php artisan filament:upgrade` secara eksplisit sebelum skrip optimasi.
+
+### Pengukuran dan pemeriksaan rilis
+
+Simpan hasil baseline dan hasil sesudah rilis di catatan deploy, dengan waktu, commit, versi PHP, jumlah data, akun uji, dan keadaan cache yang sama. Untuk setiap URL login, dashboard, dan daftar resource, lakukan lima permintaan setelah satu permintaan pemanasan, lalu catat median `time_total` dan status HTTP dengan `curl -sS -o /dev/null -w '%{http_code} %{time_total}\n'`. Halaman yang memerlukan login harus memakai cookie akun uji yang sah; jangan mencatat cookie di log atau repo. Bandingkan median sebelum dan sesudah, bukan satu permintaan acak. Hitung query hanya bila profiler tersedia di staging; jangan aktifkan profiler publik di produksi.
+
+Periksa login, dashboard, beberapa daftar resource, ikon, `/tutorial`, dan berkas dari manifest Vite. Pastikan tidak ada error route, komponen, ikon, atau cache di log. Verifikasi document root ke `public/`, PHP CLI dan PHP web minimal 8.4, serta `opcache.enable=1` pada **web SAPI**; hasil `php -r` hanya mewakili CLI. Catat path PHP, cron, worker `import-transaksi`, dan cara invalidasi OPcache setelah paket hosting dipilih.
 
 ## Pemulihan dan kriteria selesai
 
