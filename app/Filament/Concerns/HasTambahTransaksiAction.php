@@ -268,7 +268,9 @@ trait HasTambahTransaksiAction
                                 default => false,
                             })
                             ->live()
-                            ->grouped()
+                            ->columns(['default' => 2, 'sm' => 2])
+                            ->gridDirection('row')
+                            ->extraAttributes(['class' => '[&_.fi-btn]:w-full'])
                             ->required()
                             ->columnSpanFull(),
                         Select::make('buku_kas_id')

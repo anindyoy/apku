@@ -123,7 +123,15 @@ test('transaksi resource - tombol tambah membuka modal transaksi', function () {
         ->assertActionVisible('Tambah transaksi')
         ->mountAction('Tambah transaksi')
         ->assertSet('mountedActions.0.name', 'Tambah transaksi')
-        ->assertActionDataSet(['jenis_form' => 'pemasukan']);
+        ->assertActionDataSet(['jenis_form' => 'pemasukan'])
+        ->assertFormFieldExists('jenis_form', function (ToggleButtons $field): bool {
+            expect($field->isGrouped())->toBeFalse()
+                ->and($field->getColumns('default'))->toBe(2)
+                ->and($field->getColumns('sm'))->toBe(2)
+                ->and($field->getOptions())->toHaveCount(4);
+
+            return true;
+        });
 })
     ->group('filament', 'transaksi', 'tambah-transaksi');
 
