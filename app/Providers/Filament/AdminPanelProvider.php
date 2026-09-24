@@ -42,6 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationItems([
                 NavigationItem::make('Tutorial Penggunaan')
                     ->url(fn (): string => route('tutorial'))
+                    ->openUrlInNewTab()
                     ->icon('heroicon-o-book-open')
                     ->sort(100)
                     ->visible(fn (): bool => ! auth()->user()?->isAdmin()),

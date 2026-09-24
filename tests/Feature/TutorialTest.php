@@ -239,6 +239,7 @@ it('tutorial dapat ditemukan dari login dan navigasi panel', function () {
         ->first(fn ($item) => $item->getLabel() === 'Tutorial Penggunaan');
     expect($item)->not->toBeNull();
     expect($item->getUrl())->toBe(route('tutorial'));
+    expect($item->shouldOpenUrlInNewTab())->toBeTrue();
 
     $this->actingAs(User::query()->notAdmin()->firstOrFail());
     expect($item->isVisible())->toBeTrue();
