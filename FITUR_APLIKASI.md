@@ -147,6 +147,8 @@ Fitur berikut hanya tersedia untuk admin:
 
 ### Catatan implementasi
 
+Hook Git yang diaktifkan melalui `core.hooksPath=.githooks` menjalankan `composer2 update --no-interaction` jika pull/merge/rebase mengubah `composer.json` atau `composer.lock`, kemudian `php artisan migrate --force --no-interaction` jika ada file PHP baru di `database/migrations`. Kegagalan Composer menghentikan migrasi otomatis. Panduan aktivasi dan penanganan kegagalan tersedia di [docs/git-hooks.md](docs/git-hooks.md).
+
 Seeder demo menyediakan 1–2 tabungan emas dengan saldo awal tanpa modal dan dua kolaborator kas aktif (Viewer dan Editor) untuk setiap pengguna non-admin. Setiap pengguna juga menerima akses ke dua kas pengguna lain.
 
 Transfer kas, pemindahan saldo dompet, dan import transaksi pada kas bersama hanya tersedia bagi pemilik kas pada versi awal fitur kolaborasi.

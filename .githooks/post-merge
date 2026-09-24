@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+
+exec sh "$(git rev-parse --show-toplevel)/.githooks/migrate-if-added" ORIG_HEAD

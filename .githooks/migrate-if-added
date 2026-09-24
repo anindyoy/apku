@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+cd "$(git rev-parse --show-toplevel)"
+composer_changed=$(git diff --name-only "$1" HEAD -- composer.json composer.lock)
+added=$(git diff --name-only --diff-filter=A --no-renames "$1" HEAD -- 'database/migrations/*.php')
+
+if [ -n "$composer_changed" ]; then
+    printf '%s\n' '[APKu] File Composer berubah. Menjalankan composer2 update...'
+    if composer2 update --no-interaction; then
+        printf '%s\n' '[APKu] Pembaruan Composer selesai.'
+    else
+        printf '%s\n' '[APKu] Composer gagal. Perubahan Git sudah diterapkan; migrasi otomatis dibatalkan. Perbaiki penyebabnya lalu jalankan composer2 update dan migrasi secara manual jika diperlukan.' >&2
+        exit 1
+    fi
+fi
+
+[ -n "$added" ] || exit 0
+
+printf '%s\n' '[APKu] Migration baru ditemukan. Menjalankan php artisan migrate...'
+if php artisan migrate --force --no-interaction; then
+    printf '%s\n' '[APKu] Migrasi selesai.'
+else
+    printf '%s\n' '[APKu] Migrasi gagal. Perubahan Git sudah diterapkan; perbaiki penyebabnya lalu jalankan php artisan migrate secara manual.' >&2
+    exit 1
+fi
