@@ -221,6 +221,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Aksi cek nilai emas menampilkan total nilai kas dalam ringkasan beraksen emas, kartu nilai emas dan saldo rupiah, rincian berat/harga/modal, serta estimasi untung/rugi berwarna sesuai hasil. Modal responsif mendukung mode gelap dan menampilkan status sumber harga serta waktu berlakunya. Label sumber harga API menjadi tautan ke URL sumber dari Setting, dengan default `services.harga_emas.source` (`HARGA_EMAS_SOURCE`), dan dibuka di tab baru; sumber manual tetap berupa teks.
 - Form tabungan emas menempatkan berat gram setelah Kas, tanpa nilai default, dan menerima desimal koma seperti `0,5`. Aksi saldo awal tersedia untuk tabungan yang beratnya masih nol.
 - Halaman kas menyediakan pembuatan, perubahan, pemilihan kas utama/default, dan penghapusan kas; kas berisi transaksi atau emas menyediakan alur pemindahan sebelum penghapusan.
+- Daftar kas dan modal tambah menjelaskan sisa slot atau batas kuota kas untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap; Premium aktif tetap berlatar netral. Kas bersama tidak mengisi kuota. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif menampilkan tanggal akhir masa aktif dan slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
 
 ### 6. Dompet
 
@@ -228,6 +229,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Tetap menampilkan nama dompet yang sudah dihapus pada riwayat transaksi dan laporan.
 - Pengguna dapat mengaudit saldo seluruh dompet yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
 - Halaman dompet menyediakan pembuatan, perubahan, pemilihan dompet default, serta pemindahan saldo sebelum penghapusan.
+- Daftar dompet dan modal tambah menjelaskan sisa slot atau batas kuota dompet untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap; Premium aktif tetap berlatar netral. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif menampilkan tanggal akhir masa aktif dan slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
 - Form audit saldo memilih kas utama secara default dan menyediakan saldo riil, tanggal, kas pencatatan, catatan umum, serta catatan per dompet.
 
 ### 7. Aktivitas transaksi

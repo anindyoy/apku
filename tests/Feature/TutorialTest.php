@@ -6,6 +6,17 @@ use Filament\Livewire\Topbar;
 use Livewire\Livewire;
 use Symfony\Component\Process\Process;
 
+test('tutorial kuota kas dan dompet menjelaskan batas serta masa aktif premium', function () {
+    $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+
+    foreach (['kas', 'dompet'] as $id) {
+        expect($topik[$id]['note'])->toContain('maksimal 2', 'sisa slot', 'aksi tambah disembunyikan', 'Setelah Premium berakhir', 'satu kalimat', 'Latar kuning', 'latar merah');
+    }
+
+    expect($topik['kas']['note'])->toContain('Kas bersama tidak dihitung');
+    $this->get('/tutorial')->assertSuccessful();
+});
+
 it('tutorial sidebar mengikuti topik hash scroll dan hasil pencarian', function () {
     $script = <<<'JS'
     import assert from 'node:assert/strict';

@@ -9,6 +9,7 @@ use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
 use App\Services\AuditSaldoDompetService;
+use App\Services\KuotaAkun;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -19,12 +20,18 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ListDompet extends ListRecords
 {
     use CachesResourceListRecords;
 
     protected static string $resource = DompetResource::class;
+
+    public function getSubheading(): Htmlable
+    {
+        return KuotaAkun::dompet(auth()->user());
+    }
 
     protected function resourceListCacheSection(): string
     {
@@ -114,6 +121,7 @@ class ListDompet extends ListRecords
                 ->icon('heroicon-o-clock')
                 ->url(AuditSaldoDompetResource::getUrl()),
             CreateAction::make()
+                ->modalDescription(fn (): Htmlable => KuotaAkun::dompet(auth()->user()))
                 ->visible(fn (): bool => auth()->user()->dapatMembuatDompet())
                 ->before(fn () => abort_unless(auth()->user()->dapatMembuatDompet(), 403))
                 ->mutateFormDataUsing(function (array $data): array {
