@@ -80,6 +80,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Membuat dan mengubah dompet sebagai representasi tempat penyimpanan uang, misalnya kas tunai atau rekening bank.
 - Menjadikan dompet tertentu sebagai dompet default.
 - Memindahkan saldo ke dompet lain sebelum menghapus dompet.
+- Audit baru dapat dibuat melalui tombol **Tambah audit** pada daftar Audit Saldo atau tombol **Audit saldo** pada halaman Dompet, menggunakan formulir dan aturan akses yang sama.
 - Audit menyimpan snapshot saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, serta catatan umum dan catatan per dompet.
 - Selisih positif audit dicatat sebagai pemasukan dan selisih negatif sebagai pengeluaran dengan aktivitas sistem **Audit Saldo** pada kas yang dipilih.
 - Dompet tanpa selisih tetap tercatat dalam riwayat audit tanpa membuat transaksi penyesuaian.

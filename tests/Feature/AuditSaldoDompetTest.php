@@ -113,13 +113,17 @@ test('transaksi penyesuaian audit tidak dapat diubah atau dihapus langsung', fun
         ->toThrow(ValidationException::class);
 });
 
-test('pengguna dapat menjalankan audit dari halaman dompet dan membuka riwayatnya', function () {
+test('pengguna dapat menjalankan audit dari halaman dompet atau daftar audit dan membuka riwayatnya', function (string $halaman) {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
 
-    Livewire::actingAs($user)
-        ->test(ListDompet::class)
+    $komponen = Livewire::actingAs($user)->test($halaman);
+
+    if ($halaman === ListDompet::class) {
+        $komponen->assertActionVisible('riwayatAudit');
+    }
+
+    $komponen
         ->assertActionVisible('auditSaldo')
-        ->assertActionVisible('riwayatAudit')
         ->callAction('auditSaldo', data: [
             'buku_kas_id' => $bukuKas->id,
             'tanggal' => now(),
@@ -143,10 +147,17 @@ test('pengguna dapat menjalankan audit dari halaman dompet dan membuka riwayatny
         ])
         ->assertHasNoActionErrors();
 
+    if ($halaman === ListAuditSaldoDompet::class) {
+        $komponen->assertCanSeeTableRecords(AuditSaldoDompet::all());
+    }
+
     Livewire::actingAs($user)
         ->test(ListAuditSaldoDompet::class)
         ->assertCanSeeTableRecords(AuditSaldoDompet::all());
 
     expect($tunai->fresh()->saldo)->toBe(490000)
         ->and($bukuKas->fresh()->saldo)->toBe(990000);
-});
+})->with([
+    'halaman dompet' => [ListDompet::class],
+    'daftar audit' => [ListAuditSaldoDompet::class],
+]);

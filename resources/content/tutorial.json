@@ -65,7 +65,7 @@
   {
     "id": "audit-saldo", "page": "Dompet", "category": "Pengelolaan uang", "title": "Audit dan penyesuaian saldo dompet",
     "intro": "Cocokkan saldo aplikasi dengan saldo riil dari uang tunai atau rekening Anda.",
-    "steps": ["Periksa uang tunai dan saldo rekening di luar aplikasi terlebih dahulu.", "Buka audit saldo dompet. Pilih tanggal serta kas pencatatan; kas utama dipilih secara default.", "Masukkan saldo riil setiap dompet yang dapat dikelola. Tambahkan catatan umum dan catatan per dompet jika diperlukan.", "Tinjau selisih, simpan audit, lalu periksa riwayat audit dan transaksi penyesuaian. Jika saldo berubah selama proses, ulangi berdasarkan saldo terbaru."],
+    "steps": ["Periksa uang tunai dan saldo rekening di luar aplikasi terlebih dahulu.", "Buka Pengaturan > Audit Saldo lalu klik Tambah audit, atau buka Dompet lalu klik Audit saldo. Pilih tanggal serta kas pencatatan; kas utama dipilih secara default.", "Masukkan saldo riil setiap dompet yang dapat dikelola. Isi catatan umum yang wajib diisi dan tambahkan catatan per dompet jika diperlukan.", "Tinjau selisih, simpan audit, lalu periksa riwayat audit dan transaksi penyesuaian. Jika saldo berubah selama proses, ulangi berdasarkan saldo terbaru."],
     "example": "Saldo aplikasi Rp100.000 dan uang tunai sebenarnya Rp95.000 menghasilkan pengeluaran penyesuaian Rp5.000 dengan aktivitas Audit Saldo.",
     "note": "Selisih positif menjadi pemasukan, selisih negatif menjadi pengeluaran. Tanpa selisih, audit tetap tercatat tanpa transaksi baru. Transaksi penyesuaian tidak dapat diubah/dihapus langsung; lakukan audit baru untuk koreksi."
   },
