@@ -1,4 +1,5 @@
 <x-filament-panels::page>
+    @vite('resources/css/filament-toolbar.css')
     <style>
         .aktivitas-page { --aktivitas-border: #e2e8f0; --aktivitas-muted: #64748b; --aktivitas-surface: #fff; display: grid; gap: 1.5rem; }
         .aktivitas-intro { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border: 1px solid var(--aktivitas-border); border-radius: 1rem; background: var(--aktivitas-surface); }
@@ -32,7 +33,7 @@
                         <p>Sumber uang masuk, seperti gaji, bonus, atau hasil usaha.</p>
                     </div>
                 </header>
-                <div class="aktivitas-panel-body">
+                <div class="aktivitas-panel-body mt-4">
                     @livewire('kategori.pemasukan')
                 </div>
             </section>
@@ -45,7 +46,7 @@
                         <p>Kebutuhan uang keluar, seperti belanja, transportasi, atau tagihan.</p>
                     </div>
                 </header>
-                <div class="aktivitas-panel-body">
+                <div class="aktivitas-panel-body mt-4">
                     @livewire('kategori.pengeluaran')
                 </div>
             </section>

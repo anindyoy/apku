@@ -43,10 +43,27 @@ test('jenis transaksi columns mengembalikan array columns', function () {
     $columns = JenisTransaksi::columns();
 
     expect($columns)->toBeArray();
-    expect($columns)->toHaveCount(2);
+    expect($columns)->toHaveCount(1);
     expect($columns[0]->getName())->toBe('nama_jenis');
-    expect($columns[1]->getName())->toBe('transaksi_count');
 });
+
+test('daftar aktivitas menampilkan jumlah transaksi di bawah nama', function (string $component) {
+    $this->actingAs(User::query()->notAdmin()->firstOrFail());
+    $page = \Livewire\Livewire::test($component)->assertSuccessful();
+    $table = $page->instance()->getTable();
+    expect(array_keys($table->getColumns()))->toBe(['nama_jenis']);
+    $records = $page->instance()->getTableRecords();
+    expect($records->count())->toBeGreaterThan(0);
+    foreach ($records as $record) {
+        $column = $table->getColumn('nama_jenis')->record($record);
+        expect($record->transaksi_count)->toBe($record->transaksi()->count())
+            ->and($column->getState())->toBe($record->nama_jenis)
+            ->and($column->getDescriptionBelow())->toBe(number_format($record->transaksi()->count(), 0, ',', '.').' transaksi');
+    }
+})->with([
+    'pemasukan' => [\App\Livewire\Kategori\Pemasukan::class],
+    'pengeluaran' => [\App\Livewire\Kategori\Pengeluaran::class],
+]);
 
 test('jenis transaksi headerActions mengembalikan create action', function () {
     $actions = JenisTransaksi::headerActions('Pemasukan');

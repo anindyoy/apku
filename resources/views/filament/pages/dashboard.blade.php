@@ -3,19 +3,64 @@
     @if (auth()->user()->isAdmin())
         {{ $this->content }}
     @else
-        <div class="dashboard-user-grid grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3 [&>*]:min-w-0 [--dash-muted:#64748b] [--dash-line:#e2e8f0] [--dash-bg:#f8fafc] [&:is(.dark_*)]:[--dash-muted:#94a3b8] [&:is(.dark_*)]:[--dash-line:#334155] [&:is(.dark_*)]:[--dash-bg:#1e293b]">
-            @forelse (array_filter($this->sections(), fn ($section) => $section['visible']) as $section)
+        @php
+            $sections = array_values(array_filter($this->sections(), fn ($section) => $section['visible']));
+            $firstTab = $sections[0]['key'] ?? null;
+            $icons = [
+                'kas' => 'heroicon-o-banknotes',
+                'dompet' => 'heroicon-o-wallet',
+                'utang' => 'heroicon-o-arrow-up-right',
+                'piutang' => 'heroicon-o-arrow-down-left',
+                'langganan' => 'heroicon-o-sparkles',
+                'transaksi' => 'heroicon-o-arrows-right-left',
+            ];
+        @endphp
+        <div
+            wire:key="dashboard-tabs-{{ md5(json_encode($sections)) }}"
+            x-data="{ activeTab: @js($firstTab) }"
+            class="dashboard-tabs min-w-0 [--dash-muted:#64748b] [--dash-line:#e2e8f0] [--dash-bg:#f8fafc] [&:is(.dark_*)]:[--dash-muted:#94a3b8] [&:is(.dark_*)]:[--dash-line:#334155] [&:is(.dark_*)]:[--dash-bg:#1e293b]"
+        >
+            @if ($sections)
+                <div class="mb-3 overflow-x-auto border-b border-slate-200 [&:is(.dark_*)]:border-slate-700">
+                    <div
+                        role="tablist"
+                        aria-label="Bagian dashboard"
+                        class="flex min-w-max text-center text-sm font-medium"
+                        x-on:keydown="
+                            if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes($event.key)) {
+                                $event.preventDefault();
+                                const tabs = Array.from($el.querySelectorAll('[role=tab]'));
+                                const index = tabs.indexOf($event.target);
+                                const next = $event.key === 'Home' ? 0 : $event.key === 'End' ? tabs.length - 1 : (index + ($event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+                                tabs[next].focus();
+                                tabs[next].click();
+                            }
+                        "
+                    >
+                        @foreach ($sections as $section)
+                            <button
+                                type="button"
+                                id="dashboard-tab-{{ $section['key'] }}"
+                                role="tab"
+                                aria-controls="dashboard-panel-{{ $section['key'] }}"
+                                aria-selected="{{ $section['key'] === $firstTab ? 'true' : 'false' }}"
+                                tabindex="{{ $section['key'] === $firstTab ? 0 : -1 }}"
+                                x-bind:aria-selected="activeTab === '{{ $section['key'] }}'"
+                                x-bind:tabindex="activeTab === '{{ $section['key'] }}' ? 0 : -1"
+                                x-on:click="activeTab = '{{ $section['key'] }}'"
+                                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-t-lg border-b-2 border-transparent px-4 py-3 text-slate-500 hover:border-slate-300 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-600 [&[aria-selected=true]]:border-teal-600 [&[aria-selected=true]]:text-teal-600 [&:is(.dark_*)]:text-slate-400 [&:is(.dark_*)]:hover:text-slate-200 [&:is(.dark_*)[aria-selected=true]]:border-teal-400 [&:is(.dark_*)[aria-selected=true]]:text-teal-400"
+                            >
+                                <x-filament::icon :icon="$icons[$section['key']]" class="size-4 shrink-0" aria-hidden="true" />
+                                {{ \App\Filament\Pages\Dashboard::SECTIONS[$section['key']] }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+            @forelse ($sections as $section)
                 @php
                     $key = $section['key'];
                     $data = $this->sectionData($key);
-                    $icon = match ($key) {
-                        'kas' => 'heroicon-o-banknotes',
-                        'dompet' => 'heroicon-o-wallet',
-                        'utang' => 'heroicon-o-arrow-up-right',
-                        'piutang' => 'heroicon-o-arrow-down-left',
-                        'langganan' => 'heroicon-o-sparkles',
-                        default => 'heroicon-o-arrows-right-left',
-                    };
                     $manageUrl = match ($key) {
                         'kas' => \App\Filament\Resources\BukuKasResource::getUrl('index'),
                         'dompet' => \App\Filament\Resources\DompetResource::getUrl('index'),
@@ -25,7 +70,20 @@
                         default => null,
                     };
                 @endphp
-                <x-filament::section :heading="\App\Filament\Pages\Dashboard::SECTIONS[$key]" wire:key="dashboard-{{ $key }}" collapsible compact :icon="$icon" data-section="{{ $key }}" :class="'dashboard-card !rounded-xl border-t-[3px] border-t-[color:var(--accent)] !shadow-[0_4px_20px_-12px_rgb(15_23_42_/_0.22)] overflow-hidden [&:is(.dark_*)]:!shadow-[0_4px_20px_-12px_rgb(0_0_0_/_0.45)] [--accent:#6366f1] [&[data-section=kas]]:[--accent:#10b981] [&[data-section=dompet]]:[--accent:#3b82f6] [&[data-section=utang]]:[--accent:#f43f5e] [&[data-section=piutang]]:[--accent:#14b8a6] [&[data-section=langganan]]:[--accent:#f59e0b] [&_.fi-section-header]:bg-[linear-gradient(120deg,color-mix(in_srgb,var(--accent)_7%,transparent),transparent)] [&_.fi-section-header>svg]:!text-[color:var(--accent)] [&_.fi-section-header>svg]:p-1.5 [&_.fi-section-header>svg]:!size-8 [&_.fi-section-header>svg]:rounded-lg [&_.fi-section-header>svg]:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] '.($key === 'transaksi' ? 'dashboard-full-width col-span-full [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2 [&_.fi-ta-header-toolbar]:!py-2 [&_.fi-ta-table-stacked-header-cell]:!py-2 [&_.fi-pagination]:!py-2' : '')">
+                <section
+                    id="dashboard-panel-{{ $key }}"
+                    wire:key="dashboard-{{ $key }}"
+                    role="tabpanel"
+                    aria-labelledby="dashboard-tab-{{ $key }}"
+                    tabindex="0"
+                    data-section="{{ $key }}"
+                    x-show="activeTab === '{{ $key }}'"
+                    @if ($key !== $firstTab) x-cloak @endif
+                    @class([
+                        'dashboard-card min-w-0 rounded-lg bg-white p-4 ring-1 ring-slate-200 [--accent:#f59e0b] [&:is(.dark_*)]:bg-gray-900 [&:is(.dark_*)]:ring-slate-700',
+                        'dashboard-full-width [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2 [&_.fi-ta-header-toolbar]:!py-2 [&_.fi-ta-table-stacked-header-cell]:!py-2 [&_.fi-pagination]:!py-2' => $key === 'transaksi',
+                    ])
+                >
                     @if ($key === 'transaksi')
                         <div class="dashboard-actions mb-2 flex flex-wrap justify-end gap-2">
                             {{ $this->tambahTransaksiAction }}
@@ -77,7 +135,7 @@
                             <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.\App\Filament\Pages\Dashboard::SECTIONS[$key]">Kelola</x-filament::button>
                         </div>
                     @endif
-                </x-filament::section>
+                </section>
             @empty
                 <x-filament::section heading="Dashboard disembunyikan" compact class="dashboard-full-width col-span-full">
                     Aktifkan bagian yang ingin ditampilkan melalui tombol Atur dashboard.

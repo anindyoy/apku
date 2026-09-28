@@ -89,7 +89,7 @@ test('dashboard user menyimpan toggle dan urutan per akun melalui pengaturan', f
         ->and(strpos($html, 'wire:key="dashboard-langganan"'))->toBeLessThan(strpos($html, 'wire:key="dashboard-kas"'));
     $hidden = array_map(fn ($section) => [...$section, 'visible' => false], $sections);
     $fresh->call('saveSettings', $hidden)->assertHasNoErrors();
-    expect($fresh->html())->not->toContain('wire:key="dashboard-');
+    expect($fresh->html())->not->toContain('role="tabpanel"', 'role="tablist"');
 });
 
 test('dashboard user menolak pengaturan tidak valid dan aksi admin', function () {
@@ -121,19 +121,20 @@ test('dashboard user menampilkan masa aktif dan keadaan kosong', function (?stri
     'masih aktif' => [fn () => today()->addDays(10)->toDateString(), true],
 ]);
 
-test('dashboard user memakai grid responsif tiga kolom dan tabel selebar halaman', function () {
+test('dashboard user memakai tab berikon dan panel selebar halaman', function () {
     $user = User::factory()->create();
     $html = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
-    $grid = $xpath->query('//div[contains(@class,"dashboard-user-grid")]')->item(0);
+    $grid = $xpath->query('//div[contains(@class,"dashboard-tabs")]')->item(0);
     expect($grid)->not->toBeNull();
     expect($xpath->query('./section', $grid)->length)->toBe(6);
     $table = $xpath->query('./section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
     expect($table->getAttribute('class'))->toContain('dashboard-full-width');
-    expect($table->getAttribute('class'))->toContain('col-span-full', '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
-    expect($grid->getAttribute('class'))->toContain('grid-cols-1', 'md:grid-cols-2', 'xl:grid-cols-3', '[&>*]:min-w-0');
+    expect($table->getAttribute('class'))->toContain( '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
+    expect($xpath->query('.//*[@role="tab"]', $grid)->length)->toBe(6);
+    expect($xpath->query('.//*[@role="tab" and @aria-selected="true"]', $grid)->length)->toBe(1);
     expect(file_get_contents(resource_path('views/filament/pages/dashboard.blade.php')))->not->toContain('<style');
 });
 
@@ -151,28 +152,50 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     foreach (['kas' => 'Rp 100.000', 'dompet' => 'Rp 80.000'] as $key => $total) {
         $card = $xpath->query('//section[@data-section="'.$key.'"]')->item(0);
         expect($card->getAttribute('class'))->toContain('dashboard-card');
-        expect($xpath->query('.//header/*[local-name()="svg"]', $card)->length)->toBe(1);
+        expect($xpath->query('//button[@id="dashboard-tab-'.$key.'"]/*[local-name()="svg"]')->length)->toBe(1);
         expect(trim($xpath->query('.//p[contains(@class,"dashboard-amount")]', $card)->item(0)->textContent))->toBe($total);
     }
 });
 
-test('dashboard user menyediakan kontrol lipat independen untuk setiap kartu', function () {
+test('dashboard user menghubungkan tab dengan panel dan mendukung navigasi keyboard', function () {
     $user = User::factory()->create();
     $html = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
-    $cards = $xpath->query('//section[@data-section]');
-    expect($cards->length)->toBe(6);
-    foreach ($cards as $card) {
-        expect($card->getAttribute('class'))->toContain('fi-collapsible', 'fi-compact');
-        $button = $xpath->query('.//button[contains(@class,"fi-section-collapse-btn")]', $card)->item(0);
-        expect($button)->not->toBeNull();
-        expect($button->getAttribute('aria-expanded'))->toBe('true')
-            ->and($button->getAttribute('x-on:click.stop'))->toBe('isCollapsed = ! isCollapsed')
-            ->and($button->getAttribute('x-bind:aria-expanded'))->toBe('(! isCollapsed).toString()');
-        expect($xpath->query('.//div[@class="fi-section-content-ctn"]', $card)->length)->toBe(1);
+    $panels = $xpath->query('//section[@role="tabpanel"]');
+    expect($panels->length)->toBe(6);
+    foreach ($panels as $panel) {
+        $key = $panel->getAttribute('data-section');
+        $tab = $xpath->query('//button[@id="'.$panel->getAttribute('aria-labelledby').'"]')->item(0);
+        expect($tab->getAttribute('aria-controls'))->toBe($panel->getAttribute('id'))
+            ->and($tab->getAttribute('tabindex'))->toBe($key === 'kas' ? '0' : '-1')
+            ->and($panel->getAttribute('x-show'))->toBe("activeTab === '$key'")
+            ->and($panel->hasAttribute('x-cloak'))->toBe($key !== 'kas');
     }
+    $handler = $xpath->query('//*[@role="tablist"]')->item(0)->getAttribute('x-on:keydown');
+    $script = <<<'JS'
+        const assert = require('node:assert/strict');
+        const handler = new Function('$event', '$el', process.argv[1]);
+        let active = 0;
+        let focused = 0;
+        const tabs = Array.from({length: 6}, (_, index) => ({
+            focus() { focused = index; }, click() { active = index; }
+        }));
+        const el = { querySelectorAll() { return tabs; } };
+        for (const [key, expected] of [['ArrowLeft', 5], ['ArrowRight', 0], ['End', 5], ['Home', 0], ['ArrowRight', 1]]) {
+            let prevented = false;
+            handler({key, target: tabs[active], preventDefault() { prevented = true; }}, el);
+            assert.equal(active, expected);
+            assert.equal(focused, expected);
+            assert.equal(prevented, true);
+        }
+        handler({key: 'Tab', target: tabs[active], preventDefault() { throw new Error('Tab harus tetap dapat meninggalkan navigasi'); }}, el);
+        assert.equal(active, 1);
+        JS;
+    $process = new \Symfony\Component\Process\Process(['node', '-e', $script, $handler], base_path());
+    $process->run();
+    expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
 });
 
 test('dashboard user tombol tambah membuka form dan menyimpan transaksi', function () {

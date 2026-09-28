@@ -15,10 +15,10 @@
   },
   {
     "id": "dashboard", "page": "Dashboard", "category": "Ringkasan", "title": "Membaca dan mengatur dashboard",
-    "intro": "Dashboard merangkum kas, dompet, utang, piutang, langganan, dan lima transaksi terbaru dalam kartu dengan tampilan padat. Tabel transaksi memakai jarak atas dan bawah yang ringkas agar lebih banyak informasi terlihat.",
-    "steps": ["Buka Dashboard setelah login untuk memeriksa saldo serta ringkasan keuangan.", "Gunakan Kelola pada kartu untuk membuka daftar terkait. Pada kartu transaksi, periksa ringkasan jenis, nominal, aktivitas, dan tanggal di layar mobile, lalu gunakan Tambah atau Lihat lengkap.", "Buka Atur dashboard untuk menampilkan atau menyembunyikan bagian dan mengubah urutan dengan geser atau tombol urutan.", "Klik header atau panah kartu untuk melipat dan membukanya. Gunakan Ubah atau Hapus pada transaksi jika aksi tersedia."],
-    "example": "Letakkan kartu dompet di urutan pertama jika Anda paling sering mengecek saldo rekening.",
-    "note": "Pengaturan tampilan dan urutan disimpan per akun. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi audit saldo."
+    "intro": "Dashboard merangkum kas, dompet, utang, piutang, langganan, dan lima transaksi terbaru dalam tab berikon dengan tampilan padat. Hanya isi tab aktif yang terlihat. Tabel transaksi memakai jarak atas dan bawah yang ringkas agar lebih banyak informasi terlihat.",
+    "steps": ["Buka Dashboard setelah login untuk memeriksa saldo serta ringkasan keuangan.", "Pilih tab yang ingin dilihat, lalu gunakan Kelola pada panel untuk membuka daftar terkait. Pada tab transaksi, periksa ringkasan jenis, nominal, aktivitas, dan tanggal di layar mobile, lalu gunakan Tambah atau Lihat lengkap.", "Buka Atur dashboard untuk menampilkan atau menyembunyikan bagian dan mengubah urutan dengan geser atau tombol urutan.", "Klik tab untuk berpindah bagian; di ponsel geser baris tab ke samping. Saat fokus berada di tab, gunakan panah kiri/kanan atau Home/End. Gunakan Ubah atau Hapus pada transaksi jika aksi tersedia."],
+    "example": "Letakkan tab dompet di urutan pertama jika Anda paling sering mengecek saldo rekening.",
+    "note": "Pengaturan tampilan dan urutan disimpan per akun. Tab pertama dibuka saat halaman dimuat atau pengaturan diubah. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi audit saldo."
   },
   {
     "id": "transaksi", "page": "Transaksi", "category": "Pencatatan", "title": "Mencatat pemasukan dan pengeluaran",
@@ -72,7 +72,7 @@
   {
     "id": "aktivitas", "page": "Aktivitas", "category": "Pengelolaan uang", "title": "Mengelola aktivitas transaksi",
     "intro": "Aktivitas mengelompokkan pemasukan dan pengeluaran agar laporan mudah dipahami.",
-    "steps": ["Buka Setting > Aktivitas untuk melihat panel pemasukan berwarna hijau dan pengeluaran berwarna merah.", "Tambahkan aktivitas pada jenis yang sesuai, lalu beri nama yang jelas.", "Pilih aktivitas tersebut ketika mencatat transaksi.", "Gunakan aksi ubah atau hapus untuk merapikan daftar sesuai aksi yang tersedia, kemudian periksa pengelompokan pada laporan."],
+    "steps": ["Buka Setting > Aktivitas untuk melihat panel pemasukan berwarna hijau dan pengeluaran berwarna merah. Tabel terletak di bawah header panel dengan jarak agar mudah dibaca. Jumlah transaksi ditampilkan di bawah nama aktivitas, misalnya 4 transaksi.", "Tambahkan aktivitas pada jenis yang sesuai, lalu beri nama yang jelas.", "Pilih aktivitas tersebut ketika mencatat transaksi.", "Gunakan aksi ubah atau hapus untuk merapikan daftar sesuai aksi yang tersedia, kemudian periksa pengelompokan pada laporan."],
     "example": "Gunakan Gaji dan Bonus untuk pemasukan; gunakan Belanja, Transportasi, dan Tagihan untuk pengeluaran.",
     "note": "Gunakan penamaan yang konsisten agar transaksi serupa tidak tersebar di banyak aktivitas."
   },

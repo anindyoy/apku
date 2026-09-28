@@ -63,10 +63,10 @@ class JenisTransaksi extends Model
     public static function columns()
     {
         return [
-            TextColumn::make('nama_jenis'),
-            TextColumn::make('transaksi_count')
+            TextColumn::make('nama_jenis')
+                ->wrap()
                 ->counts('transaksi')
-                ->label('Jumlah transaksi'),
+                ->description(fn (JenisTransaksi $record): string => number_format($record->transaksi_count, 0, ',', '.').' transaksi'),
         ];
     }
 

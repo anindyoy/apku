@@ -238,7 +238,8 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 ### 7. Aktivitas transaksi
 
 - Aktivitas pemasukan dan pengeluaran dikelola secara terpisah.
-- Halaman aktivitas menggunakan panel beraksen hijau untuk pemasukan dan merah untuk pengeluaran, disertai penjelasan singkat. Panel tersusun dua kolom pada layar besar dan satu kolom pada layar lebih kecil, dengan dukungan tema gelap.
+- Daftar aktivitas menampilkan jumlah transaksi sebagai keterangan di bawah nama (misalnya **4 transaksi**), tanpa kolom jumlah terpisah. Nama panjang dapat turun baris.
+- Halaman aktivitas menggunakan panel beraksen hijau untuk pemasukan dan merah untuk pengeluaran, disertai penjelasan singkat. Tabel diberi jarak 1rem dari header panel. Panel tersusun dua kolom pada layar besar dan satu kolom pada layar lebih kecil, dengan dukungan tema gelap.
 - Menambah, mengubah, dan menghapus aktivitas.
 
 ### 8. Laporan keuangan
@@ -312,17 +313,17 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Dashboard menjadi halaman utama pengguna biasa setelah login dan onboarding.
 - Data kartu, lima transaksi terbaru, pengaturan tampilan, dan ringkasan admin menggunakan cache 30 menit yang dipisahkan per pengguna. Perubahan tabel model terkait membatalkan cache bagian yang bergantung padanya, termasuk query massal atau penulisan tanpa event model. Invalidasi berlaku untuk seluruh pengguna pada bagian terkait; data di dalam transaksi database dibaca langsung dan invalidasi diulang setelah commit. Status langganan diperbarui saat berganti tanggal.
-- Layout dashboard menggunakan tiga kolom pada layar besar, dua kolom pada tablet, dan satu kolom pada ponsel. Kartu menggunakan tampilan padat dengan padding, ikon header, dan jarak antarbaris yang ringkas. Tabel transaksi memakai lebar penuh di desktop dengan padding vertikal header dan isi yang padat, serta ringkasan satu kolom pada layar mobile.
-- Menampilkan seluruh kas dan dompet milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Kartu juga menampilkan total saldo dan jumlah kas atau dompet, dengan ikon serta warna aksen berbeda dan dukungan tema gelap.
+- Dashboard menggunakan satu baris tab berikon bergaya Flowbite untuk Kas, Dompet, Utang, Piutang, Langganan, dan Transaksi. Hanya panel tab aktif yang terlihat dengan lebar penuh; baris tab dapat digeser horizontal di layar kecil. Tampilan panel dan padding vertikal tabel tetap padat; transaksi mobile tetap berupa ringkasan satu kolom.
+- Menampilkan seluruh kas dan dompet milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Panel juga menampilkan total saldo dan jumlah kas atau dompet, dengan ikon pada tab dan dukungan tema gelap.
 - Menampilkan total sisa utang dan piutang setelah pembayaran, masing-masing disertai tiga catatan dengan aktivitas terbaru.
 - Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.
 - Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat, kas dan dompet, aktivitas dan deskripsi, serta nominal.
-- Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian serta mengubah urutannya dengan geser atau tombol urutan. Seluruh bagian tampil secara default.
+- Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian serta mengubah urutannya dengan geser atau tombol urutan. Seluruh tab tersedia secara default; tab pertama sesuai urutan pengguna dibuka saat halaman dimuat atau pengaturan diubah.
 - Baris transaksi yang tidak dapat dikelola menampilkan aksi informasi berwarna kuning, misalnya **Kas tidak aktif**, **Dompet tidak aktif**, atau **Transaksi audit saldo**. Klik penanda untuk membaca alasan dan langkah yang dapat dilakukan; aturan ubah/hapus tetap berlaku. Penanda tersedia di dashboard dan daftar transaksi.
 - Baris tabel transaksi dashboard menyediakan aksi **Ubah** dan **Hapus** yang sama dengan daftar transaksi, sesuai hak pengelolaan pengguna. Aksi tersebut tidak tersedia untuk transaksi audit saldo.
 - Kartu kas, dompet, utang, piutang, dan langganan menyediakan tombol **Kelola** yang membuka daftar resource masing-masing, termasuk ketika kartu belum memiliki data.
 - Kartu transaksi menyediakan tombol rata kanan di atas tabel: **Tambah** untuk membuka modal pencatatan yang sama dengan daftar transaksi (mengikuti hak akses kas), dan **Lihat lengkap** untuk menuju daftar transaksi.
-- Setiap kartu dashboard pengguna dapat dilipat atau dibuka melalui header atau tombol panah. Semua kartu terbuka secara default; melipat kartu tetap menampilkan judulnya.
+- Pilih tab untuk berpindah panel. Navigasi keyboard mendukung panah kiri/kanan serta Home/End, dengan penanda tab aktif dan relasi aksesibel antara tab dan panel. Perubahan data atau aksi Livewire mempertahankan tab aktif selama pengaturan urutan/visibilitas tidak berubah.
 - Dashboard admin tetap hanya berisi statistik agregat administrasi.
 
 Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 5 September 2026. Struktur dokumentasi dipisahkan menjadi backend dan frontend pada 12 September 2026.
