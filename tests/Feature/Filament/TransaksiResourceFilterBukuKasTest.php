@@ -33,17 +33,13 @@ test('toolbar filter transaksi menggunakan warna teks yang kontras pada setiap t
 
     expect($html)
         ->toContain('data-testid="filter-transaksi-section"')
-        ->toContain('.period-filter-select {')
-        ->toContain('color: #111827 !important;')
-        ->toContain('.transaction-filter-control {')
-        ->toContain('border: 1px solid #d1d5db;')
-        ->toContain('.transaction-reset-filter:hover {')
-        ->toContain('color: #111827 !important;')
-        ->toContain('background-color: #e5e7eb !important;')
-        ->toContain('class="transaction-filter-control transaction-reset-filter')
-        ->toContain('.dark .period-filter-select {')
-        ->toContain('color: #ffffff !important;')
-        ->toContain('.dark .transaction-filter-control {');
+        ->toContain('!text-gray-950 focus:ring-0 dark:!text-white')
+        ->toContain('border border-gray-300')
+        ->toContain('dark:border-white/10')
+        ->toContain('hover:bg-gray-100 hover:text-gray-900')
+        ->toContain('dark:hover:bg-white/10 dark:hover:text-white')
+        ->toContain('bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-200')
+        ->not->toContain('<style>');
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
@@ -56,7 +52,7 @@ test('panah select filter transaksi memiliki jarak dari tepi kanan', function ()
         ->and(substr_count($html, 'absolute inset-y-0 right-3.5 my-auto h-5 w-5'))->toBe(4)
         ->and($html)->toContain('relative h-full w-36')
         ->and($html)->toContain('relative h-full w-24')
-        ->and($html)->toContain('transaction-reset-filter ml-auto');
+        ->and($html)->toContain('rounded-lg border border-gray-300 bg-white px-3');
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
