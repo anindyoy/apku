@@ -15,7 +15,7 @@
   },
   {
     "id": "dashboard", "page": "Dashboard", "category": "Ringkasan", "title": "Membaca dan mengatur dashboard",
-    "intro": "Dashboard merangkum kas, dompet, utang, piutang, langganan, dan lima transaksi terbaru.",
+    "intro": "Dashboard merangkum kas, dompet, utang, piutang, langganan, dan lima transaksi terbaru dalam kartu dengan tampilan padat.",
     "steps": ["Buka Dashboard setelah login untuk memeriksa saldo serta ringkasan keuangan.", "Gunakan Kelola pada kartu untuk membuka daftar terkait. Pada kartu transaksi, periksa ringkasan jenis, nominal, aktivitas, dan tanggal di layar mobile, lalu gunakan Tambah atau Lihat lengkap.", "Buka Atur dashboard untuk menampilkan atau menyembunyikan bagian dan mengubah urutan dengan geser atau tombol urutan.", "Klik header atau panah kartu untuk melipat dan membukanya. Gunakan Ubah atau Hapus pada transaksi jika aksi tersedia."],
     "example": "Letakkan kartu dompet di urutan pertama jika Anda paling sering mengecek saldo rekening.",
     "note": "Pengaturan tampilan dan urutan disimpan per akun. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi audit saldo."

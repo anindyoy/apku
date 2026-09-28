@@ -127,17 +127,14 @@ test('dashboard user memakai grid responsif tiga kolom dan tabel selebar halaman
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
-    $grid = $xpath->query('//div[@class="dashboard-user-grid"]')->item(0);
+    $grid = $xpath->query('//div[contains(@class,"dashboard-user-grid")]')->item(0);
     expect($grid)->not->toBeNull();
     expect($xpath->query('./section', $grid)->length)->toBe(6);
     $table = $xpath->query('./section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
     expect($table->getAttribute('class'))->toContain('dashboard-full-width');
-    $styles = $xpath->query('//style')->item(0)->textContent;
-    expect($styles)->toContain('grid-template-columns: minmax(0, 1fr)')
-        ->toContain('@media (min-width: 768px)')
-        ->toContain('repeat(2, minmax(0, 1fr))')
-        ->toContain('@media (min-width: 1280px)')
-        ->toContain('repeat(3, minmax(0, 1fr))');
+    expect($table->getAttribute('class'))->toContain('col-span-full');
+    expect($grid->getAttribute('class'))->toContain('grid-cols-1', 'md:grid-cols-2', 'xl:grid-cols-3', '[&>*]:min-w-0');
+    expect(file_get_contents(resource_path('views/filament/pages/dashboard.blade.php')))->not->toContain('<style');
 });
 
 test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
@@ -155,7 +152,7 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
         $card = $xpath->query('//section[@data-section="'.$key.'"]')->item(0);
         expect($card->getAttribute('class'))->toContain('dashboard-card');
         expect($xpath->query('.//header/*[local-name()="svg"]', $card)->length)->toBe(1);
-        expect(trim($xpath->query('.//p[@class="dashboard-amount"]', $card)->item(0)->textContent))->toBe($total);
+        expect(trim($xpath->query('.//p[contains(@class,"dashboard-amount")]', $card)->item(0)->textContent))->toBe($total);
     }
 });
 
@@ -168,7 +165,7 @@ test('dashboard user menyediakan kontrol lipat independen untuk setiap kartu', f
     $cards = $xpath->query('//section[@data-section]');
     expect($cards->length)->toBe(6);
     foreach ($cards as $card) {
-        expect($card->getAttribute('class'))->toContain('fi-collapsible');
+        expect($card->getAttribute('class'))->toContain('fi-collapsible', 'fi-compact');
         $button = $xpath->query('.//button[contains(@class,"fi-section-collapse-btn")]', $card)->item(0);
         expect($button)->not->toBeNull();
         expect($button->getAttribute('aria-expanded'))->toBe('true')
@@ -198,10 +195,9 @@ test('dashboard user tombol tambah membuka form dan menyimpan transaksi', functi
     $xpath = new DOMXPath($dom);
     $link = $xpath->query('//section[@data-section="transaksi"]//a[contains(.,"Lihat lengkap")]')->item(0);
     expect($link->getAttribute('href'))->toBe(TransaksiResource::getUrl());
-    $toolbar = $xpath->query('//section[@data-section="transaksi"]//div[@class="dashboard-actions"]')->item(0);
+    $toolbar = $xpath->query('//section[@data-section="transaksi"]//div[contains(@class,"dashboard-actions")]')->item(0);
     expect($toolbar)->not->toBeNull();
-    expect($xpath->query('//style')->item(0)->textContent)
-        ->toMatch('/\.dashboard-actions\s*\{[^}]*justify-content:\s*flex-end;/');
+    expect($toolbar->getAttribute('class'))->toContain('flex', 'justify-end', 'flex-wrap');
     expect($xpath->query('.//button', $toolbar)->length)->toBe(1);
     expect($xpath->query('.//a', $toolbar)->length)->toBe(1);
     expect($xpath->query('following-sibling::*//table', $toolbar)->length)->toBe(1);

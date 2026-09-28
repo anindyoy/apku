@@ -307,7 +307,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Dashboard menjadi halaman utama pengguna biasa setelah login dan onboarding.
 - Data kartu, lima transaksi terbaru, pengaturan tampilan, dan ringkasan admin menggunakan cache 30 menit yang dipisahkan per pengguna. Perubahan tabel model terkait membatalkan cache bagian yang bergantung padanya, termasuk query massal atau penulisan tanpa event model. Invalidasi berlaku untuk seluruh pengguna pada bagian terkait; data di dalam transaksi database dibaca langsung dan invalidasi diulang setelah commit. Status langganan diperbarui saat berganti tanggal.
-- Layout dashboard menggunakan tiga kolom pada layar besar, dua kolom pada tablet, dan satu kolom pada ponsel. Tabel transaksi memakai lebar penuh di desktop dan ringkasan satu kolom pada layar mobile.
+- Layout dashboard menggunakan tiga kolom pada layar besar, dua kolom pada tablet, dan satu kolom pada ponsel. Kartu menggunakan tampilan padat dengan padding, ikon header, dan jarak antarbaris yang ringkas. Tabel transaksi memakai lebar penuh di desktop dan ringkasan satu kolom pada layar mobile.
 - Menampilkan seluruh kas dan dompet milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Kartu juga menampilkan total saldo dan jumlah kas atau dompet, dengan ikon serta warna aksen berbeda dan dukungan tema gelap.
 - Menampilkan total sisa utang dan piutang setelah pembayaran, masing-masing disertai tiga catatan dengan aktivitas terbaru.
 - Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.
