@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Resources\AuditSaldoDompetResource;
 use App\Filament\Resources\AuditSaldoDompetResource\Pages\ListAuditSaldoDompet;
 use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Models\AuditSaldoDompet;
@@ -40,6 +41,12 @@ function buatDataAuditSaldo(): array
 
     return compact('user', 'bukuKas', 'tunai', 'bank');
 }
+
+test('audit saldo tidak terdaftar di navigasi untuk semua peran', function (string $role) {
+    $this->actingAs(User::factory()->create(['role' => $role]));
+
+    expect(AuditSaldoDompetResource::shouldRegisterNavigation())->toBeFalse();
+})->with(['reguler', 'premium', 'admin']);
 
 test('audit saldo membuat transaksi penyesuaian per dompet dan menyimpan snapshot', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();

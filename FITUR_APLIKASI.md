@@ -232,6 +232,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Halaman dompet menyediakan pembuatan, perubahan, pemilihan dompet default, serta pemindahan saldo sebelum penghapusan.
 - Daftar dompet dan modal tambah menjelaskan sisa slot atau batas kuota dompet untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap; Premium aktif tetap berlatar netral. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif menampilkan tanggal akhir masa aktif dan slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
 - Form audit saldo memilih kas utama secara default dan menyediakan saldo riil, tanggal, kas pencatatan, catatan umum, serta catatan per dompet.
+- Audit Saldo tidak ditampilkan pada navbar. Akses audit tersedia melalui tombol **Audit saldo** dan **Riwayat audit** pada halaman Dompet; daftar riwayat tetap menyediakan tombol **Tambah audit**.
 
 ### 7. Aktivitas transaksi
 
@@ -289,6 +290,8 @@ Fitur berikut hanya tersedia untuk admin:
 - Login cepat akun pengembangan pada lingkungan lokal. Saat `APP_DEMO=true`, akun admin tidak ditampilkan dalam pilihan login cepat.
 
 ### 13. Langganan premium
+
+- Grup menu **Langganan** berada paling bawah pada navigasi, setelah grup **Pengaturan** yang memuat Setting untuk admin.
 
 - User dapat membandingkan benefit akun Reguler dan Premium melalui tabel responsif dengan kolom Fitur, Free (Reguler), dan Premium di atas daftar kartu langganan, dengan aksen Premium dan dukungan mode gelap. Baris Jumlah kas dan Jumlah Dompet menampilkan Maksimal 2 untuk Free dan Tidak terbatas untuk Premium aktif. Lebar bagian perbandingan dibatasi maksimal 52rem; status ditampilkan sebagai ceklis hijau atau silang merah dengan label aksesibel, sedangkan kuota dan ketentuan tetap berupa teks. Tabel mencakup 9 fitur: jumlah kas, jumlah dompet, import transaksi, laporan/ekspor, utang/piutang, audit saldo, tabungan emas, pembuatan kolaborasi kas, dan pembuatan link kas publik. Reguler mencakup kas utama + 1 kas tambahan gratis dan dompet utama + 1 dompet tambahan gratis; Premium aktif membuka penambahan kas/dompet serta pembuatan kolaborasi privat atau link publik. Tabel dan catatan hak akses menjelaskan bahwa kolaborasi lama tetap dapat dikelola/dicabut pemilik, kedua akun dapat menerima akses kas bersama tanpa mengurangi kuota kas sendiri, dan setelah Premium berakhir batas Reguler kembali berlaku. Akses pencatatan Editor mengikuti ketersediaan pengelolaan kas oleh pemilik. Laporan, ekspor, serta utang/piutang tersedia untuk kedua akun.
 - Form pengiriman bukti pembayaran mendukung JPG, JPEG, PNG, atau PDF dengan ukuran maksimal 3 MB.

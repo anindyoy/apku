@@ -53,14 +53,14 @@ class AdminPanelProvider extends PanelProvider
             )
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Langganan')
-                    ->collapsed(false),
-                NavigationGroup::make()
                     ->label('Utang Piutang')
                     ->collapsed(false),
                 NavigationGroup::make()
                     ->label('Pengaturan')
                     ->collapsed(true),
+                NavigationGroup::make()
+                    ->label('Langganan')
+                    ->collapsed(false),
             ])
             ->profile()
             ->registration(Register::class)

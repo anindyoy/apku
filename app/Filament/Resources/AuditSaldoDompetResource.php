@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\AuditSaldoDompetResource\Pages\ListAuditSaldoDompet;
 use App\Models\AuditSaldoDompet;
 use BackedEnum;
@@ -14,7 +13,7 @@ use UnitEnum;
 
 class AuditSaldoDompetResource extends Resource
 {
-    use HidesFromAdminNavigation;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $model = AuditSaldoDompet::class;
 

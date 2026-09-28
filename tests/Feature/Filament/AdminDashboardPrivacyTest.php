@@ -15,7 +15,25 @@ use App\Filament\Resources\UtangResource;
 use App\Filament\Widgets\AdminOverview;
 use App\Models\Langganan;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Livewire\Livewire;
+
+test('grup langganan berada paling bawah setelah pengaturan', function (string $role) {
+    $this->actingAs(User::factory()->create(['role' => $role]));
+    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    Filament::bootCurrentPanel();
+
+    $groups = collect(Filament::getNavigation());
+    $labels = $groups->map(fn ($group) => $group->getLabel())->values();
+
+    expect($labels->last())->toBe('Langganan')
+        ->and($labels->get($labels->count() - 2))->toBe('Pengaturan');
+
+    if ($role === 'admin') {
+        $settings = $groups->first(fn ($group) => $group->getLabel() === 'Pengaturan');
+        expect(collect($settings->getItems())->map(fn ($item) => $item->getLabel())->all())->toContain('Setting');
+    }
+})->with(['reguler', 'premium', 'admin']);
 
 test('dashboard admin menjadi halaman utama dan menampilkan data agregat', function () {
     $admin = createAdminUser();
