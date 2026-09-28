@@ -1,0 +1,1 @@
+@vite('resources/css/filament-toolbar.css')

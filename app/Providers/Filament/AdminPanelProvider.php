@@ -51,6 +51,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
                 fn (): View => view('filament.components.tutorial-link'),
             )
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn (): View => view('filament.components.global-styles'),
+            )
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Utang Piutang')

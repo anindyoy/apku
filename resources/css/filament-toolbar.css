@@ -1,6 +1,20 @@
 @tailwind components;
 @tailwind utilities;
 
+.fi-ta-header-cell,
+.fi-ta-header-toolbar,
+.fi-ta-table-stacked-header-cell,
+.fi-pagination {
+    @apply !py-2;
+}
+
+@media (min-width: 640px) {
+    .fi-ta-text:not(.fi-inline),
+    .fi-ta-cell:has(.fi-ta-actions) {
+        @apply !py-2;
+    }
+}
+
 /* Aksi kartu mengikuti lebar kartu, termasuk saat subnavigasi mempersempit daftar. */
 .fi-ta-content-grid .fi-ta-actions {
     @apply min-w-0 flex-wrap;
