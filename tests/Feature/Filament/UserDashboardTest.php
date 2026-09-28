@@ -132,7 +132,7 @@ test('dashboard user memakai grid responsif tiga kolom dan tabel selebar halaman
     expect($xpath->query('./section', $grid)->length)->toBe(6);
     $table = $xpath->query('./section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
     expect($table->getAttribute('class'))->toContain('dashboard-full-width');
-    expect($table->getAttribute('class'))->toContain('col-span-full');
+    expect($table->getAttribute('class'))->toContain('col-span-full', '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
     expect($grid->getAttribute('class'))->toContain('grid-cols-1', 'md:grid-cols-2', 'xl:grid-cols-3', '[&>*]:min-w-0');
     expect(file_get_contents(resource_path('views/filament/pages/dashboard.blade.php')))->not->toContain('<style');
 });
