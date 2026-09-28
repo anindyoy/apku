@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Models\BukuKas;
@@ -19,17 +20,16 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rule;
-use UnitEnum;
 
 class DompetResource extends Resource
 {
     use HidesFromAdminNavigation;
 
+    protected static ?string $cluster = Pengaturan::class;
+
     protected static ?string $model = Dompet::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-wallet';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
 
     protected static ?string $navigationLabel = 'Dompet';
 

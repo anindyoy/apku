@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use BackedEnum;
 use Filament\Forms\Components\Select;
@@ -13,20 +14,19 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
-use UnitEnum;
 
 class AkunSaya extends Page implements HasForms
 {
     use HidesFromAdminNavigation;
     use InteractsWithForms;
 
+    protected static ?string $cluster = Pengaturan::class;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
 
     protected static ?string $navigationLabel = 'Akun Saya';
 
     protected string $view = 'filament.pages.akun-saya';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
 
     protected static ?int $navigationSort = 4;
 

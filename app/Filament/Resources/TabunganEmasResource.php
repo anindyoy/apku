@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\TabunganEmasResource\Pages\ListTabunganEmas;
 use App\Models\TabunganEmas;
@@ -20,17 +21,16 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use UnitEnum;
 
 class TabunganEmasResource extends Resource
 {
     use HidesFromAdminNavigation;
 
+    protected static ?string $cluster = Pengaturan::class;
+
     protected static ?string $model = TabunganEmas::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
 
     protected static ?int $navigationSort = 2;
 

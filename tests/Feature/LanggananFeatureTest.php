@@ -36,6 +36,8 @@ test('kartu langganan mempertahankan rincian pencarian filter dan aksi', functio
     $document = new DOMDocument;
     @$document->loadHTML(mb_convert_encoding($component->html(), 'HTML-ENTITIES', 'UTF-8'));
     $xpath = new DOMXPath($document);
+    $stylesheet = \Illuminate\Support\Facades\Vite::asset('resources/css/filament-toolbar.css');
+    expect($xpath->query('//link[@href="'.$stylesheet.'"]')->length)->toBeGreaterThan(0);
     expect($xpath->query('//*[@data-subscription-card]')->length)->toBe(1)
         ->and($xpath->query('//*[@data-subscription-card]//table')->length)->toBe(0)
         ->and($component->instance()->getTable()->getContentGrid())->toBe(['default' => 1, 'md' => 2]);

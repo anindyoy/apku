@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Clusters\Pengaturan;
 use App\Services\PengaturanHargaEmas;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
@@ -11,17 +12,16 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use UnitEnum;
 
 class Setting extends Page implements HasForms
 {
     use InteractsWithForms;
 
+    protected static ?string $cluster = Pengaturan::class;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
-
-    protected static ?string $title = 'Setting';
+    protected static ?string $title = 'Harga Emas';
 
     protected string $view = 'filament.pages.setting';
 

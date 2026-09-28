@@ -10,7 +10,7 @@ test('regular user tidak dapat mengakses user management', function () {
     $user = createRegularUserWithBukuKas();
 
     $this->actingAs($user)
-        ->get(route('filament.admin.resources.users.index'))
+        ->get(\App\Filament\Resources\UserResource::getUrl())
         ->assertForbidden();
 })
     ->group('filament', 'authorization');
@@ -19,7 +19,7 @@ test('admin dapat mengakses user management', function () {
     $adminUser = createAdminUser();
 
     $this->actingAs($adminUser)
-        ->get(route('filament.admin.resources.users.index'))
+        ->get(\App\Filament\Resources\UserResource::getUrl())
         ->assertSuccessful();
 })
     ->group('filament', 'authorization');

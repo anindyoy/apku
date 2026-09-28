@@ -116,6 +116,9 @@ it('tutorial kontekstual mengikuti URL aktif dan perubahan navigasi panel', func
         assert.ok(ids.includes(topic));
         assert.equal(tutorialUrl(base, `${panel}/${path}?bulan=9#modal`, panel), `${base}#${topic}`);
     }
+    for (const path of ['buku-kas', 'dompet', 'kategori', 'kolaborator-kas', 'tabungan-emas', 'akun-saya']) {
+        assert.equal(tutorialUrl(base, `${panel}/pengaturan/${path}`, panel), `${base}#${cases[path]}`);
+    }
     for (const path of ['langganans/create', 'utangs/123/detail', 'piutangs/456/detail']) {
         assert.equal(tutorialUrl(base, `${panel}/${path}`, panel), `${base}#${cases[path.split('/')[0]]}`);
     }

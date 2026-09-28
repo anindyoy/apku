@@ -198,6 +198,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Pengguna dapat memetakan header file ke kolom transaksi dan melihat saran untuk nama kolom umum dalam Bahasa Indonesia dan Inggris.
 - Pemetaan kolom pada modal import tersusun dalam tiga kolom di layar lebar dan menyesuaikan jumlah kolom pada layar lebih kecil.
 - Riwayat import menampilkan nama file, waktu, jumlah transaksi, dampak saldo, dan status setiap batch milik pengguna.
+- Riwayat Import tidak ditampilkan pada navbar; pengguna membukanya melalui aksi **Riwayat Import** pada halaman Transaksi.
 - Pratinjau import menampilkan daftar aktivitas baru dan konfirmasi untuk membuatnya otomatis.
 - Status, progres, dan pesan kegagalan pemrosesan antrean dapat dipantau pada riwayat import.
 
@@ -276,9 +277,13 @@ Fitur berikut hanya tersedia untuk admin:
 - Daftar pengguna tidak menampilkan jumlah kas, transaksi, atau utang-piutang dan tidak menyediakan aksi impersonasi.
 - Navigasi admin difokuskan pada dashboard, pengguna, operasional langganan, dan Setting. Menu transaksi, pencarian transaksi, laporan, kas, dompet, aktivitas, utang, piutang, dan Akun Saya disembunyikan untuk admin.
 - Admin dapat membuat, mengubah, dan menghapus pengguna serta mengatur tipe akun dan masa aktif.
-- Halaman **Setting** (`/admin/setting`) khusus admin menyediakan form pengaturan harga emas. Nilai default ditampilkan sebagai placeholder; kosongkan kolom dan simpan untuk kembali memakai default.
+- Submenu **Harga Emas** (`/admin/pengaturan/setting`) pada halaman Setting khusus admin menyediakan form pengaturan harga emas. Nilai default ditampilkan sebagai placeholder; kosongkan kolom dan simpan untuk kembali memakai default.
 
 ### 12. Fitur pendukung
+
+- Tombol aksi pada kartu daftar Kas, Dompet, dan Langganan turun ke baris berikutnya ketika ruang sempit, termasuk saat subnavigasi Setting terbuka, sehingga tetap berada di dalam kartu.
+
+- Menu **Setting** (/admin/pengaturan) menggantikan grup Pengaturan pada navbar dan menggunakan Filament Cluster untuk membuka halaman pertama yang dapat diakses dengan subnavigasi bawaan pada setiap halaman anggota. URL halaman anggota memakai awalan `/admin/pengaturan/`, dan breadcrumb Setting kembali ke halaman pertama yang tersedia. Reguler dan Premium melihat Kas, Dompet, Aktivitas, Kolaborator Kas, Tabungan Emas, dan Akun Saya; admin melihat Pengguna dan Harga Emas. Submenu mengikuti otorisasi halaman tujuan. Audit saldo dan riwayatnya tetap diakses dari Dompet.
 
 - Antarmuka berbahasa Indonesia.
 - Halaman publik `/` menampilkan landing page APKu dengan ringkasan fitur, perbandingan akun Reguler dan Premium, logo aplikasi, serta tautan ke registrasi, login, dan tutorial.
@@ -291,7 +296,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 ### 13. Langganan premium
 
-- Grup menu **Langganan** berada paling bawah pada navigasi, setelah grup **Pengaturan** yang memuat Setting untuk admin.
+- Grup menu **Langganan** berada paling bawah pada navigasi, setelah menu **Setting**.
 
 - User dapat membandingkan benefit akun Reguler dan Premium melalui tabel responsif dengan kolom Fitur, Free (Reguler), dan Premium di atas daftar kartu langganan, dengan aksen Premium dan dukungan mode gelap. Baris Jumlah kas dan Jumlah Dompet menampilkan Maksimal 2 untuk Free dan Tidak terbatas untuk Premium aktif. Lebar bagian perbandingan dibatasi maksimal 52rem; status ditampilkan sebagai ceklis hijau atau silang merah dengan label aksesibel, sedangkan kuota dan ketentuan tetap berupa teks. Tabel mencakup 9 fitur: jumlah kas, jumlah dompet, import transaksi, laporan/ekspor, utang/piutang, audit saldo, tabungan emas, pembuatan kolaborasi kas, dan pembuatan link kas publik. Reguler mencakup kas utama + 1 kas tambahan gratis dan dompet utama + 1 dompet tambahan gratis; Premium aktif membuka penambahan kas/dompet serta pembuatan kolaborasi privat atau link publik. Tabel dan catatan hak akses menjelaskan bahwa kolaborasi lama tetap dapat dikelola/dicabut pemilik, kedua akun dapat menerima akses kas bersama tanpa mengurangi kuota kas sendiri, dan setelah Premium berakhir batas Reguler kembali berlaku. Akses pencatatan Editor mengikuti ketersediaan pengelolaan kas oleh pemilik. Laporan, ekspor, serta utang/piutang tersedia untuk kedua akun.
 - Form pengiriman bukti pembayaran mendukung JPG, JPEG, PNG, atau PDF dengan ukuran maksimal 3 MB.

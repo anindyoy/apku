@@ -2,18 +2,18 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use BackedEnum;
 use Filament\Pages\Page;
-use UnitEnum;
 
 class Kategori extends Page
 {
     use HidesFromAdminNavigation;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $cluster = Pengaturan::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
     protected static ?int $navigationSort = 2;
 

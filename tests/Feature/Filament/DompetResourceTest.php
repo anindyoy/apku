@@ -59,10 +59,24 @@ test('halaman dompet dapat membuat dan mengubah dompet', function () {
 
 test('daftar dompet menggunakan kartu responsif', function () {
     ['user' => $user, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+    $bank = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Rekening Bank',
+        'saldo' => 0,
+    ]);
 
     $component = Livewire::actingAs($user)->test(ListDompet::class)
         ->assertSuccessful()
-        ->assertCanSeeTableRecords([$cash]);
+        ->assertCanSeeTableRecords([$cash, $bank])
+        ->assertTableActionVisible('edit', $bank)
+        ->assertTableActionVisible('jadikanDefault', $bank)
+        ->assertTableActionVisible('pindahkanDanHapus', $bank);
+
+    $document = new DOMDocument;
+    @$document->loadHTML($component->html());
+    $xpath = new DOMXPath($document);
+    $stylesheet = \Illuminate\Support\Facades\Vite::asset('resources/css/filament-toolbar.css');
+    expect($xpath->query('//link[@href="'.$stylesheet.'"]')->length)->toBeGreaterThan(0);
 
     $table = $component->instance()->getTable();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $cash->id);

@@ -26,7 +26,8 @@ export function tutorialUrl(baseUrl, currentUrl, panelUrl) {
         return baseUrl;
     }
 
-    const page = current.pathname.slice(prefix.length).replace(/^\/+/, '').split('/')[0];
+    const segments = current.pathname.slice(prefix.length).replace(/^\/+/, '').split('/');
+    const page = segments[0] === 'pengaturan' ? segments[1] : segments[0];
     const topic = Object.hasOwn(topics, page) ? topics[page] : null;
     return topic ? `${baseUrl}#${topic}` : baseUrl;
 }

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\ImportTransaksiResource\Pages\ListImportTransaksis;
 use App\Models\ImportTransaksi;
 use App\Services\ImportTransaksiService;
@@ -16,7 +15,7 @@ use Filament\Tables\Table;
 
 class ImportTransaksiResource extends Resource
 {
-    use HidesFromAdminNavigation;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $model = ImportTransaksi::class;
 

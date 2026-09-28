@@ -1,6 +1,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Aksi kartu mengikuti lebar kartu, termasuk saat subnavigasi mempersempit daftar. */
+.fi-ta-content-grid .fi-ta-actions {
+    @apply min-w-0 flex-wrap;
+}
+
+.fi-ta-content-grid .fi-ta-actions > * {
+    @apply min-w-0 max-w-full whitespace-normal;
+}
+
+.fi-ta-content-grid .fi-ta-actions .fi-link-label {
+    @apply whitespace-normal break-words;
+}
+
 /* Penanda input nonaktif selama jenis transaksi sedang diganti */
 .transaction-form-changing {
     cursor: wait;

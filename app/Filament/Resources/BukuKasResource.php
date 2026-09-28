@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
@@ -25,17 +26,16 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use UnitEnum;
 
 class BukuKasResource extends Resource
 {
     use HidesFromAdminNavigation;
 
+    protected static ?string $cluster = Pengaturan::class;
+
     protected static ?string $model = BukuKas::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-book-open';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
 
     protected static ?int $navigationSort = 1;
 

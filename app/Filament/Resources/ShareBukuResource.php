@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\ShareBukuResource\Pages;
 use App\Models\BukuKas;
@@ -25,11 +26,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Js;
 use Illuminate\Validation\Rule;
-use UnitEnum;
 
 class ShareBukuResource extends Resource
 {
     use HidesFromAdminNavigation;
+
+    protected static ?string $cluster = Pengaturan::class;
 
     protected static ?string $model = ShareBuku::class;
 
@@ -45,8 +47,6 @@ class ShareBukuResource extends Resource
 
     protected static ?string $slug = 'kolaborator-kas';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
-
     protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
@@ -54,7 +54,7 @@ class ShareBukuResource extends Resource
         return $schema->schema([
             Select::make('buku_kas_id')
                 ->label('Kas')
-                ->options(fn(): array => BukuKas::withoutGlobalScopes()
+                ->options(fn (): array => BukuKas::withoutGlobalScopes()
                     ->where('user_id', auth()->id())
                     ->pluck('nama_buku', 'id')->all())
                 ->rules([Rule::exists('buku_kas', 'id')->where('user_id', auth()->id())])
@@ -79,17 +79,17 @@ class ShareBukuResource extends Resource
                         ? 'Email sudah terdaftar di aplikasi.'
                         : 'Email belum terdaftar di aplikasi.';
                 })
-                ->hintColor(fn(?string $state): string => filled($state) && User::where('email', trim($state))->exists() ? 'success' : 'danger')
+                ->hintColor(fn (?string $state): string => filled($state) && User::where('email', trim($state))->exists() ? 'success' : 'danger')
                 ->helperText('Kosongkan untuk membuat link publik. Siapa pun yang memiliki link dapat melihat kas tanpa login selama akses berlaku.')
                 ->afterStateUpdated(function (?string $state, Set $set): void {
                     if (blank($state)) {
                         $set('privilege', 'viewer');
                     }
                 })
-                ->disabled(fn(?ShareBuku $record): bool => $record !== null)
+                ->disabled(fn (?ShareBuku $record): bool => $record !== null)
                 ->dehydrated()
-                ->mutateStateForValidationUsing(fn(?string $state): string => trim($state ?? ''))
-                ->dehydrateStateUsing(fn(?string $state, ?ShareBuku $record): ?int => $record !== null
+                ->mutateStateForValidationUsing(fn (?string $state): string => trim($state ?? ''))
+                ->dehydrateStateUsing(fn (?string $state, ?ShareBuku $record): ?int => $record !== null
                     ? $record->user_id
                     : (blank($state) ? null : User::where('email', trim($state))->firstOrFail()->id))
                 ->rules([
@@ -104,9 +104,9 @@ class ShareBukuResource extends Resource
                 ->nullable(),
             Select::make('privilege')
                 ->label('Hak Akses')
-                ->options(fn(Get $get): array => blank($get('user_id')) ? ['viewer' => 'Viewer'] : ['viewer' => 'Viewer', 'editor' => 'Editor'])
+                ->options(fn (Get $get): array => blank($get('user_id')) ? ['viewer' => 'Viewer'] : ['viewer' => 'Viewer', 'editor' => 'Editor'])
                 ->default('viewer')
-                ->dehydrateStateUsing(fn(string $state, Get $get): string => blank($get('user_id')) ? 'viewer' : $state)
+                ->dehydrateStateUsing(fn (string $state, Get $get): string => blank($get('user_id')) ? 'viewer' : $state)
                 ->required(),
             DatePicker::make('berlaku_mulai')
                 ->label('Mulai Berlaku')
@@ -126,9 +126,9 @@ class ShareBukuResource extends Resource
                 TextColumn::make('buku_kas.nama_buku')->label('Kas')->searchable(),
                 TextColumn::make('user.name')->label('Kolaborator')
                     ->placeholder('Publik — siapa pun dengan link')
-                    ->description(fn(ShareBuku $record): ?string => $record->user?->email),
+                    ->description(fn (ShareBuku $record): ?string => $record->user?->email),
                 TextColumn::make('privilege')->label('Akses')->badge(),
-                TextColumn::make('status')->badge()->state(fn(ShareBuku $record): string => match (true) {
+                TextColumn::make('status')->badge()->state(fn (ShareBuku $record): string => match (true) {
                     $record->berlaku_mulai?->isFuture() => 'Terjadwal',
                     $record->berlaku_sampai?->lte(now()) => 'Kedaluwarsa',
                     default => 'Aktif',
@@ -142,7 +142,7 @@ class ShareBukuResource extends Resource
                     ->icon('heroicon-o-clipboard-document')
                     ->button()
                     ->color('gray')
-                    ->visible(fn(ShareBuku $record): bool => filled($record->urlPublik()))
+                    ->visible(fn (ShareBuku $record): bool => filled($record->urlPublik()))
                     ->alpineClickHandler(function (ShareBuku $record): string {
                         $url = Js::from($record->urlPublik());
 
@@ -166,7 +166,7 @@ class ShareBukuResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereHas('buku_kas', fn(Builder $query): Builder => $query
+            ->whereHas('buku_kas', fn (Builder $query): Builder => $query
                 ->withoutGlobalScopes()
                 ->where('user_id', auth()->id()));
     }

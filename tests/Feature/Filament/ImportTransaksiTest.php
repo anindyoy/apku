@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Resources\ImportTransaksiResource;
 use App\Filament\Resources\ImportTransaksiResource\Pages\ListImportTransaksis;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Jobs\ProsesImportTransaksi;
@@ -449,6 +450,12 @@ test('file yang sama tidak dapat diimpor dua kali', function () {
         ->and($data['bukuKas']->fresh()->saldo)->toBe(100000);
 })->group('filament', 'import-transaksi');
 
+test('riwayat import disembunyikan dari navbar untuk semua peran', function (string $role) {
+    $this->actingAs(\App\Models\User::factory()->create(['role' => $role]));
+
+    expect(ImportTransaksiResource::shouldRegisterNavigation())->toBeFalse();
+})->with(['reguler', 'premium', 'admin']);
+
 test('halaman transaksi menyediakan aksi import dan riwayat import', function () {
     $data = siapkanDataImportTransaksi();
 
@@ -456,7 +463,10 @@ test('halaman transaksi menyediakan aksi import dan riwayat import', function ()
         ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertActionExists('Import Transaksi')
-        ->assertActionExists('Riwayat Import');
+        ->assertActionVisible('Riwayat Import')
+        ->assertActionHasUrl('Riwayat Import', ImportTransaksiResource::getUrl());
+
+    Livewire::test(ListImportTransaksis::class)->assertSuccessful();
 })->group('filament', 'import-transaksi');
 
 test('modal import menampilkan pemetaan dalam tiga kolom pada layar lebar', function () {
