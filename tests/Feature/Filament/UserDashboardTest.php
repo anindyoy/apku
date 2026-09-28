@@ -73,6 +73,25 @@ test('dashboard user menghitung sisa utang piutang dan tiga aktivitas terakhir',
     }
 });
 
+test('dashboard user mempertahankan bagian lain saat satu bagian tab gabungan disembunyikan', function () {
+    $user = User::factory()->create();
+    $page = Livewire::actingAs($user)->test(Dashboard::class);
+    $sections = $page->instance()->sections();
+    foreach ($sections as &$section) {
+        if (in_array($section['key'], ['dompet', 'piutang'], true)) {
+            $section['visible'] = false;
+        }
+    }
+    unset($section);
+
+    $page->call('saveSettings', $sections)->assertHasNoErrors();
+
+    expect($page->instance()->visibleTabs())->toMatchArray([
+        ['key' => 'kas-dompet', 'label' => 'Kas & Dompet', 'sections' => ['kas']],
+        ['key' => 'utang-piutang', 'label' => 'Utang & Piutang', 'sections' => ['utang']],
+    ]);
+});
+
 test('dashboard user menyimpan toggle dan urutan per akun melalui pengaturan', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
@@ -86,7 +105,7 @@ test('dashboard user menyimpan toggle dan urutan per akun melalui pengaturan', f
     expect($fresh->instance()->sections())->toBe($sections);
     $html = $fresh->html();
     expect($html)->not->toContain('wire:key="dashboard-transaksi"')
-        ->and(strpos($html, 'wire:key="dashboard-langganan"'))->toBeLessThan(strpos($html, 'wire:key="dashboard-kas"'));
+        ->and(strpos($html, 'wire:key="dashboard-langganan"'))->toBeLessThan(strpos($html, 'wire:key="dashboard-kas-dompet"'));
     $hidden = array_map(fn ($section) => [...$section, 'visible' => false], $sections);
     $fresh->call('saveSettings', $hidden)->assertHasNoErrors();
     expect($fresh->html())->not->toContain('role="tabpanel"', 'role="tablist"');
@@ -129,12 +148,13 @@ test('dashboard user memakai tab berikon dan panel selebar halaman', function ()
     $xpath = new DOMXPath($dom);
     $grid = $xpath->query('//div[contains(@class,"dashboard-tabs")]')->item(0);
     expect($grid)->not->toBeNull();
-    expect($xpath->query('./section', $grid)->length)->toBe(6);
+    expect($xpath->query('./section', $grid)->length)->toBe(4);
     $table = $xpath->query('./section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
     expect($table->getAttribute('class'))->toContain('dashboard-full-width');
     expect($table->getAttribute('class'))->toContain( '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
-    expect($xpath->query('.//*[@role="tab"]', $grid)->length)->toBe(6);
+    expect($xpath->query('.//*[@role="tab"]', $grid)->length)->toBe(4);
     expect($xpath->query('.//*[@role="tab" and @aria-selected="true"]', $grid)->length)->toBe(1);
+    expect($xpath->query('.//*[@role="tab"]', $grid)->item(0)->getAttribute('id'))->toBe('dashboard-tab-transaksi');
     expect(file_get_contents(resource_path('views/filament/pages/dashboard.blade.php')))->not->toContain('<style');
 });
 
@@ -149,11 +169,13 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
+    $card = $xpath->query('//section[@data-section="kas-dompet"]')->item(0);
+    expect($card->getAttribute('class'))->toContain('dashboard-card');
+    expect($xpath->query('//button[@id="dashboard-tab-kas-dompet"]/*[local-name()="svg"]')->length)->toBe(1);
     foreach (['kas' => 'Rp 100.000', 'dompet' => 'Rp 80.000'] as $key => $total) {
-        $card = $xpath->query('//section[@data-section="'.$key.'"]')->item(0);
-        expect($card->getAttribute('class'))->toContain('dashboard-card');
-        expect($xpath->query('//button[@id="dashboard-tab-'.$key.'"]/*[local-name()="svg"]')->length)->toBe(1);
-        expect(trim($xpath->query('.//p[contains(@class,"dashboard-amount")]', $card)->item(0)->textContent))->toBe($total);
+        $feature = $xpath->query('.//*[@data-dashboard-item="'.$key.'"]', $card)->item(0);
+        expect($feature)->not->toBeNull();
+        expect(trim($xpath->query('.//p[contains(@class,"dashboard-amount")]', $feature)->item(0)->textContent))->toBe($total);
     }
 });
 
@@ -164,14 +186,14 @@ test('dashboard user menghubungkan tab dengan panel dan mendukung navigasi keybo
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
     $panels = $xpath->query('//section[@role="tabpanel"]');
-    expect($panels->length)->toBe(6);
+    expect($panels->length)->toBe(4);
     foreach ($panels as $panel) {
         $key = $panel->getAttribute('data-section');
         $tab = $xpath->query('//button[@id="'.$panel->getAttribute('aria-labelledby').'"]')->item(0);
         expect($tab->getAttribute('aria-controls'))->toBe($panel->getAttribute('id'))
-            ->and($tab->getAttribute('tabindex'))->toBe($key === 'kas' ? '0' : '-1')
+            ->and($tab->getAttribute('tabindex'))->toBe($key === 'transaksi' ? '0' : '-1')
             ->and($panel->getAttribute('x-show'))->toBe("activeTab === '$key'")
-            ->and($panel->hasAttribute('x-cloak'))->toBe($key !== 'kas');
+            ->and($panel->hasAttribute('x-cloak'))->toBe($key !== 'transaksi');
     }
     $handler = $xpath->query('//*[@role="tablist"]')->item(0)->getAttribute('x-on:keydown');
     $script = <<<'JS'
@@ -179,11 +201,11 @@ test('dashboard user menghubungkan tab dengan panel dan mendukung navigasi keybo
         const handler = new Function('$event', '$el', process.argv[1]);
         let active = 0;
         let focused = 0;
-        const tabs = Array.from({length: 6}, (_, index) => ({
+        const tabs = Array.from({length: 4}, (_, index) => ({
             focus() { focused = index; }, click() { active = index; }
         }));
         const el = { querySelectorAll() { return tabs; } };
-        for (const [key, expected] of [['ArrowLeft', 5], ['ArrowRight', 0], ['End', 5], ['Home', 0], ['ArrowRight', 1]]) {
+        for (const [key, expected] of [['ArrowLeft', 3], ['ArrowRight', 0], ['End', 3], ['Home', 0], ['ArrowRight', 1]]) {
             let prevented = false;
             handler({key, target: tabs[active], preventDefault() { prevented = true; }}, el);
             assert.equal(active, expected);
@@ -281,14 +303,21 @@ test('dashboard user tombol kelola menuju resource setiap kartu selain transaksi
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$page->html());
     $xpath = new DOMXPath($dom);
     $resources = [
-        'kas' => BukuKasResource::class,
-        'dompet' => DompetResource::class,
-        'utang' => UtangResource::class,
-        'piutang' => PiutangResource::class,
         'langganan' => LanggananResource::class,
     ];
     foreach ($resources as $key => $resource) {
         $links = $xpath->query('//section[@data-section="'.$key.'"]//a[normalize-space(.)="Kelola"]');
+        expect($links->length)->toBe(1);
+        expect($links->item(0)->getAttribute('href'))->toBe($resource::getUrl('index'));
+    }
+    $resources = [
+        'kas' => BukuKasResource::class,
+        'dompet' => DompetResource::class,
+        'utang' => UtangResource::class,
+        'piutang' => PiutangResource::class,
+    ];
+    foreach ($resources as $key => $resource) {
+        $links = $xpath->query('//section[@data-section="kas-dompet" or @data-section="utang-piutang"]//*[@data-dashboard-item="'.$key.'"]//a[normalize-space(.)="Kelola"]');
         expect($links->length)->toBe(1);
         expect($links->item(0)->getAttribute('href'))->toBe($resource::getUrl('index'));
     }

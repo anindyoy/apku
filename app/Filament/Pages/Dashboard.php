@@ -35,12 +35,19 @@ class Dashboard extends BaseDashboard implements HasTable
     protected string $view = 'filament.pages.dashboard';
 
     public const SECTIONS = [
+        'transaksi' => '5 transaksi terakhir',
         'kas' => 'Kas saya',
         'dompet' => 'Dompet saya',
         'utang' => 'Utang',
         'piutang' => 'Piutang',
         'langganan' => 'Masa aktif langganan',
-        'transaksi' => '5 transaksi terakhir',
+    ];
+
+    private const SECTION_GROUPS = [
+        'transaksi' => ['label' => '5 transaksi terakhir', 'sections' => ['transaksi']],
+        'kas-dompet' => ['label' => 'Kas & Dompet', 'sections' => ['kas', 'dompet']],
+        'utang-piutang' => ['label' => 'Utang & Piutang', 'sections' => ['utang', 'piutang']],
+        'langganan' => ['label' => 'Masa aktif langganan', 'sections' => ['langganan']],
     ];
 
     public function getTitle(): string|Htmlable
@@ -72,6 +79,26 @@ class Dashboard extends BaseDashboard implements HasTable
         }
 
         return array_values($sections);
+    }
+
+    public function visibleTabs(): array
+    {
+        $visibleSections = array_values(array_filter($this->sections(), fn ($section) => $section['visible']));
+        $tabs = [];
+
+        foreach ($visibleSections as $section) {
+            foreach (self::SECTION_GROUPS as $key => $group) {
+                if (! in_array($section['key'], $group['sections'], true)) {
+                    continue;
+                }
+
+                $tabs[$key] ??= ['key' => $key, 'label' => $group['label'], 'sections' => []];
+                $tabs[$key]['sections'][] = $section['key'];
+                break;
+            }
+        }
+
+        return array_values($tabs);
     }
 
     protected function getHeaderActions(): array

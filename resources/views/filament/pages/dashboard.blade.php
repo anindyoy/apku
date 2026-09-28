@@ -4,15 +4,13 @@
         {{ $this->content }}
     @else
         @php
-            $sections = array_values(array_filter($this->sections(), fn ($section) => $section['visible']));
+            $sections = $this->visibleTabs();
             $firstTab = $sections[0]['key'] ?? null;
             $icons = [
-                'kas' => 'heroicon-o-banknotes',
-                'dompet' => 'heroicon-o-wallet',
-                'utang' => 'heroicon-o-arrow-up-right',
-                'piutang' => 'heroicon-o-arrow-down-left',
-                'langganan' => 'heroicon-o-sparkles',
                 'transaksi' => 'heroicon-o-arrows-right-left',
+                'kas-dompet' => 'heroicon-o-wallet',
+                'utang-piutang' => 'heroicon-o-arrows-right-left',
+                'langganan' => 'heroicon-o-sparkles',
             ];
         @endphp
         <div
@@ -51,7 +49,7 @@
                                 class="inline-flex shrink-0 items-center justify-center gap-2 rounded-t-lg border-b-2 border-transparent px-4 py-3 text-slate-500 hover:border-slate-300 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-600 [&[aria-selected=true]]:border-teal-600 [&[aria-selected=true]]:text-teal-600 [&:is(.dark_*)]:text-slate-400 [&:is(.dark_*)]:hover:text-slate-200 [&:is(.dark_*)[aria-selected=true]]:border-teal-400 [&:is(.dark_*)[aria-selected=true]]:text-teal-400"
                             >
                                 <x-filament::icon :icon="$icons[$section['key']]" class="size-4 shrink-0" aria-hidden="true" />
-                                {{ \App\Filament\Pages\Dashboard::SECTIONS[$section['key']] }}
+                                {{ $section['label'] }}
                             </button>
                         @endforeach
                     </div>
@@ -60,15 +58,7 @@
             @forelse ($sections as $section)
                 @php
                     $key = $section['key'];
-                    $data = $this->sectionData($key);
-                    $manageUrl = match ($key) {
-                        'kas' => \App\Filament\Resources\BukuKasResource::getUrl('index'),
-                        'dompet' => \App\Filament\Resources\DompetResource::getUrl('index'),
-                        'utang' => \App\Filament\Resources\UtangResource::getUrl('index'),
-                        'piutang' => \App\Filament\Resources\PiutangResource::getUrl('index'),
-                        'langganan' => \App\Filament\Resources\LanggananResource::getUrl('index'),
-                        default => null,
-                    };
+                    $items = $section['sections'];
                 @endphp
                 <section
                     id="dashboard-panel-{{ $key }}"
@@ -81,31 +71,49 @@
                     @if ($key !== $firstTab) x-cloak @endif
                     @class([
                         'dashboard-card min-w-0 rounded-lg bg-white p-4 ring-1 ring-slate-200 [--accent:#f59e0b] [&:is(.dark_*)]:bg-gray-900 [&:is(.dark_*)]:ring-slate-700',
-                        'dashboard-full-width [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2 [&_.fi-ta-header-toolbar]:!py-2 [&_.fi-ta-table-stacked-header-cell]:!py-2 [&_.fi-pagination]:!py-2' => $key === 'transaksi',
+                        'dashboard-full-width [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2 [&_.fi-ta-header-toolbar]:!py-2 [&_.fi-ta-table-stacked-header-cell]:!py-2 [&_.fi-pagination]:!py-2' => in_array('transaksi', $items, true),
                     ])
                 >
-                    @if ($key === 'transaksi')
+                    <div @class(['grid gap-5', 'sm:grid-cols-2' => count($items) > 1])>
+                        @foreach ($items as $itemKey)
+                            @php
+                                $data = $this->sectionData($itemKey);
+                                $manageUrl = match ($itemKey) {
+                        'kas' => \App\Filament\Resources\BukuKasResource::getUrl('index'),
+                        'dompet' => \App\Filament\Resources\DompetResource::getUrl('index'),
+                        'utang' => \App\Filament\Resources\UtangResource::getUrl('index'),
+                        'piutang' => \App\Filament\Resources\PiutangResource::getUrl('index'),
+                        'langganan' => \App\Filament\Resources\LanggananResource::getUrl('index'),
+                        default => null,
+                    };
+                                $itemLabel = \App\Filament\Pages\Dashboard::SECTIONS[$itemKey];
+                            @endphp
+                            <div class="dashboard-feature min-w-0" data-dashboard-item="{{ $itemKey }}">
+                                @if (count($items) > 1)
+                                    <h2 class="mb-2 text-sm font-semibold text-slate-700 [&:is(.dark_*)]:text-slate-200">{{ $itemLabel }}</h2>
+                                @endif
+                                @if ($itemKey === 'transaksi')
                         <div class="dashboard-actions mb-2 flex flex-wrap justify-end gap-2">
                             {{ $this->tambahTransaksiAction }}
                             <x-filament::button tag="a" :href="\App\Filament\Resources\TransaksiResource::getUrl()" color="gray" icon="heroicon-o-arrow-top-right-on-square">Lihat lengkap</x-filament::button>
                         </div>
                         {{ $this->table }}
-                    @elseif (in_array($key, ['kas', 'dompet']))
-                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total saldo {{ $key }}</p>
+                    @elseif (in_array($itemKey, ['kas', 'dompet']))
+                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total saldo {{ $itemKey }}</p>
                         <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $data->sum('saldo'), 0, ',', '.') }}</p>
-                        <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Tersebar di {{ $data->count() }} {{ $key }}</p>
+                        <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Tersebar di {{ $data->count() }} {{ $itemKey }}</p>
                         <dl class="dashboard-list mt-3">
                             @forelse ($data as $item)
                                 <div class="dashboard-row flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[color:var(--dash-line)] py-2 last:border-b-0 last:pb-0 [&_dt]:min-w-0 [&_dt]:flex-[1_1_7rem] [&_dt]:text-sm [&_dt]:font-medium [&_dt]:[overflow-wrap:anywhere] [&_dd]:max-w-full [&_dd]:text-sm [&_dd]:font-[650] [&_dd]:tabular-nums [&_dd]:[overflow-wrap:anywhere] [&_.dashboard-caption]:text-[.7rem] [&_.dashboard-caption]:font-normal">
-                                    <dt>{{ $key === 'kas' ? $item->nama_buku : $item->nama_dompet }}</dt>
+                                    <dt>{{ $itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet }}</dt>
                                     <dd>Rp {{ number_format((float) $item->saldo, 0, ',', '.') }}</dd>
                                 </div>
                             @empty
-                                <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $key }}.</p>
+                                <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $itemKey }}.</p>
                             @endforelse
                         </dl>
-                    @elseif (in_array($key, ['utang', 'piutang']))
-                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total sisa {{ $key }}</p><p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $data['total'], 0, ',', '.') }}</p>
+                    @elseif (in_array($itemKey, ['utang', 'piutang']))
+                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total sisa {{ $itemKey }}</p><p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $data['total'], 0, ',', '.') }}</p>
                         <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">3 catatan dengan aktivitas terbaru</p>
                         <dl class="dashboard-list mt-3">
                             @forelse ($data['latest'] as $item)
@@ -117,10 +125,10 @@
                                     <dd>Rp {{ number_format((float) $item->nominal, 0, ',', '.') }}</dd>
                                 </div>
                             @empty
-                                <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $key }}.</p>
+                                <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $itemKey }}.</p>
                             @endforelse
                         </dl>
-                    @elseif ($key === 'langganan')
+                    @elseif ($itemKey === 'langganan')
                         <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Langganan Anda</p><p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere] dashboard-membership rounded-lg bg-[linear-gradient(135deg,color-mix(in_srgb,var(--accent)_12%,transparent),var(--dash-bg))] p-3">{{ $data['active'] ? 'Premium aktif' : 'Reguler' }}</p>
                         @if ($data['active'])
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Aktif sampai {{ $data['expires'] }} · {{ $data['days'] === 0 ? 'Berakhir hari ini' : $data['days'].' hari tersisa' }}</p>
@@ -129,12 +137,15 @@
                         @else
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Belum memiliki langganan premium aktif.</p>
                         @endif
-                    @endif
-                    @if ($manageUrl)
-                        <div class="dashboard-footer mt-3 border-t border-[color:var(--dash-line)] pt-3">
-                            <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.\App\Filament\Pages\Dashboard::SECTIONS[$key]">Kelola</x-filament::button>
-                        </div>
-                    @endif
+                                @endif
+                                @if ($manageUrl)
+                                    <div class="dashboard-footer mt-3 border-t border-[color:var(--dash-line)] pt-3">
+                                        <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.$itemLabel">Kelola</x-filament::button>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </section>
             @empty
                 <x-filament::section heading="Dashboard disembunyikan" compact class="dashboard-full-width col-span-full">
