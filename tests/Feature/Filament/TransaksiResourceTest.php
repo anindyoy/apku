@@ -156,6 +156,13 @@ test('header transaksi mengikuti visibilitas responsif isi kolom', function () {
     const visible = declarations.filter(([selector]) => selector.includes('fi-visible'));
     assert.deepEqual(hidden.map(([, ...values]) => values), [['none', true, '(min-width: 768px)']]);
     assert.deepEqual(visible.map(([, ...values]) => values), [['none', true, null], ['table-cell', true, '(min-width: 768px)']]);
+    const cellSpacing = [];
+    result.root.walkRules(rule => {
+        if (rule.selector.includes('.fi-ta-cell') && !rule.selector.includes(':')) {
+            rule.walkDecls(/padding-(top|bottom)/, decl => cellSpacing.push([decl.prop, decl.value, decl.important]));
+        }
+    });
+    assert.deepEqual(cellSpacing, [['padding-top', '0.5rem', true], ['padding-bottom', '0.5rem', true]]);
     JS;
     $process = new \Symfony\Component\Process\Process(['node', '--input-type=module'], base_path());
     $process->setInput($script)->run();

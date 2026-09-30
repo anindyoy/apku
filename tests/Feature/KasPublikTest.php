@@ -72,6 +72,7 @@ test('kas publik menyajikan transaksi dan ringkasan tanpa login dengan isolasi d
         ->assertHeader('Referrer-Policy', 'no-referrer');
     expect($response->getContent())->toContain('Iuran warga', '&lt;script&gt;', 'data-public-transaksi-mobile', 'public-mobile-amount')
         ->not->toContain('Transaksi rahasia', 'Kas rahasia', 'Dompet rahasia', $owner->email, '<script>alert(1)</script>', 'Bulan sebelumnya');
+    expect($response->getContent())->toContain('tbody td { padding: 8px 22px; }', 'tbody td.mobile-cell { display: block; padding: 11px 14px 2px;');
     expect($response->headers->get('Cache-Control'))->toContain('no-store');
     $this->assertGuest();
 

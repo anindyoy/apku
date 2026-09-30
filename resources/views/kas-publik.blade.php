@@ -32,6 +32,7 @@
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 16px 22px; border-top: 1px solid #e4ebe7; vertical-align: top; }
+        tbody td { padding: 8px 22px; }
         th { background: #f8faf9; font-size: 12px; color: #5a6d68; }
         td p { margin: 6px 0 0; overflow-wrap: anywhere; }
         .number { text-align: right; white-space: nowrap; }
@@ -63,7 +64,7 @@
             thead, .desktop-cell { display: none; }
             tbody tr { border-top: 1px solid #e4ebe7; }
             tbody tr:first-child { border-top: 0; }
-            .mobile-cell { display: block; padding: 11px 14px; border-top: 0; }
+            tbody td.mobile-cell { display: block; padding: 11px 14px 2px; border-top: 0; }
             tbody tr > td[colspan] { display: block; padding: 14px; border-top: 0; }
         }
     </style>

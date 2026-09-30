@@ -13,15 +13,13 @@
 .fi-ta-header-cell,
 .fi-ta-header-toolbar,
 .fi-ta-table-stacked-header-cell,
-.fi-pagination {
+.fi-pagination,
+.fi-ta-cell {
     @apply !py-2;
 }
 
-@media (min-width: 640px) {
-    .fi-ta-text:not(.fi-inline),
-    .fi-ta-cell:has(.fi-ta-actions) {
-        @apply !py-2;
-    }
+.fi-ta-text:not(.fi-inline) {
+    @apply !py-0;
 }
 
 /* Aksi kartu mengikuti lebar kartu, termasuk saat subnavigasi mempersempit daftar. */
@@ -72,7 +70,7 @@
 /* Ringkasan transaksi pada tabel bertumpuk di layar kecil. */
 @media (max-width: 639px) {
     .fi-ta-table-stacked-on-mobile .fi-ta-cell:has([data-transaksi-mobile]) {
-        padding: 11px 14px 2px;
+        padding: 11px 14px 2px !important;
     }
 
     .fi-ta-table-stacked-on-mobile .fi-ta-cell:has([data-transaksi-mobile]) .fi-ta-cell-label {
@@ -89,7 +87,7 @@
     }
 
     .fi-ta-table-stacked-on-mobile tr:has([data-transaksi-mobile]) > .fi-ta-cell:has(.fi-ta-actions) {
-        padding: 2px 14px 10px;
+        padding: 2px 14px 10px !important;
     }
 
     .fi-ta-table-stacked-on-mobile tr:has([data-transaksi-mobile]) .fi-ta-actions {

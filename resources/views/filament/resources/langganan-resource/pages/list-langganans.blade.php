@@ -7,7 +7,7 @@
             .plan-comparison .plan-table-wrap { margin-top: 1.25rem; overflow-x: auto; border: 1px solid var(--plan-border); border-radius: 1rem; background: var(--plan-surface); }
             .plan-comparison table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: .875rem; line-height: 1.5; }
             .plan-comparison caption { text-align: left; padding: 1rem; font-weight: 600; }
-            .plan-comparison th, .plan-comparison td { padding: 1rem; border-top: 1px solid var(--plan-border); vertical-align: top; overflow-wrap: anywhere; }
+            .plan-comparison th, .plan-comparison td { padding: .5rem 1rem; border-top: 1px solid var(--plan-border); vertical-align: top; overflow-wrap: anywhere; }
             .plan-comparison th { text-align: left; font-weight: 600; }
             .plan-comparison thead th { font-size: 1rem; }
             .plan-comparison thead th:first-child { width: 40%; }
@@ -23,7 +23,7 @@
             .plan-comparison .plan-unavailable svg { color: #dc2626; }
             .dark .plan-comparison .plan-unavailable svg { color: #f87171; }
             @media (max-width: 640px) {
-                .plan-comparison th, .plan-comparison td { padding: .75rem .5rem; }
+                .plan-comparison th, .plan-comparison td { padding: .5rem .5rem; }
                 .plan-comparison table { font-size: .75rem; }
                 .plan-comparison thead th { font-size: .875rem; }
                 .plan-comparison .plan-status { flex-wrap: wrap; }

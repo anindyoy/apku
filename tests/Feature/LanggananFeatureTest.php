@@ -250,6 +250,7 @@ test('tabel perbandingan akun langganan sesuai batasan dan tersembunyi bagi admi
 
     if ($role === 'user') {
         $table = $tables->item(0);
+        expect($component->html())->toContain('.plan-comparison th, .plan-comparison td { padding: .5rem 1rem;');
         expect($xpath->query('.//thead//th[@scope="col"]', $table))->toHaveCount(3);
         expect($xpath->query('.//tbody/tr', $table))->toHaveCount(9);
         expect($table->textContent)->not->toContain(
