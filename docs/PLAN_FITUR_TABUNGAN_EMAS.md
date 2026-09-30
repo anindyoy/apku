@@ -397,7 +397,7 @@ Tambahkan pengujian terarah untuk perilaku berikut:
 - Cache mencegah pemanggilan API berulang.
 - Snapshot lama diberi status kedaluwarsa/cache.
 - Harga manual digunakan jika API dan snapshot tidak tersedia.
-- Smoke test endpoint publik berjalan terjadwal setiap enam jam dan memeriksa status HTTP, tipe konten, waktu respons, struktur JSON, harga buyback IDR positif, serta kesegaran tanggal harga.
+- Smoke test endpoint publik berjalan terjadwal setiap hari dan memeriksa status HTTP, tipe konten, waktu respons, struktur JSON, harga buyback IDR positif, serta kesegaran tanggal harga. Kegagalan pemantauan mengirim notifikasi melalui Telegram jika kredensial tersedia.
 
 ### Otorisasi
 

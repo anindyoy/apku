@@ -70,7 +70,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Modal emas mencakup harga dasar, biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
 - Pengguna dapat mengambil harga buyback emas dari endpoint publik, menggunakan snapshot terakhir ketika layanan gagal, atau menyimpan harga manual privat untuk kas terkait.
 - Admin dapat mengubah URL API, URL sumber, timeout (1–60 detik), dan durasi cache harga emas (1–168 jam) melalui Setting. Nilai disimpan di database dan berlaku global; kolom kosong mengikuti default `services.harga_emas`. Perubahan pengaturan membatalkan cache harga terkait dan digunakan pada permintaan berikutnya.
-- Kestabilan endpoint harga emas dipantau setiap enam jam melalui smoke test terpisah yang memvalidasi ketersediaan, waktu respons, struktur data, dan kesegaran harga buyback.
+- Kestabilan endpoint harga emas dipantau setiap hari oleh scheduler Laravel melalui command `harga-emas:pantau`, yang memvalidasi ketersediaan, waktu respons, struktur data, dan kesegaran harga buyback. Kegagalan pemantauan mengirim notifikasi melalui Telegram jika kredensial tersedia. Workflow GitHub Actions tetap dapat dijalankan manual untuk smoke test endpoint.
 - Setelah pemantauan berhasil, workflow menghapus run sukses sebelumnya agar daftar GitHub Actions tidak menumpuk. Run terbaru dan seluruh run gagal tetap disimpan; kegagalan pembersihan tidak menggagalkan hasil pemantauan.
 - Kas yang masih memiliki emas hanya dapat dihapus setelah tabungan emasnya ikut dipindahkan ke kas lain milik pengguna yang sama.
 - Tanggal pembelian tabungan emas menggunakan `created_at` dan tidak boleh di masa depan. Total gram per kas tetap menghitung seluruh tabungan dalam kas saat pencarian atau pergantian halaman.

@@ -2,7 +2,7 @@
 
 test('harga_emas_endpoint_publik_stabil_dan_memuat_buyback_valid', function () {
     if (getenv('RUN_EXTERNAL_GOLD_API_TEST') !== '1') {
-        $this->markTestSkipped('Smoke test endpoint eksternal hanya dijalankan oleh monitor terjadwal.');
+        $this->markTestSkipped('Smoke test endpoint eksternal hanya dijalankan secara manual.');
     }
 
     $url = getenv('HARGA_EMAS_URL') ?: 'https://logam-mulia-api.iamutaki.workers.dev/api/prices/anekalogam';
