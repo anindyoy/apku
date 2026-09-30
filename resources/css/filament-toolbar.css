@@ -1,6 +1,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Padatkan isi kartu utang dan piutang hanya pada layar mobile. */
+.utang-piutang-compact .fi-ta-table-stacked-on-mobile > tbody > tr > .fi-ta-cell {
+    @apply max-sm:!py-1;
+}
+
+.utang-piutang-compact .fi-ta-table-stacked-on-mobile .fi-ta-cell-label {
+    @apply max-sm:!pt-0;
+}
+
+.utang-piutang-compact .fi-ta-table-stacked-on-mobile .fi-ta-icon {
+    @apply max-sm:!py-0;
+}
+
 /* Header tabel bertumpuk harus mengikuti breakpoint yang sama dengan sel datanya. */
 .fi-ta-table.fi-ta-table-stacked-on-mobile > thead > tr > .fi-ta-header-cell.md\:fi-hidden {
     @apply md:!hidden;

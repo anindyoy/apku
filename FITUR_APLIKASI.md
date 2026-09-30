@@ -252,6 +252,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Ringkasan saldo awal, total pemasukan, total pengeluaran, akumulasi, dan saldo akhir.
 - Ringkasan pemasukan dan pengeluaran per aktivitas beserta persentasenya.
 - Tab aktivitas yang mengelompokkan rincian transaksi pemasukan dan pengeluaran berdasarkan aktivitas dalam daftar yang dapat dibuka dan ditutup, dengan rincian tertutup secara default.
+- Data laporan dimuat otomatis setelah halaman dan filter tampil; query transaksi serta perhitungan ringkasan ditunda hingga permintaan berikutnya. Indikator Memuat laporan... tampil sejak halaman dibuka sampai data tersedia.
 - Indikator loading ditampilkan rata kiri pada baris tersendiri di bawah tab dan di atas isi laporan ketika memproses perubahan filter, periode, tab, navigasi, atau ekspor.
 - Rincian transaksi pada periode yang dipilih.
 - Navigasi ke periode sebelum atau sesudah periode aktif.

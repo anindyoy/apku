@@ -41,6 +41,8 @@ class PiutangResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->stackedOnMobile()
+            ->extraAttributes(['class' => 'utang-piutang-compact'])
             ->modifyQueryUsing(
                 fn (Builder $query) => $query->piutang()
                     ->selectRawNominalAndLastActivityDate()
