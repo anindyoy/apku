@@ -57,6 +57,7 @@ class TabunganEmasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->stackedOnMobile()
             ->columns([
                 TextColumn::make('label')->label('Label emas')->searchable(),
                 TextColumn::make('berat_gram')->label('Berat')->suffix(' gram')->formatStateUsing(fn ($state): string => rtrim(rtrim(number_format((float) $state, 4, ',', '.'), '0'), ',')),

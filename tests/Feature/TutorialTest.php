@@ -6,6 +6,19 @@ use Filament\Livewire\Topbar;
 use Livewire\Livewire;
 use Symfony\Component\Process\Process;
 
+test('tutorial emas menjelaskan kartu mobile dan tabel desktop', function () {
+    $response = $this->get(route('tutorial', ['q' => 'Tabungan emas']))->assertOk();
+    $topic = collect($response->viewData('topics'))->firstWhere('id', 'emas');
+    expect($topic['intro'])->toContain('kartu', 'label emas, berat, harga beli, keterangan', 'Dibeli pada', 'hak akses', 'desktop', 'tabel', 'total berat per kas');
+});
+
+test('tutorial kolaborator menjelaskan kartu dan aksi link publik', function () {
+    $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+    expect($topics['kolaborasi']['intro'])->toContain('card', 'satu kolom', 'hak akses', 'tanggal Mulai dan Berlaku hingga');
+    expect(implode(' ', $topics['kolaborasi']['steps']))->toContain('aksi pada card kolaborator');
+    expect(implode(' ', $topics['kas-publik']['steps']))->toContain('Salin link pada card kolaborator publik');
+});
+
 test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
     expect($topik['transaksi']['intro'])->toContain('Tipe (ikon jenis transaksi), Tanggal, Kas, Aktivitas, lalu Nominal', 'Pencarian Transaksi', 'Dashboard', 'layar kecil');

@@ -21,6 +21,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -122,19 +123,23 @@ class ShareBukuResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
-                TextColumn::make('buku_kas.nama_buku')->label('Kas')->searchable(),
-                TextColumn::make('user.name')->label('Kolaborator')
-                    ->placeholder('Publik — siapa pun dengan link')
-                    ->description(fn (ShareBuku $record): ?string => $record->user?->email),
-                TextColumn::make('privilege')->label('Akses')->badge(),
-                TextColumn::make('status')->badge()->state(fn (ShareBuku $record): string => match (true) {
-                    $record->berlaku_mulai?->isFuture() => 'Terjadwal',
-                    $record->berlaku_sampai?->lte(now()) => 'Kedaluwarsa',
-                    default => 'Aktif',
-                }),
-                TextColumn::make('berlaku_mulai')->label('Mulai')->dateTime('d M Y'),
-                TextColumn::make('berlaku_sampai')->label('Berakhir')->dateTime('d M Y')->placeholder('Tanpa batas'),
+                Stack::make([
+                    TextColumn::make('buku_kas.nama_buku')->label('Kas')->searchable()->weight('bold')->size('lg')->wrap(),
+                    TextColumn::make('user.name')->label('Kolaborator')
+                        ->wrap()
+                        ->placeholder('Publik — siapa pun dengan link')
+                        ->description(fn (ShareBuku $record): ?string => $record->user?->email),
+                    TextColumn::make('privilege')->label('Akses')->prefix('Akses: ')->badge(),
+                    TextColumn::make('status')->prefix('Status: ')->badge()->state(fn (ShareBuku $record): string => match (true) {
+                        $record->berlaku_mulai?->isFuture() => 'Terjadwal',
+                        $record->berlaku_sampai?->lte(now()) => 'Kedaluwarsa',
+                        default => 'Aktif',
+                    }),
+                    TextColumn::make('berlaku_mulai')->label('Mulai')->prefix('Mulai: ')->dateTime('d M Y'),
+                    TextColumn::make('berlaku_sampai')->label('Berlaku hingga')->prefix('Berlaku hingga: ')->dateTime('d M Y')->placeholder('Berlaku hingga: -'),
+                ])->space(3),
             ])
             ->actions([
                 Action::make('salinLinkPublik')

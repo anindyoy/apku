@@ -10,6 +10,38 @@ use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
+test('share buku menampilkan kartu responsif beserta informasi dan aksi kolaborator', function () {
+    $owner = createRegularUserWithBukuKas();
+    $kas = $owner->buku_kas()->first();
+    $member = User::factory()->create();
+    $private = ShareBuku::factory()->create([
+        'buku_kas_id' => $kas->id, 'user_id' => $member->id,
+        'privilege' => 'editor', 'berlaku_mulai' => today()->subDay(), 'berlaku_sampai' => null,
+    ]);
+    $public = ShareBuku::factory()->create([
+        'buku_kas_id' => $kas->id, 'user_id' => null,
+        'privilege' => 'viewer', 'berlaku_mulai' => today()->addDay(), 'berlaku_sampai' => today()->addDays(3),
+    ]);
+
+    $component = Livewire::actingAs($owner)->test(ListShareBukus::class)
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$private, $public])
+        ->assertTableActionVisible('edit', $private)
+        ->assertTableActionVisible('delete', $private)
+        ->assertTableActionHidden('salinLinkPublik', $private)
+        ->assertTableActionVisible('salinLinkPublik', $public);
+
+    expect($component->instance()->getTable()->getContentGrid())->toBe(['default' => 1, 'md' => 2, 'xl' => 3]);
+    $document = new DOMDocument;
+    @$document->loadHTML($component->html());
+    $xpath = new DOMXPath($document);
+    $cards = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " fi-ta-record ")]');
+    expect($cards)->toHaveCount(2);
+    $text = $document->textContent;
+    expect($text)->toContain($kas->nama_buku, $member->name, $member->email, 'Publik', 'editor', 'viewer', 'Aktif', 'Terjadwal', 'Mulai:', 'Berlaku hingga:', 'Berlaku hingga: -');
+    $component->searchTable('kas-tidak-ditemukan')->assertCanNotSeeTableRecords([$private, $public]);
+});
+
 test('share buku hanya mengizinkan pembuatan selama premium aktif', function (?int $days, string $role, bool $allowed) {
     $user = User::factory()->create([
         'role' => $role,

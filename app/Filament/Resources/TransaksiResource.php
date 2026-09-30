@@ -57,10 +57,7 @@ class TransaksiResource extends Resource
             ->recordAction(null)
             ->filters([
             ])
-            ->actions(static::transactionActions())
-            ->bulkActions([
-                // DeleteBulkAction::make(),
-            ]);
+            ->actions(static::transactionActions());
     }
 
     public static function queryDenganSaldo(Builder $query): Builder

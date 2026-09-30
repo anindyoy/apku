@@ -258,6 +258,24 @@ test('edit label tabungan emas mempertahankan berat dan histori', function () {
         ->and($data['tabungan']->transaksiEmas()->count())->toBe(1);
 })->group('tabungan-emas', 'filament-emas');
 
+test('tabungan emas menampilkan kartu mobile dengan informasi lengkap dan aksi pemilik', function () {
+    $data = siapkanAkunTabunganEmas();
+    $page = Livewire::actingAs($data['user'])->test(ListTabunganEmas::class)
+        ->assertSuccessful()
+        ->assertTableActionVisible('edit', $data['tabungan'])
+        ->assertTableActionVisible('saldoAwal', $data['tabungan']);
+
+    $document = new DOMDocument;
+    @$document->loadHTML($page->html());
+    $xpath = new DOMXPath($document);
+    $tables = $xpath->query('//table[contains(concat(" ", normalize-space(@class), " "), " fi-ta-table-stacked-on-mobile ")]');
+    expect($tables)->toHaveCount(1);
+    $labels = $xpath->query('.//div[@class="fi-ta-cell-label"]', $tables->item(0));
+    expect(array_map(fn ($label) => trim($label->textContent), iterator_to_array($labels)))
+        ->toBe(['Label emas', 'Berat', 'Harga beli', 'Keterangan', 'Dibeli pada']);
+    expect($xpath->query('.//thead//th', $tables->item(0))->length)->toBeGreaterThanOrEqual(5);
+});
+
 test('tabel tabungan emas menampilkan tanggal dan berat tanpa nol desimal berlebih serta grup kas', function () {
     $data = siapkanAkunTabunganEmas();
     $records = collect(['1.0000', '0.5000', '1.2500', '0.0001', '1000.0000'])->map(
