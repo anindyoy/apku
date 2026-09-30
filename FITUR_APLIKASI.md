@@ -29,6 +29,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Saldo per baris pada daftar transaksi mengikuti saldo kas dan dompet tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
 - Filter periode, kas, dan dompet pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
+- Pada layar desktop, header dan isi tabel Transaksi, Pencarian Transaksi, serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Kas, Aktivitas, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.
 - Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, aktivitas, dan tanggal secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
@@ -186,7 +187,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Menampilkan saldo berjalan untuk kas atau dompet yang sedang dipilih.
 - Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer dompet berwarna kuning.
 - Nama aktivitas pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
-- Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal, sedangkan dompet ditampilkan di bawah kas. Saat filter kas atau dompet aktif, saldo berjalan ditampilkan di bawah nominal.
+- Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal hanya pada kas yang sedang atau pernah dikolaborasikan dengan akun lain (termasuk setelah kedaluwarsa atau dicabut, tidak termasuk tautan publik), sedangkan dompet ditampilkan di bawah kas. Saat filter kas atau dompet aktif, saldo berjalan ditampilkan di bawah nominal.
 - Filter transaksi berdasarkan bulan, tahun, kas, dan dompet; pilihan bulan dan tahun dibuat lebih ringkas, chevron filter lebih jelas, dan tombol reset sejajar di kanan ketika ruang tersedia.
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
@@ -206,7 +207,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 - Mencari transaksi berdasarkan deskripsi, aktivitas, kas, dompet, tipe transaksi, nominal, atau pengguna.
 - Memfilter hasil berdasarkan jenis transaksi, kas, dan dompet.
-- Hasil pencarian memakai lima kolom dan format yang sama seperti daftar transaksi: pencatat berada di bawah tanggal, dompet di bawah kas, serta deskripsi di bawah aktivitas.
+- Hasil pencarian memakai lima kolom dan format yang sama seperti daftar transaksi: pencatat berada di bawah tanggal hanya untuk kas dengan riwayat kolaborasi akun lain, dompet di bawah kas, serta deskripsi di bawah aktivitas.
 - Menampilkan tipe transaksi dan warna teks hasil sesuai tipe tersebut dengan pola yang sama seperti daftar transaksi.
 - Pengguna dapat mengubah atau menghapus transaksi yang dapat dikelolanya langsung dari hasil pencarian.
 - Menampilkan pengguna pemilik transaksi khusus untuk admin.
@@ -317,7 +318,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Menampilkan seluruh kas dan dompet milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Panel juga menampilkan total saldo dan jumlah kas atau dompet, dengan ikon pada tab dan dukungan tema gelap.
 - Menampilkan total sisa utang dan piutang setelah pembayaran, masing-masing disertai tiga catatan dengan aktivitas terbaru.
 - Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.
-- Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat, kas dan dompet, aktivitas dan deskripsi, serta nominal.
+- Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat (hanya kas dengan riwayat kolaborasi akun lain), kas dan dompet, aktivitas dan deskripsi, serta nominal.
 - Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian individual serta mengubah urutannya dengan geser atau tombol urutan. Kas/dompet dan utang/piutang menjadi satu tab jika keduanya ditampilkan; tab gabungan tetap tersedia saat hanya salah satu bagiannya ditampilkan. Secara default, tab Transaksi muncul dan dibuka pertama; urutan yang telah diatur pengguna tetap dipakai.
 - Baris transaksi yang tidak dapat dikelola menampilkan aksi informasi berwarna kuning, misalnya **Kas tidak aktif**, **Dompet tidak aktif**, atau **Transaksi audit saldo**. Klik penanda untuk membaca alasan dan langkah yang dapat dilakukan; aturan ubah/hapus tetap berlaku. Penanda tersedia di dashboard dan daftar transaksi.
 - Baris tabel transaksi dashboard menyediakan aksi **Ubah** dan **Hapus** yang sama dengan daftar transaksi, sesuai hak pengelolaan pengguna. Aksi tersebut tidak tersedia untuk transaksi audit saldo.

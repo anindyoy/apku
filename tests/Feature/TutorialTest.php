@@ -6,6 +6,12 @@ use Filament\Livewire\Topbar;
 use Livewire\Livewire;
 use Symfony\Component\Process\Process;
 
+test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', function () {
+    $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+    expect($topik['transaksi']['intro'])->toContain('Tipe (ikon jenis transaksi), Tanggal, Kas, Aktivitas, lalu Nominal', 'Pencarian Transaksi', 'Dashboard', 'layar kecil');
+    expect($topik['transaksi']['note'])->toContain('Dicatat oleh', 'pernah dikolaborasikan dengan akun lain', 'kedaluwarsa atau dicabut', 'Tautan kas publik');
+});
+
 test('tutorial kuota kas dan dompet menjelaskan batas serta masa aktif premium', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 

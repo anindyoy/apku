@@ -22,7 +22,7 @@ class BukuKas extends Model
 
     protected function casts(): array
     {
-        return ['is_default' => 'boolean'];
+        return ['is_default' => 'boolean', 'pernah_dikolaborasikan' => 'boolean'];
     }
 
     protected static function boot()

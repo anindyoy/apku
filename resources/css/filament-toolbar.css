@@ -1,6 +1,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Header tabel bertumpuk harus mengikuti breakpoint yang sama dengan sel datanya. */
+.fi-ta-table.fi-ta-table-stacked-on-mobile > thead > tr > .fi-ta-header-cell.md\:fi-hidden {
+    @apply md:!hidden;
+}
+
+.fi-ta-table.fi-ta-table-stacked-on-mobile > thead > tr > .fi-ta-header-cell.md\:fi-visible {
+    @apply !hidden md:!table-cell;
+}
+
 .fi-ta-header-cell,
 .fi-ta-header-toolbar,
 .fi-ta-table-stacked-header-cell,

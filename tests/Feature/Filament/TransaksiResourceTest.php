@@ -70,7 +70,7 @@ test('tabel transaksi merangkum pencatat dan dompet pada deskripsi kolom', funct
         ->html();
 
     expect($html)
-        ->toContain('Dicatat oleh: '.$user->name)
+        ->not->toContain('Dicatat oleh:')
         ->toContain('Dompet: '.$transaksi->labelDompetUntuk($user));
 })
     ->group('filament', 'transaksi', 'ringkasan-kolom');
@@ -120,6 +120,47 @@ test('daftar transaksi mobile menampilkan ringkasan tanpa kolom desktop', functi
         ->and($columns->get('nominal')->getVisibleFrom())->toBe('md');
 })
     ->group('filament', 'transaksi', 'mobile-ringkasan');
+
+test('header transaksi mengikuti visibilitas responsif isi kolom', function () {
+    $user = createRegularUserWithBukuKas();
+    $html = Livewire::actingAs($user)->test(ListTransaksis::class)->html();
+    $document = new DOMDocument;
+    @$document->loadHTML($html);
+    $xpath = new DOMXPath($document);
+
+    $headers = $xpath->query('//th[contains(@class, "fi-ta-header-cell") and @scope="col"]');
+    $labels = [];
+    foreach ($headers as $header) {
+        $label = trim($header->textContent);
+        if ($label === '') {
+            continue;
+        }
+        $labels[] = $label;
+        expect($header->getAttribute('class'))->toContain($label === 'Transaksi' ? 'md:fi-hidden' : 'md:fi-visible');
+    }
+    expect($labels)->toBe(['Transaksi', 'Tipe', 'Tanggal', 'Kas', 'Aktivitas', 'Nominal']);
+
+    $script = <<<'JS'
+    import assert from 'node:assert/strict';
+    import fs from 'node:fs';
+    import postcss from 'postcss';
+    import tailwind from 'tailwindcss';
+    const result = await postcss([tailwind({ content: [] })]).process(fs.readFileSync('resources/css/filament-toolbar.css', 'utf8'), { from: undefined });
+    const declarations = [];
+    result.root.walkDecls('display', decl => {
+        if (decl.parent.selector?.includes('> thead > tr > .fi-ta-header-cell.md\\:fi-')) {
+            declarations.push([decl.parent.selector.split('fi-header-cell').pop(), decl.value, decl.important, decl.parent.parent.params ?? null]);
+        }
+    });
+    const hidden = declarations.filter(([selector]) => selector.includes('fi-hidden'));
+    const visible = declarations.filter(([selector]) => selector.includes('fi-visible'));
+    assert.deepEqual(hidden.map(([, ...values]) => values), [['none', true, '(min-width: 768px)']]);
+    assert.deepEqual(visible.map(([, ...values]) => values), [['none', true, null], ['table-cell', true, '(min-width: 768px)']]);
+    JS;
+    $process = new \Symfony\Component\Process\Process(['node', '--input-type=module'], base_path());
+    $process->setInput($script)->run();
+    expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
+});
 
 test('transaksi resource dapat mengedit nominal transaksi', function () {
     $user = createRegularUserWithBukuKas();

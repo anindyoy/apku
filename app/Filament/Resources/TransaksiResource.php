@@ -148,6 +148,13 @@ class TransaksiResource extends Resource
             ->hiddenFrom('md');
     }
 
+    public static function keteranganPencatat(Transaksi $record): ?string
+    {
+        return $record->buku_kas?->pernah_dikolaborasikan
+            ? 'Dicatat oleh: '.($record->user?->name ?? '-')
+            : null;
+    }
+
     public static function transactionColumns(): array
     {
         return [
@@ -168,7 +175,7 @@ class TransaksiResource extends Resource
             TextColumn::make('tanggal')
                 ->visibleFrom('md')
                 ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
-                ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
+                ->description(fn (Transaksi $record): ?string => static::keteranganPencatat($record))
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('buku_kas.nama_buku')

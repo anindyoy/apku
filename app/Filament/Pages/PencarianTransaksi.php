@@ -41,7 +41,7 @@ class PencarianTransaksi extends Page implements HasTable
         return $table
             ->query(function (): Builder {
                 $query = Transaksi::query()->with([
-                    'buku_kas:id,user_id,nama_buku',
+                    'buku_kas:id,user_id,nama_buku,pernah_dikolaborasikan',
                     'jenis_transaksi:id,nama_jenis',
                     'asal_buku_tabungan:id,nama_buku',
                     'tujuan_buku_tabungan:id,nama_buku',
@@ -80,7 +80,7 @@ class PencarianTransaksi extends Page implements HasTable
                 TextColumn::make('tanggal')
                     ->visibleFrom('md')
                     ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
-                    ->description(fn (Transaksi $record): string => 'Dicatat oleh: '.($record->user?->name ?? '-'))
+                    ->description(fn (Transaksi $record): ?string => TransaksiResource::keteranganPencatat($record))
                     ->sortable()
                     ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 

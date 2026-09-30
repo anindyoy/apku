@@ -44,6 +44,14 @@ class ShareBuku extends Model
         static::saved($bersihkanCache);
         static::deleted($bersihkanCache);
 
+        static::saved(function (ShareBuku $share): void {
+            if ($share->user_id !== null) {
+                BukuKas::withoutGlobalScopes()->whereKey($share->buku_kas_id)
+                    ->where('user_id', '<>', $share->user_id)
+                    ->update(['pernah_dikolaborasikan' => true]);
+            }
+        });
+
         static::updated(function (ShareBuku $share): void {
             $share->user?->notify(new AksesBukuDiubah($share));
         });

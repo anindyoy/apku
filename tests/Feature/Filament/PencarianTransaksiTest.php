@@ -91,7 +91,7 @@ test('warna teks hasil pencarian mengikuti tipe transaksi seperti daftar transak
     expect(str_starts_with($komponen->html(), '<div'))->toBeTrue();
 
     $komponen
-        ->assertTableColumnExists('tanggal', fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Dicatat oleh: '.$user->name, $transaksi)
+        ->assertTableColumnExists('tanggal', fn ($kolom): bool => $kolom->getDescriptionBelow() === null, $transaksi)
         ->assertTableColumnExists('buku_kas.nama_buku', fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Dompet: '.$transaksi->labelDompetUntuk($user), $transaksi)
         ->assertTableColumnExists('kategori', fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Deskripsi: Transfer untuk pengujian warna', $transaksi);
 })->group('filament', 'pencarian-transaksi');
