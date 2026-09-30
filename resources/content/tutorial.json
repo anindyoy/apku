@@ -106,7 +106,7 @@
   },
   {
     "id": "utang-piutang", "page": "Utang dan Piutang", "category": "Pencatatan", "title": "Mencatat utang dan piutang",
-    "intro": "Utang adalah kewajiban Anda kepada pihak lain; piutang adalah uang yang perlu dibayar pihak lain kepada Anda.",
+    "intro": "Utang adalah kewajiban Anda kepada pihak lain; piutang adalah uang yang perlu dibayar pihak lain kepada Anda. Pada mobile, daftar tampil sebagai kartu dengan padding atas dan bawah yang rapat, berisi status, tanggal, aktivitas terakhir, pihak terkait, jatuh tempo jika tersedia, deskripsi, dan nominal tersisa. Gunakan tombol Detail atau Hapus pada kartu. Pada desktop, daftar tetap berupa tabel.",
     "steps": ["Buka menu Utang atau Piutang sesuai jenis catatan, lalu pilih tambah.", "Isi nama pihak terkait, nominal awal, tanggal pencatatan, dan tanggal jatuh tempo jika diperlukan.", "Buka Detail untuk mencatat penambahan nominal atau pembayaran. Isi nominal, tanggal, serta deskripsi yang tersedia.", "Periksa riwayat dan saldo tersisa untuk mengetahui status selesai atau belum selesai. Gunakan pencarian nama untuk menemukan pihak tertentu.", "Jika terdapat kesalahan, gunakan aksi ubah/hapus pada catatan atau riwayat yang sesuai dan periksa kembali sisa nominal."],
     "example": "Piutang Rp500.000 kepada Budi dengan pembayaran Rp200.000 menyisakan Rp300.000 yang belum diterima.",
     "note": "Pilih menu yang tepat sebelum mencatat agar utang dan piutang tidak tertukar. Periksa riwayat pembayaran sebelum menghapus catatan."

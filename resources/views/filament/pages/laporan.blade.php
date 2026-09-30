@@ -1,24 +1,5 @@
 <x-filament-panels::page>
-    @php
-        $laporan = $this->dataLaporan;
-        $formatRupiah = fn ($nominal) => 'Rp '.number_format($nominal, 0, ',', '.');
-        $totalGrafik = max(1, $laporan['pemasukan'], $laporan['pengeluaran']);
-        $tinggiPemasukan = $laporan['pemasukan'] ? max(8, ($laporan['pemasukan'] / $totalGrafik) * 100) : 0;
-        $tinggiPengeluaran = $laporan['pengeluaran'] ? max(8, ($laporan['pengeluaran'] / $totalGrafik) * 100) : 0;
-        $buatGradien = function ($kategori) {
-            if (! count($kategori)) return 'conic-gradient(#e5e7eb 0 100%)';
-            $posisi = 0;
-            $bagian = [];
-            foreach ($kategori as $item) {
-                $akhir = $posisi + $item['persen'];
-                $bagian[] = "{$item['warna']} {$posisi}% {$akhir}%";
-                $posisi = $akhir;
-            }
-            return 'conic-gradient('.implode(', ', $bagian).')';
-        };
-    @endphp
-
-    <div class="laporan-page">
+    <div class="laporan-page" wire:init="muatLaporan">
         <section class="laporan-filter">
             <div class="laporan-filter__controls">
                 <div class="laporan-filter__input">
@@ -79,7 +60,7 @@
             @if ($periode === 'harian')
                 <button type="button" wire:click="geserPeriode(-1)" aria-label="Periode sebelumnya">&#10094;</button>
                 <input type="date" wire:model.live="tanggalAcuan" aria-label="Tanggal acuan">
-                <strong>{{ $laporan['label'] }}</strong>
+                <strong>{{ $this->labelPeriode }}</strong>
                 <button type="button" wire:click="geserPeriode(1)" aria-label="Periode berikutnya">&#10095;</button>
             @elseif ($periode === 'bulanan')
                 <button type="button" wire:click="geserPeriode(-1)" aria-label="Bulan sebelumnya">&#10094;</button>
@@ -115,7 +96,7 @@
                     <span>hingga</span>
                     <label><input type="date" wire:model.live.debounce.400ms="tanggalSelesai"></label>
                 </div>
-                <strong>{{ $laporan['label'] }}</strong>
+                <strong>{{ $this->labelPeriode }}</strong>
             @endif
         </section>
 
@@ -124,14 +105,33 @@
             <button type="button" wire:click="pilihTabLaporan('aktivitas')" @class(['active' => $tabLaporan === 'aktivitas'])>Aktivitas</button>
         </nav>
 
-        <div class="laporan-loading" wire:loading.block wire:loading.delay role="status" aria-live="polite" aria-label="Memuat laporan">
+        <div wire:key="laporan-loading-{{ $laporanSiap ? 'siap' : 'awal' }}" class="laporan-loading" @if ($laporanSiap) wire:loading.block @endif role="status" aria-live="polite" aria-label="Memuat laporan">
             <div class="laporan-loading__content">
                 <x-filament::loading-indicator />
                 <span>Memuat laporan...</span>
             </div>
         </div>
 
-        <div class="laporan-content">
+        @if ($laporanSiap)
+            @php
+                $laporan = $this->dataLaporan;
+                $formatRupiah = fn ($nominal) => 'Rp '.number_format($nominal, 0, ',', '.');
+                $totalGrafik = max(1, $laporan['pemasukan'], $laporan['pengeluaran']);
+                $tinggiPemasukan = $laporan['pemasukan'] ? max(8, ($laporan['pemasukan'] / $totalGrafik) * 100) : 0;
+                $tinggiPengeluaran = $laporan['pengeluaran'] ? max(8, ($laporan['pengeluaran'] / $totalGrafik) * 100) : 0;
+                $buatGradien = function ($kategori) {
+                    if (! count($kategori)) return 'conic-gradient(#e5e7eb 0 100%)';
+                    $posisi = 0;
+                    $bagian = [];
+                    foreach ($kategori as $item) {
+                        $akhir = $posisi + $item['persen'];
+                        $bagian[] = "{$item['warna']} {$posisi}% {$akhir}%";
+                        $posisi = $akhir;
+                    }
+                    return 'conic-gradient('.implode(', ', $bagian).')';
+                };
+            @endphp
+        <div class="laporan-content" wire:loading.remove>
             @if ($tabLaporan === 'umum')
                 <section class="laporan-card laporan-summary">
             <header><x-heroicon-o-book-open /> <h2>{{ $bukuKasId === 'semua' ? 'Semua Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }}</h2></header>
@@ -208,12 +208,13 @@
                 </div>
             @endif
         </div>
+        @endif
     </div>
 
     <style>
         .laporan-page { display:grid; gap:1.25rem; color:var(--gray-700); }
         .laporan-content { display:grid; gap:1.25rem; min-height:320px; }
-        .laporan-loading { width:100%; display:none; padding:.75rem 1rem; border:1px solid var(--gray-200); border-radius:.75rem; color:var(--gray-600); background:var(--gray-50); }
+        .laporan-loading { width:100%; padding:.75rem 1rem; border:1px solid var(--gray-200); border-radius:.75rem; color:var(--gray-600); background:var(--gray-50); }
         .laporan-loading__content { display:inline-flex !important; flex-direction:row !important; align-items:center; gap:.65rem; white-space:nowrap; }
         .laporan-loading svg { width:1.5rem; height:1.5rem; flex:none; } .laporan-loading span { font-size:.85rem; font-weight:600; }
         .laporan-filter { display:flex; align-items:end; gap:1.5rem; padding:1rem; border:1px solid var(--gray-200); border-radius:1rem; background:white; box-shadow:0 1px 3px rgb(0 0 0 / .05); }

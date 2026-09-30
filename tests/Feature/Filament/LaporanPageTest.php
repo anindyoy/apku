@@ -48,6 +48,28 @@ function buatTransaksiLaporanPadaDompet(
     ]));
 }
 
+test('laporan menunda query transaksi sampai halaman selesai dibuka', function () {
+    $user = User::factory()->create(['role' => 'user']);
+    $queryTransaksi = [];
+    \Illuminate\Support\Facades\DB::listen(function ($query) use (&$queryTransaksi) {
+        if (preg_match('/\bfrom\s+["`]?transaksi["`]?\b/i', $query->sql)) {
+            $queryTransaksi[] = $query->sql;
+        }
+    });
+
+    $komponen = Livewire::actingAs($user)->test(Laporan::class)
+        ->assertSet('laporanSiap', false);
+
+    expect($queryTransaksi)->toBeEmpty()
+        ->and($komponen->html())->toContain('wire:init="muatLaporan"', 'Memuat laporan...')
+        ->not->toContain('class="laporan-content"', 'Belum ada pengeluaran pada periode ini.');
+
+    $komponen->call('muatLaporan')->assertSet('laporanSiap', true);
+
+    expect($queryTransaksi)->not->toBeEmpty()
+        ->and($komponen->html())->toContain('class="laporan-content"', 'wire:loading.remove', 'wire:loading.block', 'Belum ada pengeluaran pada periode ini.');
+});
+
 test('laporan bulanan menghitung saldo dan membatasi data milik pengguna', function () {
     $user = User::factory()->create(['role' => 'user']);
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 1150]);
@@ -66,6 +88,7 @@ test('laporan bulanan menghitung saldo dan membatasi data milik pengguna', funct
 
     $komponen = Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->set('bulan', '08')
         ->set('tahun', 2026)
         ->assertSuccessful();
@@ -91,6 +114,7 @@ test('laporan mendukung periode harian tahunan custom dan navigasi periode', fun
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 300, '2026-09-01 09:00:00');
 
     $komponen = Livewire::actingAs($user)->test(Laporan::class)
+        ->call('muatLaporan')
         ->call('pilihPeriode', 'harian')
         ->set('tanggalAcuan', '2026-08-15');
     expect($komponen->instance()->dataLaporan['pemasukan'])->toBe(200);
@@ -119,6 +143,7 @@ test('laporan bulanan dan tahunan menggunakan pilihan periode tanpa input tangga
 
     Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->assertSuccessful()
         ->assertDontSeeHtml('aria-label="Tanggal acuan"')
         ->assertSeeHtml('aria-label="Bulan"')
@@ -135,6 +160,7 @@ test('filter laporan dikelompokkan di kiri dan export dipisahkan di kanan', func
 
     $html = Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->html();
 
     expect($html)
@@ -155,6 +181,7 @@ test('tab aktivitas menampilkan transaksi yang dikelompokkan berdasarkan kategor
 
     $komponen = Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->call('pilihTabLaporan', 'aktivitas');
 
     $aktivitas = $komponen->instance()->dataLaporan['aktivitasPengeluaran'];
@@ -189,6 +216,7 @@ test('laporan dapat diunduh sebagai pdf dan excel sesuai filter aktif', function
 
     Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->set('bukuKasId', (string) $bukuKas->id)
         ->set('bulan', '08')
         ->set('tahun', 2026)
@@ -198,6 +226,7 @@ test('laporan dapat diunduh sebagai pdf dan excel sesuai filter aktif', function
 
     Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->set('bukuKasId', (string) $bukuKas->id)
         ->set('bulan', '08')
         ->set('tahun', 2026)
@@ -219,6 +248,7 @@ test('laporan memfilter dompet dan tidak menghitung transfer dompet sebagai arus
 
     $komponen = Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->set('dompetId', (string) $cash->id)
         ->set('bulan', '08')
         ->set('tahun', 2026);
@@ -246,6 +276,7 @@ test('laporan dengan semua dompet menjaga transfer dompet tetap netral', functio
 
     $komponen = Livewire::actingAs($user)
         ->test(Laporan::class)
+        ->call('muatLaporan')
         ->set('bulan', '08')
         ->set('tahun', 2026);
 

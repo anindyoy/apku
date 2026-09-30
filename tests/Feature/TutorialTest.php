@@ -10,6 +10,7 @@ test('tutorial laporan menjelaskan posisi grup setelah utang piutang', function 
     $response = $this->get(route('tutorial', ['q' => 'Membaca dan mengekspor laporan']))->assertOk();
     $topic = collect($response->viewData('topics'))->firstWhere('id', 'laporan');
     expect($topic['intro'])->toContain('Grup menu Laporan berada tepat di bawah grup Utang Piutang');
+    expect(implode(' ', $topic['steps']))->toContain('data dimuat otomatis', 'Memuat laporan...');
 });
 
 test('tutorial emas menjelaskan kartu mobile dan tabel desktop', function () {

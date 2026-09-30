@@ -52,6 +52,18 @@ class Laporan extends Page
 
     public string $tabLaporan = 'umum';
 
+    public bool $laporanSiap = false;
+
+    public function muatLaporan(): void
+    {
+        $this->laporanSiap = true;
+    }
+
+    public function getLabelPeriodeProperty(): string
+    {
+        return $this->labelPeriode(...$this->rentangTanggal());
+    }
+
     public function mount(): void
     {
         $hariIni = now()->toDateString();

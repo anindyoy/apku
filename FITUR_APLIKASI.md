@@ -102,6 +102,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 ### 8. Utang dan piutang
 
 - Menyimpan nama pihak terkait, nominal awal, tanggal pencatatan, dan tanggal jatuh tempo opsional.
+- Daftar Utang dan Piutang tampil sebagai kartu pada mobile dan tabel pada desktop. Padding vertikal isi kartu dibuat rapat agar lebih padat. Setiap kartu memuat status, tanggal, aktivitas terakhir, pihak terkait, jatuh tempo jika tersedia, deskripsi, nominal tersisa, serta aksi Detail dan Hapus.
 - Menambah nominal utang/piutang atau mencatat pembayaran.
 - Mengubah atau menghapus catatan dan detail riwayat.
 
