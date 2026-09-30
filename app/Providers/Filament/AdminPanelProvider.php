@@ -60,6 +60,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Utang Piutang')
                     ->collapsed(false),
                 NavigationGroup::make()
+                    ->label('Laporan')
+                    ->collapsed(false),
+                NavigationGroup::make()
                     ->label('Langganan')
                     ->collapsed(false),
             ])

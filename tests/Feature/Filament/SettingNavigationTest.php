@@ -41,6 +41,10 @@ test('setting menampilkan submenu sesuai peran dan menyederhanakan navbar', func
     }
 
     if ($role !== 'admin') {
+        $urutan = $labels->values()->all();
+        $posisiUtang = array_search('Utang Piutang', $urutan, true);
+        expect($posisiUtang)->not->toBeFalse();
+        expect($urutan[$posisiUtang + 1] ?? null)->toBe('Laporan');
         $this->get(Setting::getUrl())->assertForbidden();
     }
 })->with(['reguler', 'premium', 'admin']);

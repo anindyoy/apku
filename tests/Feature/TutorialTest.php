@@ -6,6 +6,12 @@ use Filament\Livewire\Topbar;
 use Livewire\Livewire;
 use Symfony\Component\Process\Process;
 
+test('tutorial laporan menjelaskan posisi grup setelah utang piutang', function () {
+    $response = $this->get(route('tutorial', ['q' => 'Membaca dan mengekspor laporan']))->assertOk();
+    $topic = collect($response->viewData('topics'))->firstWhere('id', 'laporan');
+    expect($topic['intro'])->toContain('Grup menu Laporan berada tepat di bawah grup Utang Piutang');
+});
+
 test('tutorial emas menjelaskan kartu mobile dan tabel desktop', function () {
     $response = $this->get(route('tutorial', ['q' => 'Tabungan emas']))->assertOk();
     $topic = collect($response->viewData('topics'))->firstWhere('id', 'emas');

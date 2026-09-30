@@ -245,6 +245,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 8. Laporan keuangan
 
+- Grup menu **Laporan** berada tepat di bawah grup **Utang Piutang** pada navigasi.
 - Laporan harian, bulanan, tahunan, atau rentang tanggal khusus.
 - Filter laporan berdasarkan kas dan dompet.
 - Ringkasan saldo awal, total pemasukan, total pengeluaran, akumulasi, dan saldo akhir.
