@@ -86,9 +86,9 @@ test('dashboard user mempertahankan bagian lain saat satu bagian tab gabungan di
 
     $page->call('saveSettings', $sections)->assertHasNoErrors();
 
-    expect($page->instance()->visibleTabs())->toMatchArray([
-        ['key' => 'kas-dompet', 'label' => 'Kas & Dompet', 'sections' => ['kas']],
-        ['key' => 'utang-piutang', 'label' => 'Utang & Piutang', 'sections' => ['utang']],
+    expect(array_column($page->instance()->visibleTabs(), null, 'key'))->toMatchArray([
+        'kas-dompet' => ['key' => 'kas-dompet', 'label' => 'Kas & Dompet', 'sections' => ['kas']],
+        'utang-piutang' => ['key' => 'utang-piutang', 'label' => 'Utang & Piutang', 'sections' => ['utang']],
     ]);
 });
 
@@ -97,7 +97,10 @@ test('dashboard user menyimpan toggle dan urutan per akun melalui pengaturan', f
     $other = User::factory()->create();
     $page = Livewire::actingAs($user)->test(Dashboard::class);
     $sections = array_reverse($page->instance()->sections());
-    $sections[0]['visible'] = false;
+    $sections = array_map(fn ($section) => [
+        ...$section,
+        'visible' => $section['key'] !== 'transaksi',
+    ], $sections);
     $page->callAction('aturDashboard', data: ['sections' => $sections])->assertHasNoActionErrors();
     expect($user->fresh()->dashboard_settings)->toBe($sections)
         ->and($other->fresh()->dashboard_settings)->toBeNull();
