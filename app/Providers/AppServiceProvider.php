@@ -28,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
 
         Table::configureUsing(function (Table $table): void {
             $table
+                ->deferLoading()
                 ->striped();
         });
     }
