@@ -22,7 +22,7 @@
 .fi-ta-table.fi-ta-table-stacked-on-mobile > thead > tr > .fi-ta-header-cell.md\:fi-visible {
     @apply !hidden md:!table-cell;
 }
-d
+
 .fi-ta-header-cell,
 .fi-ta-header-toolbar,
 .fi-ta-table-stacked-header-cell,
