@@ -27,9 +27,11 @@ class AppServiceProvider extends ServiceProvider
         DB::listen(DashboardCache::invalidateWrite(...));
 
         Table::configureUsing(function (Table $table): void {
-            $table
-                ->deferLoading()
-                ->striped();
+            if (! app()->runningUnitTests()) {
+                $table->deferLoading();
+            }
+
+            $table->striped();
         });
     }
 }
