@@ -196,16 +196,6 @@ class TransaksiResource extends Resource
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
                 ->wrap(),
 
-            TextColumn::make('created_at')
-                ->visibleFrom('md')
-                ->dateTime()
-                ->toggleable(isToggledHiddenByDefault: true),
-
-            TextColumn::make('updated_at')
-                ->visibleFrom('md')
-                ->dateTime()
-                ->toggleable(isToggledHiddenByDefault: true),
-
             TextColumn::make('nominal')
                 ->visibleFrom('md')
                 ->numeric()
