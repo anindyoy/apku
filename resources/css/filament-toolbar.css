@@ -3,11 +3,11 @@
 
 /* Padatkan isi kartu utang dan piutang hanya pada layar mobile. */
 .utang-piutang-compact .fi-ta-table-stacked-on-mobile > tbody > tr > .fi-ta-cell {
-    @apply max-sm:!py-1;
+    @apply max-sm:!p-1;
 }
 
 .utang-piutang-compact .fi-ta-table-stacked-on-mobile .fi-ta-cell-label {
-    @apply max-sm:!pt-0;
+    @apply max-sm:!p-0;
 }
 
 .utang-piutang-compact .fi-ta-table-stacked-on-mobile .fi-ta-icon {
