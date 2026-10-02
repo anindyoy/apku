@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Resources\DompetResource\Pages\ListDompet;
+use App\Filament\Resources\DompetResource;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Dompet;
@@ -75,8 +76,13 @@ test('daftar dompet menggunakan kartu responsif', function () {
     $document = new DOMDocument;
     @$document->loadHTML($component->html());
     $xpath = new DOMXPath($document);
+    $response = $this->actingAs($user)->get(DompetResource::getUrl());
+    $response->assertSuccessful();
+    $pageDocument = new DOMDocument;
+    @$pageDocument->loadHTML($response->getContent());
+    $pageXpath = new DOMXPath($pageDocument);
     $stylesheet = \Illuminate\Support\Facades\Vite::asset('resources/css/filament-toolbar.css');
-    expect($xpath->query('//link[@href="'.$stylesheet.'"]')->length)->toBeGreaterThan(0);
+    expect($pageXpath->query('//link[@href="'.$stylesheet.'"]')->length)->toBeGreaterThan(0);
 
     $table = $component->instance()->getTable();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $cash->id);

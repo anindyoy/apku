@@ -70,7 +70,7 @@
                     x-show="activeTab === '{{ $key }}'"
                     @if ($key !== $firstTab) x-cloak @endif
                     @class([
-                        'dashboard-card min-w-0 rounded-lg bg-white p-4 ring-1 ring-slate-200 [--accent:#f59e0b] [&:is(.dark_*)]:bg-gray-900 [&:is(.dark_*)]:ring-slate-700',
+                        'dashboard-card min-w-0 rounded-lg bg-white p-4 ring-1 ring-slate-200 [--accent:#f59e0b] [&:is(.dark_*)]:bg-gray-900 [&:is(.dark_*)]:ring-slate-700 [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2',
                         'dashboard-full-width' => in_array('transaksi', $items, true),
                     ])
                 >

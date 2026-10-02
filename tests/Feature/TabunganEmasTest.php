@@ -295,7 +295,7 @@ test('tabel tabungan emas menampilkan tanggal dan berat tanpa nol desimal berleb
     foreach (['1 gram', '0,5 gram', '1,25 gram', '0,0001 gram', '1.000 gram'] as $index => $formatted) {
         $page->assertTableColumnFormattedStateSet('berat_gram', $formatted, $records[$index]);
     }
-    $page->assertTableColumnFormattedStateSet('created_at', $records[0]->created_at->format('d M Y H:i'), $records[0]);
+    $page->assertTableColumnFormattedStateSet('created_at', $records[0]->created_at->locale(app()->getLocale())->translatedFormat('d M Y H:i'), $records[0]);
     $group = $page->instance()->getTable()->getDefaultGroup();
     expect($group->getId())->toBe('buku_kas_id')
         ->and($group->getTitle($records[0]))->toBe($data['kas']->nama_buku)
@@ -337,7 +337,7 @@ test('tabungan emas menyimpan dan mengubah tanggal dibeli pada', function () {
     Livewire::actingAs($data['user'])->test(ListTabunganEmas::class)
         ->callTableAction('edit', $emas, data: ['created_at' => $tanggalBaru->format('Y-m-d H:i:s')])
         ->assertHasNoTableActionErrors()
-        ->assertTableColumnFormattedStateSet('created_at', $tanggalBaru->format('d M Y H:i'), $emas);
+        ->assertTableColumnFormattedStateSet('created_at', $tanggalBaru->locale(app()->getLocale())->translatedFormat('d M Y H:i'), $emas);
     expect($emas->fresh()->created_at->equalTo($tanggalBaru))->toBeTrue();
 })->group('tabungan-emas', 'filament-emas');
 

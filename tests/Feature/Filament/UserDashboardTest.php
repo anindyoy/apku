@@ -48,7 +48,10 @@ test('dashboard user menampilkan saldo milik sendiri dan lima transaksi terbaru 
     expect(array_keys($page->instance()->getTable()->getColumns()))
         ->toBe(['ringkasan_mobile', 'jenis', 'tanggal', 'buku_kas.nama_buku', 'kategori', 'nominal']);
     expect($page->html())->toContain('fi-ta-table-stacked-on-mobile', 'data-transaksi-mobile', 'filament-toolbar');
-    Livewire::test(ListTransaksis::class)->assertSuccessful()->assertCanSeeTableRecords($records);
+    Livewire::withQueryParams(['filter_month' => '09', 'filter_year' => '2026'])
+        ->test(ListTransaksis::class)
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords($records);
 });
 
 test('dashboard user menghitung sisa utang piutang dan tiga aktivitas terakhir', function () {
