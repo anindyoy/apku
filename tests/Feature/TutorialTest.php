@@ -37,6 +37,7 @@ test('tutorial kuota kas dan dompet menjelaskan batas serta masa aktif premium',
 
     foreach (['kas', 'dompet'] as $id) {
         expect($topik[$id]['note'])->toContain('maksimal 2', 'sisa slot', 'aksi tambah disembunyikan', 'Setelah Premium berakhir', 'satu kalimat', 'Latar kuning', 'latar merah');
+        expect($topik[$id]['note'])->toContain('tidak menampilkan pesan kuota');
     }
 
     expect($topik['kas']['note'])->toContain('Kas bersama tidak dihitung');

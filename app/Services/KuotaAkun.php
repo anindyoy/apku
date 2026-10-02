@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 class KuotaAkun
 {
@@ -21,14 +22,16 @@ class KuotaAkun
     {
         $admin = $user->isAdmin();
         $premium = $user->masaAktifBerlaku();
+        if ($premium && ! $admin) {
+            return new HtmlString('');
+        }
+
         $tanpaBatas = $admin || $premium;
         $sisa = max(0, 2 - $jumlah);
         $pesan = ucfirst($jenis).' '.$jumlah;
 
         if ($admin) {
             $pesan .= ', kuota Admin tidak terbatas.';
-        } elseif ($premium) {
-            $pesan .= ', kuota tidak terbatas hingga '.$user->masa_aktif->format('d/m/Y').'.';
         } else {
             $pesan = match ($sisa) {
                 0 => 'Sebagai pengguna reguler, Anda tidak bisa menambah '.$jenis.' lagi karena kuota sudah terpenuhi.',

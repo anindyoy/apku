@@ -25,18 +25,20 @@ test('kuota akun ditampilkan pada daftar dan modal sesuai jumlah dan masa aktif'
     $component = Livewire::actingAs($user)->test($page)->assertSuccessful();
     $teks = $component->instance()->getSubheading()->toHtml();
 
-    expect($teks)->toContain('text-xs', 'px-3 py-2')
-        ->and(substr_count(trim(strip_tags($teks)), '.'))->toBe(1)
-        ->and($component->html())->toContain('data-kuota-status=');
+    if ($status === 'premium') {
+        expect($teks)->toBe('')
+            ->and($component->html())->not->toContain('data-kuota-status=');
+    } else {
+        expect($teks)->toContain('text-xs', 'px-3 py-2')
+            ->and(substr_count(trim(strip_tags($teks)), '.'))->toBe(1)
+            ->and($component->html())->toContain('data-kuota-status=');
+    }
 
     $tanpaBatas = in_array($status, ['premium', 'admin']);
-    if ($tanpaBatas) {
-        expect($teks)->toContain(ucfirst($jenis).' '.$jumlah, 'tidak terbatas', 'data-kuota-status="normal"', 'bg-gray-100')
+    if ($status === 'admin') {
+        expect($teks)->toContain(ucfirst($jenis).' '.$jumlah, 'kuota Admin tidak terbatas.', 'data-kuota-status="normal"', 'bg-gray-100')
             ->not->toContain('bg-red-100', 'bg-yellow-100');
-        if ($status === 'premium') {
-            expect($teks)->toContain('hingga '.today()->format('d/m/Y'));
-        }
-    } else {
+    } elseif ($status !== 'premium') {
         $pesan = match (true) {
             $jumlah >= 2 => 'Sebagai pengguna reguler, Anda tidak bisa menambah '.$jenis.' lagi karena kuota sudah terpenuhi.',
             $jumlah === 1 => 'Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi '.$jenis.'.',
@@ -50,7 +52,8 @@ test('kuota akun ditampilkan pada daftar dan modal sesuai jumlah dan masa aktif'
 
     if ($tanpaBatas || $jumlah < 2) {
         $component->assertActionVisible('create')->mountAction('create');
-        expect($component->instance()->getMountedAction()->getModalDescription()->toHtml())->toBe($teks);
+        $deskripsiModal = $component->instance()->getMountedAction()->getModalDescription();
+        expect($deskripsiModal?->toHtml() ?? '')->toBe($teks);
     } else {
         $component->assertActionHidden('create');
         expect($teks)->toContain('kuota sudah terpenuhi');
