@@ -13,12 +13,46 @@ test('halaman akun saya dapat ditampilkan', function () {
 })
     ->group('filament', 'pages');
 
-test('halaman akun saya dapat mengupdate profil', function () {
+test('masa aktif premium di halaman akun saya hanya menampilkan tanggal', function () {
+    $expiry = now()->setDate(2030, 4, 5)->setTime(15, 30);
     $user = createRegularUserWithBukuKas();
+    $user->update(['type' => 'premium', 'masa_aktif' => $expiry]);
+
+    $component = Livewire::actingAs($user)
+        ->test(\App\Filament\Pages\AkunSaya::class)
+        ->assertSuccessful()
+        ->assertFormFieldIsDisabled('masa_aktif');
+
+    $expiryState = $component->instance()->form->getComponent('masa_aktif')->getState();
+
+    expect($expiryState)->toMatch('/^\d{4}-\d{2}-\d{2}$/');
+})
+    ->group('filament', 'pages');
+
+test('tipe akun di halaman akun saya ditampilkan dengan huruf awal kapital', function () {
+    $user = createRegularUserWithBukuKas();
+    $user->update(['type' => 'reguler']);
+
+    $component = Livewire::actingAs($user)->test(\App\Filament\Pages\AkunSaya::class);
+
+    expect($component->instance()->form->getComponent('type')->getState())->toBe('Reguler');
+
+    $user->update(['type' => 'premium']);
+    $component->instance()->form->fill($user->fresh()->toArray());
+
+    expect($component->instance()->form->getComponent('type')->getState())->toBe('Premium')
+        ->and($user->fresh()->type)->toBe('premium');
+})
+    ->group('filament', 'pages');
+
+test('halaman akun saya dapat mengupdate profil tanpa mengubah email', function () {
+    $user = createRegularUserWithBukuKas();
+    $email = $user->email;
 
     Livewire::actingAs($user)
         ->test(\App\Filament\Pages\AkunSaya::class)
         ->assertSuccessful()
+        ->assertFormFieldIsDisabled('email')
         ->set('data.name', 'Updated Name')
         ->set('data.email', 'updated@test.com')
         ->set('data.hp', '081234567890')
@@ -29,7 +63,7 @@ test('halaman akun saya dapat mengupdate profil', function () {
         ->assertHasNoErrors();
 
     $this->assertEquals('Updated Name', $user->fresh()->name);
-    $this->assertEquals('updated@test.com', $user->fresh()->email);
+    $this->assertEquals($email, $user->fresh()->email);
 })
     ->group('filament', 'pages');
 

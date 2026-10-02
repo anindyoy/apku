@@ -162,8 +162,8 @@ Tampilan dan alur interaksi pengguna aplikasi.
 
 ### 1. Akun dan autentikasi
 
-- Pengaturan profil melalui halaman **Akun Saya**, meliputi nama, email, nomor HP, penggunaan aplikasi, dan perubahan password.
-- Tampilan tipe akun dan masa aktif akun premium.
+- Pengaturan profil melalui halaman **Akun Saya**, meliputi nama, nomor HP, penggunaan aplikasi, dan perubahan password. Email ditampilkan tetapi tidak dapat diubah dari halaman ini.
+- Tampilan tipe akun dengan huruf awal kapital dan masa aktif akun premium dalam format tanggal tahun-bulan-tanggal (`YYYY-MM-DD`).
 - Notifikasi di dalam aplikasi.
 - Halaman registrasi dengan Cloudflare Turnstile Managed hanya di production, login, verifikasi email, lupa password, dan reset password.
 

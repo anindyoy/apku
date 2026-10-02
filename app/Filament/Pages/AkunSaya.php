@@ -13,6 +13,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 
 class AkunSaya extends Page implements HasForms
@@ -48,9 +49,7 @@ class AkunSaya extends Page implements HasForms
                             ->required(),
 
                         TextInput::make('email')
-                            ->required()
-                            ->unique()
-                            ->email(),
+                            ->disabled(),
 
                         TextInput::make('hp')
                             ->tel()->required()
@@ -71,11 +70,13 @@ class AkunSaya extends Page implements HasForms
 
                         TextInput::make('type')
                             ->label('Tipe akun')
+                            ->formatStateUsing(fn ($state) => filled($state) ? ucfirst($state) : null)
                             ->disabled(),
 
                         TextInput::make('masa_aktif')
                             ->visible(fn ($get) => $get('type') === 'premium')
                             ->label('Masa aktif akun premium')
+                            ->formatStateUsing(fn ($state) => filled($state) ? Carbon::parse($state)->format('Y-m-d') : null)
                             ->disabled(),
 
                         TextInput::make('password')
@@ -97,7 +98,6 @@ class AkunSaya extends Page implements HasForms
 
         $new = [
             'name' => $data['name'],
-            'email' => $data['email'],
             'hp' => $data['hp'],
             'alamat' => $data['alamat'],
             'penggunaan' => $data['penggunaan'],
