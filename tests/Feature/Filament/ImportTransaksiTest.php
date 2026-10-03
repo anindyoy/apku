@@ -502,7 +502,7 @@ test('modal import menyediakan unduhan contoh template', function () {
     $data = siapkanDataImportTransaksi();
 
     expect(view('filament.resources.transaksi-resource.pages.import-template')->render())
-        ->toContain('Unduh contoh template XLSX', 'wire:click="unduhTemplateImport"', 'text-gray-800 dark:text-gray-800');
+        ->toContain('Unduh contoh template XLSX', 'wire:click="unduhTemplateImport"', 'text-gray-800 dark:text-gray-300');
 
     Livewire::actingAs($data['user'])
         ->test(ListTransaksis::class)
