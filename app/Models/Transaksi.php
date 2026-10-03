@@ -78,6 +78,17 @@ class Transaksi extends Model
         return $this->belongsTo(Kategori::class)->withoutGlobalScopes();
     }
 
+    /** Nama kelompok kategori untuk laporan dan ekspor. */
+    public function namaKategoriLaporan(): string
+    {
+        if (str_starts_with((string) $this->jenis, 'Transfer')) {
+            return 'Transfer';
+        }
+
+        return $this->kategori?->nama
+            ?? ($this->audit_saldo_dompet_detail_id ? 'Audit Saldo' : 'Tanpa kategori');
+    }
+
     public function import_transaksi()
     {
         return $this->belongsTo(ImportTransaksi::class);
@@ -158,7 +169,7 @@ class Transaksi extends Model
                             ))
                         )
                         ->options(fn (?Transaksi $record): array => static::opsiKategori($record?->jenis))
-                        ->required(),
+                        ->placeholder('Tanpa kategori'),
 
                     DateTimePicker::make('tanggal')
                         ->required()

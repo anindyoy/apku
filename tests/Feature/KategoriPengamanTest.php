@@ -21,7 +21,7 @@ use Livewire\Livewire;
 
 /*
 |--------------------------------------------------------------------------
-| Test pengaman perubahan Kategori menjadi Kategori
+| Test pengaman perubahan Aktivitas menjadi Kategori
 |--------------------------------------------------------------------------
 |
 | Mengunci perilaku import, laporan, pemindahan kas, dan hak akses kas bersama

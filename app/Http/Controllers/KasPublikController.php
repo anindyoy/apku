@@ -37,7 +37,9 @@ class KasPublikController extends Controller
                         ->orWhere('transaksi.jenis', 'like', '%'.$pencarian.'%');
                 });
             })
-            ->select(['transaksi.tanggal', 'transaksi.jenis', 'transaksi.tipe_transfer', 'transaksi.nominal', 'transaksi.deskripsi', 'kategori.nama as kategori'])
+            ->select(['transaksi.tanggal', 'transaksi.jenis', 'transaksi.tipe_transfer', 'transaksi.nominal', 'transaksi.deskripsi'])
+            // Transaksi audit dan transaksi tanpa kategori tetap diberi label; transfer memakai jenisnya.
+            ->selectRaw("COALESCE(kategori.nama, CASE WHEN transaksi.audit_saldo_dompet_detail_id IS NOT NULL THEN 'Audit Saldo' WHEN transaksi.jenis IN ('Pemasukan', 'Pengeluaran') THEN 'Tanpa kategori' END) as kategori")
             ->orderByDesc('transaksi.tanggal')->orderByDesc('transaksi.id')
             ->paginate(25)->appends(['bulan' => $bulan, 'q' => $pencarian]);
 

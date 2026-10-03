@@ -34,7 +34,7 @@ class ImportTransaksiService
 
     private const HEADER_OPSI_TEMPLATE = ['Opsi Buku Kas', 'Opsi Dompet', 'Opsi Kategori Pemasukan', 'Opsi Kategori Pengeluaran'];
 
-    private const KOLOM_WAJIB = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal'];
+    private const KOLOM_WAJIB = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'nominal'];
 
     private const ALIAS_HEADER = [
         'tanggal' => ['tanggal', 'date', 'datetime', 'transaction_date', 'waktu'],
@@ -666,7 +666,8 @@ class ImportTransaksiService
             && $namaKategoriBaru !== ''
             && mb_strlen($namaKategoriBaru) <= 255;
 
-        if ($kategori === null && ! $kategoriDapatDibuat) {
+        // Kolom kategori yang kosong berarti transaksi diimpor tanpa kategori.
+        if ($kategori === null && $namaKategoriBaru !== '' && ! $kategoriDapatDibuat) {
             $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori tidak ditemukan atau tipenya tidak sesuai.";
         }
 

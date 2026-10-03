@@ -241,9 +241,7 @@ class Laporan extends Page
             : ['#be5b62', '#d47b80', '#e4a1a5', '#f0c5c7', '#9e4149'];
         $ringkasan = $transaksi->reject(fn (Transaksi $item): bool => $item->tipe_transfer === 'dompet')
             ->whereIn('jenis', $jenisYangDipilih)
-            ->groupBy(fn (Transaksi $item) => str_starts_with($item->jenis, 'Transfer')
-                ? 'Transfer'
-                : ($item->kategori?->nama ?? 'Tanpa kategori'))
+            ->groupBy(fn (Transaksi $item): string => $item->namaKategoriLaporan())
             ->map(fn (Collection $items, string $nama) => ['nama' => $nama, 'nominal' => (int) $items->sum('nominal')])
             ->sortByDesc('nominal')
             ->values();
@@ -266,9 +264,7 @@ class Laporan extends Page
         return $transaksi
             ->reject(fn (Transaksi $item): bool => $item->tipe_transfer === 'dompet')
             ->whereIn('jenis', $jenisYangDipilih)
-            ->groupBy(fn (Transaksi $item): string => str_starts_with($item->jenis, 'Transfer')
-                ? 'Transfer'
-                : ($item->kategori?->nama ?? 'Tanpa kategori'))
+            ->groupBy(fn (Transaksi $item): string => $item->namaKategoriLaporan())
             ->map(fn (Collection $items, string $nama): array => [
                 'nama' => $nama,
                 'nominal' => (int) $items->sum('nominal'),
@@ -332,7 +328,7 @@ class Laporan extends Page
                 $transaksi->buku_kas?->nama_buku ?? '-',
                 $transaksi->labelDompetUntuk(auth()->user()),
                 $transaksi->jenis,
-                str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->kategori?->nama ?? 'Tanpa kategori'),
+                $transaksi->namaKategoriLaporan(),
                 $transaksi->deskripsi ?? '',
                 $transaksi->nominal,
             ];

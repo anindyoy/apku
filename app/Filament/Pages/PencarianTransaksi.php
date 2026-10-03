@@ -95,7 +95,7 @@ class PencarianTransaksi extends Page implements HasTable
                 TextColumn::make('kategori')
                     ->visibleFrom('md')
                     ->label('Kategori')
-                    ->getStateUsing(fn (Transaksi $record): ?string => TransaksiResource::getKategoriLabel($record))
+                    ->getStateUsing(fn (Transaksi $record): string => TransaksiResource::getKategoriLabel($record) ?? 'Tanpa kategori')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function (Builder $query) use ($search): void {
                             $query

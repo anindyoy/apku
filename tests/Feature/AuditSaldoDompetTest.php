@@ -64,7 +64,10 @@ test('audit saldo membuat transaksi penyesuaian per dompet dan menyimpan snapsho
         ->and($bank->fresh()->saldo)->toBe(600000)
         ->and($bukuKas->fresh()->saldo)->toBe(1050000)
         ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(2)
-        ->and(Kategori::where('nama', 'Audit Saldo')->where('is_system', true)->count())->toBe(2);
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->whereNotNull('kategori_id')->count())->toBe(0)
+        ->and(Kategori::withoutGlobalScopes()->where('nama', 'Audit Saldo')->count())->toBe(0)
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->get()
+            ->map(fn (Transaksi $transaksi): string => $transaksi->namaKategoriLaporan())->unique()->all())->toBe(['Audit Saldo']);
 });
 
 test('audit tanpa selisih tetap menyimpan snapshot tanpa transaksi', function () {

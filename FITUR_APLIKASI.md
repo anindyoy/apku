@@ -123,7 +123,7 @@ Fitur berikut hanya tersedia untuk admin:
 ### 11. Fitur pendukung
 
 - Opsi input pilihan yang berasal dari data master disimpan dalam cache selama 3 hari dan otomatis diperbarui ketika entitas terkait ditambah, diubah, atau dihapus.
-- Pencatatan kategori dan debugging melalui Laravel Telescope serta Debugbar pada lingkungan yang sesuai.
+- Pencatatan log dan debugging melalui Laravel Telescope serta Debugbar pada lingkungan yang sesuai.
 - Notifikasi otomatis ke Telegram untuk exception yang dilaporkan pada lingkungan production apabila kredensial bot dan chat telah dikonfigurasi.
 
 ### 12. Langganan premium

@@ -23,7 +23,7 @@ trait HasAuditSaldoAction
             ->label('Audit saldo')
             ->icon('heroicon-o-clipboard-document-check')
             ->modalHeading('Cocokkan saldo aplikasi dengan saldo riil')
-            ->modalDescription('Masukkan saldo riil setiap dompet. Selisih akan dicatat sebagai transaksi kategori Audit Saldo.')
+            ->modalDescription('Masukkan saldo riil setiap dompet. Selisih akan dicatat sebagai transaksi penyesuaian Audit Saldo.')
             ->form([
                 Select::make('buku_kas_id')
                     ->label('Kas pencatatan')

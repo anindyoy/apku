@@ -223,8 +223,8 @@ class ListTransaksis extends ListRecords
                                     ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                                 Select::make('pemetaan.kategori')
                                     ->label('Kolom kategori')
+                                    ->placeholder('Tidak dipetakan')
                                     ->options(fn (Get $get): array => $get('header_options') ?? [])
-                                    ->required()
                                     ->live()
                                     ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                                 Select::make('pemetaan.nominal')

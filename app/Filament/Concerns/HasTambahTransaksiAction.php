@@ -311,7 +311,7 @@ trait HasTambahTransaksiAction
                                 'pengeluaran' => 'Pengeluaran',
                                 default => null,
                             }))
-                            ->required()
+                            ->placeholder('Tanpa kategori')
                             ->visible(fn (Get $get): bool => in_array($get('jenis_form'), ['pemasukan', 'pengeluaran'], true)),
                         DateTimePicker::make('tanggal')->required()->seconds(false)->native(false)->maxDate(now()),
                         TextInput::make('nominal')->required()->numeric()->minValue(1)->prefix('Rp'),

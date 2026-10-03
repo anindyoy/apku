@@ -58,13 +58,13 @@ class TransaksiService
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($data['buku_kas_id']);
         $dompet = Dompet::withoutGlobalScopes()->findOrFail($data['dompet_id']);
         $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
-        $this->pastikanKategoriValid($user, $data['kategori_id'] ?? null, $jenis);
+        $this->pastikanKategoriValid($user, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
 
         return DB::transaction(function () use ($user, $data, $jenis): Transaksi {
             $bukuKas = BukuKas::withoutGlobalScopes()->whereKey($data['buku_kas_id'])->lockForUpdate()->firstOrFail();
             $dompet = Dompet::withoutGlobalScopes()->whereKey($data['dompet_id'])->lockForUpdate()->firstOrFail();
             $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
-            $this->pastikanKategoriValid($user, $data['kategori_id'] ?? null, $jenis);
+            $this->pastikanKategoriValid($user, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
 
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
                 'user_id' => $user->id,
@@ -72,7 +72,7 @@ class TransaksiService
                 'pengaruhi_saldo' => $data['pengaruhi_saldo'] ?? true,
                 'buku_kas_id' => $bukuKas->id,
                 'dompet_id' => $dompet->id,
-                'kategori_id' => $data['kategori_id'] ?? null,
+                'kategori_id' => filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null,
                 'tanggal' => $data['tanggal'] ?? now(),
                 'nominal' => (int) $data['nominal'],
                 'jenis' => $jenis,
@@ -344,9 +344,12 @@ class TransaksiService
 
     private function pastikanKategoriValid(User $user, ?int $kategoriId, string $jenis): void
     {
-        $kategori = $kategoriId
-            ? Kategori::withoutGlobalScopes()->find($kategoriId)
-            : null;
+        // Kategori bersifat opsional; transaksi tanpa kategori tetap sah.
+        if ($kategoriId === null) {
+            return;
+        }
+
+        $kategori = Kategori::withoutGlobalScopes()->find($kategoriId);
 
         if (! $kategori || $kategori->user_id !== $user->id || $kategori->tipe !== $jenis) {
             throw new AuthorizationException('Kategori transaksi tidak dapat digunakan.');

@@ -44,7 +44,7 @@
                     <td>{{ $transaksi->buku_kas?->nama_buku ?? '-' }}</td>
                     <td>{{ $transaksi->labelDompetUntuk(auth()->user()) }}</td>
                     <td>{{ $transaksi->jenis }}</td>
-                    <td>{{ str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->kategori?->nama ?? 'Tanpa kategori') }}</td>
+                    <td>{{ $transaksi->namaKategoriLaporan() }}</td>
                     <td>{{ $transaksi->deskripsi ?: '-' }}</td>
                     <td class="number">{{ $rupiah($transaksi->nominal) }}</td>
                 </tr>
