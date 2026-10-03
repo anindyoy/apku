@@ -6,7 +6,7 @@ use App\Jobs\ProsesImportTransaksi;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\ImportTransaksi;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -56,17 +56,17 @@ class ImportTransaksiService
             ->where('user_id', $user->id)
             ->pluck('nama_dompet')
             ->all();
-        $kategoriPemasukan = JenisTransaksi::query()
+        $kategoriPemasukan = Kategori::query()
             ->where('user_id', $user->id)
             ->where('tipe', 'Pemasukan')
-            ->orderBy('nama_jenis')
-            ->pluck('nama_jenis')
+            ->orderBy('nama')
+            ->pluck('nama')
             ->all();
-        $kategoriPengeluaran = JenisTransaksi::query()
+        $kategoriPengeluaran = Kategori::query()
             ->where('user_id', $user->id)
             ->where('tipe', 'Pengeluaran')
-            ->orderBy('nama_jenis')
-            ->pluck('nama_jenis')
+            ->orderBy('nama')
+            ->pluck('nama')
             ->all();
 
         $writer = new XlsxWriter;
@@ -394,12 +394,12 @@ class ImportTransaksiService
 
             foreach ($hasil['baris'] as $data) {
                 if (filled($data['nama_kategori_baru'] ?? null)) {
-                    $kategori = JenisTransaksi::withoutGlobalScopes()->firstOrCreate([
+                    $kategori = Kategori::withoutGlobalScopes()->firstOrCreate([
                         'user_id' => $user->id,
                         'tipe' => $data['jenis'],
-                        'nama_jenis' => $data['nama_kategori_baru'],
+                        'nama' => $data['nama_kategori_baru'],
                     ]);
-                    $data['jenis_transaksi_id'] = $kategori->id;
+                    $data['kategori_id'] = $kategori->id;
                 }
 
                 app(TransaksiService::class)->buat($user, [
@@ -667,7 +667,7 @@ class ImportTransaksiService
             && mb_strlen($namaKategoriBaru) <= 255;
 
         if ($kategori === null && ! $kategoriDapatDibuat) {
-            $errors[] = "Baris {$nomorBaris}, kolom aktivitas: aktivitas tidak ditemukan atau tipenya tidak sesuai.";
+            $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori tidak ditemukan atau tipenya tidak sesuai.";
         }
 
         return [[
@@ -675,7 +675,7 @@ class ImportTransaksiService
             'jenis' => $jenis,
             'buku_kas_id' => $bukuKas?->id,
             'dompet_id' => $dompet?->id,
-            'jenis_transaksi_id' => $kategori?->id,
+            'kategori_id' => $kategori?->id,
             'nama_kategori_baru' => $kategori === null && $kategoriDapatDibuat ? $namaKategoriBaru : null,
             'nominal' => $nominal === false ? 0 : $nominal,
             'deskripsi' => filled($data['deskripsi'] ?? null) ? trim((string) $data['deskripsi']) : null,
@@ -712,10 +712,10 @@ class ImportTransaksiService
         return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;
     }
 
-    private function cariKategori(User $user, mixed $nama, string $jenis): ?JenisTransaksi
+    private function cariKategori(User $user, mixed $nama, string $jenis): ?Kategori
     {
-        $hasil = JenisTransaksi::withoutGlobalScopes()->where('user_id', $user->id)->where('tipe', $jenis)
-            ->whereRaw('LOWER(nama_jenis) = ?', [mb_strtolower(trim((string) $nama))])->get();
+        $hasil = Kategori::withoutGlobalScopes()->where('user_id', $user->id)->where('tipe', $jenis)
+            ->whereRaw('LOWER(nama) = ?', [mb_strtolower(trim((string) $nama))])->get();
 
         return $hasil->count() === 1 ? $hasil->first() : null;
     }

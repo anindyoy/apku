@@ -5,7 +5,7 @@ use App\Filament\Resources\DompetResource;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Livewire\Livewire;
@@ -97,14 +97,14 @@ test('daftar dompet menggunakan kartu responsif', function () {
 
 test('action transaksi biasa menggunakan service untuk memperbarui saldo', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
-    $kategoriMasuk = JenisTransaksi::create([
+    $kategoriMasuk = Kategori::create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Gaji',
+        'nama' => 'Gaji',
         'tipe' => 'Pemasukan',
     ]);
-    $kategoriKeluar = JenisTransaksi::create([
+    $kategoriKeluar = Kategori::create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Belanja',
+        'nama' => 'Belanja',
         'tipe' => 'Pengeluaran',
     ]);
     $komponen = Livewire::actingAs($user)
@@ -114,7 +114,7 @@ test('action transaksi biasa menggunakan service untuk memperbarui saldo', funct
         'jenis_form' => 'pemasukan',
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $cash->id,
-        'jenis_transaksi_id' => $kategoriMasuk->id,
+        'kategori_id' => $kategoriMasuk->id,
         'tanggal' => now(),
         'nominal' => 25000,
         'deskripsi' => 'Pemasukan lewat service',
@@ -123,7 +123,7 @@ test('action transaksi biasa menggunakan service untuk memperbarui saldo', funct
         'jenis_form' => 'pengeluaran',
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $cash->id,
-        'jenis_transaksi_id' => $kategoriKeluar->id,
+        'kategori_id' => $kategoriKeluar->id,
         'tanggal' => now(),
         'nominal' => 10000,
         'deskripsi' => 'Pengeluaran lewat service',

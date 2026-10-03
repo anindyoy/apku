@@ -36,7 +36,7 @@
     </table>
 
     <table class="details">
-        <thead><tr><th>Tanggal</th><th>Kas</th><th>Dompet</th><th>Jenis</th><th>Aktivitas</th><th>Deskripsi</th><th class="number">Nominal</th></tr></thead>
+        <thead><tr><th>Tanggal</th><th>Kas</th><th>Dompet</th><th>Jenis</th><th>Kategori</th><th>Deskripsi</th><th class="number">Nominal</th></tr></thead>
         <tbody>
             @forelse ($laporan['transaksi'] as $transaksi)
                 <tr>
@@ -44,7 +44,7 @@
                     <td>{{ $transaksi->buku_kas?->nama_buku ?? '-' }}</td>
                     <td>{{ $transaksi->labelDompetUntuk(auth()->user()) }}</td>
                     <td>{{ $transaksi->jenis }}</td>
-                    <td>{{ str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas') }}</td>
+                    <td>{{ str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->kategori?->nama ?? 'Tanpa kategori') }}</td>
                     <td>{{ $transaksi->deskripsi ?: '-' }}</td>
                     <td class="number">{{ $rupiah($transaksi->nominal) }}</td>
                 </tr>

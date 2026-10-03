@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Support\Facades\Schema;
 
-class JenisTransaksiSeeder extends Seeder
+class KategoriSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,10 +16,10 @@ class JenisTransaksiSeeder extends Seeder
     public function run(): void
     {
         Schema::withoutForeignKeyConstraints(function () {
-            JenisTransaksi::truncate();
+            Kategori::truncate();
         });
 
-        // CREATE JENIS TRANSAKSI
+        // Buat kategori awal untuk setiap pengguna
         $list_tipe = ['Pemasukan', 'Pengeluaran'];
         $jenis = [
             'transfer',
@@ -42,10 +42,10 @@ class JenisTransaksiSeeder extends Seeder
             foreach ($list_tipe as $key => $tipe) {
                 $jenisRandom = fake()->randomElements($jenis, rand(3, 5));
                 foreach ($jenisRandom as $value3) {
-                    JenisTransaksi::create([
+                    Kategori::create([
                         'user_id' => $value->id,
                         'tipe' => $tipe,
-                        'nama_jenis' => $value3
+                        'nama' => $value3
                     ]);
                 }
             }

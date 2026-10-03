@@ -93,16 +93,16 @@ test('halaman kategori dapat ditampilkan', function () {
 })
     ->group('filament', 'pages');
 
-test('halaman kategori menggunakan label aktivitas', function () {
+test('halaman kategori menggunakan label kategori', function () {
     $user = createRegularUserWithBukuKas();
     $halaman = Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class);
 
-    expect(\App\Filament\Pages\Kategori::getNavigationLabel())->toBe('Aktivitas')
-        ->and($halaman->instance()->getTitle())->toBe('Aktivitas');
+    expect(\App\Filament\Pages\Kategori::getNavigationLabel())->toBe('Kategori')
+        ->and($halaman->instance()->getTitle())->toBe('Kategori');
 })
-    ->group('filament', 'pages', 'label-aktivitas');
+    ->group('filament', 'pages', 'label-kategori');
 
-test('halaman kategori menampilkan panel aktivitas responsif dengan tabel terpisah', function () {
+test('halaman kategori menampilkan panel kategori responsif dengan tabel terpisah', function () {
     $user = createRegularUserWithBukuKas();
     $halaman = Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class);
 
@@ -112,11 +112,11 @@ test('halaman kategori menampilkan panel aktivitas responsif dengan tabel terpis
     $xpath = new \DOMXPath($dom);
 
     foreach (['pemasukan' => 'Pemasukan', 'pengeluaran' => 'Pengeluaran'] as $jenis => $judul) {
-        $panel = $xpath->query('//section[@aria-labelledby="aktivitas-'.$jenis.'-title"]');
+        $panel = $xpath->query('//section[@aria-labelledby="kategori-'.$jenis.'-title"]');
         expect($panel->length)->toBe(1)
             ->and($xpath->query('.//h2', $panel->item(0))->item(0)->textContent)->toBe($judul)
             ->and($xpath->query('.//*[@*[name()="wire:id"]]', $panel->item(0))->length)->toBeGreaterThan(0);
     }
 
-    expect($xpath->query('//section[contains(@class, "aktivitas-panel--pengeluaran")]')->length)->toBe(1);
+    expect($xpath->query('//section[contains(@class, "kategori-panel--pengeluaran")]')->length)->toBe(1);
 })->group('filament', 'pages');

@@ -6,7 +6,7 @@ use App\Jobs\ProsesImportTransaksi;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\ImportTransaksi;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\ShareBuku;
 use App\Models\TabunganEmas;
 use App\Models\Transaksi;
@@ -21,7 +21,7 @@ use Livewire\Livewire;
 
 /*
 |--------------------------------------------------------------------------
-| Test pengaman perubahan Aktivitas menjadi Kategori
+| Test pengaman perubahan Kategori menjadi Kategori
 |--------------------------------------------------------------------------
 |
 | Mengunci perilaku import, laporan, pemindahan kas, dan hak akses kas bersama
@@ -29,7 +29,7 @@ use Livewire\Livewire;
 |
 */
 
-/** @return array{user: User, bukuKas: BukuKas, dompet: Dompet, pemasukan: JenisTransaksi, pengeluaran: JenisTransaksi} */
+/** @return array{user: User, bukuKas: BukuKas, dompet: Dompet, pemasukan: Kategori, pengeluaran: Kategori} */
 function siapkanDataPengamanKategori(): array
 {
     $user = createRegularUserWithBukuKas();
@@ -41,8 +41,8 @@ function siapkanDataPengamanKategori(): array
         'saldo' => 0,
         'is_default' => true,
     ]);
-    $pemasukan = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Gaji', 'tipe' => 'Pemasukan']);
-    $pengeluaran = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Makanan', 'tipe' => 'Pengeluaran']);
+    $pemasukan = Kategori::create(['user_id' => $user->id, 'nama' => 'Gaji', 'tipe' => 'Pemasukan']);
+    $pengeluaran = Kategori::create(['user_id' => $user->id, 'nama' => 'Makanan', 'tipe' => 'Pengeluaran']);
 
     return compact('user', 'bukuKas', 'dompet', 'pemasukan', 'pengeluaran');
 }
@@ -51,7 +51,7 @@ function catatTransaksiPengaman(
     User $user,
     BukuKas $bukuKas,
     Dompet $dompet,
-    ?JenisTransaksi $kategori,
+    ?Kategori $kategori,
     string $jenis,
     int $nominal,
     ?string $tipeTransfer = null,
@@ -60,7 +60,7 @@ function catatTransaksiPengaman(
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori?->id,
+        'kategori_id' => $kategori?->id,
         'jenis' => $jenis,
         'nominal' => $nominal,
         'tanggal' => now()->startOfMonth()->addHours(9),
@@ -90,13 +90,13 @@ test('job import antrean membuat kategori baru sesuai pilihan batch', function (
     $batch = $service->antrekan($data['user'], $file, buatKategoriOtomatis: true);
 
     expect($batch->buat_kategori_otomatis)->toBeTrue()
-        ->and(JenisTransaksi::withoutGlobalScopes()->where('nama_jenis', 'Bonus Antrean')->exists())->toBeFalse();
+        ->and(Kategori::withoutGlobalScopes()->where('nama', 'Bonus Antrean')->exists())->toBeFalse();
 
     (new ProsesImportTransaksi($batch->id))->handle($service);
 
-    $kategori = JenisTransaksi::withoutGlobalScopes()
+    $kategori = Kategori::withoutGlobalScopes()
         ->where('user_id', $data['user']->id)
-        ->where('nama_jenis', 'Bonus Antrean')
+        ->where('nama', 'Bonus Antrean')
         ->get();
 
     expect($kategori)->toHaveCount(1)
@@ -104,7 +104,7 @@ test('job import antrean membuat kategori baru sesuai pilihan batch', function (
         ->and($batch->fresh()->status)->toBe('berhasil')
         ->and(Transaksi::withoutGlobalScopes()
             ->where('import_transaksi_id', $batch->id)
-            ->where('jenis_transaksi_id', $kategori->first()->id)
+            ->where('kategori_id', $kategori->first()->id)
             ->count())->toBe(ImportTransaksiService::BATAS_BARIS_LANGSUNG + 1)
         ->and($data['bukuKas']->fresh()->saldo)->toBe(ImportTransaksiService::BATAS_BARIS_LANGSUNG + 1);
 })->group('pengaman-kategori');
@@ -164,7 +164,7 @@ test('ringkasan laporan menghitung persentase per kategori sesuai filter kas dan
     $user = $data['user'];
     $kasLain = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Usaha', 'saldo' => 0]);
     $dompetLain = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 0]);
-    $transport = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Transportasi', 'tipe' => 'Pengeluaran']);
+    $transport = Kategori::create(['user_id' => $user->id, 'nama' => 'Transportasi', 'tipe' => 'Pengeluaran']);
 
     catatTransaksiPengaman($user, $data['bukuKas'], $data['dompet'], $data['pengeluaran'], 'Pengeluaran', 300);
     catatTransaksiPengaman($user, $data['bukuKas'], $data['dompet'], $transport, 'Pengeluaran', 100);
@@ -206,12 +206,12 @@ test('laporan mengelompokkan transaksi tanpa kategori dan transfer kas pada bari
 
     $laporan = Livewire::actingAs($user)->test(Laporan::class)->call('muatLaporan')->instance()->dataLaporan;
     $ringkasan = collect($laporan['kategoriPengeluaran'])->pluck('nominal', 'nama');
-    $rincian = collect($laporan['aktivitasPengeluaran'])->mapWithKeys(fn (array $item): array => [
+    $rincian = collect($laporan['rincianPengeluaran'])->mapWithKeys(fn (array $item): array => [
         $item['nama'] => $item['transaksi']->count(),
     ]);
 
-    expect($ringkasan->all())->toBe(['Makanan' => 100, 'Tanpa aktivitas' => 60, 'Transfer' => 40])
-        ->and($rincian->all())->toBe(['Makanan' => 1, 'Tanpa aktivitas' => 1, 'Transfer' => 1])
+    expect($ringkasan->all())->toBe(['Makanan' => 100, 'Tanpa kategori' => 60, 'Transfer' => 40])
+        ->and($rincian->all())->toBe(['Makanan' => 1, 'Tanpa kategori' => 1, 'Transfer' => 1])
         ->and($laporan['pengeluaran'])->toBe(200);
 })->group('pengaman-kategori');
 
@@ -222,7 +222,7 @@ test('pemindahan saat hapus kas mempertahankan kategori transaksi dan memindahka
     $transaksi = app(TransaksiService::class)->buat($user, [
         'buku_kas_id' => $data['bukuKas']->id,
         'dompet_id' => $data['dompet']->id,
-        'jenis_transaksi_id' => $data['pemasukan']->id,
+        'kategori_id' => $data['pemasukan']->id,
         'nominal' => 5000,
         'tanggal' => now(),
     ], 'Pemasukan');
@@ -235,7 +235,7 @@ test('pemindahan saat hapus kas mempertahankan kategori transaksi dan memindahka
 
     expect(BukuKas::withoutGlobalScopes()->find($data['bukuKas']->id))->toBeNull()
         ->and($transaksi->fresh()->buku_kas_id)->toBe($kasTujuan->id)
-        ->and($transaksi->fresh()->jenis_transaksi_id)->toBe($data['pemasukan']->id)
+        ->and($transaksi->fresh()->kategori_id)->toBe($data['pemasukan']->id)
         ->and($emas->fresh()->buku_kas_id)->toBe($kasTujuan->id)
         ->and($kasTujuan->fresh()->saldo)->toBe(6000);
 })->group('pengaman-kategori');
@@ -273,7 +273,7 @@ test('editor kas bersama dapat membuat mengubah dan menghapus transaksinya sendi
     $kas = $pemilik->buku_kas()->firstOrFail();
     $saldoAwal = $kas->saldo;
     $dompet = Dompet::factory()->create(['user_id' => $editor->id, 'saldo' => 0]);
-    $kategori = JenisTransaksi::factory()->create(['user_id' => $editor->id, 'tipe' => 'Pengeluaran']);
+    $kategori = Kategori::factory()->create(['user_id' => $editor->id, 'tipe' => 'Pengeluaran']);
     ShareBuku::create([
         'buku_kas_id' => $kas->id,
         'user_id' => $editor->id,
@@ -287,7 +287,7 @@ test('editor kas bersama dapat membuat mengubah dan menghapus transaksinya sendi
     $transaksi = $service->buat($editor, [
         'buku_kas_id' => $kas->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'nominal' => 20000,
         'tanggal' => now(),
     ], 'Pengeluaran');
@@ -307,7 +307,7 @@ test('viewer kas bersama tidak dapat mencatat transaksi', function () {
     $viewer = createRegularUserWithBukuKas();
     $kas = $pemilik->buku_kas()->firstOrFail();
     $dompet = Dompet::factory()->create(['user_id' => $viewer->id, 'saldo' => 0]);
-    $kategori = JenisTransaksi::factory()->create(['user_id' => $viewer->id, 'tipe' => 'Pemasukan']);
+    $kategori = Kategori::factory()->create(['user_id' => $viewer->id, 'tipe' => 'Pemasukan']);
     ShareBuku::create([
         'buku_kas_id' => $kas->id,
         'user_id' => $viewer->id,
@@ -320,7 +320,7 @@ test('viewer kas bersama tidak dapat mencatat transaksi', function () {
     expect(fn () => app(TransaksiService::class)->buat($viewer, [
         'buku_kas_id' => $kas->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'nominal' => 1000,
         'tanggal' => now(),
     ], 'Pemasukan'))->toThrow(AuthorizationException::class)

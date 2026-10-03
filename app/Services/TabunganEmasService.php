@@ -51,7 +51,7 @@ class TabunganEmasService
             $transaksi = $this->transaksiService->buat($user, [
                 'buku_kas_id' => $terkunci->buku_kas_id,
                 'dompet_id' => $dompet->id,
-                'jenis_transaksi_id' => $data['jenis_transaksi_id'],
+                'kategori_id' => $data['kategori_id'],
                 'tanggal' => $data['tanggal'] ?? now(),
                 'nominal' => $total,
                 'deskripsi' => $data['catatan'] ?? 'Pembelian emas '.$terkunci->nama,
@@ -101,7 +101,7 @@ class TabunganEmasService
             $transaksi = $this->transaksiService->buat($user, [
                 'buku_kas_id' => $terkunci->buku_kas_id,
                 'dompet_id' => $dompet->id,
-                'jenis_transaksi_id' => $data['jenis_transaksi_id'],
+                'kategori_id' => $data['kategori_id'],
                 'tanggal' => $data['tanggal'] ?? now(),
                 'nominal' => $total,
                 'deskripsi' => $data['catatan'] ?? 'Penjualan emas '.$terkunci->nama,

@@ -83,7 +83,7 @@ class UtangPiutang extends Model
                 ->date('d M Y')
                 ->label('Tanggal')
                 ->description(
-                    fn ($record) => 'Aktivitas terakhir: '.date(
+                    fn ($record) => 'Pembaruan terakhir: '.date(
                         'd M Y, H:i',
                         strtotime($record->last_activity_date)
                     )

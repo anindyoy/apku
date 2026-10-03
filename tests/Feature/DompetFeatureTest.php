@@ -3,7 +3,7 @@
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\TransaksiService;
@@ -41,16 +41,16 @@ function buatDataDompet(array $atributUser = []): array
 
 test('service membuat transaksi biasa dan memperbarui kedua saldo secara atomik', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet();
-    $kategori = JenisTransaksi::create([
+    $kategori = Kategori::create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Gaji',
+        'nama' => 'Gaji',
         'tipe' => 'Pemasukan',
     ]);
 
     $transaksi = app(TransaksiService::class)->buat($user, [
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $cash->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'tanggal' => now(),
         'nominal' => 25000,
         'deskripsi' => 'Pendapatan layanan',
@@ -72,15 +72,15 @@ test('service transaksi biasa menolak dompet terbatas dan kategori pengguna lain
         'saldo' => 0,
     ]);
     ['user' => $userLain] = buatDataDompet();
-    $kategoriLain = JenisTransaksi::create([
+    $kategoriLain = Kategori::create([
         'user_id' => $userLain->id,
-        'nama_jenis' => 'Rahasia',
+        'nama' => 'Rahasia',
         'tipe' => 'Pemasukan',
     ]);
     $data = [
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $dompetKetiga->id,
-        'jenis_transaksi_id' => $kategoriLain->id,
+        'kategori_id' => $kategoriLain->id,
         'nominal' => 10000,
     ];
 

@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,7 +25,7 @@ class TransaksiFactory extends Factory
 
         return [
             // 'user_id' => $user->id,
-            // 'jenis_transaksi_id' => JenisTransaksi::whereUserId($user->id)->inRandomOrder()->first()->id,
+            // 'kategori_id' => Kategori::whereUserId($user->id)->inRandomOrder()->first()->id,
             // 'buku_kas_id' => BukuKas::getRandomBukuKas($user->id)->first()->id,
             'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
             'nominal' => rand(1, 100) * 1000,

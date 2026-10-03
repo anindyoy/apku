@@ -304,9 +304,9 @@ trait HasTambahTransaksiAction
                                 : 'dompet_id_tidak_digunakan')
                             ->required()
                             ->visible(fn (Get $get): bool => $get('jenis_form') === 'transfer_dompet'),
-                        Select::make('jenis_transaksi_id')
-                            ->label('Aktivitas')
-                            ->options(fn (Get $get): array => Transaksi::opsiJenisTransaksi(match ($get('jenis_form')) {
+                        Select::make('kategori_id')
+                            ->label('Kategori')
+                            ->options(fn (Get $get): array => Transaksi::opsiKategori(match ($get('jenis_form')) {
                                 'pemasukan' => 'Pemasukan',
                                 'pengeluaran' => 'Pengeluaran',
                                 default => null,

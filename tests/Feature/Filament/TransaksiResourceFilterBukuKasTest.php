@@ -2,7 +2,7 @@
 
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use Livewire\Livewire;
 
@@ -154,7 +154,7 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
         'saldo' => 0,
     ]);
 
-    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = Kategori::where('tipe', 'Pemasukan')->first();
 
     // Transaksi di buku kas pertama
     Transaksi::create([
@@ -163,7 +163,7 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
         'jenis' => 'Pemasukan',
         'nominal' => 50000,
         'tanggal' => now(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Transaksi di Kas Test',
     ]);
 
@@ -174,7 +174,7 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
         'jenis' => 'Pemasukan',
         'nominal' => 75000,
         'tanggal' => now(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Transaksi di Kas Kedua',
     ]);
 
@@ -213,7 +213,7 @@ test('filter buku kas - filterBukuKas kosong tampilkan semua transaksi', functio
         'saldo' => 0,
     ]);
 
-    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = Kategori::where('tipe', 'Pemasukan')->first();
 
     $transaksiPertama = Transaksi::create([
         'user_id' => $user->id,
@@ -221,7 +221,7 @@ test('filter buku kas - filterBukuKas kosong tampilkan semua transaksi', functio
         'jenis' => 'Pemasukan',
         'nominal' => 50000,
         'tanggal' => now(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Pemasukan Kas Test',
     ]);
 
@@ -231,7 +231,7 @@ test('filter buku kas - filterBukuKas kosong tampilkan semua transaksi', functio
         'jenis' => 'Pemasukan',
         'nominal' => 75000,
         'tanggal' => now(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Pemasukan Kas Kedua',
     ]);
 

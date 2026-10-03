@@ -29,15 +29,15 @@ class KasPublikController extends Controller
         $pengeluaran = (clone $bulanan)->whereIn('jenis', ['Pengeluaran', 'Transfer Pengeluaran'])->sum('nominal');
         $transaksi = $query->when($pencarian === '', fn ($query) => $query
             ->where('tanggal', '>=', $mulai)->where('tanggal', '<', $akhir))
-            ->leftJoin('jenis_transaksi', 'jenis_transaksi.id', '=', 'transaksi.jenis_transaksi_id')
+            ->leftJoin('kategori', 'kategori.id', '=', 'transaksi.kategori_id')
             ->when($pencarian !== '', function ($query) use ($pencarian): void {
                 $query->where(function ($query) use ($pencarian): void {
                     $query->where('transaksi.deskripsi', 'like', '%'.$pencarian.'%')
-                        ->orWhere('jenis_transaksi.nama_jenis', 'like', '%'.$pencarian.'%')
+                        ->orWhere('kategori.nama', 'like', '%'.$pencarian.'%')
                         ->orWhere('transaksi.jenis', 'like', '%'.$pencarian.'%');
                 });
             })
-            ->select(['transaksi.tanggal', 'transaksi.jenis', 'transaksi.tipe_transfer', 'transaksi.nominal', 'transaksi.deskripsi', 'jenis_transaksi.nama_jenis as aktivitas'])
+            ->select(['transaksi.tanggal', 'transaksi.jenis', 'transaksi.tipe_transfer', 'transaksi.nominal', 'transaksi.deskripsi', 'kategori.nama as kategori'])
             ->orderByDesc('transaksi.tanggal')->orderByDesc('transaksi.id')
             ->paginate(25)->appends(['bulan' => $bulan, 'q' => $pencarian]);
 

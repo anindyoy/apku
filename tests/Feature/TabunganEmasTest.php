@@ -5,7 +5,7 @@ use App\Filament\Resources\TabunganEmasResource\Pages\ListTabunganEmas;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\HargaEmas;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\ShareBuku;
 use App\Models\TabunganEmas;
 use App\Models\User;
@@ -22,8 +22,8 @@ function siapkanAkunTabunganEmas(): array
     $user = createRegularUserWithBukuKas();
     $kas = $user->buku_kas()->firstOrFail();
     $dompet = Dompet::factory()->create(['user_id' => $user->id, 'saldo' => 10000000, 'is_default' => true]);
-    $pemasukan = JenisTransaksi::factory()->create(['user_id' => $user->id, 'nama_jenis' => 'Penjualan Emas', 'tipe' => 'Pemasukan']);
-    $pengeluaran = JenisTransaksi::factory()->create(['user_id' => $user->id, 'nama_jenis' => 'Pembelian Emas', 'tipe' => 'Pengeluaran']);
+    $pemasukan = Kategori::factory()->create(['user_id' => $user->id, 'nama' => 'Penjualan Emas', 'tipe' => 'Pemasukan']);
+    $pengeluaran = Kategori::factory()->create(['user_id' => $user->id, 'nama' => 'Pembelian Emas', 'tipe' => 'Pengeluaran']);
     $tabungan = TabunganEmas::factory()->create(['buku_kas_id' => $kas->id, 'label' => 'Antam']);
 
     return compact('user', 'kas', 'dompet', 'pemasukan', 'pengeluaran', 'tabungan');
@@ -37,7 +37,7 @@ test('pembelian dan penjualan emas memperbarui aset serta saldo rupiah secara at
         'berat_gram' => 2,
         'harga_per_gram' => 1000000,
         'biaya_tambahan' => 50000,
-        'jenis_transaksi_id' => $data['pengeluaran']->id,
+        'kategori_id' => $data['pengeluaran']->id,
     ]);
 
     expect((float) $data['tabungan']->fresh()->berat_gram)->toBe(2.0)
@@ -50,7 +50,7 @@ test('pembelian dan penjualan emas memperbarui aset serta saldo rupiah secara at
         'berat_gram' => 0.5,
         'harga_per_gram' => 1200000,
         'biaya_tambahan' => 10000,
-        'jenis_transaksi_id' => $data['pemasukan']->id,
+        'kategori_id' => $data['pemasukan']->id,
     ]);
 
     expect((float) $data['tabungan']->fresh()->berat_gram)->toBe(1.5)
@@ -68,7 +68,7 @@ test('penjualan emas melebihi berat yang dimiliki ditolak tanpa mengubah saldo',
             'berat_gram' => 2,
             'harga_per_gram' => 1000000,
             'biaya_tambahan' => 0,
-            'jenis_transaksi_id' => $data['pemasukan']->id,
+            'kategori_id' => $data['pemasukan']->id,
         ]);
         $this->fail('Validasi berat seharusnya gagal.');
     } catch (ValidationException) {
@@ -81,22 +81,22 @@ test('editor kas bersama dapat membeli dan menjual emas dengan dompet miliknya',
     $data = siapkanAkunTabunganEmas();
     $editor = User::factory()->create(['role' => 'reguler', 'masa_aktif' => today()->addMonth(), 'email_verified_at' => now()]);
     $dompetEditor = Dompet::factory()->create(['user_id' => $editor->id, 'saldo' => 3000000, 'is_default' => true]);
-    $kategoriBeli = JenisTransaksi::factory()->create(['user_id' => $editor->id, 'nama_jenis' => 'Beli Emas', 'tipe' => 'Pengeluaran']);
-    $kategoriJual = JenisTransaksi::factory()->create(['user_id' => $editor->id, 'nama_jenis' => 'Jual Emas', 'tipe' => 'Pemasukan']);
+    $kategoriBeli = Kategori::factory()->create(['user_id' => $editor->id, 'nama' => 'Beli Emas', 'tipe' => 'Pengeluaran']);
+    $kategoriJual = Kategori::factory()->create(['user_id' => $editor->id, 'nama' => 'Jual Emas', 'tipe' => 'Pemasukan']);
     ShareBuku::factory()->create(['buku_kas_id' => $data['kas']->id, 'user_id' => $editor->id, 'privilege' => 'editor']);
 
     app(TabunganEmasService::class)->beli($editor, $data['tabungan'], $dompetEditor, [
         'berat_gram' => 1,
         'harga_per_gram' => 1000000,
         'biaya_tambahan' => 0,
-        'jenis_transaksi_id' => $kategoriBeli->id,
+        'kategori_id' => $kategoriBeli->id,
     ]);
 
     app(TabunganEmasService::class)->jual($editor, $data['tabungan']->fresh(), $dompetEditor->fresh(), [
         'berat_gram' => 0.25,
         'harga_per_gram' => 1200000,
         'biaya_tambahan' => 0,
-        'jenis_transaksi_id' => $kategoriJual->id,
+        'kategori_id' => $kategoriJual->id,
     ]);
 
     expect((float) $data['tabungan']->fresh()->berat_gram)->toBe(0.75)

@@ -6,9 +6,9 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\JenisTransaksi>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Kategori>
  */
-class JenisTransaksiFactory extends Factory
+class KategoriFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,7 +19,7 @@ class JenisTransaksiFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'nama_jenis' => fake()->randomElement(['Pemasukan', 'Pengeluaran']),
+            'nama' => fake()->randomElement(['Pemasukan', 'Pengeluaran']),
         ];
     }
 }

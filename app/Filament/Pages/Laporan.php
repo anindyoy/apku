@@ -83,7 +83,7 @@ class Laporan extends Page
 
     public function pilihTabLaporan(string $tab): void
     {
-        if (in_array($tab, ['umum', 'aktivitas'], true)) {
+        if (in_array($tab, ['umum', 'kategori'], true)) {
             $this->tabLaporan = $tab;
         }
     }
@@ -117,7 +117,7 @@ class Laporan extends Page
         [$mulai, $selesai] = $this->rentangTanggal();
         $query = $this->queryTransaksi();
         $transaksiPeriode = (clone $query)
-            ->with(['jenis_transaksi:id,nama_jenis', 'buku_kas:id,nama_buku', 'dompet' => fn ($query) => $query->withTrashed()])
+            ->with(['kategori:id,nama', 'buku_kas:id,nama_buku', 'dompet' => fn ($query) => $query->withTrashed()])
             ->whereBetween('tanggal', [$mulai, $selesai])
             ->orderBy('tanggal')
             ->get();
@@ -146,8 +146,8 @@ class Laporan extends Page
             'saldoAkhir' => $saldoAwal + $perubahanPeriode,
             'kategoriPemasukan' => $this->ringkasanKategori($transaksiPeriode, 'Pemasukan'),
             'kategoriPengeluaran' => $this->ringkasanKategori($transaksiPeriode, 'Pengeluaran'),
-            'aktivitasPemasukan' => $this->aktivitasKategori($transaksiPeriode, 'Pemasukan'),
-            'aktivitasPengeluaran' => $this->aktivitasKategori($transaksiPeriode, 'Pengeluaran'),
+            'rincianPemasukan' => $this->rincianKategori($transaksiPeriode, 'Pemasukan'),
+            'rincianPengeluaran' => $this->rincianKategori($transaksiPeriode, 'Pengeluaran'),
             'transaksi' => $transaksiPeriode,
         ];
     }
@@ -243,7 +243,7 @@ class Laporan extends Page
             ->whereIn('jenis', $jenisYangDipilih)
             ->groupBy(fn (Transaksi $item) => str_starts_with($item->jenis, 'Transfer')
                 ? 'Transfer'
-                : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas'))
+                : ($item->kategori?->nama ?? 'Tanpa kategori'))
             ->map(fn (Collection $items, string $nama) => ['nama' => $nama, 'nominal' => (int) $items->sum('nominal')])
             ->sortByDesc('nominal')
             ->values();
@@ -257,7 +257,7 @@ class Laporan extends Page
     }
 
     /** @return array<int, array{nama: string, nominal: int, transaksi: Collection<int, Transaksi>}> */
-    private function aktivitasKategori(Collection $transaksi, string $jenis): array
+    private function rincianKategori(Collection $transaksi, string $jenis): array
     {
         $jenisYangDipilih = $jenis === 'Pemasukan'
             ? ['Pemasukan', 'Transfer Pemasukan']
@@ -268,7 +268,7 @@ class Laporan extends Page
             ->whereIn('jenis', $jenisYangDipilih)
             ->groupBy(fn (Transaksi $item): string => str_starts_with($item->jenis, 'Transfer')
                 ? 'Transfer'
-                : ($item->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas'))
+                : ($item->kategori?->nama ?? 'Tanpa kategori'))
             ->map(fn (Collection $items, string $nama): array => [
                 'nama' => $nama,
                 'nominal' => (int) $items->sum('nominal'),
@@ -323,7 +323,7 @@ class Laporan extends Page
             ['Saldo Akhir', $laporan['saldoAkhir']],
             [],
             ['RINCIAN TRANSAKSI'],
-            ['Tanggal', 'Kas', 'Dompet', 'Jenis', 'Aktivitas', 'Deskripsi', 'Nominal'],
+            ['Tanggal', 'Kas', 'Dompet', 'Jenis', 'Kategori', 'Deskripsi', 'Nominal'],
         ];
 
         foreach ($laporan['transaksi'] as $transaksi) {
@@ -332,7 +332,7 @@ class Laporan extends Page
                 $transaksi->buku_kas?->nama_buku ?? '-',
                 $transaksi->labelDompetUntuk(auth()->user()),
                 $transaksi->jenis,
-                str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->jenis_transaksi?->nama_jenis ?? 'Tanpa aktivitas'),
+                str_starts_with($transaksi->jenis, 'Transfer') ? 'Transfer' : ($transaksi->kategori?->nama ?? 'Tanpa kategori'),
                 $transaksi->deskripsi ?? '',
                 $transaksi->nominal,
             ];

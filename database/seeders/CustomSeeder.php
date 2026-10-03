@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\ShareBuku;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -26,7 +26,7 @@ class CustomSeeder extends Seeder
 
         // Transaksi::create([
         //     'user_id' => $user,
-        //     'jenis_transaksi_id' => JenisTransaksi::inRandomOrder()->first()->id,
+        //     'kategori_id' => Kategori::inRandomOrder()->first()->id,
         //     'buku_kas_id' => 9,
         //     // 'buku_kas_id' => BukuKas::getRandomBukuKas($user)->first()->id,
         //     'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),

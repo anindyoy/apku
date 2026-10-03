@@ -6,7 +6,7 @@ use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Models\AuditSaldoDompet;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\AuditSaldoDompetService;
@@ -64,7 +64,7 @@ test('audit saldo membuat transaksi penyesuaian per dompet dan menyimpan snapsho
         ->and($bank->fresh()->saldo)->toBe(600000)
         ->and($bukuKas->fresh()->saldo)->toBe(1050000)
         ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(2)
-        ->and(JenisTransaksi::where('nama_jenis', 'Audit Saldo')->where('is_system', true)->count())->toBe(2);
+        ->and(Kategori::where('nama', 'Audit Saldo')->where('is_system', true)->count())->toBe(2);
 });
 
 test('audit tanpa selisih tetap menyimpan snapshot tanpa transaksi', function () {

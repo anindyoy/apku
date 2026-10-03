@@ -4,7 +4,7 @@ use App\Models\User;
 use Livewire\Livewire;
 use App\Models\BukuKas;
 use App\Models\Transaksi;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 
 // ==================== TRANSAKSI RESOURCE - DELETE ACTION CALLBACKS ====================
 // These tests target the uncovered lines in TransaksiResource.php:
@@ -17,7 +17,7 @@ function createTransaksiTestData(string $jenis = 'Pemasukan'): array
 {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $jenisTransaksi = JenisTransaksi::where('tipe', $jenis === 'Pengeluaran' ? 'Pengeluaran' : 'Pemasukan')->first();
+    $kategori = Kategori::where('tipe', $jenis === 'Pengeluaran' ? 'Pengeluaran' : 'Pemasukan')->first();
 
     $transaksi = Transaksi::create([
         'user_id' => $user->id,
@@ -25,11 +25,11 @@ function createTransaksiTestData(string $jenis = 'Pemasukan'): array
         'jenis' => $jenis,
         'nominal' => 50000,
         'tanggal' => now()->subDay(),
-        'jenis_transaksi_id' => $jenisTransaksi->id,
+        'kategori_id' => $kategori->id,
         'deskripsi' => 'Test transaksi untuk callback',
     ]);
 
-    return compact('user', 'bukuKas', 'transaksi', 'jenisTransaksi');
+    return compact('user', 'bukuKas', 'transaksi', 'kategori');
 }
 
 // --- Test DeleteAction after callback for Pengeluaran (lines 179-186) ---

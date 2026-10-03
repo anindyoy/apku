@@ -9,7 +9,7 @@ const topics = {
     'buku-kas': 'kas',
     dompet: 'dompet',
     'audit-saldo-dompet': 'audit-saldo',
-    kategori: 'aktivitas',
+    kategori: 'kategori',
     'kolaborator-kas': 'kolaborasi',
     'tabungan-emas': 'emas',
     laporan: 'laporan',

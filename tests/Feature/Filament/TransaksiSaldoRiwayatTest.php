@@ -3,7 +3,7 @@
 use App\Filament\Resources\TransaksiResource;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\TransaksiService;
@@ -12,9 +12,9 @@ test('saldo riwayat tetap tepat setelah transaksi tengah dihapus dan daftar difi
     $user = User::factory()->create(['role' => 'reguler', 'masa_aktif' => today()->addMonth()]);
     $kas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas', 'saldo' => 0, 'is_default' => true]);
     $dompet = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Tunai', 'saldo' => 0, 'is_default' => true]);
-    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Gaji', 'tipe' => 'Pemasukan']);
+    $kategori = Kategori::create(['user_id' => $user->id, 'nama' => 'Gaji', 'tipe' => 'Pemasukan']);
     $service = app(TransaksiService::class);
-    $data = ['buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id, 'jenis_transaksi_id' => $kategori->id];
+    $data = ['buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id, 'kategori_id' => $kategori->id];
 
     $awal = $service->buat($user, $data + ['tanggal' => now()->subDays(3), 'nominal' => 100000], 'Pemasukan');
     $tengah = $service->buat($user, $data + ['tanggal' => now()->subDays(2), 'nominal' => 30000], 'Pemasukan');

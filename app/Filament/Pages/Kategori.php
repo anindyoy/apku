@@ -17,9 +17,9 @@ class Kategori extends Page
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $navigationLabel = 'Aktivitas';
+    protected static ?string $navigationLabel = 'Kategori';
 
-    protected static ?string $title = 'Aktivitas';
+    protected static ?string $title = 'Kategori';
 
     protected string $view = 'filament.pages.kategori';
 }

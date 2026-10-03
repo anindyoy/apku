@@ -2,7 +2,7 @@
 
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use Livewire\Livewire;
 
@@ -16,7 +16,7 @@ use Livewire\Livewire;
 test('transaksi list - page dapat ditampilkan dengan data pemasukan', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = Kategori::where('tipe', 'Pemasukan')->first();
 
     Transaksi::create([
         'user_id' => $user->id,
@@ -24,7 +24,7 @@ test('transaksi list - page dapat ditampilkan dengan data pemasukan', function (
         'jenis' => 'Pemasukan',
         'nominal' => 50000,
         'tanggal' => now()->subDay(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test pemasukan',
     ]);
 
@@ -37,7 +37,7 @@ test('transaksi list - page dapat ditampilkan dengan data pemasukan', function (
 test('transaksi list - page dapat ditampilkan dengan data pengeluaran', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $jenis = JenisTransaksi::where('tipe', 'Pengeluaran')->first();
+    $jenis = Kategori::where('tipe', 'Pengeluaran')->first();
 
     Transaksi::create([
         'user_id' => $user->id,
@@ -45,7 +45,7 @@ test('transaksi list - page dapat ditampilkan dengan data pengeluaran', function
         'jenis' => 'Pengeluaran',
         'nominal' => 25000,
         'tanggal' => now()->subDay(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test pengeluaran',
     ]);
 

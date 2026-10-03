@@ -57,7 +57,7 @@
                 </div>
                 <ul class="plan-notes" id="plan-access-notes">
                     <li>Pencatatan, transfer, import, dan audit mengikuti hak akses serta kas dan dompet yang dapat dikelola. Import dan transfer pada kas bersama hanya tersedia bagi pemilik kas.</li>
-                    <li>Kas bersama tidak mengurangi kuota kas sendiri. Viewer hanya melihat; Editor memakai dompet dan aktivitas sendiri serta hanya dapat mengubah atau menghapus transaksi buatannya. Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik.</li>
+                    <li>Kas bersama tidak mengurangi kuota kas sendiri. Viewer hanya melihat; Editor memakai dompet dan kategori sendiri serta hanya dapat mengubah atau menghapus transaksi buatannya. Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik.</li>
                     <li>Saat Premium berakhir, pengelolaan kas dan dompet kembali mengikuti kuota Reguler, dan pembuatan kolaborasi baru tidak tersedia. Kolaborasi yang sudah ada tetap dapat dikelola atau dicabut pemilik.</li>
                     <li>Harga dan masa aktif Premium mengikuti paket yang dipilih saat membuat order. Aktivasi dilakukan setelah pembayaran disetujui admin.</li>
                 </ul>

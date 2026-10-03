@@ -3,7 +3,7 @@
 use App\Filament\Resources\ShareBukuResource\Pages\ListShareBukus;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\ShareBuku;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -162,14 +162,14 @@ test('kas publik pencarian mencakup semua tanggal dengan batas kas dan mempertah
     $kas = BukuKas::factory()->create(['user_id' => $owner->id]);
     $private = BukuKas::factory()->create(['user_id' => $owner->id]);
     $wallet = Dompet::factory()->create(['user_id' => $owner->id]);
-    $category = JenisTransaksi::factory()->create(['user_id' => $owner->id, 'nama_jenis' => 'Kerja bakti', 'tipe' => 'Pemasukan']);
+    $category = Kategori::factory()->create(['user_id' => $owner->id, 'nama' => 'Kerja bakti', 'tipe' => 'Pemasukan']);
     $share = ShareBuku::factory()->create(['buku_kas_id' => $kas->id, 'user_id' => null]);
     $base = ['user_id' => $owner->id, 'buku_kas_id' => $kas->id, 'dompet_id' => $wallet->id, 'tanggal' => '2026-08-10 10:00:00', 'jenis' => 'Pemasukan', 'nominal' => 1000, 'deskripsi' => 'Iuran warga'];
     Transaksi::withoutEvents(function () use ($base, $private, $category): void {
         Transaksi::factory()->count(26)->create($base);
-        Transaksi::factory()->create(array_replace($base, ['deskripsi' => 'Kegiatan bersama', 'jenis_transaksi_id' => $category->id]));
-        Transaksi::factory()->create(array_replace($base, ['buku_kas_id' => $private->id, 'jenis_transaksi_id' => $category->id]));
-        Transaksi::factory()->create(array_replace($base, ['tanggal' => '2025-07-10 10:00:00', 'jenis_transaksi_id' => $category->id]));
+        Transaksi::factory()->create(array_replace($base, ['deskripsi' => 'Kegiatan bersama', 'kategori_id' => $category->id]));
+        Transaksi::factory()->create(array_replace($base, ['buku_kas_id' => $private->id, 'kategori_id' => $category->id]));
+        Transaksi::factory()->create(array_replace($base, ['tanggal' => '2025-07-10 10:00:00', 'kategori_id' => $category->id]));
     });
     $url = $share->urlPublik().'?bulan=2026-08';
     $result = $this->get($url.'&q=Iuran');

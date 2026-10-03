@@ -3,7 +3,7 @@
 use App\Filament\Pages\PencarianTransaksi;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use Livewire\Livewire;
 
@@ -11,22 +11,22 @@ test('halaman pencarian global menampilkan transaksi dari seluruh buku kas milik
     $user = createRegularUserWithBukuKas();
     $bukuPertama = $user->buku_kas()->first();
     $bukuKedua = BukuKas::factory()->create(['user_id' => $user->id]);
-    $kategori = JenisTransaksi::factory()->create([
+    $kategori = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Transportasi',
+        'nama' => 'Transportasi',
         'tipe' => 'Pengeluaran',
     ]);
     $transaksiPertama = Transaksi::factory()->create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuPertama->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => 'Pengeluaran',
         'deskripsi' => 'Tiket kereta antarkota',
     ]);
     $transaksiKedua = Transaksi::factory()->create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKedua->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => 'Pengeluaran',
         'deskripsi' => 'Ongkos taksi',
     ]);
@@ -104,16 +104,16 @@ test('hasil pencarian dapat diedit dan dihapus oleh pemilik transaksi', function
         'nama_dompet' => 'Dompet Aksi Pencarian',
         'saldo' => 100000,
     ]);
-    $kategori = JenisTransaksi::factory()->create([
+    $kategori = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Kategori Aksi Pencarian',
+        'nama' => 'Kategori Aksi Pencarian',
         'tipe' => 'Pemasukan',
     ]);
     $transaksi = Transaksi::factory()->create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => 'Pemasukan',
         'nominal' => 50000,
         'deskripsi' => 'Record aksi pencarian',
@@ -129,7 +129,7 @@ test('hasil pencarian dapat diedit dan dihapus oleh pemilik transaksi', function
             'jenis' => 'Pemasukan',
             'buku_kas_id' => $bukuKas->id,
             'dompet_id' => $dompet->id,
-            'jenis_transaksi_id' => $kategori->id,
+            'kategori_id' => $kategori->id,
             'nominal' => 50000,
             'deskripsi' => 'Record aksi pencarian',
         ])
@@ -138,7 +138,7 @@ test('hasil pencarian dapat diedit dan dihapus oleh pemilik transaksi', function
             'jenis' => 'Pemasukan',
             'buku_kas_id' => $bukuKas->id,
             'dompet_id' => $dompet->id,
-            'jenis_transaksi_id' => $kategori->id,
+            'kategori_id' => $kategori->id,
             'tanggal' => $transaksi->tanggal,
             'nominal' => 75000,
             'deskripsi' => 'Record aksi pencarian diubah',
@@ -167,9 +167,9 @@ test('pencarian global dapat memfilter dompet dan buku kas secara bersamaan', fu
         'is_default' => true,
     ]);
     $bank = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 0]);
-    $kategori = JenisTransaksi::factory()->create([
+    $kategori = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pendapatan',
+        'nama' => 'Pendapatan',
         'tipe' => 'Pemasukan',
     ]);
 
@@ -177,7 +177,7 @@ test('pencarian global dapat memfilter dompet dan buku kas secara bersamaan', fu
         'user_id' => $user->id,
         'buku_kas_id' => $bukuPertama->id,
         'dompet_id' => $cash->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => 'Pemasukan',
         'deskripsi' => 'Pencarian gabungan sesuai',
     ]);
@@ -185,7 +185,7 @@ test('pencarian global dapat memfilter dompet dan buku kas secara bersamaan', fu
         'user_id' => $user->id,
         'buku_kas_id' => $bukuPertama->id,
         'dompet_id' => $bank->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => 'Pemasukan',
         'deskripsi' => 'Pencarian gabungan beda dompet',
     ]);
@@ -193,7 +193,7 @@ test('pencarian global dapat memfilter dompet dan buku kas secara bersamaan', fu
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKedua->id,
         'dompet_id' => $cash->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => 'Pemasukan',
         'deskripsi' => 'Pencarian gabungan beda buku',
     ]);
@@ -211,16 +211,16 @@ test('pencarian global tetap menampilkan nama dompet yang sudah dihapus', functi
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->firstOrFail();
     $dompet = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Dompet Lama', 'saldo' => 0]);
-    $kategori = JenisTransaksi::factory()->create([
+    $kategori = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Arsip',
+        'nama' => 'Arsip',
         'tipe' => 'Pengeluaran',
     ]);
     $transaksi = Transaksi::factory()->create([
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => 'Pengeluaran',
         'deskripsi' => 'Transaksi dompet lama',
     ]);

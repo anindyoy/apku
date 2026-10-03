@@ -12,9 +12,9 @@ test('transaksi observer - created pemasukan menambah saldo buku kas', function 
     $bukuKas = $user->buku_kas()->first();
     $saldoAwal = $bukuKas->saldo;
 
-    $jenis = \App\Models\JenisTransaksi::factory()->create([
+    $jenis = \App\Models\Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     // Use explicit different timestamps to trigger the observer
@@ -26,7 +26,7 @@ test('transaksi observer - created pemasukan menambah saldo buku kas', function 
         'nominal' => 50000,
         'tanggal' => now()->subDay(),
         'created_at' => now()->subHour(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test pemasukan',
     ]);
 
@@ -40,9 +40,9 @@ test('transaksi observer - created pengeluaran mengurangi saldo buku kas', funct
     $bukuKas = $user->buku_kas()->first();
     $saldoAwal = $bukuKas->saldo;
 
-    $jenis = \App\Models\JenisTransaksi::factory()->create([
+    $jenis = \App\Models\Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pengeluaran',
+        'nama' => 'Pengeluaran',
     ]);
 
     Transaksi::create([
@@ -52,7 +52,7 @@ test('transaksi observer - created pengeluaran mengurangi saldo buku kas', funct
         'nominal' => 30000,
         'tanggal' => now()->subDay(),
         'created_at' => now()->subHour(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test pengeluaran',
     ]);
 
@@ -85,9 +85,9 @@ test('transaksi observer - updated pemasukan mengubah saldo sesuai nominal baru'
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = \App\Models\JenisTransaksi::factory()->create([
+    $jenis = \App\Models\Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     $transaksi = Transaksi::create([
@@ -97,7 +97,7 @@ test('transaksi observer - updated pemasukan mengubah saldo sesuai nominal baru'
         'nominal' => 100000,
         'tanggal' => now()->subDay(),
         'created_at' => now()->subHour(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test update pemasukan',
     ]);
 
@@ -115,9 +115,9 @@ test('transaksi observer - updated pengeluaran mengubah saldo sesuai nominal bar
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = \App\Models\JenisTransaksi::factory()->create([
+    $jenis = \App\Models\Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pengeluaran',
+        'nama' => 'Pengeluaran',
     ]);
 
     $transaksi = Transaksi::create([
@@ -127,7 +127,7 @@ test('transaksi observer - updated pengeluaran mengubah saldo sesuai nominal bar
         'nominal' => 50000,
         'tanggal' => now()->subDay(),
         'created_at' => now()->subHour(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test update pengeluaran',
     ]);
 
@@ -146,9 +146,9 @@ test('transaksi observer - deleted tidak mengubah saldo', function () {
     $bukuKas = $user->buku_kas()->first();
     $saldoAwal = $bukuKas->saldo;
 
-    $jenis = \App\Models\JenisTransaksi::factory()->create([
+    $jenis = \App\Models\Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     $transaksi = Transaksi::create([
@@ -158,7 +158,7 @@ test('transaksi observer - deleted tidak mengubah saldo', function () {
         'nominal' => 100000,
         'tanggal' => now()->subDay(),
         'created_at' => now()->subHour(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test delete',
     ]);
 

@@ -2,7 +2,7 @@
 
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\ShareBuku;
 use App\Models\Transaksi;
 use App\Services\TransaksiService;
@@ -34,7 +34,7 @@ test('kolaborasi buku kas memungkinkan editor mencatat dengan dompet dan kategor
     $editor = createRegularUserWithBukuKas();
     $buku = $pemilik->buku_kas()->first();
     $dompet = Dompet::factory()->create(['user_id' => $editor->id, 'saldo' => 0]);
-    $kategori = JenisTransaksi::factory()->create([
+    $kategori = Kategori::factory()->create([
         'user_id' => $editor->id,
         'tipe' => 'Pemasukan',
     ]);
@@ -52,7 +52,7 @@ test('kolaborasi buku kas memungkinkan editor mencatat dengan dompet dan kategor
     $transaksi = app(TransaksiService::class)->buat($editor, [
         'buku_kas_id' => $buku->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'nominal' => 50000,
         'tanggal' => now(),
     ], 'Pemasukan');

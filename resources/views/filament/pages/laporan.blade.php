@@ -102,7 +102,7 @@
 
         <nav class="laporan-tabs" aria-label="Tampilan laporan">
             <button type="button" wire:click="pilihTabLaporan('umum')" @class(['active' => $tabLaporan === 'umum'])>Umum</button>
-            <button type="button" wire:click="pilihTabLaporan('aktivitas')" @class(['active' => $tabLaporan === 'aktivitas'])>Aktivitas</button>
+            <button type="button" wire:click="pilihTabLaporan('kategori')" @class(['active' => $tabLaporan === 'kategori'])>Kategori</button>
         </nav>
 
         <div wire:key="laporan-loading-{{ $laporanSiap ? 'siap' : 'awal' }}" class="laporan-loading" @if ($laporanSiap) wire:loading.block @endif role="status" aria-live="polite" aria-label="Memuat laporan">
@@ -161,7 +161,7 @@
                             <h2>{{ $judul }}</h2>
                         </header>
                         @if (count($laporan[$key]))
-                            <div class="donut" style="background: {{ $buatGradien($laporan[$key]) }}"><span>{{ count($laporan[$key]) }}<small>aktivitas</small></span></div>
+                            <div class="donut" style="background: {{ $buatGradien($laporan[$key]) }}"><span>{{ count($laporan[$key]) }}<small>kategori</small></span></div>
                             <div class="category-list">
                                 @foreach ($laporan[$key] as $item)
                                     <div><span><i style="background: {{ $item['warna'] }}"></i>{{ $item['nama'] }}</span><strong>{{ $formatRupiah($item['nominal']) }}</strong></div>
@@ -176,20 +176,20 @@
                 </div>
             @else
                 <div class="laporan-activities">
-                @foreach ([['Pengeluaran', 'aktivitasPengeluaran', 'expense'], ['Pemasukan', 'aktivitasPemasukan', 'income']] as [$judul, $key, $kelas])
+                @foreach ([['Pengeluaran', 'rincianPengeluaran', 'expense'], ['Pemasukan', 'rincianPemasukan', 'income']] as [$judul, $key, $kelas])
                     <section class="laporan-card activity-card {{ $kelas }}">
                         <header>
                             @if ($kelas === 'income') <x-heroicon-o-arrow-trending-up /> @else <x-heroicon-o-arrow-trending-down /> @endif
                             <h2>{{ $bukuKasId === 'semua' ? 'Semua Kas' : optional(\App\Models\BukuKas::find($bukuKasId))->nama_buku }} - {{ $judul }}</h2>
                         </header>
-                        @forelse ($laporan[$key] as $aktivitas)
+                        @forelse ($laporan[$key] as $kategori)
                             <details class="activity-group">
                                 <summary class="activity-group__heading">
-                                    <span><x-heroicon-o-folder-open /> {{ $aktivitas['nama'] }}</span>
-                                    <span class="activity-group__total"><strong>{{ $formatRupiah($aktivitas['nominal']) }}</strong><x-heroicon-m-chevron-down /></span>
+                                    <span><x-heroicon-o-folder-open /> {{ $kategori['nama'] }}</span>
+                                    <span class="activity-group__total"><strong>{{ $formatRupiah($kategori['nominal']) }}</strong><x-heroicon-m-chevron-down /></span>
                                 </summary>
                                 <div class="activity-group__transactions">
-                                    @foreach ($aktivitas['transaksi'] as $transaksi)
+                                    @foreach ($kategori['transaksi'] as $transaksi)
                                         <div>
                                             <time>{{ \Carbon\CarbonImmutable::parse($transaksi->tanggal)->locale('id')->translatedFormat('d M Y, H.i') }}</time>
                                             <span>{{ $transaksi->deskripsi ?: $transaksi->jenis }}</span>
@@ -200,7 +200,7 @@
                                 </div>
                             </details>
                         @empty
-                            <div class="empty-state"><x-heroicon-o-folder-open /><p>Belum ada aktivitas {{ strtolower($judul) }} pada periode ini.</p></div>
+                            <div class="empty-state"><x-heroicon-o-folder-open /><p>Belum ada kategori {{ strtolower($judul) }} pada periode ini.</p></div>
                         @endforelse
                         <footer><span>Total {{ strtolower($judul) }}</span><strong>{{ $formatRupiah($laporan[strtolower($judul)]) }}</strong></footer>
                     </section>

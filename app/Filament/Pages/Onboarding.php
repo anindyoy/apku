@@ -4,7 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Services\TransaksiService;
 use BackedEnum;
 use Filament\Forms\Components\Repeater;
@@ -79,14 +79,14 @@ class Onboarding extends Page implements HasForms
                                 ->numeric()
                                 ->minValue(0),
                         ]),
-                    Step::make('Aktivitas Pemasukan')
-                        ->description('Tambahkan aktivitas yang sering digunakan')
+                    Step::make('Kategori Pemasukan')
+                        ->description('Tambahkan kategori yang sering digunakan')
                         ->icon('heroicon-o-arrow-trending-up')
                         ->schema([
                             Repeater::make('kategori_pemasukan')
-                                ->label('Aktivitas pemasukan')
+                                ->label('Kategori pemasukan')
                                 ->simple(
-                                    TextInput::make('nama_jenis')
+                                    TextInput::make('nama')
                                         ->placeholder('Contoh: Gaji, Bonus, atau Penjualan')
                                         ->required()
                                         ->maxLength(255)
@@ -94,16 +94,16 @@ class Onboarding extends Page implements HasForms
                                 ->defaultItems(2)
                                 ->minItems(2)
                                 ->maxItems(10)
-                                ->addActionLabel('Tambah aktivitas pemasukan'),
+                                ->addActionLabel('Tambah kategori pemasukan'),
                         ]),
-                    Step::make('Aktivitas Pengeluaran')
-                        ->description('Lengkapi aktivitas pengeluaran Anda')
+                    Step::make('Kategori Pengeluaran')
+                        ->description('Lengkapi kategori pengeluaran Anda')
                         ->icon('heroicon-o-arrow-trending-down')
                         ->schema([
                             Repeater::make('kategori_pengeluaran')
-                                ->label('Aktivitas pengeluaran')
+                                ->label('Kategori pengeluaran')
                                 ->simple(
-                                    TextInput::make('nama_jenis')
+                                    TextInput::make('nama')
                                         ->placeholder('Contoh: Makan, Transportasi, atau Tagihan')
                                         ->required()
                                         ->maxLength(255)
@@ -111,7 +111,7 @@ class Onboarding extends Page implements HasForms
                                 ->defaultItems(2)
                                 ->minItems(2)
                                 ->maxItems(10)
-                                ->addActionLabel('Tambah aktivitas pengeluaran'),
+                                ->addActionLabel('Tambah kategori pengeluaran'),
                         ]),
                 ])
                     ->submitAction(new HtmlString('<button type="submit" class="fi-btn fi-btn-color-primary fi-color-primary fi-size-md">Mulai menggunakan APKu</button>')),
@@ -150,10 +150,10 @@ class Onboarding extends Page implements HasForms
 
             foreach (['Pemasukan' => 'kategori_pemasukan', 'Pengeluaran' => 'kategori_pengeluaran'] as $tipe => $field) {
                 foreach ($data[$field] as $kategori) {
-                    JenisTransaksi::create([
+                    Kategori::create([
                         'user_id' => $user->id,
                         'tipe' => $tipe,
-                        'nama_jenis' => is_array($kategori) ? $kategori['nama_jenis'] : $kategori,
+                        'nama' => is_array($kategori) ? $kategori['nama'] : $kategori,
                     ]);
                 }
             }

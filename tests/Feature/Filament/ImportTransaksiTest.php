@@ -6,7 +6,7 @@ use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Jobs\ProsesImportTransaksi;
 use App\Models\Dompet;
 use App\Models\ImportTransaksi;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\ImportTransaksiService;
@@ -31,14 +31,14 @@ function siapkanDataImportTransaksi(): array
         'saldo' => 0,
         'is_default' => true,
     ]);
-    $pemasukan = JenisTransaksi::create([
+    $pemasukan = Kategori::create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Gaji',
+        'nama' => 'Gaji',
         'tipe' => 'Pemasukan',
     ]);
-    $pengeluaran = JenisTransaksi::create([
+    $pengeluaran = Kategori::create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Makanan',
+        'nama' => 'Makanan',
         'tipe' => 'Pengeluaran',
     ]);
 
@@ -277,21 +277,21 @@ test('kategori baru hanya dibuat setelah dikonfirmasi bersama import', function 
     expect($tanpaKonfirmasi['errors'])->not->toBeEmpty()
         ->and($denganKonfirmasi['errors'])->toBe([])
         ->and(array_values($denganKonfirmasi['kategori_baru']['Pemasukan']))->toBe(['Bonus Proyek']);
-    $this->assertDatabaseMissing('jenis_transaksi', [
+    $this->assertDatabaseMissing('kategori', [
         'user_id' => $data['user']->id,
-        'nama_jenis' => 'Bonus Proyek',
+        'nama' => 'Bonus Proyek',
     ]);
 
     $hasil = $service->impor($data['user'], $file, buatKategoriOtomatis: true);
 
-    $this->assertDatabaseHas('jenis_transaksi', [
+    $this->assertDatabaseHas('kategori', [
         'user_id' => $data['user']->id,
-        'nama_jenis' => 'Bonus Proyek',
+        'nama' => 'Bonus Proyek',
         'tipe' => 'Pemasukan',
     ]);
     expect($hasil['jumlah_baris'])->toBe(1)
         ->and($data['bukuKas']->fresh()->saldo)->toBe(325000)
-        ->and(Transaksi::withoutGlobalScopes()->whereHas('jenis_transaksi', fn ($query) => $query->where('nama_jenis', 'Bonus Proyek'))->exists())->toBeTrue();
+        ->and(Transaksi::withoutGlobalScopes()->whereHas('kategori', fn ($query) => $query->where('nama', 'Bonus Proyek'))->exists())->toBeTrue();
 })->group('filament', 'import-transaksi', 'kategori-otomatis-import');
 
 test('kategori baru tidak dibuat ketika batch memiliki baris tidak valid', function () {
@@ -305,13 +305,13 @@ test('kategori baru tidak dibuat ketika batch memiliki baris tidak valid', funct
     expect(fn () => app(ImportTransaksiService::class)->impor($data['user'], $file, buatKategoriOtomatis: true))
         ->toThrow(ValidationException::class);
 
-    $this->assertDatabaseMissing('jenis_transaksi', [
+    $this->assertDatabaseMissing('kategori', [
         'user_id' => $data['user']->id,
-        'nama_jenis' => 'Keperluan Baru',
+        'nama' => 'Keperluan Baru',
     ]);
-    $this->assertDatabaseMissing('jenis_transaksi', [
+    $this->assertDatabaseMissing('kategori', [
         'user_id' => $data['user']->id,
-        'nama_jenis' => 'Pemasukan Baru',
+        'nama' => 'Pemasukan Baru',
     ]);
     expect(ImportTransaksi::query()->where('user_id', $data['user']->id)->count())->toBe(0)
         ->and($data['bukuKas']->fresh()->saldo)->toBe(0)
@@ -370,21 +370,21 @@ test('template xlsx mencantumkan opsi kas dan kategori milik pengguna setelah ko
         'saldo' => 0,
         'is_default' => false,
     ]);
-    $kategoriPemasukanTambahan = JenisTransaksi::create([
+    $kategoriPemasukanTambahan = Kategori::create([
         'user_id' => $data['user']->id,
-        'nama_jenis' => 'Bonus',
+        'nama' => 'Bonus',
         'tipe' => 'Pemasukan',
     ]);
-    $kategoriPengeluaranTambahan = JenisTransaksi::create([
+    $kategoriPengeluaranTambahan = Kategori::create([
         'user_id' => $data['user']->id,
-        'nama_jenis' => 'Transportasi',
+        'nama' => 'Transportasi',
         'tipe' => 'Pengeluaran',
     ]);
     $userLain = createRegularUserWithBukuKas();
     $userLain->buku_kas()->firstOrFail()->update(['nama_buku' => 'Kas Orang Lain']);
-    JenisTransaksi::create([
+    Kategori::create([
         'user_id' => $userLain->id,
-        'nama_jenis' => 'Kategori Orang Lain',
+        'nama' => 'Kategori Orang Lain',
         'tipe' => 'Pemasukan',
     ]);
     $pathSementara = tempnam(sys_get_temp_dir(), 'template-import-transaksi-test-');
@@ -419,8 +419,8 @@ test('template xlsx mencantumkan opsi kas dan kategori milik pengguna setelah ko
         ->and($rows[1][7])->toBe('')
         ->and(array_column(array_slice($rows, 1), 8))->toContain('Kas Utama', $kasTambahan->nama_buku)
         ->and(array_column(array_slice($rows, 1), 9))->toContain($data['dompet']->nama_dompet, $dompetTambahan->nama_dompet)
-        ->and(array_column(array_slice($rows, 1), 10))->toContain($data['pemasukan']->nama_jenis, $kategoriPemasukanTambahan->nama_jenis)
-        ->and(array_column(array_slice($rows, 1), 11))->toContain($data['pengeluaran']->nama_jenis, $kategoriPengeluaranTambahan->nama_jenis)
+        ->and(array_column(array_slice($rows, 1), 10))->toContain($data['pemasukan']->nama, $kategoriPemasukanTambahan->nama)
+        ->and(array_column(array_slice($rows, 1), 11))->toContain($data['pengeluaran']->nama, $kategoriPengeluaranTambahan->nama)
         ->and(collect(array_slice($rows, 1, 3))->every(fn (array $row): bool => in_array($row[2], array_column(array_slice($rows, 1), 8), true)))->toBeTrue()
         ->and(collect(array_slice($rows, 1, 3))->every(fn (array $row): bool => in_array($row[3], array_column(array_slice($rows, 1), 9), true)))->toBeTrue()
         ->and(array_column(array_slice($rows, 1, 3), 6))->toBe(['Gaji bulan berjalan', '', 'Belanja kebutuhan'])
@@ -508,7 +508,7 @@ test('laporan error xlsx memuat data asli dan alasan kegagalan', function () {
         ->and($baris[1][5])->toBe('Gaji')
         ->and($baris[1][6])->toBe('-25000')
         ->and($baris[1][8])->toContain('kolom nominal')
-        ->and($baris[1][8])->toContain('kolom aktivitas');
+        ->and($baris[1][8])->toContain('kolom kategori');
 })->group('filament', 'import-transaksi', 'laporan-error-import');
 
 test('file yang sama tidak dapat diimpor dua kali', function () {

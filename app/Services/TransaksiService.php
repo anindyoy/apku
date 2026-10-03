@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -58,13 +58,13 @@ class TransaksiService
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($data['buku_kas_id']);
         $dompet = Dompet::withoutGlobalScopes()->findOrFail($data['dompet_id']);
         $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
-        $this->pastikanKategoriValid($user, $data['jenis_transaksi_id'] ?? null, $jenis);
+        $this->pastikanKategoriValid($user, $data['kategori_id'] ?? null, $jenis);
 
         return DB::transaction(function () use ($user, $data, $jenis): Transaksi {
             $bukuKas = BukuKas::withoutGlobalScopes()->whereKey($data['buku_kas_id'])->lockForUpdate()->firstOrFail();
             $dompet = Dompet::withoutGlobalScopes()->whereKey($data['dompet_id'])->lockForUpdate()->firstOrFail();
             $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
-            $this->pastikanKategoriValid($user, $data['jenis_transaksi_id'] ?? null, $jenis);
+            $this->pastikanKategoriValid($user, $data['kategori_id'] ?? null, $jenis);
 
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
                 'user_id' => $user->id,
@@ -72,7 +72,7 @@ class TransaksiService
                 'pengaruhi_saldo' => $data['pengaruhi_saldo'] ?? true,
                 'buku_kas_id' => $bukuKas->id,
                 'dompet_id' => $dompet->id,
-                'jenis_transaksi_id' => $data['jenis_transaksi_id'] ?? null,
+                'kategori_id' => $data['kategori_id'] ?? null,
                 'tanggal' => $data['tanggal'] ?? now(),
                 'nominal' => (int) $data['nominal'],
                 'jenis' => $jenis,
@@ -182,7 +182,7 @@ class TransaksiService
             }
 
             $dataBaru = array_merge($terkunci->only([
-                'buku_kas_id', 'dompet_id', 'jenis_transaksi_id', 'tanggal', 'nominal', 'jenis', 'deskripsi',
+                'buku_kas_id', 'dompet_id', 'kategori_id', 'tanggal', 'nominal', 'jenis', 'deskripsi',
             ]), $data);
             $bukuKasBaru = BukuKas::withoutGlobalScopes()->findOrFail($dataBaru['buku_kas_id']);
             $dompetBaru = Dompet::withoutGlobalScopes()->findOrFail($dataBaru['dompet_id']);
@@ -345,11 +345,11 @@ class TransaksiService
     private function pastikanKategoriValid(User $user, ?int $kategoriId, string $jenis): void
     {
         $kategori = $kategoriId
-            ? JenisTransaksi::withoutGlobalScopes()->find($kategoriId)
+            ? Kategori::withoutGlobalScopes()->find($kategoriId)
             : null;
 
         if (! $kategori || $kategori->user_id !== $user->id || $kategori->tipe !== $jenis) {
-            throw new AuthorizationException('Aktivitas transaksi tidak dapat digunakan.');
+            throw new AuthorizationException('Kategori transaksi tidak dapat digunakan.');
         }
     }
 

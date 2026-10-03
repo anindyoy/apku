@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -33,7 +33,7 @@ class TransaksiSeeder extends Seeder
         $users = User::all()->except(1);
 
         // Muat jenis transaksi berdasarkan pengguna dan tipe di awal.
-        $jenisByUser = JenisTransaksi::all()->groupBy(fn ($jt) => "{$jt->user_id}_{$jt->tipe}");
+        $jenisByUser = Kategori::all()->groupBy(fn ($jt) => "{$jt->user_id}_{$jt->tipe}");
 
         foreach ($users as $user) {
             $dompetId = DB::table('dompet')->insertGetId([
@@ -73,7 +73,7 @@ class TransaksiSeeder extends Seeder
                     'user_id' => $user->id,
                     'buku_kas_id' => 0, // Nilai sementara sebelum insert massal selesai.
                     'dompet_id' => $dompetId,
-                    'jenis_transaksi_id' => null,
+                    'kategori_id' => null,
                     'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
                     'nominal' => $nominal,
                     'jenis' => 'Pemasukan',
@@ -140,7 +140,7 @@ class TransaksiSeeder extends Seeder
                         'user_id' => $user->id,
                         'buku_kas_id' => $kasId,
                         'dompet_id' => $dompetId,
-                        'jenis_transaksi_id' => null,
+                        'kategori_id' => null,
                         'tanggal' => $tanggal,
                         'nominal' => $nominal,
                         'jenis' => 'Transfer Pengeluaran',
@@ -157,7 +157,7 @@ class TransaksiSeeder extends Seeder
                         'user_id' => $user->id,
                         'buku_kas_id' => $tujuanId,
                         'dompet_id' => $dompetId,
-                        'jenis_transaksi_id' => null,
+                        'kategori_id' => null,
                         'tanggal' => $tanggal,
                         'nominal' => $nominal,
                         'jenis' => 'Transfer Pemasukan',
@@ -178,7 +178,7 @@ class TransaksiSeeder extends Seeder
 
                     // Ambil ID jenis transaksi dari data yang sudah dimuat.
                     $cacheKey = "{$user->id}_{$jenis}";
-                    $jenisTransaksiId = $jenisByUser[$cacheKey]?->random()?->id;
+                    $kategoriId = $jenisByUser[$cacheKey]?->random()?->id;
 
                     $baseTanggal = DB::table('transaksi')
                         ->where('buku_kas_id', $kasId)
@@ -189,7 +189,7 @@ class TransaksiSeeder extends Seeder
                         'user_id' => $user->id,
                         'buku_kas_id' => $kasId,
                         'dompet_id' => $dompetId,
-                        'jenis_transaksi_id' => $jenisTransaksiId,
+                        'kategori_id' => $kategoriId,
                         'tanggal' => fake()->dateTimeBetween($baseTanggal, 'now'),
                         'nominal' => $nominal,
                         'jenis' => $jenis,

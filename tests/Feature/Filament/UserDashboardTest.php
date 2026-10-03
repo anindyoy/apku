@@ -10,7 +10,7 @@ use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Filament\Resources\UtangResource;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Models\UtangPiutang;
@@ -54,7 +54,7 @@ test('dashboard user menampilkan saldo milik sendiri dan lima transaksi terbaru 
         ->assertCanSeeTableRecords($records);
 });
 
-test('dashboard user menghitung sisa utang piutang dan tiga aktivitas terakhir', function () {
+test('dashboard user menghitung sisa utang piutang dan tiga pembaruan terakhir', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
     $expected = [];
@@ -235,11 +235,11 @@ test('dashboard user tombol tambah membuka form dan menyimpan transaksi', functi
     $user = User::factory()->create();
     $kas = BukuKas::factory()->create(['user_id' => $user->id]);
     $dompet = Dompet::factory()->create(['user_id' => $user->id, 'is_default' => true]);
-    $jenis = JenisTransaksi::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
+    $jenis = Kategori::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
     $page = Livewire::actingAs($user)->test(Dashboard::class)->mountAction('tambahTransaksi')->assertActionMounted('tambahTransaksi');
     $page->setActionData([
         'jenis_form' => 'pemasukan', 'buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $jenis->id, 'nominal' => 45000, 'tanggal' => now()->format('Y-m-d H:i:s'),
+        'kategori_id' => $jenis->id, 'nominal' => 45000, 'tanggal' => now()->format('Y-m-d H:i:s'),
         'deskripsi' => 'Transaksi dari dashboard',
     ])->callMountedAction()->assertHasNoActionErrors();
     $record = Transaksi::where('user_id', $user->id)->sole();
@@ -270,9 +270,9 @@ test('dashboard user aksi baris mengubah dan menghapus transaksi beserta saldo',
     $user = User::factory()->create();
     $kas = BukuKas::factory()->create(['user_id' => $user->id]);
     $dompet = Dompet::factory()->create(['user_id' => $user->id, 'is_default' => true]);
-    $jenis = JenisTransaksi::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
+    $jenis = Kategori::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
     $this->actingAs($user);
-    $data = ['buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id, 'jenis_transaksi_id' => $jenis->id,
+    $data = ['buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id, 'kategori_id' => $jenis->id,
         'nominal' => 50000, 'tanggal' => now()->format('Y-m-d H:i:s'), 'deskripsi' => 'Aksi dashboard'];
     $record = app(TransaksiService::class)->buat($user, $data, 'Pemasukan');
     $page = Livewire::test(Dashboard::class)

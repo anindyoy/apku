@@ -183,7 +183,7 @@ class TransaksiResource extends Resource
 
             TextColumn::make('kategori')
                 ->visibleFrom('md')
-                ->label('Aktivitas')
+                ->label('Kategori')
                 ->getStateUsing(fn (Transaksi $record) => static::getKategoriLabel($record))
                 ->searchable(query: function (Builder $query, string $search): Builder {
                     return $query
@@ -236,7 +236,7 @@ class TransaksiResource extends Resource
             'Transfer Pengeluaran' => $transaksi->tipe_transfer === 'dompet'
                 ? 'Transfer keluar dompet'
                 : 'Transfer ke '.($transaksi->tujuan_buku_tabungan?->nama_buku ?? '-'),
-            default => $transaksi->jenis_transaksi?->nama_jenis,
+            default => $transaksi->kategori?->nama,
         };
 
         return filled($label) ? Str::ucfirst($label) : null;

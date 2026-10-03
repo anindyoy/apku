@@ -65,7 +65,7 @@ test('menu keuangan pengguna reguler tetap tersedia', function () {
         ->and(Dashboard::shouldRegisterNavigation())->toBeTrue();
 });
 
-test('daftar pengguna tidak memuat metadata aktivitas keuangan', function () {
+test('daftar pengguna tidak memuat metadata kategori keuangan', function () {
     $admin = createAdminUser();
     $this->actingAs($admin);
 

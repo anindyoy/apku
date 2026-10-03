@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -118,31 +118,31 @@ class UserTransactionSeeder extends Seeder
             ['saldo' => 0, 'is_default' => true, 'description' => 'Dompet tunai utama']
         );
 
-        // --- 2. Pastikan user punya JenisTransaksi ---
-        $pemasukanType = JenisTransaksi::where('user_id', $user->id)
+        // --- 2. Pastikan user punya Kategori ---
+        $pemasukanType = Kategori::where('user_id', $user->id)
             ->where('tipe', 'Pemasukan')
             ->first();
 
         if (! $pemasukanType) {
-            $pemasukanType = JenisTransaksi::create([
+            $pemasukanType = Kategori::create([
                 'user_id' => $user->id,
-                'nama_jenis' => 'Gaji',
+                'nama' => 'Gaji',
                 'tipe' => 'Pemasukan',
             ]);
-            $this->line('  Created JenisTransaksi Pemasukan: Gaji');
+            $this->line('  Created Kategori Pemasukan: Gaji');
         }
 
-        $pengeluaranType = JenisTransaksi::where('user_id', $user->id)
+        $pengeluaranType = Kategori::where('user_id', $user->id)
             ->where('tipe', 'Pengeluaran')
             ->first();
 
         if (! $pengeluaranType) {
-            $pengeluaranType = JenisTransaksi::create([
+            $pengeluaranType = Kategori::create([
                 'user_id' => $user->id,
-                'nama_jenis' => 'Makanan',
+                'nama' => 'Makanan',
                 'tipe' => 'Pengeluaran',
             ]);
-            $this->line('  Created JenisTransaksi Pengeluaran: Makanan');
+            $this->line('  Created Kategori Pengeluaran: Makanan');
         }
 
         // Tahap 3: buat transaksi untuk beberapa bulan terakhir.
@@ -189,7 +189,7 @@ class UserTransactionSeeder extends Seeder
                     'buku_kas_id' => $bukuKas->id,
                     'dompet_id' => $dompet->id,
                     'user_id' => $user->id,
-                    'jenis_transaksi_id' => $pemasukanType->id,
+                    'kategori_id' => $pemasukanType->id,
                     'tanggal' => $date->format('Y-m-d H:i:s'),
                     'nominal' => $pemasukanNominals[array_rand($pemasukanNominals)],
                     'jenis' => 'Pemasukan',
@@ -215,7 +215,7 @@ class UserTransactionSeeder extends Seeder
                     'buku_kas_id' => $bukuKas->id,
                     'dompet_id' => $dompet->id,
                     'user_id' => $user->id,
-                    'jenis_transaksi_id' => $pengeluaranType->id,
+                    'kategori_id' => $pengeluaranType->id,
                     'tanggal' => $date->format('Y-m-d H:i:s'),
                     'nominal' => $pengeluaranNominals[array_rand($pengeluaranNominals)],
                     'jenis' => 'Pengeluaran',

@@ -4,7 +4,7 @@ APKu adalah aplikasi web untuk mencatat dan memantau keuangan pribadi melalui ka
 
 ## Fitur pengguna
 
-- **Akun dan pengaturan awal:** registrasi, verifikasi email, pemulihan kata sandi, pengaturan profil, serta panduan awal untuk membuat kas, dompet, saldo awal, dan aktivitas transaksi.
+- **Akun dan pengaturan awal:** registrasi, verifikasi email, pemulihan kata sandi, pengaturan profil, serta panduan awal untuk membuat kas, dompet, saldo awal, dan kategori transaksi.
 - **Dashboard:** ringkasan saldo kas dan dompet, transaksi terbaru, sisa utang-piutang, serta status langganan. Bagian dashboard dapat diatur urutan dan tampilannya.
 - **Transaksi:** catat pemasukan, pengeluaran, transfer antar-kas, dan pemindahan saldo antar-dompet. Transaksi dapat dicari, difilter, serta diimpor dari CSV atau XLSX dengan pratinjau dan riwayat impor.
 - **Kas dan dompet:** kelola kas, dompet, saldo, dan pilihan utama. Audit saldo dompet membantu mencatat selisih antara saldo aplikasi dan saldo riil.

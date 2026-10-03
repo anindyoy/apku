@@ -222,7 +222,7 @@ class ListTransaksis extends ListRecords
                                     ->live()
                                     ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                                 Select::make('pemetaan.kategori')
-                                    ->label('Kolom aktivitas')
+                                    ->label('Kolom kategori')
                                     ->options(fn (Get $get): array => $get('header_options') ?? [])
                                     ->required()
                                     ->live()
@@ -247,8 +247,8 @@ class ListTransaksis extends ListRecords
                                     ->helperText('Matikan saat mengimpor riwayat lama agar saldo saat ini tidak berubah.')
                                     ->default(true),
                                 Toggle::make('buat_kategori_otomatis')
-                                    ->label('Buat aktivitas yang belum tersedia')
-                                    ->helperText('Aktivitas baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
+                                    ->label('Buat kategori yang belum tersedia')
+                                    ->helperText('Kategori baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
                                     ->default(false)
                                     ->live()
                                     ->afterStateUpdated(fn (bool $state, Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $state, $set)),
@@ -335,7 +335,7 @@ class ListTransaksis extends ListRecords
         $html = '<div class="space-y-2"><p><strong>'.$jumlah.'</strong> baris · Pemasukan Rp '.$pemasukan.' · Pengeluaran Rp '.$pengeluaran.'</p>';
 
         if ($kategoriBaru !== []) {
-            $html .= '<div class="text-warning-600"><strong>Aktivitas yang akan dibuat:</strong><ul class="list-disc pl-5 text-sm">';
+            $html .= '<div class="text-warning-600"><strong>Kategori yang akan dibuat:</strong><ul class="list-disc pl-5 text-sm">';
 
             foreach ($kategoriBaru as $jenis => $daftar) {
                 foreach ($daftar as $nama) {

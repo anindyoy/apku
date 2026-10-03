@@ -3,7 +3,7 @@
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Services\TransaksiService;
 use Livewire\Livewire;
@@ -11,7 +11,7 @@ use Livewire\Livewire;
 test('buku kas dengan transaksi menampilkan tombol hapus', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = Kategori::where('tipe', 'Pemasukan')->first();
 
     Transaksi::create([
         'user_id' => $user->id,
@@ -19,7 +19,7 @@ test('buku kas dengan transaksi menampilkan tombol hapus', function () {
         'jenis' => 'Pemasukan',
         'nominal' => 50000,
         'tanggal' => now(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Test transaksi untuk delete action',
     ]);
 
@@ -75,7 +75,7 @@ test('transaksi dan saldo dipindahkan sebelum buku kas dihapus', function (int $
 test('buku kas tujuan wajib milik pengguna yang sama', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
-    $jenis = JenisTransaksi::where('tipe', 'Pemasukan')->first();
+    $jenis = Kategori::where('tipe', 'Pemasukan')->first();
     $userLain = createRegularUserWithBukuKas();
     $bukuKasUserLain = $userLain->buku_kas()->first();
 
@@ -85,7 +85,7 @@ test('buku kas tujuan wajib milik pengguna yang sama', function () {
         'jenis' => 'Pemasukan',
         'nominal' => 50000,
         'tanggal' => now(),
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'deskripsi' => 'Transaksi tetap aman',
     ]);
 

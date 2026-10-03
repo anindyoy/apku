@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\BukuKas;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Database\Seeders\TransaksiSeeder;
@@ -36,8 +36,8 @@ test('user transaction seeder mengisi buku kas dan dompet yang valid', function 
 
 test('transaksi seeder menghasilkan relasi valid saldo konsisten dan kode transfer uuid', function () {
     $user = User::factory()->create(['role' => 'reguler']);
-    JenisTransaksi::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
-    JenisTransaksi::factory()->create(['user_id' => $user->id, 'tipe' => 'Pengeluaran']);
+    Kategori::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
+    Kategori::factory()->create(['user_id' => $user->id, 'tipe' => 'Pengeluaran']);
 
     app(TransaksiSeeder::class)->run();
 

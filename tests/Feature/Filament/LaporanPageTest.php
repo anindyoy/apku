@@ -3,12 +3,12 @@
 use App\Filament\Pages\Laporan;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Livewire\Livewire;
 
-function buatTransaksiLaporan(User $user, BukuKas $bukuKas, JenisTransaksi $kategori, string $jenis, int $nominal, string $tanggal): Transaksi
+function buatTransaksiLaporan(User $user, BukuKas $bukuKas, Kategori $kategori, string $jenis, int $nominal, string $tanggal): Transaksi
 {
     $dompet = Dompet::withoutGlobalScopes()->firstOrCreate(
         ['user_id' => $user->id, 'nama_dompet' => 'Cash'],
@@ -19,7 +19,7 @@ function buatTransaksiLaporan(User $user, BukuKas $bukuKas, JenisTransaksi $kate
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori->id,
+        'kategori_id' => $kategori->id,
         'jenis' => $jenis,
         'nominal' => $nominal,
         'tanggal' => $tanggal,
@@ -30,7 +30,7 @@ function buatTransaksiLaporanPadaDompet(
     User $user,
     BukuKas $bukuKas,
     Dompet $dompet,
-    ?JenisTransaksi $kategori,
+    ?Kategori $kategori,
     string $jenis,
     int $nominal,
     string $tanggal,
@@ -40,7 +40,7 @@ function buatTransaksiLaporanPadaDompet(
         'user_id' => $user->id,
         'buku_kas_id' => $bukuKas->id,
         'dompet_id' => $dompet->id,
-        'jenis_transaksi_id' => $kategori?->id,
+        'kategori_id' => $kategori?->id,
         'jenis' => $jenis,
         'nominal' => $nominal,
         'tanggal' => $tanggal,
@@ -73,8 +73,8 @@ test('laporan menunda query transaksi sampai halaman selesai dibuka', function (
 test('laporan bulanan menghitung saldo dan membatasi data milik pengguna', function () {
     $user = User::factory()->create(['role' => 'user']);
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 1150]);
-    $kategoriMasuk = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Gaji', 'tipe' => 'Pemasukan']);
-    $kategoriKeluar = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Belanja', 'tipe' => 'Pengeluaran']);
+    $kategoriMasuk = Kategori::create(['user_id' => $user->id, 'nama' => 'Gaji', 'tipe' => 'Pemasukan']);
+    $kategoriKeluar = Kategori::create(['user_id' => $user->id, 'nama' => 'Belanja', 'tipe' => 'Pengeluaran']);
 
     buatTransaksiLaporan($user, $bukuKas, $kategoriMasuk, 'Pemasukan', 100, '2026-01-10 10:00:00');
     buatTransaksiLaporan($user, $bukuKas, $kategoriMasuk, 'Pemasukan', 500, '2026-08-05 10:00:00');
@@ -83,7 +83,7 @@ test('laporan bulanan menghitung saldo dan membatasi data milik pengguna', funct
 
     $userLain = User::factory()->create(['role' => 'user']);
     $bukuKasLain = BukuKas::create(['user_id' => $userLain->id, 'nama_buku' => 'Kas Lain', 'saldo' => 9999]);
-    $kategoriLain = JenisTransaksi::create(['user_id' => $userLain->id, 'nama_jenis' => 'Rahasia', 'tipe' => 'Pemasukan']);
+    $kategoriLain = Kategori::create(['user_id' => $userLain->id, 'nama' => 'Rahasia', 'tipe' => 'Pemasukan']);
     buatTransaksiLaporan($userLain, $bukuKasLain, $kategoriLain, 'Pemasukan', 9999, '2026-08-05 10:00:00');
 
     $komponen = Livewire::actingAs($user)
@@ -108,7 +108,7 @@ test('laporan bulanan menghitung saldo dan membatasi data milik pengguna', funct
 test('laporan mendukung periode harian tahunan custom dan navigasi periode', function () {
     $user = User::factory()->create(['role' => 'user']);
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 600]);
-    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Proyek', 'tipe' => 'Pemasukan']);
+    $kategori = Kategori::create(['user_id' => $user->id, 'nama' => 'Proyek', 'tipe' => 'Pemasukan']);
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 100, '2026-08-01 09:00:00');
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 200, '2026-08-15 09:00:00');
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 300, '2026-09-01 09:00:00');
@@ -171,10 +171,10 @@ test('filter laporan dikelompokkan di kiri dan export dipisahkan di kanan', func
         ->toBeLessThan(strpos($html, 'laporan-filter__export'));
 });
 
-test('tab aktivitas menampilkan transaksi yang dikelompokkan berdasarkan kategori', function () {
+test('tab kategori menampilkan transaksi yang dikelompokkan berdasarkan kategori', function () {
     $user = User::factory()->create(['role' => 'user']);
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 150]);
-    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Makan', 'tipe' => 'Pengeluaran']);
+    $kategori = Kategori::create(['user_id' => $user->id, 'nama' => 'Makan', 'tipe' => 'Pengeluaran']);
 
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pengeluaran', 50, now()->format('Y-m-05 08:30:00'));
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pengeluaran', 100, now()->format('Y-m-10 12:00:00'));
@@ -182,19 +182,19 @@ test('tab aktivitas menampilkan transaksi yang dikelompokkan berdasarkan kategor
     $komponen = Livewire::actingAs($user)
         ->test(Laporan::class)
         ->call('muatLaporan')
-        ->call('pilihTabLaporan', 'aktivitas');
+        ->call('pilihTabLaporan', 'kategori');
 
-    $aktivitas = $komponen->instance()->dataLaporan['aktivitasPengeluaran'];
+    $kategori = $komponen->instance()->dataLaporan['rincianPengeluaran'];
 
     $html = $komponen->html();
 
-    expect($komponen->get('tabLaporan'))->toBe('aktivitas')
-        ->and($aktivitas)->toHaveCount(1)
-        ->and($aktivitas[0]['nama'])->toBe('Makan')
-        ->and($aktivitas[0]['nominal'])->toBe(150)
-        ->and($aktivitas[0]['transaksi'])->toHaveCount(2)
+    expect($komponen->get('tabLaporan'))->toBe('kategori')
+        ->and($kategori)->toHaveCount(1)
+        ->and($kategori[0]['nama'])->toBe('Makan')
+        ->and($kategori[0]['nominal'])->toBe(150)
+        ->and($kategori[0]['transaksi'])->toHaveCount(2)
         ->and($html)->toContain('Semua Kas - Pengeluaran')
-        ->toContain('>Aktivitas</button>')
+        ->toContain('>Kategori</button>')
         ->toContain('<details class="activity-group">')
         ->not->toContain('<details class="activity-group" open>')
         ->toContain('class="laporan-content"')
@@ -210,7 +210,7 @@ test('tab aktivitas menampilkan transaksi yang dikelompokkan berdasarkan kategor
 test('laporan dapat diunduh sebagai pdf dan excel sesuai filter aktif', function () {
     $user = User::factory()->create(['role' => 'user']);
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Ekspor', 'saldo' => 750]);
-    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Bonus', 'tipe' => 'Pemasukan']);
+    $kategori = Kategori::create(['user_id' => $user->id, 'nama' => 'Bonus', 'tipe' => 'Pemasukan']);
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 750, '2026-08-15 09:00:00');
     buatTransaksiLaporan($user, $bukuKas, $kategori, 'Pemasukan', 999, '2026-09-15 09:00:00');
 
@@ -239,7 +239,7 @@ test('laporan memfilter dompet dan tidak menghitung transfer dompet sebagai arus
     $bukuKas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama', 'saldo' => 1300]);
     $cash = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Cash', 'saldo' => 700, 'is_default' => true]);
     $bank = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Bank', 'saldo' => 600]);
-    $kategori = JenisTransaksi::create(['user_id' => $user->id, 'nama_jenis' => 'Gaji', 'tipe' => 'Pemasukan']);
+    $kategori = Kategori::create(['user_id' => $user->id, 'nama' => 'Gaji', 'tipe' => 'Pemasukan']);
 
     buatTransaksiLaporanPadaDompet($user, $bukuKas, $cash, $kategori, 'Pemasukan', 1000, '2026-08-01 09:00:00');
     buatTransaksiLaporanPadaDompet($user, $bukuKas, $cash, null, 'Transfer Pengeluaran', 300, '2026-08-10 09:00:00', 'dompet');

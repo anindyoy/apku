@@ -4,7 +4,7 @@ namespace App\Livewire\Kategori;
 
 use Livewire\Component;
 use Filament\Tables\Table;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -35,14 +35,14 @@ class Pemasukan extends Component implements HasTable, HasForms
     public function table(Table $table): Table
     {
         return $table
-            ->headerActions(JenisTransaksi::headerActions('Pemasukan'))
-            ->actions(JenisTransaksi::actions('Pemasukan'))
+            ->headerActions(Kategori::headerActions('Pemasukan'))
+            ->actions(Kategori::actions('Pemasukan'))
             ->query(
-                JenisTransaksi::query()
+                Kategori::query()
                     ->whereTipe('Pemasukan')
-                    ->orderby('nama_jenis')
+                    ->orderby('nama')
             )
-            ->columns(JenisTransaksi::columns());
+            ->columns(Kategori::columns());
     }
 
     public function render()

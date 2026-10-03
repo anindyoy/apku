@@ -89,14 +89,14 @@
             <div><h2>Riwayat transaksi</h2><p class="muted">{{ $transaksi->total() }} transaksi · termasuk transfer@if ($pencarian !== '') · Semua tanggal@endif</p></div>
             <form method="get" action="{{ route('kas.publik', ['token' => $share->public_token]) }}">
                 <label>Bulan<input type="month" name="bulan" value="{{ $bulan }}" required></label>
-                <label>Cari transaksi (semua tanggal)<input type="search" name="q" value="{{ $pencarian }}" placeholder="Deskripsi, aktivitas, atau jenis" maxlength="200"></label>
+                <label>Cari transaksi (semua tanggal)<input type="search" name="q" value="{{ $pencarian }}" placeholder="Deskripsi, kategori, atau jenis" maxlength="200"></label>
                 <button type="submit">Tampilkan</button>
                 @if ($pencarian !== '')<a href="{{ route('kas.publik', ['token' => $share->public_token, 'bulan' => $bulan]) }}">Hapus pencarian</a>@endif
             </form>
         </div>
         <div class="table-wrap">
             <table>
-                <thead><tr><th>Tanggal</th><th>Jenis</th><th>Aktivitas / Deskripsi</th><th class="number">Nominal</th></tr></thead>
+                <thead><tr><th>Tanggal</th><th>Jenis</th><th>Kategori / Deskripsi</th><th class="number">Nominal</th></tr></thead>
                 <tbody>
                 @forelse ($transaksi as $item)
                     <tr>
@@ -107,7 +107,7 @@
                                     <span class="public-mobile-amount">Rp {{ number_format($item->nominal, 0, ',', '.') }}</span>
                                 </div>
                                 <div class="public-mobile-detail">
-                                    <span class="public-mobile-activity">{{ $item->aktivitas ? ucfirst($item->aktivitas) : $item->jenis }}</span>
+                                    <span class="public-mobile-activity">{{ $item->kategori ? ucfirst($item->kategori) : $item->jenis }}</span>
                                     <span class="public-mobile-date">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</span>
                                 </div>
                                 @if ($item->deskripsi)<p class="public-mobile-description">{{ $item->deskripsi }}</p>@endif
@@ -115,7 +115,7 @@
                         </td>
                         <td class="desktop-cell date">{{ \Carbon\Carbon::parse($item->tanggal)->format('d M Y') }}</td>
                         <td class="desktop-cell">{{ $item->jenis }}</td>
-                        <td class="desktop-cell">{{ $item->aktivitas ? ucfirst($item->aktivitas) : $item->jenis }}@if ($item->deskripsi)<p class="muted">{{ $item->deskripsi }}</p>@endif</td>
+                        <td class="desktop-cell">{{ $item->kategori ? ucfirst($item->kategori) : $item->jenis }}@if ($item->deskripsi)<p class="muted">{{ $item->deskripsi }}</p>@endif</td>
                         <td class="desktop-cell number {{ in_array($item->jenis, ['Pemasukan', 'Transfer Pemasukan']) ? 'incoming' : 'outgoing' }}">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
                     </tr>
                 @empty

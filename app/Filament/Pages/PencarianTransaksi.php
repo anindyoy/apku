@@ -42,7 +42,7 @@ class PencarianTransaksi extends Page implements HasTable
             ->query(function (): Builder {
                 $query = Transaksi::query()->with([
                     'buku_kas:id,user_id,nama_buku,pernah_dikolaborasikan',
-                    'jenis_transaksi:id,nama_jenis',
+                    'kategori:id,nama',
                     'asal_buku_tabungan:id,nama_buku',
                     'tujuan_buku_tabungan:id,nama_buku',
                     'user:id,name',
@@ -53,7 +53,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ? $query
                     : $query->whereRaw('1 = 0');
             })
-            ->searchPlaceholder('Cari deskripsi, aktivitas, kas, tipe, nominal, atau pengguna...')
+            ->searchPlaceholder('Cari deskripsi, kategori, kas, tipe, nominal, atau pengguna...')
             ->emptyStateHeading(fn (): string => filled($this->getTableSearch())
                 ? 'Transaksi tidak ditemukan'
                 : 'Masukkan kata pencarian')
@@ -94,13 +94,13 @@ class PencarianTransaksi extends Page implements HasTable
 
                 TextColumn::make('kategori')
                     ->visibleFrom('md')
-                    ->label('Aktivitas')
+                    ->label('Kategori')
                     ->getStateUsing(fn (Transaksi $record): ?string => TransaksiResource::getKategoriLabel($record))
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function (Builder $query) use ($search): void {
                             $query
                                 ->where('deskripsi', 'like', "%{$search}%")
-                                ->orWhereHas('jenis_transaksi', fn (Builder $query) => $query->where('nama_jenis', 'like', "%{$search}%"))
+                                ->orWhereHas('kategori', fn (Builder $query) => $query->where('nama', 'like', "%{$search}%"))
                                 ->orWhereHas('asal_buku_tabungan', fn (Builder $query) => $query->where('nama_buku', 'like', "%{$search}%"))
                                 ->orWhereHas('tujuan_buku_tabungan', fn (Builder $query) => $query->where('nama_buku', 'like', "%{$search}%"))
                                 ->orWhereHas('user', fn (Builder $query) => $query->where('name', 'like', "%{$search}%"));

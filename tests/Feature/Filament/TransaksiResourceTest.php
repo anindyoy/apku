@@ -3,7 +3,7 @@
 use App\Filament\Resources\TransaksiResource;
 use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -29,22 +29,22 @@ test('transaksi resource dapat menampilkan halaman list', function () {
 })
     ->group('filament', 'transaksi');
 
-test('kolom aktivitas transaksi selalu diawali huruf kapital', function () {
+test('kolom kategori transaksi selalu diawali huruf kapital', function () {
     $user = createRegularUserWithBukuKas();
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'transfer',
+        'nama' => 'transfer',
     ]);
     $transaksi = Transaksi::factory()->create([
         'user_id' => $user->id,
         'buku_kas_id' => $user->buku_kas()->firstOrFail()->id,
         'jenis' => 'Pemasukan',
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
     ]);
 
     expect(TransaksiResource::getKategoriLabel($transaksi))->toBe('Transfer');
 })
-    ->group('filament', 'transaksi', 'aktivitas-kapital');
+    ->group('filament', 'transaksi', 'kategori-kapital');
 
 test('warna record transaksi dibedakan berdasarkan tipe transaksi', function () {
     expect(TransaksiResource::getWarnaTipeTransaksi('Pemasukan'))->toBe('success')
@@ -138,7 +138,7 @@ test('header transaksi mengikuti visibilitas responsif isi kolom', function () {
         $labels[] = $label;
         expect($header->getAttribute('class'))->toContain($label === 'Transaksi' ? 'md:fi-hidden' : 'md:fi-visible');
     }
-    expect($labels)->toBe(['Transaksi', 'Tipe', 'Tanggal', 'Kas', 'Aktivitas', 'Nominal']);
+    expect($labels)->toBe(['Transaksi', 'Tipe', 'Tanggal', 'Kas', 'Kategori', 'Nominal']);
 
     $script = <<<'JS'
     import assert from 'node:assert/strict';
@@ -173,9 +173,9 @@ test('transaksi resource dapat mengedit nominal transaksi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     $transaksi = Transaksi::factory()->create([
@@ -183,7 +183,7 @@ test('transaksi resource dapat mengedit nominal transaksi', function () {
         'buku_kas_id' => $bukuKas->id,
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
     ]);
 
     Livewire::actingAs($user)
@@ -201,9 +201,9 @@ test('transaksi resource dapat menghapus transaksi pemasukan', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     $transaksi = Transaksi::factory()->create([
@@ -211,7 +211,7 @@ test('transaksi resource dapat menghapus transaksi pemasukan', function () {
         'buku_kas_id' => $bukuKas->id,
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
     ]);
 
     Livewire::actingAs($user)

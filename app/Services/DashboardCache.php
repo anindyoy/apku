@@ -17,7 +17,7 @@ class DashboardCache
         'piutang' => ['utang_piutang', 'utang_piutang_detail'],
         'langganan' => ['users', 'langganans'],
         'settings' => ['users'],
-        'transaksi' => ['transaksi', 'users', 'buku_kas', 'dompet', 'jenis_transaksi', 'share_buku'],
+        'transaksi' => ['transaksi', 'users', 'buku_kas', 'dompet', 'kategori', 'share_buku'],
         'admin' => ['users', 'langganans'],
     ];
 

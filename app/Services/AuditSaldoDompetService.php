@@ -6,7 +6,7 @@ use App\Models\AuditSaldoDompet;
 use App\Models\AuditSaldoDompetDetail;
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -101,9 +101,9 @@ class AuditSaldoDompetService
                 }
 
                 $jenis = $selisih > 0 ? 'Pemasukan' : 'Pengeluaran';
-                $kategori = JenisTransaksi::withoutGlobalScopes()->firstOrCreate([
+                $kategori = Kategori::withoutGlobalScopes()->firstOrCreate([
                     'user_id' => $user->id,
-                    'nama_jenis' => 'Audit Saldo',
+                    'nama' => 'Audit Saldo',
                     'tipe' => $jenis,
                 ], ['is_system' => true]);
 
@@ -114,7 +114,7 @@ class AuditSaldoDompetService
                 $transaksi = app(TransaksiService::class)->buat($user, [
                     'buku_kas_id' => $bukuKas->id,
                     'dompet_id' => $record->id,
-                    'jenis_transaksi_id' => $kategori->id,
+                    'kategori_id' => $kategori->id,
                     'tanggal' => $tanggal ?? now(),
                     'nominal' => abs($selisih),
                     'deskripsi' => 'Penyesuaian saldo dompet: '.trim($catatan),

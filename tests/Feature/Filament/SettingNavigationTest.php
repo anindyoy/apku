@@ -15,7 +15,7 @@ test('setting menampilkan submenu sesuai peran dan menyederhanakan navbar', func
     $menus = collect($menus)->flatMap(fn ($group) => $group->getItems())->values();
     $expected = $role === 'admin'
         ? ['Pengguna', 'Harga Emas']
-        : ['Kas', 'Dompet', 'Aktivitas', 'Kolaborator Kas', 'Tabungan Emas', 'Akun Saya'];
+        : ['Kas', 'Dompet', 'Kategori', 'Kolaborator Kas', 'Tabungan Emas', 'Akun Saya'];
     expect($menus->map(fn ($item) => $item->getLabel())->all())->toEqualCanonicalizing($expected);
     $this->get(Pengaturan::getUrl())->assertRedirect($menus->first()->getUrl());
 

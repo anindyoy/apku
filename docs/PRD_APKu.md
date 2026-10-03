@@ -35,7 +35,7 @@ Dokumen ini menggambarkan kebutuhan produk yang **sudah tercakup dalam aplikasi*
 | Reguler | Catat transaksi, impor, laporan, audit saldo, utang/piutang, tabungan emas | Maksimal dua kas milik sendiri dan dua dompet milik sendiri; tidak dapat membuat kolaborasi kas baru |
 | Premium aktif | Seluruh kebutuhan Reguler, tambahan kas/dompet dan pembuatan kolaborasi | Akses Premium hanya berlaku selama masa aktif |
 | Kolaborator Viewer | Membaca transaksi dan laporan kas yang dibagikan | Tidak dapat mengubah data kas |
-| Kolaborator Editor | Mencatat transaksi pada kas bersama yang dapat dikelola | Hanya mengubah atau menghapus transaksi buatannya; memakai dompet dan aktivitas sendiri |
+| Kolaborator Editor | Mencatat transaksi pada kas bersama yang dapat dikelola | Hanya mengubah atau menghapus transaksi buatannya; memakai dompet dan kategori sendiri |
 | Pengunjung link publik | Membaca ringkasan serta transaksi kas selama link aktif | Tanpa login; hanya baca; identitas pengguna dan nama dompet disembunyikan |
 | Admin | Mengelola pengguna, langganan, metode pembayaran, voucher, dan pengaturan harga emas | Navigasi admin berfokus pada administrasi dan statistik agregat |
 
@@ -43,7 +43,7 @@ Kas yang diterima dari pengguna lain tidak mengurangi kuota kas milik kolaborato
 
 ## 4. Alur utama pengguna
 
-1. **Mulai:** pengunjung mendaftar, memverifikasi email, masuk, lalu membuat kas utama, dompet utama, saldo awal, dan aktivitas melalui wizard.
+1. **Mulai:** pengunjung mendaftar, memverifikasi email, masuk, lalu membuat kas utama, dompet utama, saldo awal, dan kategori melalui wizard.
 2. **Catat uang:** pengguna memilih pemasukan, pengeluaran, transfer kas, atau transfer dompet; mengisi data yang relevan; menyimpan; lalu memeriksa saldo dan riwayat.
 3. **Impor riwayat:** pengguna mengunduh template atau mengunggah CSV/XLSX, memetakan kolom, meninjau hasil validasi, memilih dampak saldo, lalu memantau status batch dan membatalkannya bila masih lengkap.
 4. **Tinjau kondisi:** pengguna membuka dashboard, mencari transaksi, memfilter periode/kas/dompet, membaca laporan, dan mengekspor PDF atau XLSX.
@@ -56,37 +56,37 @@ Kas yang diterima dari pengguna lain tidak mengurangi kuota kas milik kolaborato
 ### FR-01 Akun dan pengaturan awal
 
 - Sistem menyediakan registrasi, login, verifikasi email, pemulihan password, profil, perubahan password, dan notifikasi dalam aplikasi.
-- Pengguna baru menjalani wizard kas utama, dompet utama, saldo awal, dan aktivitas umum sebelum memakai fitur utama.
+- Pengguna baru menjalani wizard kas utama, dompet utama, saldo awal, dan kategori umum sebelum memakai fitur utama.
 - Registrasi dan login di production memakai Cloudflare Turnstile Managed dengan validasi server.
 - **Kriteria penerimaan:** setelah wizard selesai, kas dan dompet utama tersedia dan saldo awal tercermin pada keduanya; pengguna dapat membuka dashboard.
 
 ### FR-02 Transaksi dan saldo
 
 - Pengguna dapat membuat pemasukan, pengeluaran, transfer antar-kas, dan transfer antar-dompet melalui satu alur pencatatan.
-- Pemasukan/pengeluaran menyimpan tanggal, kas, dompet, aktivitas, nominal, dan deskripsi. Setiap transaksi menyimpan identitas pencatat.
+- Pemasukan/pengeluaran menyimpan tanggal, kas, dompet, kategori, nominal, dan deskripsi. Setiap transaksi menyimpan identitas pencatat.
 - Transfer memperbarui pasangan saldo secara atomik. Perubahan atau penghapusan transaksi yang diizinkan juga memperbarui saldo terkait.
-- Daftar transaksi menyediakan filter periode, kas, dompet, navigasi periode, pencarian deskripsi, dan aksi sesuai hak akses. Pencarian global mencakup deskripsi, aktivitas, kas, dompet, jenis, nominal, dan pengguna.
+- Daftar transaksi menyediakan filter periode, kas, dompet, navigasi periode, pencarian deskripsi, dan aksi sesuai hak akses. Pencarian global mencakup deskripsi, kategori, kas, dompet, jenis, nominal, dan pengguna.
 - **Kriteria penerimaan:** saldo asal dan tujuan benar setelah transfer maupun perubahan transfer; pengguna tidak dapat mengubah transaksi pada kas terbatas atau transaksi audit saldo secara langsung.
 
 ### FR-03 Impor transaksi
 
 - Sistem menerima CSV/XLSX untuk pemasukan dan pengeluaran, maksimal 10 MB dan 10.000 baris. Pengguna dapat mengunduh template XLSX.
-- Sistem membaca header, menyarankan pemetaan kolom, memvalidasi baris, menampilkan pratinjau dan laporan error XLSX, serta dapat membuat aktivitas yang belum ada setelah konfirmasi.
+- Sistem membaca header, menyarankan pemetaan kolom, memvalidasi baris, menampilkan pratinjau dan laporan error XLSX, serta dapat membuat kategori yang belum ada setelah konfirmasi.
 - Opsi pembaruan saldo aktif secara default dan dapat dimatikan untuk impor riwayat. File yang sama tidak dapat diimpor dua kali selama batch sebelumnya masih berlaku.
 - Hingga 1.000 baris diproses langsung; 1.001–10.000 baris melalui antrean privat. Riwayat menunjukkan status, progres, dan kegagalan. Batch lengkap dapat dibatalkan secara atomik.
 - **Kriteria penerimaan:** satu kesalahan yang menggagalkan penyimpanan tidak meninggalkan sebagian transaksi; pembatalan menghapus transaksi batch dan memulihkan dampak saldo yang pernah diterapkan.
 
-### FR-04 Kas, dompet, dan aktivitas
+### FR-04 Kas, dompet, dan kategori
 
 - Pengguna dapat membuat, mengubah, memilih default, serta menghapus kas/dompet sesuai kuota dan hak akses. Sebelum menghapus entitas berisi data atau saldo, sistem menyediakan pemindahan yang diperlukan.
-- Aktivitas pemasukan dan pengeluaran dapat dikelola terpisah.
-- Audit dompet menyimpan saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, dan catatan. Selisih menghasilkan transaksi penyesuaian dengan aktivitas sistem **Audit Saldo**.
+- Kategori pemasukan dan pengeluaran dapat dikelola terpisah.
+- Audit dompet menyimpan saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, dan catatan. Selisih menghasilkan transaksi penyesuaian dengan kategori sistem **Audit Saldo**.
 - **Kriteria penerimaan:** audit tanpa selisih tetap muncul di riwayat tanpa transaksi penyesuaian; audit dibatalkan bila saldo berubah selama proses.
 
 ### FR-05 Dashboard, pencarian, dan laporan
 
 - Dashboard pengguna menampilkan kas, dompet, sisa utang/piutang, status Premium, dan lima transaksi terbaru. Urutan serta visibilitas bagian disimpan per akun.
-- Laporan menyediakan periode harian, bulanan, tahunan, atau khusus; filter kas/dompet; saldo awal, pemasukan, pengeluaran, akumulasi, saldo akhir, rincian, dan persentase per aktivitas.
+- Laporan menyediakan periode harian, bulanan, tahunan, atau khusus; filter kas/dompet; saldo awal, pemasukan, pengeluaran, akumulasi, saldo akhir, rincian, dan persentase per kategori.
 - Laporan dapat diekspor ke PDF lanskap dan XLSX.
 - **Kriteria penerimaan:** tampilan dan ekspor mengikuti periode serta filter yang dipilih; informasi dompet anggota lain pada kas bersama tetap tersamarkan.
 

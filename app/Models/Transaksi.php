@@ -73,9 +73,9 @@ class Transaksi extends Model
             : 'Dompet anggota';
     }
 
-    public function jenis_transaksi()
+    public function kategori()
     {
-        return $this->belongsTo(JenisTransaksi::class)->withoutGlobalScopes();
+        return $this->belongsTo(Kategori::class)->withoutGlobalScopes();
     }
 
     public function import_transaksi()
@@ -149,15 +149,15 @@ class Transaksi extends Model
                         ->required()
                         ->visible(fn (?Transaksi $record): bool => $transfer || $record?->tipe_transfer === 'dompet'),
 
-                    Select::make('jenis_transaksi_id')
-                        ->label('Aktivitas')
+                    Select::make('kategori_id')
+                        ->label('Kategori')
                         ->hidden(
                             fn ($record = null) => $transfer || ($record && in_array(
                                 $record->jenis,
                                 ['Transfer Pemasukan', 'Transfer Pengeluaran']
                             ))
                         )
-                        ->options(fn (?Transaksi $record): array => static::opsiJenisTransaksi($record?->jenis))
+                        ->options(fn (?Transaksi $record): array => static::opsiKategori($record?->jenis))
                         ->required(),
 
                     DateTimePicker::make('tanggal')
@@ -267,21 +267,21 @@ class Transaksi extends Model
             ->all(), auth()->id(), 'dapat-dikelola');
     }
 
-    public static function opsiJenisTransaksi(?string $tipe = null): array
+    public static function opsiKategori(?string $tipe = null): array
     {
         $tipe = in_array($tipe, ['Pemasukan', 'Pengeluaran'], true) ? $tipe : 'semua';
 
         if ($tipe === 'semua') {
             return array_replace(
-                static::opsiJenisTransaksi('Pemasukan'),
-                static::opsiJenisTransaksi('Pengeluaran'),
+                static::opsiKategori('Pemasukan'),
+                static::opsiKategori('Pengeluaran'),
             );
         }
 
-        return OpsiSelectCache::ingat('jenis-transaksi', fn (): array => JenisTransaksi::query()
+        return OpsiSelectCache::ingat('kategori', fn (): array => Kategori::query()
             ->where('tipe', $tipe)
-            ->orderBy('nama_jenis')
-            ->pluck('nama_jenis', 'id')
+            ->orderBy('nama')
+            ->pluck('nama', 'id')
             ->all(), auth()->id(), $tipe);
     }
 }

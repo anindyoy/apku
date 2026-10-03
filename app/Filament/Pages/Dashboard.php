@@ -201,7 +201,7 @@ class Dashboard extends BaseDashboard implements HasTable
             ->query(Transaksi::query()
                 ->where('user_id', auth()->id())
                 ->when(auth()->user()->isAdmin(), fn ($query) => $query->whereRaw('1 = 0'))
-                ->with(['user', 'buku_kas', 'dompet', 'jenis_transaksi', 'asal_buku_tabungan', 'tujuan_buku_tabungan'])
+                ->with(['user', 'buku_kas', 'dompet', 'kategori', 'asal_buku_tabungan', 'tujuan_buku_tabungan'])
                 ->orderByDesc('tanggal')->orderByDesc('id')->limit(5))
             ->stackedOnMobile()
             ->columns(array_values($columns))

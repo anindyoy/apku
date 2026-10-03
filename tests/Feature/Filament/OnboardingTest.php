@@ -25,12 +25,12 @@ test('pengguna baru dapat menyimpan pengaturan awal', function () {
             'description' => 'Kas operasional toko',
             'saldo_awal' => 150000,
             'kategori_pemasukan' => [
-                ['nama_jenis' => 'Penjualan'],
-                ['nama_jenis' => 'Modal'],
+                ['nama' => 'Penjualan'],
+                ['nama' => 'Modal'],
             ],
             'kategori_pengeluaran' => [
-                ['nama_jenis' => 'Belanja Stok'],
-                ['nama_jenis' => 'Transportasi'],
+                ['nama' => 'Belanja Stok'],
+                ['nama' => 'Transportasi'],
             ],
         ])
         ->call('submit')
@@ -57,8 +57,8 @@ test('pengguna baru dapat menyimpan pengaturan awal', function () {
         'jenis' => 'Pemasukan',
         'deskripsi' => 'Saldo awal',
     ]);
-    $this->assertDatabaseHas('jenis_transaksi', ['user_id' => $user->id, 'tipe' => 'Pemasukan', 'nama_jenis' => 'Penjualan']);
-    $this->assertDatabaseHas('jenis_transaksi', ['user_id' => $user->id, 'tipe' => 'Pengeluaran', 'nama_jenis' => 'Belanja Stok']);
+    $this->assertDatabaseHas('kategori', ['user_id' => $user->id, 'tipe' => 'Pemasukan', 'nama' => 'Penjualan']);
+    $this->assertDatabaseHas('kategori', ['user_id' => $user->id, 'tipe' => 'Pengeluaran', 'nama' => 'Belanja Stok']);
 });
 
 test('label default onboarding terisi tanpa mengisi kategori dengan placeholder', function () {
@@ -68,8 +68,8 @@ test('label default onboarding terisi tanpa mengisi kategori dengan placeholder'
         ->test(Onboarding::class)
         ->assertSet('data.nama_buku', 'Kas Utama')
         ->assertSet('data.nama_dompet', 'Cash')
-        ->assertSet('data.kategori_pemasukan', fn (array $items) => collect($items)->pluck('nama_jenis')->filter()->isEmpty())
-        ->assertSet('data.kategori_pengeluaran', fn (array $items) => collect($items)->pluck('nama_jenis')->filter()->isEmpty());
+        ->assertSet('data.kategori_pemasukan', fn (array $items) => collect($items)->pluck('nama')->filter()->isEmpty())
+        ->assertSet('data.kategori_pengeluaran', fn (array $items) => collect($items)->pluck('nama')->filter()->isEmpty());
 });
 
 test('service default keuangan idempoten dan tidak mengubah nama default', function () {

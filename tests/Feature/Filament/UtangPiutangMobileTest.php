@@ -42,7 +42,7 @@ test('daftar utang piutang memakai kartu mobile dengan data dan pencarian', func
     $tables = $xpath->query('//table[contains(concat(" ", normalize-space(@class), " "), " fi-ta-table-stacked-on-mobile ")]');
     expect($tables)->toHaveCount(1);
     expect($xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " utang-piutang-compact ")]//table'))->toHaveCount(1);
-    expect($tables->item(0)->textContent)->toContain('Pihak kartu mobile', 'Catatan kartu mobile', 'Jatuh tempo:', 'Aktivitas terakhir:');
+    expect($tables->item(0)->textContent)->toContain('Pihak kartu mobile', 'Catatan kartu mobile', 'Jatuh tempo:', 'Pembaruan terakhir:');
 
     $component->searchTable('Nama tidak ditemukan')->assertCanNotSeeTableRecords([$record]);
 })->with([

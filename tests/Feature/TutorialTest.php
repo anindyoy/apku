@@ -28,7 +28,7 @@ test('tutorial kolaborator menjelaskan kartu dan aksi link publik', function () 
 
 test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
-    expect($topik['transaksi']['intro'])->toContain('Tipe (ikon jenis transaksi), Tanggal, Kas, Aktivitas, lalu Nominal', 'Pencarian Transaksi', 'Dashboard', 'layar kecil');
+    expect($topik['transaksi']['intro'])->toContain('Tipe (ikon jenis transaksi), Tanggal, Kas, Kategori, lalu Nominal', 'Pencarian Transaksi', 'Dashboard', 'layar kecil');
     expect($topik['transaksi']['note'])->toContain('Dicatat oleh', 'pernah dikolaborasikan dengan akun lain', 'kedaluwarsa atau dicabut', 'Tautan kas publik');
 });
 
@@ -142,7 +142,7 @@ it('tutorial kontekstual mengikuti URL aktif dan perubahan navigasi panel', func
         '': 'dashboard', 'akun-saya': 'profil-notifikasi', profile: 'profil-notifikasi',
         onboarding: 'pengaturan-awal', transaksi: 'transaksi', 'pencarian-transaksi': 'pencarian',
         'riwayat-import-transaksi': 'import', 'buku-kas': 'kas', dompet: 'dompet',
-        'audit-saldo-dompet': 'audit-saldo', kategori: 'aktivitas', 'kolaborator-kas': 'kolaborasi',
+        'audit-saldo-dompet': 'audit-saldo', kategori: 'kategori', 'kolaborator-kas': 'kolaborasi',
         'tabungan-emas': 'emas', laporan: 'laporan', utangs: 'utang-piutang',
         piutangs: 'utang-piutang', langganans: 'langganan',
     };
@@ -218,7 +218,7 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
     expect(array_column($topics, 'id'))->toBe([
         'akun', 'pengaturan-awal', 'dashboard', 'transaksi', 'transfer', 'pencarian',
         'import', 'kas', 'kolaborasi', 'kas-publik', 'dompet', 'audit-saldo',
-        'aktivitas', 'emas', 'laporan', 'utang-piutang', 'langganan', 'profil-notifikasi',
+        'kategori', 'emas', 'laporan', 'utang-piutang', 'langganan', 'profil-notifikasi',
     ]);
 
     $document = new DOMDocument;

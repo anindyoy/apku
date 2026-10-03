@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
 use App\Services\OpsiSelectCache;
-use Database\Factories\JenisTransaksiFactory;
+use Database\Factories\KategoriFactory;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -21,12 +21,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 #[ScopedBy([UserScope::class])]
-class JenisTransaksi extends Model
+class Kategori extends Model
 {
-    /** @use HasFactory<JenisTransaksiFactory> */
+    /** @use HasFactory<KategoriFactory> */
     use HasFactory, MembersihkanCacheOpsiSelect;
 
-    protected $table = 'jenis_transaksi';
+    protected $table = 'kategori';
 
     protected $guarded = [];
 
@@ -48,10 +48,10 @@ class JenisTransaksi extends Model
     public static function form(string $type)
     {
         return [
-            TextInput::make('nama_jenis')
+            TextInput::make('nama')
                 ->required()
                 ->rules(fn (?self $record): array => [
-                    Rule::unique('jenis_transaksi', 'nama_jenis')
+                    Rule::unique('kategori', 'nama')
                         ->where('user_id', auth()->id())
                         ->where('tipe', $type)
                         ->ignore($record?->id),
@@ -63,10 +63,10 @@ class JenisTransaksi extends Model
     public static function columns()
     {
         return [
-            TextColumn::make('nama_jenis')
+            TextColumn::make('nama')
                 ->wrap()
                 ->counts('transaksi')
-                ->description(fn (JenisTransaksi $record): string => number_format($record->transaksi_count, 0, ',', '.').' transaksi'),
+                ->description(fn (Kategori $record): string => number_format($record->transaksi_count, 0, ',', '.').' transaksi'),
         ];
     }
 
@@ -106,26 +106,26 @@ class JenisTransaksi extends Model
                 ->form(function ($record) use ($type) {
                     return [
                         Select::make('kategori')
-                            ->label('Aktivitas')
+                            ->label('Kategori')
                             ->required()
                             ->options(fn (): array => array_filter(
-                                OpsiSelectCache::ingat('jenis-transaksi', fn (): array => self::orderby('nama_jenis')
+                                OpsiSelectCache::ingat('kategori', fn (): array => self::orderby('nama')
                                     ->whereTipe($type)
-                                    ->pluck('nama_jenis', 'id')
+                                    ->pluck('nama', 'id')
                                     ->all(), auth()->id(), $type),
                                 fn ($id): bool => (int) $id !== (int) $record->id,
                                 ARRAY_FILTER_USE_KEY,
                             )),
                     ];
                 })
-                ->modalHeading(fn ($record) => 'Hapus '.$record->nama_jenis)
+                ->modalHeading(fn ($record) => 'Hapus '.$record->nama)
                 ->modalSubheading(
-                    'Aktivitas ini memiliki data transaksi, pilih aktivitas lain untuk memindahkan aktivitas penggantinya.'
+                    'Kategori ini memiliki data transaksi. Pilih kategori pengganti untuk transaksi tersebut.'
                 )
                 ->action(function ($data, $record) {
                     DB::transaction(function () use ($data, $record) {
-                        Transaksi::whereJenisTransaksiId($record->id)
-                            ->update(['jenis_transaksi_id' => $data['kategori']]);
+                        Transaksi::whereKategoriId($record->id)
+                            ->update(['kategori_id' => $data['kategori']]);
 
                         $record->delete();
                     });
@@ -138,6 +138,6 @@ class JenisTransaksi extends Model
 
     protected function cacheOpsiSelectEntitas(): string
     {
-        return 'jenis-transaksi';
+        return 'kategori';
     }
 }

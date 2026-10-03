@@ -2,7 +2,7 @@
 
 use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Transaksi;
@@ -19,9 +19,9 @@ test('transaksi resource - list page menampilkan kolom yang benar', function () 
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     Transaksi::factory()->create([
@@ -30,7 +30,7 @@ test('transaksi resource - list page menampilkan kolom yang benar', function () 
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
         'deskripsi' => 'Test deskripsi transaksi',
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'tanggal' => now(),
     ]);
 
@@ -45,9 +45,9 @@ test('transaksi resource - list page menampilkan kolom yang benar', function () 
 test('transaksi resource - tombol ubah pada daftar membuka modal edit', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->firstOrFail();
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
         'tipe' => 'Pemasukan',
     ]);
     $transaksi = Transaksi::factory()->create([
@@ -56,7 +56,7 @@ test('transaksi resource - tombol ubah pada daftar membuka modal edit', function
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
         'deskripsi' => 'Transaksi yang akan diubah',
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'tanggal' => now(),
     ]);
 
@@ -240,9 +240,9 @@ test('transaksi resource - edit page dapat update nominal', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     $transaksi = Transaksi::factory()->create([
@@ -251,7 +251,7 @@ test('transaksi resource - edit page dapat update nominal', function () {
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
         'deskripsi' => 'Deskripsi awal',
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'tanggal' => now(),
     ]);
 
@@ -270,9 +270,9 @@ test('transaksi resource - edit page dapat update deskripsi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     $transaksi = Transaksi::factory()->create([
@@ -281,7 +281,7 @@ test('transaksi resource - edit page dapat update deskripsi', function () {
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
         'deskripsi' => 'Deskripsi awal',
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
     ]);
 
     Livewire::actingAs($user)
@@ -299,9 +299,9 @@ test('transaksi resource - list page dengan pengeluaran', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pengeluaran',
+        'nama' => 'Pengeluaran',
     ]);
 
     Transaksi::factory()->create([
@@ -310,7 +310,7 @@ test('transaksi resource - list page dengan pengeluaran', function () {
         'jenis' => 'Pengeluaran',
         'nominal' => 50000,
         'deskripsi' => 'Test pengeluaran',
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
         'tanggal' => now(),
     ]);
 
@@ -326,9 +326,9 @@ test('transaksi resource - edit page validasi nominal required', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = JenisTransaksi::factory()->create([
+    $jenis = Kategori::factory()->create([
         'user_id' => $user->id,
-        'nama_jenis' => 'Pemasukan',
+        'nama' => 'Pemasukan',
     ]);
 
     $transaksi = Transaksi::factory()->create([
@@ -336,7 +336,7 @@ test('transaksi resource - edit page validasi nominal required', function () {
         'buku_kas_id' => $bukuKas->id,
         'jenis' => 'Pemasukan',
         'nominal' => 100000,
-        'jenis_transaksi_id' => $jenis->id,
+        'kategori_id' => $jenis->id,
     ]);
 
     Livewire::actingAs($user)

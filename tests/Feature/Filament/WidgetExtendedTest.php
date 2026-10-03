@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\JenisTransaksi;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\UtangPiutang;
 use App\Models\UtangPiutangDetail;
