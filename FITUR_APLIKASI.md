@@ -34,7 +34,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-dompet.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
-- Modal import transaksi menyediakan unduhan contoh template XLSX sebelum pengguna mengunggah file.
+- Modal import transaksi menyediakan unduhan contoh template XLSX sebelum pengguna mengunggah file. Template memuat tiga baris data transaksi dengan deskripsi terisi maupun kosong; nilai buku kas dan dompetnya sesuai opsi milik pengguna yang ditampilkan di kolom referensi setelah satu kolom pemisah, bersama kategori pemasukan/pengeluaran. Baris referensi tidak dihitung sebagai transaksi saat file diimpor.
 - Aktivitas yang belum tersedia dapat dibuat otomatis setelah konfirmasi pengguna. Pembuatannya ikut dibatalkan jika import transaksi gagal.
 - Seluruh baris import disimpan secara atomik. Pengguna dapat memilih apakah import memperbarui saldo kas dan dompet; pilihan aktif secara default. Riwayat yang diimpor tanpa dampak saldo tetap tampil sebagai transaksi dan tidak mengubah saldo saat diubah, dihapus, atau saat batch dibatalkan.
 - Import mengikuti kepemilikan dan hak pengelolaan kas, dompet, serta aktivitas pengguna. File yang sama tidak dapat diimpor lebih dari sekali.

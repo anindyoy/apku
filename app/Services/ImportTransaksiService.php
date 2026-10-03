@@ -32,6 +32,8 @@ class ImportTransaksiService
 
     private const HEADER = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi'];
 
+    private const HEADER_OPSI_TEMPLATE = ['Opsi Buku Kas', 'Opsi Dompet', 'Opsi Kategori Pemasukan', 'Opsi Kategori Pengeluaran'];
+
     private const KOLOM_WAJIB = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal'];
 
     private const ALIAS_HEADER = [
@@ -44,20 +46,85 @@ class ImportTransaksiService
         'deskripsi' => ['deskripsi', 'description', 'keterangan', 'note', 'memo'],
     ];
 
-    public function buatTemplateXlsx(string $path): void
+    public function buatTemplateXlsx(string $path, User $user): void
     {
+        $bukuKas = BukuKas::query()
+            ->where('user_id', $user->id)
+            ->pluck('nama_buku')
+            ->all();
+        $dompet = Dompet::query()
+            ->where('user_id', $user->id)
+            ->pluck('nama_dompet')
+            ->all();
+        $kategoriPemasukan = JenisTransaksi::query()
+            ->where('user_id', $user->id)
+            ->where('tipe', 'Pemasukan')
+            ->orderBy('nama_jenis')
+            ->pluck('nama_jenis')
+            ->all();
+        $kategoriPengeluaran = JenisTransaksi::query()
+            ->where('user_id', $user->id)
+            ->where('tipe', 'Pengeluaran')
+            ->orderBy('nama_jenis')
+            ->pluck('nama_jenis')
+            ->all();
+
         $writer = new XlsxWriter;
         $writer->openToFile($path);
-        $writer->addRow(Row::fromValues(self::HEADER));
         $writer->addRow(Row::fromValues([
-            now()->format('Y-m-d'),
-            'Pemasukan',
-            'Kas Utama',
-            'Cash',
-            'Gaji',
-            5000000,
-            'Gaji bulan berjalan',
+            ...self::HEADER,
+            null,
+            ...self::HEADER_OPSI_TEMPLATE,
         ]));
+        $contohTransaksi = [
+            [
+                now()->format('Y-m-d'),
+                'Pemasukan',
+                $bukuKas[0] ?? null,
+                $dompet[0] ?? null,
+                $kategoriPemasukan[0] ?? null,
+                5000000,
+                'Gaji bulan berjalan',
+            ],
+            [
+                now()->format('Y-m-d'),
+                'Pengeluaran',
+                $bukuKas[1] ?? $bukuKas[0] ?? null,
+                $dompet[1] ?? $dompet[0] ?? null,
+                $kategoriPengeluaran[0] ?? null,
+                35000,
+                null,
+            ],
+            [
+                now()->format('Y-m-d'),
+                'Pengeluaran',
+                $bukuKas[0] ?? null,
+                $dompet[0] ?? null,
+                $kategoriPengeluaran[0] ?? null,
+                50000,
+                'Belanja kebutuhan',
+            ],
+        ];
+
+        $jumlahOpsi = max(
+            count($contohTransaksi),
+            count($bukuKas),
+            count($dompet),
+            count($kategoriPemasukan),
+            count($kategoriPengeluaran),
+        );
+
+        for ($index = 0; $index < $jumlahOpsi; $index++) {
+            $writer->addRow(Row::fromValues([
+                ...($contohTransaksi[$index] ?? array_fill(0, count(self::HEADER), null)),
+                null,
+                $bukuKas[$index] ?? null,
+                $dompet[$index] ?? null,
+                $kategoriPemasukan[$index] ?? null,
+                $kategoriPengeluaran[$index] ?? null,
+            ]));
+        }
+
         $writer->close();
     }
 
@@ -82,7 +149,10 @@ class ImportTransaksiService
                     $header = array_map(fn ($value): string => $this->normalisasiHeader($value), $nilai);
                     $this->pastikanHeaderDasarValid($header);
 
-                    return array_combine($header, array_map(fn ($value): string => trim((string) $value), $nilai));
+                    $hasil = array_combine($header, array_map(fn ($value): string => trim((string) $value), $nilai));
+                    unset($hasil['']);
+
+                    return $hasil;
                 }
 
                 break;
@@ -147,9 +217,11 @@ class ImportTransaksiService
         try {
             $reader->open($path);
             $header = null;
+            $nomorBarisSumber = 0;
 
             foreach ($reader->getSheetIterator() as $sheet) {
                 foreach ($sheet->getRowIterator() as $row) {
+                    $nomorBarisSumber++;
                     $nilai = array_map(fn ($cell) => $cell->getValue(), $row->getCells());
 
                     if ($this->barisKosong($nilai)) {
@@ -167,8 +239,17 @@ class ImportTransaksiService
                         continue;
                     }
 
+                    $dataSumber = array_combine($header, array_slice(array_pad($nilai, count($header), null), 0, count($header)));
+                    $dataMentah = collect(self::HEADER)->mapWithKeys(fn (string $tujuan): array => [
+                        $tujuan => filled($pemetaan[$tujuan] ?? null) ? ($dataSumber[$pemetaan[$tujuan]] ?? null) : null,
+                    ])->all();
+
+                    if ($this->barisKosong(array_values($dataMentah))) {
+                        continue;
+                    }
+
                     $hasil['jumlah_baris']++;
-                    $nomorBaris = $hasil['jumlah_baris'] + 1;
+                    $nomorBaris = $nomorBarisSumber;
 
                     if ($hasil['jumlah_baris'] > self::BATAS_BARIS) {
                         throw ValidationException::withMessages([
@@ -176,10 +257,6 @@ class ImportTransaksiService
                         ]);
                     }
 
-                    $dataSumber = array_combine($header, array_slice(array_pad($nilai, count($header), null), 0, count($header)));
-                    $dataMentah = collect(self::HEADER)->mapWithKeys(fn (string $tujuan): array => [
-                        $tujuan => filled($pemetaan[$tujuan] ?? null) ? ($dataSumber[$pemetaan[$tujuan]] ?? null) : null,
-                    ])->all();
                     [$data, $errors] = $this->validasiBaris(
                         $user, $dataMentah, $nomorBaris, $buatKategoriOtomatis,
                     );
@@ -495,7 +572,11 @@ class ImportTransaksiService
     /** @param array<int, string> $header */
     private function pastikanHeaderDasarValid(array $header): void
     {
-        if ($header === [] || in_array('', $header, true)) {
+        $pemisahTemplateValid = ($header[count(self::HEADER)] ?? null) === ''
+            && array_slice($header, count(self::HEADER) + 1, count(self::HEADER_OPSI_TEMPLATE))
+                === array_map(fn (string $label): string => $this->normalisasiHeader($label), self::HEADER_OPSI_TEMPLATE);
+
+        if ($header === [] || (in_array('', $header, true) && ! $pemisahTemplateValid)) {
             throw ValidationException::withMessages(['file' => 'Header file tidak boleh kosong.']);
         }
 

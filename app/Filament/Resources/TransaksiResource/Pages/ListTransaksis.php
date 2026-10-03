@@ -8,6 +8,7 @@ use App\Filament\Resources\TransaksiResource;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\User;
 use App\Services\ImportTransaksiService;
 use App\Services\OpsiSelectCache;
 use Filament\Actions\Action;
@@ -17,11 +18,11 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\EmbeddedTable;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\RenderHook;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\HtmlString;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListTransaksis extends ListRecords
 {
@@ -429,10 +431,13 @@ class ListTransaksis extends ListRecords
         ]);
     }
 
-    public function unduhTemplateImport(): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function unduhTemplateImport(): StreamedResponse
     {
+        $user = auth()->user();
+        abort_unless($user instanceof User, 403);
+
         $path = tempnam(sys_get_temp_dir(), 'template-import-transaksi-');
-        app(ImportTransaksiService::class)->buatTemplateXlsx($path);
+        app(ImportTransaksiService::class)->buatTemplateXlsx($path, $user);
 
         return response()->streamDownload(function () use ($path): void {
             echo file_get_contents($path);

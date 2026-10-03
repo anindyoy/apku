@@ -8,7 +8,9 @@ use App\Models\Dompet;
 use App\Models\ImportTransaksi;
 use App\Models\JenisTransaksi;
 use App\Models\Transaksi;
+use App\Models\User;
 use App\Services\ImportTransaksiService;
+use App\Services\TransaksiService;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Http\UploadedFile;
@@ -86,7 +88,7 @@ test('import riwayat tanpa dampak saldo tetap dapat diubah dan dibatalkan', func
         ->and($data['bukuKas']->fresh()->saldo)->toBe(750000)
         ->and($data['dompet']->fresh()->saldo)->toBe(750000);
 
-    app(\App\Services\TransaksiService::class)->ubah($data['user'], $transaksi, ['nominal' => 200000]);
+    app(TransaksiService::class)->ubah($data['user'], $transaksi, ['nominal' => 200000]);
     expect($data['bukuKas']->fresh()->saldo)->toBe(750000)
         ->and($data['dompet']->fresh()->saldo)->toBe(750000);
 
@@ -319,7 +321,7 @@ test('kategori baru tidak dibuat ketika batch memiliki baris tidak valid', funct
 test('pratinjau xlsx tidak mengubah transaksi atau saldo', function () {
     $data = siapkanDataImportTransaksi();
     $path = tempnam(sys_get_temp_dir(), 'import-transaksi-test-').'.xlsx';
-    app(ImportTransaksiService::class)->buatTemplateXlsx($path);
+    app(ImportTransaksiService::class)->buatTemplateXlsx($path, $data['user']);
 
     try {
         $reader = new XlsxReader;
@@ -348,11 +350,85 @@ test('pratinjau xlsx tidak mengubah transaksi atau saldo', function () {
     }
 
     expect($contohTanggal)->toBe(now()->format('Y-m-d'))
-        ->and($hasil['jumlah_baris'])->toBe(1)
+        ->and($hasil['jumlah_baris'])->toBe(3)
         ->and($hasil['errors'])->toBe([])
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->count())->toBe(0)
         ->and($data['bukuKas']->fresh()->saldo)->toBe(0)
         ->and($data['dompet']->fresh()->saldo)->toBe(0);
+})->group('filament', 'import-transaksi');
+
+test('template xlsx mencantumkan opsi kas dan kategori milik pengguna setelah kolom pemisah', function () {
+    $data = siapkanDataImportTransaksi();
+    $kasTambahan = $data['user']->buku_kas()->create([
+        'nama_buku' => 'Kas Tabungan',
+        'saldo' => 0,
+        'is_default' => false,
+    ]);
+    $dompetTambahan = Dompet::create([
+        'user_id' => $data['user']->id,
+        'nama_dompet' => 'Bank',
+        'saldo' => 0,
+        'is_default' => false,
+    ]);
+    $kategoriPemasukanTambahan = JenisTransaksi::create([
+        'user_id' => $data['user']->id,
+        'nama_jenis' => 'Bonus',
+        'tipe' => 'Pemasukan',
+    ]);
+    $kategoriPengeluaranTambahan = JenisTransaksi::create([
+        'user_id' => $data['user']->id,
+        'nama_jenis' => 'Transportasi',
+        'tipe' => 'Pengeluaran',
+    ]);
+    $userLain = createRegularUserWithBukuKas();
+    $userLain->buku_kas()->firstOrFail()->update(['nama_buku' => 'Kas Orang Lain']);
+    JenisTransaksi::create([
+        'user_id' => $userLain->id,
+        'nama_jenis' => 'Kategori Orang Lain',
+        'tipe' => 'Pemasukan',
+    ]);
+    $pathSementara = tempnam(sys_get_temp_dir(), 'template-import-transaksi-test-');
+    $path = $pathSementara.'.xlsx';
+    rename($pathSementara, $path);
+
+    try {
+        app(ImportTransaksiService::class)->buatTemplateXlsx($path, $data['user']);
+        $reader = new XlsxReader;
+        $reader->open($path);
+        $rows = [];
+
+        foreach ($reader->getSheetIterator() as $sheet) {
+            foreach ($sheet->getRowIterator() as $row) {
+                $rows[] = array_map(fn ($cell) => $cell->getValue(), $row->getCells());
+            }
+
+            break;
+        }
+
+        $reader->close();
+        $header = app(ImportTransaksiService::class)->bacaHeader($path);
+        $hasil = app(ImportTransaksiService::class)->pratinjau($data['user'], $path);
+    } finally {
+        @unlink($path);
+    }
+
+    expect($rows[0])->toBe([
+        'tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi',
+        '', 'Opsi Buku Kas', 'Opsi Dompet', 'Opsi Kategori Pemasukan', 'Opsi Kategori Pengeluaran',
+    ])
+        ->and($rows[1][7])->toBe('')
+        ->and(array_column(array_slice($rows, 1), 8))->toContain('Kas Utama', $kasTambahan->nama_buku)
+        ->and(array_column(array_slice($rows, 1), 9))->toContain($data['dompet']->nama_dompet, $dompetTambahan->nama_dompet)
+        ->and(array_column(array_slice($rows, 1), 10))->toContain($data['pemasukan']->nama_jenis, $kategoriPemasukanTambahan->nama_jenis)
+        ->and(array_column(array_slice($rows, 1), 11))->toContain($data['pengeluaran']->nama_jenis, $kategoriPengeluaranTambahan->nama_jenis)
+        ->and(collect(array_slice($rows, 1, 3))->every(fn (array $row): bool => in_array($row[2], array_column(array_slice($rows, 1), 8), true)))->toBeTrue()
+        ->and(collect(array_slice($rows, 1, 3))->every(fn (array $row): bool => in_array($row[3], array_column(array_slice($rows, 1), 9), true)))->toBeTrue()
+        ->and(array_column(array_slice($rows, 1, 3), 6))->toBe(['Gaji bulan berjalan', '', 'Belanja kebutuhan'])
+        ->and(collect($rows)->flatten()->all())->not->toContain('Kas Orang Lain', 'Kategori Orang Lain')
+        ->and($header)->toHaveKeys(['tanggal', 'deskripsi', 'opsi_buku_kas', 'opsi_dompet', 'opsi_kategori_pemasukan', 'opsi_kategori_pengeluaran'])
+        ->and($header)->not->toHaveKey('')
+        ->and($hasil['jumlah_baris'])->toBe(3)
+        ->and($hasil['errors'])->toBe([]);
 })->group('filament', 'import-transaksi');
 
 test('pratinjau import menjelaskan format tanggal yang salah dan tanggal masa depan', function () {
@@ -451,7 +527,7 @@ test('file yang sama tidak dapat diimpor dua kali', function () {
 })->group('filament', 'import-transaksi');
 
 test('riwayat import disembunyikan dari navbar untuk semua peran', function (string $role) {
-    $this->actingAs(\App\Models\User::factory()->create(['role' => $role]));
+    $this->actingAs(User::factory()->create(['role' => $role]));
 
     expect(ImportTransaksiResource::shouldRegisterNavigation())->toBeFalse();
 })->with(['reguler', 'premium', 'admin']);
