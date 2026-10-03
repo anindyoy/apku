@@ -161,6 +161,11 @@ test('dashboard user memakai tab berikon dan panel selebar halaman', function ()
     expect($xpath->query('.//*[@role="tab"]', $grid)->length)->toBe(4);
     expect($xpath->query('.//*[@role="tab" and @aria-selected="true"]', $grid)->length)->toBe(1);
     expect($xpath->query('.//*[@role="tab"]', $grid)->item(0)->getAttribute('id'))->toBe('dashboard-tab-transaksi');
+    $tablist = $xpath->query('.//*[@role="tablist"]', $grid)->item(0);
+    expect($tablist->getAttribute('class'))->toContain('grid-cols-2', 'sm:flex', 'sm:min-w-max');
+    expect($tablist->getAttribute('class'))->not->toContain('min-w-max text-center');
+    expect($xpath->query('.//*[@role="tab"]', $grid)->item(0)->getAttribute('class'))->toContain('min-w-0', 'px-2', 'sm:shrink-0', 'sm:px-4');
+    expect($xpath->query('.//*[@role="tablist"]/..', $grid)->item(0)->getAttribute('class'))->not->toContain('overflow-x-auto');
     expect(file_get_contents(resource_path('views/filament/pages/dashboard.blade.php')))->not->toContain('<style');
 });
 

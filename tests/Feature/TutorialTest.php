@@ -32,6 +32,14 @@ test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', funct
     expect($topik['transaksi']['note'])->toContain('Dicatat oleh', 'pernah dikolaborasikan dengan akun lain', 'kedaluwarsa atau dicabut', 'Tautan kas publik');
 });
 
+test('tutorial dashboard menjelaskan tata letak tab mobile', function () {
+    $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+    $steps = implode(' ', $topics['dashboard']['steps']);
+
+    expect($steps)->toContain('ponsel tab tersusun dua kolom')
+        ->not->toContain('geser baris tab ke samping');
+});
+
 test('tutorial kuota kas dan dompet menjelaskan batas serta masa aktif premium', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 

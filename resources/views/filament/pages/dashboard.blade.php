@@ -19,11 +19,11 @@
             class="dashboard-tabs min-w-0 [--dash-muted:#64748b] [--dash-line:#e2e8f0] [--dash-bg:#f8fafc] [&:is(.dark_*)]:[--dash-muted:#94a3b8] [&:is(.dark_*)]:[--dash-line:#334155] [&:is(.dark_*)]:[--dash-bg:#1e293b]"
         >
             @if ($sections)
-                <div class="mb-3 overflow-x-auto border-b border-slate-200 [&:is(.dark_*)]:border-slate-700">
+                <div class="mb-3 border-b border-slate-200 [&:is(.dark_*)]:border-slate-700">
                     <div
                         role="tablist"
                         aria-label="Bagian dashboard"
-                        class="flex min-w-max text-center text-sm font-medium"
+                        class="grid w-full grid-cols-2 text-center text-sm font-medium sm:flex sm:min-w-max"
                         x-on:keydown="
                             if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes($event.key)) {
                                 $event.preventDefault();
@@ -46,7 +46,7 @@
                                 x-bind:aria-selected="activeTab === '{{ $section['key'] }}'"
                                 x-bind:tabindex="activeTab === '{{ $section['key'] }}' ? 0 : -1"
                                 x-on:click="activeTab = '{{ $section['key'] }}'"
-                                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-t-lg border-b-2 border-transparent px-4 py-3 text-slate-500 hover:border-slate-300 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-600 [&[aria-selected=true]]:border-teal-600 [&[aria-selected=true]]:text-teal-600 [&:is(.dark_*)]:text-slate-400 [&:is(.dark_*)]:hover:text-slate-200 [&:is(.dark_*)[aria-selected=true]]:border-teal-400 [&:is(.dark_*)[aria-selected=true]]:text-teal-400"
+                                class="inline-flex min-w-0 items-center justify-center gap-2 rounded-t-lg border-b-2 border-transparent px-2 py-3 text-slate-500 hover:border-slate-300 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-600 sm:shrink-0 sm:px-4 [&[aria-selected=true]]:border-teal-600 [&[aria-selected=true]]:text-teal-600 [&:is(.dark_*)]:text-slate-400 [&:is(.dark_*)]:hover:text-slate-200 [&:is(.dark_*)[aria-selected=true]]:border-teal-400 [&:is(.dark_*)[aria-selected=true]]:text-teal-400"
                             >
                                 <x-filament::icon :icon="$icons[$section['key']]" class="size-4 shrink-0" aria-hidden="true" />
                                 {{ $section['label'] }}
