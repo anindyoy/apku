@@ -74,7 +74,7 @@ class AkunSaya extends Page implements HasForms
                             ->disabled(),
 
                         TextInput::make('masa_aktif')
-                            ->visible(fn ($get) => $get('type') === 'premium')
+                            ->visible(fn ($get) => strtolower((string) $get('type')) === 'premium')
                             ->label('Masa aktif akun premium')
                             ->formatStateUsing(fn ($state) => filled($state) ? Carbon::parse($state)->format('Y-m-d') : null)
                             ->disabled(),
