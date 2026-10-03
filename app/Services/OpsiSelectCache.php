@@ -35,7 +35,7 @@ class OpsiSelectCache
         return match ($entitas) {
             'buku-kas' => ['default', 'dapat-dikelola'],
             'dompet' => ['aktif', 'dapat-dikelola', 'dengan-terhapus'],
-            'kategori' => ['Pemasukan', 'Pengeluaran'],
+            'kategori' => ['Pemasukan', 'Pengeluaran', 'semua'],
             default => ['default'],
         };
     }

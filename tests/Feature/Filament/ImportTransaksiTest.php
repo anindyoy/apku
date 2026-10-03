@@ -10,6 +10,7 @@ use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\ImportTransaksiService;
+use App\Services\KategoriService;
 use App\Services\TransaksiService;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
@@ -41,6 +42,9 @@ function siapkanDataImportTransaksi(): array
         'nama' => 'Makanan',
         'tipe' => 'Pengeluaran',
     ]);
+
+    app(KategoriService::class)->hubungkan($pemasukan, [$bukuKas->id]);
+    app(KategoriService::class)->hubungkan($pengeluaran, [$bukuKas->id]);
 
     return compact('user', 'bukuKas', 'dompet', 'pemasukan', 'pengeluaran');
 }
@@ -276,7 +280,7 @@ test('kategori baru hanya dibuat setelah dikonfirmasi bersama import', function 
 
     expect($tanpaKonfirmasi['errors'])->not->toBeEmpty()
         ->and($denganKonfirmasi['errors'])->toBe([])
-        ->and(array_values($denganKonfirmasi['kategori_baru']['Pemasukan']))->toBe(['Bonus Proyek']);
+        ->and(array_values($denganKonfirmasi['kategori_baru']['Pemasukan']))->toBe(['Bonus Proyek (Kas Utama)']);
     $this->assertDatabaseMissing('kategori', [
         'user_id' => $data['user']->id,
         'nama' => 'Bonus Proyek',

@@ -10,10 +10,13 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 #[ScopedBy([UserScope::class])]
 #[ObservedBy([TransaksiObserver::class])]
@@ -132,6 +135,12 @@ class Transaksi extends Model
                     Select::make('buku_kas_id')
                         ->label(fn (?Transaksi $record): string => $record?->transfer_code && $record->tipe_transfer !== 'dompet' ? 'Kas asal' : 'Kas')
                         ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set, ?Transaksi $record): void {
+                            // Kategori yang tidak terhubung ke kas baru dikosongkan.
+                            if (! array_key_exists((int) $get('kategori_id'), static::opsiKategori((int) $get('buku_kas_id'), $record?->jenis))) {
+                                $set('kategori_id', null);
+                            }
+                        })
                         ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
                         ->disableOptionWhen(fn (string $value, ?Transaksi $record): bool => ! array_key_exists($value, static::opsiBukuKasYangDapatDikelola())
                             || (filled($record?->transfer_code) && BukuKas::find($value)?->user_id !== auth()->id()))
@@ -168,7 +177,7 @@ class Transaksi extends Model
                                 ['Transfer Pemasukan', 'Transfer Pengeluaran']
                             ))
                         )
-                        ->options(fn (?Transaksi $record): array => static::opsiKategori($record?->jenis))
+                        ->options(fn (Get $get, ?Transaksi $record): array => static::opsiKategori((int) $get('buku_kas_id'), $record?->jenis))
                         ->placeholder('Tanpa kategori'),
 
                     DateTimePicker::make('tanggal')
@@ -278,21 +287,21 @@ class Transaksi extends Model
             ->all(), auth()->id(), 'dapat-dikelola');
     }
 
-    public static function opsiKategori(?string $tipe = null): array
+    /** Kategori yang terhubung ke kas tertentu; cache disimpan per kas. */
+    public static function opsiKategori(?int $bukuKasId, ?string $tipe = null): array
     {
-        $tipe = in_array($tipe, ['Pemasukan', 'Pengeluaran'], true) ? $tipe : 'semua';
-
-        if ($tipe === 'semua') {
-            return array_replace(
-                static::opsiKategori('Pemasukan'),
-                static::opsiKategori('Pengeluaran'),
-            );
+        // Daftar kategori hanya dibuka untuk kas yang dapat dikelola pengguna.
+        if (! $bukuKasId || ! array_key_exists($bukuKasId, static::opsiBukuKasYangDapatDikelola())) {
+            return [];
         }
 
-        return OpsiSelectCache::ingat('kategori', fn (): array => Kategori::query()
-            ->where('tipe', $tipe)
+        $tipe = in_array($tipe, ['Pemasukan', 'Pengeluaran'], true) ? $tipe : 'semua';
+
+        return OpsiSelectCache::ingat('kategori', fn (): array => Kategori::withoutGlobalScopes()
+            ->whereIn('id', DB::table('kategori_kas')->where('buku_kas_id', $bukuKasId)->select('kategori_id'))
+            ->when($tipe !== 'semua', fn ($query) => $query->where('tipe', $tipe))
             ->orderBy('nama')
             ->pluck('nama', 'id')
-            ->all(), auth()->id(), $tipe);
+            ->all(), $bukuKasId, $tipe);
     }
 }

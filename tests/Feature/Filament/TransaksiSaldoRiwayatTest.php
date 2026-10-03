@@ -12,7 +12,7 @@ test('saldo riwayat tetap tepat setelah transaksi tengah dihapus dan daftar difi
     $user = User::factory()->create(['role' => 'reguler', 'masa_aktif' => today()->addMonth()]);
     $kas = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas', 'saldo' => 0, 'is_default' => true]);
     $dompet = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Tunai', 'saldo' => 0, 'is_default' => true]);
-    $kategori = Kategori::create(['user_id' => $user->id, 'nama' => 'Gaji', 'tipe' => 'Pemasukan']);
+    $kategori = Kategori::factory()->untukKas($kas)->create(['user_id' => $user->id, 'nama' => 'Gaji', 'tipe' => 'Pemasukan']);
     $service = app(TransaksiService::class);
     $data = ['buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id, 'kategori_id' => $kategori->id];
 

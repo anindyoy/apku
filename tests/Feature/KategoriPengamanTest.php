@@ -12,6 +12,7 @@ use App\Models\TabunganEmas;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\ImportTransaksiService;
+use App\Services\KategoriService;
 use App\Services\TransaksiService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
@@ -43,6 +44,8 @@ function siapkanDataPengamanKategori(): array
     ]);
     $pemasukan = Kategori::create(['user_id' => $user->id, 'nama' => 'Gaji', 'tipe' => 'Pemasukan']);
     $pengeluaran = Kategori::create(['user_id' => $user->id, 'nama' => 'Makanan', 'tipe' => 'Pengeluaran']);
+    app(KategoriService::class)->hubungkan($pemasukan, [$bukuKas->id]);
+    app(KategoriService::class)->hubungkan($pengeluaran, [$bukuKas->id]);
 
     return compact('user', 'bukuKas', 'dompet', 'pemasukan', 'pengeluaran');
 }
@@ -219,6 +222,8 @@ test('pemindahan saat hapus kas mempertahankan kategori transaksi dan memindahka
     $data = siapkanDataPengamanKategori();
     $user = $data['user'];
     $kasTujuan = BukuKas::create(['user_id' => $user->id, 'nama_buku' => 'Kas Tujuan', 'saldo' => 1000]);
+    // Kategori yang juga terhubung ke kas tujuan dipertahankan tanpa perlu dipetakan.
+    app(KategoriService::class)->hubungkan($data['pemasukan'], [$kasTujuan->id]);
     $transaksi = app(TransaksiService::class)->buat($user, [
         'buku_kas_id' => $data['bukuKas']->id,
         'dompet_id' => $data['dompet']->id,
@@ -273,7 +278,7 @@ test('editor kas bersama dapat membuat mengubah dan menghapus transaksinya sendi
     $kas = $pemilik->buku_kas()->firstOrFail();
     $saldoAwal = $kas->saldo;
     $dompet = Dompet::factory()->create(['user_id' => $editor->id, 'saldo' => 0]);
-    $kategori = Kategori::factory()->create(['user_id' => $editor->id, 'tipe' => 'Pengeluaran']);
+    $kategori = Kategori::factory()->untukKas($kas)->create(['user_id' => $pemilik->id, 'tipe' => 'Pengeluaran']);
     ShareBuku::create([
         'buku_kas_id' => $kas->id,
         'user_id' => $editor->id,

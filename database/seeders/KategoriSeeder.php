@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Kategori;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class KategoriSeeder extends Seeder
@@ -16,6 +17,7 @@ class KategoriSeeder extends Seeder
     public function run(): void
     {
         Schema::withoutForeignKeyConstraints(function () {
+            DB::table('kategori_kas')->truncate();
             Kategori::truncate();
         });
 
@@ -44,6 +46,7 @@ class KategoriSeeder extends Seeder
                 foreach ($jenisRandom as $value3) {
                     Kategori::create([
                         'user_id' => $value->id,
+                        'dibuat_oleh' => $value->id,
                         'tipe' => $tipe,
                         'nama' => $value3
                     ]);

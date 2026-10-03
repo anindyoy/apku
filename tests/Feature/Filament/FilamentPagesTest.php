@@ -102,21 +102,20 @@ test('halaman kategori menggunakan label kategori', function () {
 })
     ->group('filament', 'pages', 'label-kategori');
 
-test('halaman kategori menampilkan panel kategori responsif dengan tabel terpisah', function () {
+test('halaman kategori menampilkan satu tabel dengan kolom nama tipe dan kas', function () {
     $user = createRegularUserWithBukuKas();
+    $kas = $user->buku_kas()->firstOrFail();
+    $kategori = \App\Models\Kategori::factory()->untukKas($kas)->create([
+        'user_id' => $user->id,
+        'nama' => 'Belanja',
+        'tipe' => 'Pengeluaran',
+    ]);
     $halaman = Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class);
+    $tabel = $halaman->instance()->getTable();
 
     $halaman->assertSuccessful();
-    $dom = new \DOMDocument;
-    @$dom->loadHTML('<?xml encoding="UTF-8">'.$halaman->html());
-    $xpath = new \DOMXPath($dom);
-
-    foreach (['pemasukan' => 'Pemasukan', 'pengeluaran' => 'Pengeluaran'] as $jenis => $judul) {
-        $panel = $xpath->query('//section[@aria-labelledby="kategori-'.$jenis.'-title"]');
-        expect($panel->length)->toBe(1)
-            ->and($xpath->query('.//h2', $panel->item(0))->item(0)->textContent)->toBe($judul)
-            ->and($xpath->query('.//*[@*[name()="wire:id"]]', $panel->item(0))->length)->toBeGreaterThan(0);
-    }
-
-    expect($xpath->query('//section[contains(@class, "kategori-panel--pengeluaran")]')->length)->toBe(1);
+    expect(array_keys($tabel->getColumns()))->toBe(['nama', 'tipe', 'kas.nama_buku'])
+        ->and(array_keys($tabel->getFilters()))->toBe(['kas', 'tipe'])
+        ->and($halaman->instance()->getTableRecords()->pluck('id')->all())->toBe([$kategori->id])
+        ->and($halaman->html())->toContain('Belanja', 'Kas Test', 'bersifat opsional');
 })->group('filament', 'pages');

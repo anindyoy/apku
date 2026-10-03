@@ -19,7 +19,7 @@ test('transaksi resource - list page menampilkan kolom yang benar', function () 
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pemasukan',
     ]);
@@ -45,7 +45,7 @@ test('transaksi resource - list page menampilkan kolom yang benar', function () 
 test('transaksi resource - tombol ubah pada daftar membuka modal edit', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->firstOrFail();
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pemasukan',
         'tipe' => 'Pemasukan',
@@ -240,7 +240,7 @@ test('transaksi resource - edit page dapat update nominal', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pemasukan',
     ]);
@@ -270,7 +270,7 @@ test('transaksi resource - edit page dapat update deskripsi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pemasukan',
     ]);
@@ -299,7 +299,7 @@ test('transaksi resource - list page dengan pengeluaran', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pengeluaran',
     ]);
@@ -326,7 +326,7 @@ test('transaksi resource - edit page validasi nominal required', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pemasukan',
     ]);

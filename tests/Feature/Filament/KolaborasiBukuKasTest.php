@@ -29,13 +29,13 @@ test('kolaborasi buku kas memberi viewer akses baca tanpa akses tulis', function
         ->and($viewer->dapatMengelolaTransaksiPada($buku))->toBeFalse();
 })->group('filament', 'kolaborasi-buku-kas');
 
-test('kolaborasi buku kas memungkinkan editor mencatat dengan dompet dan kategori sendiri', function () {
+test('kolaborasi buku kas memungkinkan editor mencatat dengan dompet sendiri dan kategori kas bersama', function () {
     $pemilik = createRegularUserWithBukuKas();
     $editor = createRegularUserWithBukuKas();
     $buku = $pemilik->buku_kas()->first();
     $dompet = Dompet::factory()->create(['user_id' => $editor->id, 'saldo' => 0]);
-    $kategori = Kategori::factory()->create([
-        'user_id' => $editor->id,
+    $kategori = Kategori::factory()->untukKas($buku)->create([
+        'user_id' => $pemilik->id,
         'tipe' => 'Pemasukan',
     ]);
 

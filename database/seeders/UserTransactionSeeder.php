@@ -7,6 +7,7 @@ use App\Models\Dompet;
 use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
+use App\Services\KategoriService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -144,6 +145,10 @@ class UserTransactionSeeder extends Seeder
             ]);
             $this->line('  Created Kategori Pengeluaran: Makanan');
         }
+
+        // Kategori harus terhubung ke kas agar dapat dipakai transaksinya.
+        app(KategoriService::class)->hubungkan($pemasukanType, [$bukuKas->id]);
+        app(KategoriService::class)->hubungkan($pengeluaranType, [$bukuKas->id]);
 
         // Tahap 3: buat transaksi untuk beberapa bulan terakhir.
         $now = Carbon::now();

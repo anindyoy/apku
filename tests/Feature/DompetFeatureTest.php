@@ -46,6 +46,7 @@ test('service membuat transaksi biasa dan memperbarui kedua saldo secara atomik'
         'nama' => 'Gaji',
         'tipe' => 'Pemasukan',
     ]);
+    app(\App\Services\KategoriService::class)->hubungkan($kategori, [$bukuKas->id]);
 
     $transaksi = app(TransaksiService::class)->buat($user, [
         'buku_kas_id' => $bukuKas->id,
@@ -89,8 +90,9 @@ test('service transaksi biasa menolak dompet terbatas dan kategori pengguna lain
 
     $data['dompet_id'] = $user->idDompetUtama();
 
+    // Kategori pengguna lain tidak terhubung ke kas ini sehingga ditolak sebagai kesalahan validasi.
     expect(fn () => app(TransaksiService::class)->buat($user, $data, 'Pemasukan'))
-        ->toThrow(AuthorizationException::class);
+        ->toThrow(\Illuminate\Validation\ValidationException::class);
 
     expect(Transaksi::where('user_id', $user->id)->count())->toBe(0)
         ->and($bukuKas->fresh()->saldo)->toBe(0)

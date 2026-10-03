@@ -44,6 +44,11 @@ class BukuKas extends Model
         return $this->hasMany(Transaksi::class);
     }
 
+    public function kategori()
+    {
+        return $this->belongsToMany(Kategori::class, 'kategori_kas', 'buku_kas_id', 'kategori_id');
+    }
+
     public function tabunganEmas()
     {
         return $this->hasMany(TabunganEmas::class);

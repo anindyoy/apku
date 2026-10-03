@@ -235,7 +235,7 @@ test('dashboard user tombol tambah membuka form dan menyimpan transaksi', functi
     $user = User::factory()->create();
     $kas = BukuKas::factory()->create(['user_id' => $user->id]);
     $dompet = Dompet::factory()->create(['user_id' => $user->id, 'is_default' => true]);
-    $jenis = Kategori::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
+    $jenis = Kategori::factory()->untukKas($kas)->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
     $page = Livewire::actingAs($user)->test(Dashboard::class)->mountAction('tambahTransaksi')->assertActionMounted('tambahTransaksi');
     $page->setActionData([
         'jenis_form' => 'pemasukan', 'buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id,
@@ -270,7 +270,7 @@ test('dashboard user aksi baris mengubah dan menghapus transaksi beserta saldo',
     $user = User::factory()->create();
     $kas = BukuKas::factory()->create(['user_id' => $user->id]);
     $dompet = Dompet::factory()->create(['user_id' => $user->id, 'is_default' => true]);
-    $jenis = Kategori::factory()->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
+    $jenis = Kategori::factory()->untukKas($kas)->create(['user_id' => $user->id, 'tipe' => 'Pemasukan']);
     $this->actingAs($user);
     $data = ['buku_kas_id' => $kas->id, 'dompet_id' => $dompet->id, 'kategori_id' => $jenis->id,
         'nominal' => 50000, 'tanggal' => now()->format('Y-m-d H:i:s'), 'deskripsi' => 'Aksi dashboard'];

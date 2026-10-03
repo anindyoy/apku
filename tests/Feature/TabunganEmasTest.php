@@ -22,8 +22,8 @@ function siapkanAkunTabunganEmas(): array
     $user = createRegularUserWithBukuKas();
     $kas = $user->buku_kas()->firstOrFail();
     $dompet = Dompet::factory()->create(['user_id' => $user->id, 'saldo' => 10000000, 'is_default' => true]);
-    $pemasukan = Kategori::factory()->create(['user_id' => $user->id, 'nama' => 'Penjualan Emas', 'tipe' => 'Pemasukan']);
-    $pengeluaran = Kategori::factory()->create(['user_id' => $user->id, 'nama' => 'Pembelian Emas', 'tipe' => 'Pengeluaran']);
+    $pemasukan = Kategori::factory()->untukKas($kas)->create(['user_id' => $user->id, 'nama' => 'Penjualan Emas', 'tipe' => 'Pemasukan']);
+    $pengeluaran = Kategori::factory()->untukKas($kas)->create(['user_id' => $user->id, 'nama' => 'Pembelian Emas', 'tipe' => 'Pengeluaran']);
     $tabungan = TabunganEmas::factory()->create(['buku_kas_id' => $kas->id, 'label' => 'Antam']);
 
     return compact('user', 'kas', 'dompet', 'pemasukan', 'pengeluaran', 'tabungan');
@@ -81,8 +81,9 @@ test('editor kas bersama dapat membeli dan menjual emas dengan dompet miliknya',
     $data = siapkanAkunTabunganEmas();
     $editor = User::factory()->create(['role' => 'reguler', 'masa_aktif' => today()->addMonth(), 'email_verified_at' => now()]);
     $dompetEditor = Dompet::factory()->create(['user_id' => $editor->id, 'saldo' => 3000000, 'is_default' => true]);
-    $kategoriBeli = Kategori::factory()->create(['user_id' => $editor->id, 'nama' => 'Beli Emas', 'tipe' => 'Pengeluaran']);
-    $kategoriJual = Kategori::factory()->create(['user_id' => $editor->id, 'nama' => 'Jual Emas', 'tipe' => 'Pemasukan']);
+    // Editor memakai kategori milik kas bersama, bukan kategori pribadinya.
+    $kategoriBeli = $data['pengeluaran'];
+    $kategoriJual = $data['pemasukan'];
     ShareBuku::factory()->create(['buku_kas_id' => $data['kas']->id, 'user_id' => $editor->id, 'privilege' => 'editor']);
 
     app(TabunganEmasService::class)->beli($editor, $data['tabungan'], $dompetEditor, [

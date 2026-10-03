@@ -35,7 +35,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Pemindahan saldo antar-dompet.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
 - Modal import transaksi menyediakan unduhan contoh template XLSX sebelum pengguna mengunggah file. Template memuat tiga baris data transaksi dengan deskripsi terisi maupun kosong; nilai buku kas dan dompetnya sesuai opsi milik pengguna yang ditampilkan di kolom referensi setelah satu kolom pemisah, bersama kategori pemasukan/pengeluaran. Baris referensi tidak dihitung sebagai transaksi saat file diimpor.
-- Kategori yang belum tersedia dapat dibuat otomatis setelah konfirmasi pengguna. Pembuatannya ikut dibatalkan jika import transaksi gagal.
+- Kolom kategori pada import bersifat opsional; nilai kosong diimpor sebagai transaksi tanpa kategori. Kategori dicari pada kas di baris yang sama. Kategori yang belum tersedia dapat dibuat otomatis, dan kategori yang belum terhubung dapat dihubungkan ke kas pada baris transaksinya, setelah konfirmasi pengguna. Perubahan ini ikut dibatalkan jika import transaksi gagal.
 - Seluruh baris import disimpan secara atomik. Pengguna dapat memilih apakah import memperbarui saldo kas dan dompet; pilihan aktif secara default. Riwayat yang diimpor tanpa dampak saldo tetap tampil sebagai transaksi dan tidak mengubah saldo saat diubah, dihapus, atau saat batch dibatalkan.
 - Import mengikuti kepemilikan dan hak pengelolaan kas, dompet, serta kategori pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
 - Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo kas serta dompet dipulihkan jika opsi pembaruan saldo diaktifkan.
@@ -46,7 +46,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Import belum mendukung transfer saldo antar-kas atau pemindahan saldo antar-dompet.
 - Beberapa pengguna dapat mencatat transaksi pada kas yang sama melalui peran Editor.
 - Setiap transaksi menyimpan identitas pengguna yang mencatatnya.
-- Editor menggunakan dompet dan kategori miliknya sendiri serta hanya dapat mengubah atau menghapus transaksi buatannya.
+- Editor menggunakan dompet miliknya sendiri dan kategori milik kas bersama, dapat mengelola kategori kas tersebut, serta hanya dapat mengubah atau menghapus transaksi buatannya.
 - Informasi dompet anggota lain disamarkan pada daftar transaksi, pencarian, laporan, dan hasil ekspor.
 - Transfer kas menentukan dompet pencatatan secara otomatis, sedangkan transfer dompet menentukan kas pencatatan secara otomatis. Transaksi pada kas terbatas tidak dapat diubah atau dihapus.
 - File import divalidasi sebelum disimpan.
@@ -58,6 +58,8 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Menentukan kas utama/default.
 - Menghapus kas kosong secara langsung.
 - Memindahkan seluruh transaksi dan saldo ke kas lain sebelum menghapus kas yang masih berisi transaksi.
+- Saat pemindahan, kategori yang belum terhubung ke kas tujuan dipetakan satu per satu ke kategori kas tujuan atau dikosongkan sesuai pilihan pengguna; kategori yang sudah terhubung ke kas tujuan dipertahankan.
+- Kas baru dapat langsung memakai seluruh kategori pemiliknya melalui pilihan **Pakai semua kategori saya di kas ini** (aktif secara default).
 - Melalui fitur **Kolaborator Kas**, hanya pemilik dengan masa aktif premium yang masih berlaku dapat membuat kolaborasi kas, baik kepada pengguna APKu lain yang sudah terdaftar dan terverifikasi maupun melalui link publik. Tombol tambah tidak tersedia untuk akun reguler atau premium kedaluwarsa, dan pembuatan juga ditolak oleh otorisasi server. Kolaborasi yang sudah ada tetap dapat dikelola dan dicabut oleh pemilik.
 - Email kolaborator boleh kosong untuk membuat link kas publik bertoken acak. Akses publik selalu **Viewer**, tanpa login, dan diperiksa pada setiap permintaan berdasarkan tanggal mulai serta berakhir. Mencabut akses langsung menonaktifkan link; kolaborasi dengan email tetap privat.
 - Email kolaborator diketik melalui input teks tanpa daftar email pengguna. Setelah input ditinggalkan, status terdaftar ditampilkan berwarna hijau atau belum terdaftar berwarna merah. Jika diisi, email yang belum terdaftar gagal validasi; pembatasan akun terverifikasi, bukan diri sendiri, dan bukan admin tetap berlaku.
@@ -83,15 +85,17 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Memindahkan saldo ke dompet lain sebelum menghapus dompet.
 - Audit baru dapat dibuat melalui tombol **Tambah audit** pada daftar Audit Saldo atau tombol **Audit saldo** pada halaman Dompet, menggunakan formulir dan aturan akses yang sama.
 - Audit menyimpan snapshot saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, serta catatan umum dan catatan per dompet.
-- Selisih positif audit dicatat sebagai pemasukan dan selisih negatif sebagai pengeluaran dengan kategori sistem **Audit Saldo** pada kas yang dipilih.
+- Selisih positif audit dicatat sebagai pemasukan dan selisih negatif sebagai pengeluaran tanpa kategori pada kas yang dipilih. Transaksi ini dikenali dari relasinya ke audit dan tampil dengan label **Audit Saldo** pada daftar, laporan, dan ekspor.
 - Dompet tanpa selisih tetap tercatat dalam riwayat audit tanpa membuat transaksi penyesuaian.
 - Seluruh penyesuaian dalam satu audit disimpan secara atomik dan dibatalkan jika saldo berubah selama proses audit.
 - Transaksi penyesuaian saldo tidak dapat diubah atau dihapus langsung. Koreksi dilakukan melalui audit saldo baru agar jejak rekonsiliasi tetap terjaga.
 
 ### 6. Kategori transaksi
 
-- Menggunakan kategori sebagai klasifikasi transaksi dan bahan ringkasan laporan.
-- Pengelolaan data kategori pemasukan dan pengeluaran mencakup penambahan, perubahan, dan penghapusan.
+- Menggunakan kategori sebagai klasifikasi transaksi yang opsional dan bahan ringkasan laporan. Transaksi tanpa kategori tampil sebagai **Tanpa kategori**; transfer kas dan transfer dompet selalu tanpa kategori.
+- Kategori terikat pada kas melalui tabel `kategori_kas`: transaksi hanya dapat memakai kategori yang terhubung ke kasnya, dan satu kategori dapat dipakai di beberapa kas milik pemilik yang sama.
+- Kategori dimiliki pemilik kas (`user_id`) dan mencatat pembuatnya (`dibuat_oleh`). Pemilik dan Editor aktif dapat menambah, mengubah, melepas, dan menghapus kategori kas; Editor hanya dapat mengubah atau menghapus kategori yang seluruh kasnya dapat ia sunting. Viewer hanya melihat.
+- Opsi kategori pada form transaksi disimpan dalam cache per kas dan dibersihkan saat kategori atau hubungannya dengan kas berubah.
 
 ### 7. Laporan keuangan
 
@@ -179,7 +183,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 3. Pengelolaan transaksi
 
-- Menentukan tanggal, kas, dompet, kategori, nominal, dan deskripsi transaksi.
+- Menentukan tanggal, kas, dompet, nominal, dan deskripsi transaksi. Kategori opsional; pilihannya mengikuti kas yang dipilih dan dikosongkan jika tidak terhubung ke kas baru.
 - Mencatat beberapa transaksi berurutan melalui aksi **Tambah yang lain**.
 - Tombol **Tambah transaksi** tetap tersedia selama pengguna memiliki kas yang dapat dikelola, termasuk ketika daftar difilter ke kas terbatas. Pilihan kas di modal hanya memuat kas yang dapat dikelola; aksi ubah dan hapus tidak tersedia untuk transaksi pada kas terbatas.
 - Pemasukan, pengeluaran, transfer kas, dan transfer dompet dicatat melalui satu modal **Tambah transaksi**; jenis transaksi menentukan field serta warna form. Pilihan jenis transaksi tersusun grid dua kolom pada semua ukuran layar, termasuk mobile agar tidak meluap ke samping. Seluruh input dan tombol submit dinonaktifkan sementara ketika perubahan jenis sedang diproses. Transfer kas hanya meminta kas asal dan tujuan, sedangkan transfer dompet hanya meminta dompet asal dan tujuan.
@@ -201,7 +205,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Pemetaan kolom pada modal import tersusun dalam tiga kolom di layar lebar dan menyesuaikan jumlah kolom pada layar lebih kecil.
 - Riwayat import menampilkan nama file, waktu, jumlah transaksi, dampak saldo, dan status setiap batch milik pengguna.
 - Riwayat Import tidak ditampilkan pada navbar; pengguna membukanya melalui aksi **Riwayat Import** pada halaman Transaksi.
-- Pratinjau import menampilkan daftar kategori baru dan konfirmasi untuk membuatnya otomatis.
+- Pratinjau import menampilkan daftar kategori baru beserta kasnya, daftar kategori yang akan dihubungkan ke kas, dan konfirmasi untuk memprosesnya otomatis.
 - Status, progres, dan pesan kegagalan pemrosesan antrean dapat dipantau pada riwayat import.
 
 ### 4. Pencarian transaksi global
@@ -239,9 +243,11 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 7. Kategori transaksi
 
-- Kategori pemasukan dan pengeluaran dikelola secara terpisah.
-- Daftar kategori menampilkan jumlah transaksi sebagai keterangan di bawah nama (misalnya **4 transaksi**), tanpa kolom jumlah terpisah. Nama panjang dapat turun baris.
-- Halaman kategori menggunakan panel beraksen hijau untuk pemasukan dan merah untuk pengeluaran, disertai penjelasan singkat. Tabel diberi jarak 1rem dari header panel. Panel tersusun dua kolom pada layar besar dan satu kolom pada layar lebih kecil, dengan dukungan tema gelap.
+- Kategori bertipe Pemasukan atau Pengeluaran dikelola dalam satu tabel berisi nama, tipe, dan kas yang terhubung, dengan filter kas dan tipe.
+- Daftar kategori menampilkan jumlah transaksi sebagai keterangan di bawah nama (misalnya **4 transaksi**), tanpa kolom jumlah terpisah. Nama panjang dapat turun baris. Kategori kas bersama menampilkan nama pemiliknya.
+- Form tambah dan ubah memuat nama, tipe, dan daftar centang kas. Semua kas yang dipilih harus milik pemilik yang sama.
+- Melepas kategori dari kas yang transaksinya masih memakainya diblokir. Aksi **Lepas dari kas** menyediakan pilihan untuk mengosongkan kategori pada transaksi kas tersebut terlebih dahulu.
+- Menghapus kategori yang masih dipakai menawarkan kategori pengganti yang terhubung ke semua kas terkait; tanpa pengganti, transaksinya menjadi tanpa kategori.
 - Menambah, mengubah, dan menghapus kategori.
 
 ### 8. Laporan keuangan
@@ -250,7 +256,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Laporan harian, bulanan, tahunan, atau rentang tanggal khusus.
 - Filter laporan berdasarkan kas dan dompet.
 - Ringkasan saldo awal, total pemasukan, total pengeluaran, akumulasi, dan saldo akhir.
-- Ringkasan pemasukan dan pengeluaran per kategori beserta persentasenya.
+- Ringkasan pemasukan dan pengeluaran per kategori beserta persentasenya, termasuk baris **Tanpa kategori** pada ringkasan, rincian, PDF, dan Excel.
 - Tab kategori yang mengelompokkan rincian transaksi pemasukan dan pengeluaran berdasarkan kategori dalam daftar yang dapat dibuka dan ditutup, dengan rincian tertutup secara default.
 - Data laporan dimuat otomatis setelah halaman dan filter tampil; query transaksi serta perhitungan ringkasan ditunda hingga permintaan berikutnya. Indikator Memuat laporan... tampil sejak halaman dibuka sampai data tersedia.
 - Indikator loading ditampilkan rata kiri pada baris tersendiri di bawah tab dan di atas isi laporan ketika memproses perubahan filter, periode, tab, navigasi, atau ekspor.

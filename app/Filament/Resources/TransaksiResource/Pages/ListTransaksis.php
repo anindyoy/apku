@@ -248,7 +248,7 @@ class ListTransaksis extends ListRecords
                                     ->default(true),
                                 Toggle::make('buat_kategori_otomatis')
                                     ->label('Buat kategori yang belum tersedia')
-                                    ->helperText('Kategori baru akan dibuat bersama transaksi setelah import dikonfirmasi.')
+                                    ->helperText('Kategori baru dibuat dan dihubungkan ke kas pada baris transaksinya setelah import dikonfirmasi.')
                                     ->default(false)
                                     ->live()
                                     ->afterStateUpdated(fn (bool $state, Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], $state, $set)),
@@ -346,6 +346,16 @@ class ListTransaksis extends ListRecords
             $html .= '</ul></div>';
         }
 
+        if (($pratinjau['kategori_dihubungkan'] ?? []) !== []) {
+            $html .= '<div class="text-warning-600"><strong>Kategori yang akan dihubungkan ke kas:</strong><ul class="list-disc pl-5 text-sm">';
+
+            foreach ($pratinjau['kategori_dihubungkan'] as $keterangan) {
+                $html .= '<li>'.e($keterangan).'</li>';
+            }
+
+            $html .= '</ul></div>';
+        }
+
         if ($errors === []) {
             $html .= '<p class="text-success-600">Semua baris valid dan siap diimpor.</p>';
         } else {
@@ -414,7 +424,7 @@ class ListTransaksis extends ListRecords
                 auth()->user(), $file, pemetaan: $pemetaan, buatKategoriOtomatis: $buatKategoriOtomatis,
             );
             $set('pratinjau', collect($hasil)->only([
-                'jumlah_baris', 'total_pemasukan', 'total_pengeluaran', 'kategori_baru', 'errors',
+                'jumlah_baris', 'total_pemasukan', 'total_pengeluaran', 'kategori_baru', 'kategori_dihubungkan', 'errors',
             ])->all());
         } catch (ValidationException $exception) {
             $this->setErrorPratinjauImport($set, $exception);

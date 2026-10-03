@@ -31,7 +31,7 @@ test('transaksi resource dapat menampilkan halaman list', function () {
 
 test('kolom kategori transaksi selalu diawali huruf kapital', function () {
     $user = createRegularUserWithBukuKas();
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'transfer',
     ]);
@@ -173,7 +173,7 @@ test('transaksi resource dapat mengedit nominal transaksi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pemasukan',
     ]);
@@ -201,7 +201,7 @@ test('transaksi resource dapat menghapus transaksi pemasukan', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->first();
 
-    $jenis = Kategori::factory()->create([
+    $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Pemasukan',
     ]);

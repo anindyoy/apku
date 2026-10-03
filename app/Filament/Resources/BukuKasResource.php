@@ -7,6 +7,8 @@ use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
+use App\Models\Kategori;
+use App\Services\BukuKasService;
 use App\Services\HargaEmasService;
 use App\Services\OpsiSelectCache;
 use BackedEnum;
@@ -18,13 +20,15 @@ use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class BukuKasResource extends Resource
@@ -75,6 +79,12 @@ class BukuKasResource extends Resource
                 TextInput::make('description')
                     ->maxLength(200)
                     ->default(null),
+
+                Toggle::make('hubungkan_kategori')
+                    ->label('Pakai semua kategori saya di kas ini')
+                    ->helperText('Matikan jika kas ini memerlukan daftar kategori sendiri, misalnya untuk kas bersama. Hubungan kategori dapat diubah di Setting > Kategori.')
+                    ->default(true)
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
             ]);
     }
 
@@ -204,38 +214,26 @@ class BukuKasResource extends Resource
                                 ))
                                 ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
                                 ->searchable(false)
+                                ->live()
                                 ->rules([
                                     Rule::exists('buku_kas', 'id')
                                         ->where('user_id', $record->user_id)
                                         ->whereNot('id', $record->id),
                                 ])
                                 ->required(),
+
+                            Section::make('Kategori transaksi')
+                                ->description('Kategori berikut belum terhubung ke kas tujuan. Pilih kategori penggantinya di kas tujuan, atau biarkan kosong agar transaksinya menjadi tanpa kategori.')
+                                ->schema(fn (Get $get): array => static::fieldPemetaanKategori($record, $get('buku_kas_id')))
+                                ->visible(fn (Get $get): bool => static::fieldPemetaanKategori($record, $get('buku_kas_id')) !== []),
                         ])
                         ->action(function (BukuKas $record, array $data): void {
-                            DB::transaction(function () use ($record, $data): void {
-                                $bukuKasAsal = BukuKas::query()
-                                    ->whereKey($record->id)
-                                    ->where('user_id', $record->user_id)
-                                    ->lockForUpdate()
-                                    ->firstOrFail();
-
-                                $bukuKasTujuan = BukuKas::query()
-                                    ->whereKey($data['buku_kas_id'])
-                                    ->whereKeyNot($bukuKasAsal->id)
-                                    ->where('user_id', $bukuKasAsal->user_id)
-                                    ->lockForUpdate()
-                                    ->firstOrFail();
-
-                                $bukuKasAsal->transaksi()->update([
-                                    'buku_kas_id' => $bukuKasTujuan->id,
-                                ]);
-                                $bukuKasAsal->tabunganEmas()->update([
-                                    'buku_kas_id' => $bukuKasTujuan->id,
-                                ]);
-
-                                $bukuKasTujuan->increment('saldo', $bukuKasAsal->saldo);
-                                $bukuKasAsal->delete();
-                            });
+                            app(BukuKasService::class)->pindahkanDanHapus(
+                                auth()->user(),
+                                $record,
+                                BukuKas::query()->where('user_id', $record->user_id)->findOrFail($data['buku_kas_id']),
+                                $data['pemetaan_kategori'] ?? [],
+                            );
                         })
                         ->successNotificationTitle('Transaksi dipindahkan dan kas berhasil dihapus'),
                 ])->label('Aksi'),
@@ -245,6 +243,34 @@ class BukuKasResource extends Resource
                 // Tables\Actions\DeleteBulkAction::make(),
                 // ]),
             ]);
+    }
+
+    /**
+     * Satu pilihan kategori pengganti untuk setiap kategori kas asal yang belum terhubung ke kas tujuan.
+     *
+     * @return array<int, Select>
+     */
+    public static function fieldPemetaanKategori(BukuKas $asal, mixed $idKasTujuan): array
+    {
+        $tujuan = filled($idKasTujuan)
+            ? BukuKas::query()->where('user_id', $asal->user_id)->whereKeyNot($asal->id)->find($idKasTujuan)
+            : null;
+
+        if (! $tujuan) {
+            return [];
+        }
+
+        $opsi = $tujuan->kategori()->withoutGlobalScopes()->orderBy('nama')->get()
+            ->mapWithKeys(fn (Kategori $kategori): array => [$kategori->id => $kategori->nama.' ('.$kategori->tipe.')'])
+            ->all();
+
+        return collect(app(BukuKasService::class)->kategoriPerluDipetakan($asal, $tujuan))
+            ->map(fn (string $nama, int $id): Select => Select::make('pemetaan_kategori.'.$id)
+                ->label($nama)
+                ->placeholder('Kosongkan kategori')
+                ->options($opsi))
+            ->values()
+            ->all();
     }
 
     public static function getRelations(): array

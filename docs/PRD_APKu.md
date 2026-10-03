@@ -35,7 +35,7 @@ Dokumen ini menggambarkan kebutuhan produk yang **sudah tercakup dalam aplikasi*
 | Reguler | Catat transaksi, impor, laporan, audit saldo, utang/piutang, tabungan emas | Maksimal dua kas milik sendiri dan dua dompet milik sendiri; tidak dapat membuat kolaborasi kas baru |
 | Premium aktif | Seluruh kebutuhan Reguler, tambahan kas/dompet dan pembuatan kolaborasi | Akses Premium hanya berlaku selama masa aktif |
 | Kolaborator Viewer | Membaca transaksi dan laporan kas yang dibagikan | Tidak dapat mengubah data kas |
-| Kolaborator Editor | Mencatat transaksi pada kas bersama yang dapat dikelola | Hanya mengubah atau menghapus transaksi buatannya; memakai dompet dan kategori sendiri |
+| Kolaborator Editor | Mencatat transaksi pada kas bersama yang dapat dikelola | Hanya mengubah atau menghapus transaksi buatannya; memakai dompet sendiri dan kategori kas bersama |
 | Pengunjung link publik | Membaca ringkasan serta transaksi kas selama link aktif | Tanpa login; hanya baca; identitas pengguna dan nama dompet disembunyikan |
 | Admin | Mengelola pengguna, langganan, metode pembayaran, voucher, dan pengaturan harga emas | Navigasi admin berfokus pada administrasi dan statistik agregat |
 
@@ -79,8 +79,8 @@ Kas yang diterima dari pengguna lain tidak mengurangi kuota kas milik kolaborato
 ### FR-04 Kas, dompet, dan kategori
 
 - Pengguna dapat membuat, mengubah, memilih default, serta menghapus kas/dompet sesuai kuota dan hak akses. Sebelum menghapus entitas berisi data atau saldo, sistem menyediakan pemindahan yang diperlukan.
-- Kategori pemasukan dan pengeluaran dapat dikelola terpisah.
-- Audit dompet menyimpan saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, dan catatan. Selisih menghasilkan transaksi penyesuaian dengan kategori sistem **Audit Saldo**.
+- Kategori bersifat opsional, bertipe pemasukan atau pengeluaran, dan terikat pada kas; satu kategori dapat dipakai di beberapa kas milik pemilik yang sama. Pemilik dan Editor dapat mengelolanya.
+- Audit dompet menyimpan saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, dan catatan. Selisih menghasilkan transaksi penyesuaian tanpa kategori yang berlabel **Audit Saldo**.
 - **Kriteria penerimaan:** audit tanpa selisih tetap muncul di riwayat tanpa transaksi penyesuaian; audit dibatalkan bila saldo berubah selama proses.
 
 ### FR-05 Dashboard, pencarian, dan laporan

@@ -48,26 +48,36 @@ class ImportTransaksiService
 
     public function buatTemplateXlsx(string $path, User $user): void
     {
-        $bukuKas = BukuKas::query()
-            ->where('user_id', $user->id)
-            ->pluck('nama_buku')
-            ->all();
         $dompet = Dompet::query()
             ->where('user_id', $user->id)
             ->pluck('nama_dompet')
             ->all();
-        $kategoriPemasukan = Kategori::query()
+        $bukuKas = BukuKas::query()
+            ->where('user_id', $user->id)
+            ->get(['id', 'nama_buku']);
+        $kategoriPemasukan = Kategori::withoutGlobalScopes()
             ->where('user_id', $user->id)
             ->where('tipe', 'Pemasukan')
             ->orderBy('nama')
             ->pluck('nama')
             ->all();
-        $kategoriPengeluaran = Kategori::query()
+        $kategoriPengeluaran = Kategori::withoutGlobalScopes()
             ->where('user_id', $user->id)
             ->where('tipe', 'Pengeluaran')
             ->orderBy('nama')
             ->pluck('nama')
             ->all();
+        // Contoh hanya memakai kategori yang terhubung ke kas pada barisnya; jika belum ada, kolomnya dikosongkan.
+        $contohKategori = fn (?BukuKas $kas, string $tipe): ?string => $kas
+            ? Kategori::withoutGlobalScopes()
+                ->whereIn('id', DB::table('kategori_kas')->where('buku_kas_id', $kas->id)->select('kategori_id'))
+                ->where('tipe', $tipe)
+                ->orderBy('nama')
+                ->value('nama')
+            : null;
+        $kasPertama = $bukuKas->get(0);
+        $kasKedua = $bukuKas->get(1) ?? $kasPertama;
+        $bukuKas = $bukuKas->pluck('nama_buku')->all();
 
         $writer = new XlsxWriter;
         $writer->openToFile($path);
@@ -82,7 +92,7 @@ class ImportTransaksiService
                 'Pemasukan',
                 $bukuKas[0] ?? null,
                 $dompet[0] ?? null,
-                $kategoriPemasukan[0] ?? null,
+                $contohKategori($kasPertama, 'Pemasukan'),
                 5000000,
                 'Gaji bulan berjalan',
             ],
@@ -91,7 +101,7 @@ class ImportTransaksiService
                 'Pengeluaran',
                 $bukuKas[1] ?? $bukuKas[0] ?? null,
                 $dompet[1] ?? $dompet[0] ?? null,
-                $kategoriPengeluaran[0] ?? null,
+                $contohKategori($kasKedua, 'Pengeluaran'),
                 35000,
                 null,
             ],
@@ -100,7 +110,7 @@ class ImportTransaksiService
                 'Pengeluaran',
                 $bukuKas[0] ?? null,
                 $dompet[0] ?? null,
-                $kategoriPengeluaran[0] ?? null,
+                $contohKategori($kasPertama, 'Pengeluaran'),
                 50000,
                 'Belanja kebutuhan',
             ],
@@ -189,7 +199,7 @@ class ImportTransaksiService
     }
 
     /**
-     * @return array{baris: array<int, array<string, mixed>>, baris_error: array<int, array{nomor_baris: int, data: array<string, mixed>, pesan: string}>, kategori_baru: array<string, array<string>>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
+     * @return array{baris: array<int, array<string, mixed>>, baris_error: array<int, array{nomor_baris: int, data: array<string, mixed>, pesan: string}>, kategori_baru: array<string, array<string>>, kategori_dihubungkan: array<string, string>, errors: array<int, string>, jumlah_baris: int, total_pemasukan: int, total_pengeluaran: int, hash_file: string}
      */
     public function pratinjau(
         User $user,
@@ -205,6 +215,7 @@ class ImportTransaksiService
             'baris' => [],
             'baris_error' => [],
             'kategori_baru' => [],
+            'kategori_dihubungkan' => [],
             'errors' => [],
             'jumlah_baris' => 0,
             'total_pemasukan' => 0,
@@ -276,9 +287,16 @@ class ImportTransaksiService
 
                     $hasil['baris'][] = $data;
 
+                    // Kategori baru dibuat di kas pada baris transaksinya, jadi pratinjau menyebut kasnya.
                     if (filled($data['nama_kategori_baru'] ?? null)) {
                         $hasil['kategori_baru'][$data['jenis']] ??= [];
-                        $hasil['kategori_baru'][$data['jenis']][$this->normalisasiNama($data['nama_kategori_baru'])] = $data['nama_kategori_baru'];
+                        $hasil['kategori_baru'][$data['jenis']][$this->normalisasiNama($data['nama_kategori_baru']).'|'.$data['buku_kas_id']]
+                            = $data['nama_kategori_baru'].' ('.$data['nama_buku_kas'].')';
+                    }
+
+                    if ($data['hubungkan_kategori'] ?? false) {
+                        $hasil['kategori_dihubungkan'][$data['kategori_id'].'|'.$data['buku_kas_id']]
+                            = $data['nama_kategori'].' → '.$data['nama_buku_kas'];
                     }
 
                     $kunciTotal = $data['jenis'] === 'Pemasukan' ? 'total_pemasukan' : 'total_pengeluaran';
@@ -398,8 +416,14 @@ class ImportTransaksiService
                         'user_id' => $user->id,
                         'tipe' => $data['jenis'],
                         'nama' => $data['nama_kategori_baru'],
-                    ]);
+                    ], ['dibuat_oleh' => $user->id]);
+                    app(KategoriService::class)->hubungkan($kategori, [$data['buku_kas_id']]);
                     $data['kategori_id'] = $kategori->id;
+                } elseif ($data['hubungkan_kategori'] ?? false) {
+                    app(KategoriService::class)->hubungkan(
+                        Kategori::withoutGlobalScopes()->findOrFail($data['kategori_id']),
+                        [$data['buku_kas_id']],
+                    );
                 }
 
                 app(TransaksiService::class)->buat($user, [
@@ -634,8 +658,12 @@ class ImportTransaksiService
         $jenis = Str::title(trim((string) ($data['jenis'] ?? '')));
         $bukuKas = $this->cariBukuKas($user, $data['buku_kas'] ?? null);
         $dompet = $this->cariDompet($user, $data['dompet'] ?? null);
-        $kategori = $this->cariKategori($user, $data['kategori'] ?? null, $jenis);
+        $jenisValid = in_array($jenis, ['Pemasukan', 'Pengeluaran'], true);
         $namaKategoriBaru = trim((string) ($data['kategori'] ?? ''));
+        // Kategori dicari pada kas baris ini; kategori pemilik yang belum terhubung dicatat terpisah.
+        [$kategori, $kategoriBelumTerhubung] = $bukuKas !== null && $jenisValid && $namaKategoriBaru !== ''
+            ? $this->cariKategori($bukuKas, $namaKategoriBaru, $jenis)
+            : [null, null];
         $tanggal = $this->parseTanggal($data['tanggal'] ?? null);
         $nominal = filter_var($data['nominal'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
@@ -662,22 +690,31 @@ class ImportTransaksiService
         }
 
         $kategoriDapatDibuat = $buatKategoriOtomatis
-            && in_array($jenis, ['Pemasukan', 'Pengeluaran'], true)
+            && $jenisValid
+            && $bukuKas !== null
             && $namaKategoriBaru !== ''
             && mb_strlen($namaKategoriBaru) <= 255;
+        $hubungkanKategori = $kategoriBelumTerhubung !== null && $buatKategoriOtomatis;
 
         // Kolom kategori yang kosong berarti transaksi diimpor tanpa kategori.
-        if ($kategori === null && $namaKategoriBaru !== '' && ! $kategoriDapatDibuat) {
-            $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori tidak ditemukan atau tipenya tidak sesuai.";
+        if ($kategori === null && $namaKategoriBaru !== '' && $bukuKas !== null) {
+            if ($kategoriBelumTerhubung !== null && ! $buatKategoriOtomatis) {
+                $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori belum terhubung ke kas {$bukuKas->nama_buku}.";
+            } elseif ($kategoriBelumTerhubung === null && ! $kategoriDapatDibuat) {
+                $errors[] = "Baris {$nomorBaris}, kolom kategori: kategori tidak ditemukan atau tipenya tidak sesuai.";
+            }
         }
 
         return [[
             'tanggal' => $tanggal,
             'jenis' => $jenis,
             'buku_kas_id' => $bukuKas?->id,
+            'nama_buku_kas' => $bukuKas?->nama_buku,
             'dompet_id' => $dompet?->id,
-            'kategori_id' => $kategori?->id,
-            'nama_kategori_baru' => $kategori === null && $kategoriDapatDibuat ? $namaKategoriBaru : null,
+            'kategori_id' => $kategori?->id ?? ($hubungkanKategori ? $kategoriBelumTerhubung->id : null),
+            'nama_kategori' => $kategori?->nama ?? $kategoriBelumTerhubung?->nama,
+            'hubungkan_kategori' => $hubungkanKategori,
+            'nama_kategori_baru' => $kategori === null && $kategoriBelumTerhubung === null && $kategoriDapatDibuat ? $namaKategoriBaru : null,
             'nominal' => $nominal === false ? 0 : $nominal,
             'deskripsi' => filled($data['deskripsi'] ?? null) ? trim((string) $data['deskripsi']) : null,
         ], $errors];
@@ -713,12 +750,21 @@ class ImportTransaksiService
         return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;
     }
 
-    private function cariKategori(User $user, mixed $nama, string $jenis): ?Kategori
+    /**
+     * @return array{?Kategori, ?Kategori} Kategori yang terhubung ke kas, lalu kategori pemilik kas yang belum terhubung.
+     */
+    private function cariKategori(BukuKas $bukuKas, string $nama, string $jenis): array
     {
-        $hasil = Kategori::withoutGlobalScopes()->where('user_id', $user->id)->where('tipe', $jenis)
-            ->whereRaw('LOWER(nama) = ?', [mb_strtolower(trim((string) $nama))])->get();
+        $hasil = Kategori::withoutGlobalScopes()->where('user_id', $bukuKas->user_id)->where('tipe', $jenis)
+            ->whereRaw('LOWER(nama) = ?', [mb_strtolower($nama)])->get();
 
-        return $hasil->count() === 1 ? $hasil->first() : null;
+        if ($hasil->count() !== 1) {
+            return [null, null];
+        }
+
+        return $hasil->first()->terhubungKe($bukuKas->id)
+            ? [$hasil->first(), null]
+            : [null, $hasil->first()];
     }
 
     private function parseTanggal(mixed $value): ?CarbonImmutable

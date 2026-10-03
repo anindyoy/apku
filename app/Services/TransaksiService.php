@@ -58,13 +58,13 @@ class TransaksiService
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($data['buku_kas_id']);
         $dompet = Dompet::withoutGlobalScopes()->findOrFail($data['dompet_id']);
         $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
-        $this->pastikanKategoriValid($user, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
+        $this->pastikanKategoriValid($bukuKas, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
 
         return DB::transaction(function () use ($user, $data, $jenis): Transaksi {
             $bukuKas = BukuKas::withoutGlobalScopes()->whereKey($data['buku_kas_id'])->lockForUpdate()->firstOrFail();
             $dompet = Dompet::withoutGlobalScopes()->whereKey($data['dompet_id'])->lockForUpdate()->firstOrFail();
             $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
-            $this->pastikanKategoriValid($user, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
+            $this->pastikanKategoriValid($bukuKas, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
 
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
                 'user_id' => $user->id,
@@ -188,6 +188,13 @@ class TransaksiService
             $dompetBaru = Dompet::withoutGlobalScopes()->findOrFail($dataBaru['dompet_id']);
 
             $this->pastikanTujuanDapatDikelola($user, $bukuKasBaru, $dompetBaru);
+            $dataBaru['kategori_id'] = filled($dataBaru['kategori_id'] ?? null) ? (int) $dataBaru['kategori_id'] : null;
+
+            // Pasangan kas dan kategori divalidasi ulang hanya ketika salah satunya berubah.
+            if ((int) $dataBaru['buku_kas_id'] !== (int) $terkunci->buku_kas_id || $dataBaru['kategori_id'] !== ($terkunci->kategori_id === null ? null : (int) $terkunci->kategori_id)) {
+                $this->pastikanKategoriValid($bukuKasBaru, $dataBaru['kategori_id'], $dataBaru['jenis']);
+            }
+
             $this->balikDampak($terkunci);
             Transaksi::withoutEvents(fn () => $terkunci->update($dataBaru));
             $this->terapkanDampak($terkunci->fresh());
@@ -342,7 +349,7 @@ class TransaksiService
         }
     }
 
-    private function pastikanKategoriValid(User $user, ?int $kategoriId, string $jenis): void
+    private function pastikanKategoriValid(BukuKas $bukuKas, ?int $kategoriId, string $jenis): void
     {
         // Kategori bersifat opsional; transaksi tanpa kategori tetap sah.
         if ($kategoriId === null) {
@@ -351,8 +358,16 @@ class TransaksiService
 
         $kategori = Kategori::withoutGlobalScopes()->find($kategoriId);
 
-        if (! $kategori || $kategori->user_id !== $user->id || $kategori->tipe !== $jenis) {
-            throw new AuthorizationException('Kategori transaksi tidak dapat digunakan.');
+        if (! $kategori || ! $kategori->terhubungKe($bukuKas->id)) {
+            throw ValidationException::withMessages([
+                'kategori_id' => 'Kategori tidak terhubung ke kas yang dipilih.',
+            ]);
+        }
+
+        if ($kategori->tipe !== $jenis) {
+            throw ValidationException::withMessages([
+                'kategori_id' => 'Tipe kategori tidak sesuai dengan jenis transaksi.',
+            ]);
         }
     }
 

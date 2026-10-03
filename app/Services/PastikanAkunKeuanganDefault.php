@@ -35,6 +35,8 @@ class PastikanAkunKeuanganDefault
                     'is_default' => true,
                     'description' => 'Kas utama',
                 ]);
+                // Kas pengganti langsung memakai kategori yang sudah dimiliki pengguna.
+                app(KategoriService::class)->hubungkanSemuaKategoriPemilik($bukuKas);
             }
 
             if (! $dompet) {

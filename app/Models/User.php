@@ -110,6 +110,47 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             ->value('privilege');
     }
 
+    /** Kategori kas dikelola pemilik kas dan Editor aktif pada kas tersebut. */
+    public function dapatMengelolaKategoriPada(BukuKas $bukuKas): bool
+    {
+        return ! $this->isAdmin()
+            && in_array($this->hakAksesPada($bukuKas), ['owner', 'editor'], true);
+    }
+
+    public function dapatMengelolaKategori(Kategori $kategori): bool
+    {
+        if ($this->isAdmin()) {
+            return false;
+        }
+
+        if ($kategori->user_id === $this->id) {
+            return true;
+        }
+
+        // Editor hanya mengelola kategori yang seluruh kasnya dapat ia sunting.
+        $idKas = $kategori->idKas();
+
+        return $idKas !== [] && ShareBuku::query()->aktif()
+            ->where('user_id', $this->id)
+            ->where('privilege', 'editor')
+            ->whereIn('buku_kas_id', $idKas)
+            ->distinct()
+            ->count('buku_kas_id') === count($idKas);
+    }
+
+    public function dapatMelihatKategori(Kategori $kategori): bool
+    {
+        if ($this->isAdmin()) {
+            return false;
+        }
+
+        return $kategori->user_id === $this->id
+            || ShareBuku::query()->aktif()
+                ->where('user_id', $this->id)
+                ->whereIn('buku_kas_id', $kategori->idKas())
+                ->exists();
+    }
+
     private function bukuKasMasihDapatDikelolaPemilik(BukuKas $bukuKas): bool
     {
         $pemilik = $bukuKas->user;

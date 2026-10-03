@@ -23,6 +23,7 @@ class TransaksiSeeder extends Seeder
         // Hapus data lama dan atur ulang nomor otomatis.
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::table('transaksi')->delete();
+        DB::table('kategori_kas')->delete();
         DB::table('buku_kas')->delete();
         DB::table('dompet')->delete();
         DB::statement('ALTER TABLE transaksi AUTO_INCREMENT=1');
@@ -224,5 +225,12 @@ class TransaksiSeeder extends Seeder
                 'updated_at' => $now,
             ]);
         }
+
+        // Kategori contoh dipakai di semua kas pemiliknya.
+        DB::statement(
+            'INSERT INTO kategori_kas (kategori_id, buku_kas_id) '
+            .'SELECT kategori.id, buku_kas.id FROM kategori '
+            .'INNER JOIN buku_kas ON buku_kas.user_id = kategori.user_id'
+        );
     }
 }

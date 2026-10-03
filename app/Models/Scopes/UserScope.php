@@ -3,6 +3,7 @@
 namespace App\Models\Scopes;
 
 use App\Models\BukuKas;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -51,6 +52,24 @@ class UserScope implements Scope
                                                 ->where(fn ($query) => $query->whereNull('berlaku_sampai')->orWhere('berlaku_sampai', '>', now()));
                                         });
                                 });
+                        });
+                });
+
+                return;
+            }
+
+            if ($model instanceof Kategori) {
+                // Kategori milik sendiri dan kategori pada kas yang sedang dibagikan kepada pengguna.
+                $builder->where(function (Builder $query): void {
+                    $query->where('kategori.user_id', auth()->id())
+                        ->orWhereExists(function ($query): void {
+                            $query->selectRaw('1')
+                                ->from('kategori_kas')
+                                ->join('share_buku', 'share_buku.buku_kas_id', '=', 'kategori_kas.buku_kas_id')
+                                ->whereColumn('kategori_kas.kategori_id', 'kategori.id')
+                                ->where('share_buku.user_id', auth()->id())
+                                ->where(fn ($query) => $query->whereNull('berlaku_mulai')->orWhere('berlaku_mulai', '<=', now()))
+                                ->where(fn ($query) => $query->whereNull('berlaku_sampai')->orWhere('berlaku_sampai', '>', now()));
                         });
                 });
 

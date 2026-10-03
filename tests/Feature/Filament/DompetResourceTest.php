@@ -107,6 +107,8 @@ test('action transaksi biasa menggunakan service untuk memperbarui saldo', funct
         'nama' => 'Belanja',
         'tipe' => 'Pengeluaran',
     ]);
+    app(\App\Services\KategoriService::class)->hubungkan($kategoriMasuk, [$bukuKas->id]);
+    app(\App\Services\KategoriService::class)->hubungkan($kategoriKeluar, [$bukuKas->id]);
     $komponen = Livewire::actingAs($user)
         ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id]);
 

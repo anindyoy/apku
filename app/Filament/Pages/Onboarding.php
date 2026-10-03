@@ -4,7 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\BukuKas;
 use App\Models\Dompet;
-use App\Models\Kategori;
+use App\Services\KategoriService;
 use App\Services\TransaksiService;
 use BackedEnum;
 use Filament\Forms\Components\Repeater;
@@ -150,11 +150,11 @@ class Onboarding extends Page implements HasForms
 
             foreach (['Pemasukan' => 'kategori_pemasukan', 'Pengeluaran' => 'kategori_pengeluaran'] as $tipe => $field) {
                 foreach ($data[$field] as $kategori) {
-                    Kategori::create([
-                        'user_id' => $user->id,
+                    // Kategori awal langsung dihubungkan ke kas utama.
+                    app(KategoriService::class)->buat($user, [
                         'tipe' => $tipe,
                         'nama' => is_array($kategori) ? $kategori['nama'] : $kategori,
-                    ]);
+                    ], [$bukuKas->id]);
                 }
             }
         };

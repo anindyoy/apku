@@ -104,7 +104,7 @@ test('hasil pencarian dapat diedit dan dihapus oleh pemilik transaksi', function
         'nama_dompet' => 'Dompet Aksi Pencarian',
         'saldo' => 100000,
     ]);
-    $kategori = Kategori::factory()->create([
+    $kategori = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'Kategori Aksi Pencarian',
         'tipe' => 'Pemasukan',

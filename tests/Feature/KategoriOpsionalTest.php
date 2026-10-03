@@ -22,6 +22,7 @@ function siapkanDataKategoriOpsional(): array
     $bukuKas->update(['nama_buku' => 'Kas Utama', 'saldo' => 0, 'is_default' => true]);
     $dompet = Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Cash', 'saldo' => 0, 'is_default' => true]);
     $pengeluaran = Kategori::create(['user_id' => $user->id, 'nama' => 'Makanan', 'tipe' => 'Pengeluaran']);
+    app(\App\Services\KategoriService::class)->hubungkan($pengeluaran, [$bukuKas->id]);
 
     return compact('user', 'bukuKas', 'dompet', 'pengeluaran');
 }

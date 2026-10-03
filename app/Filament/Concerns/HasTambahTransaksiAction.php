@@ -124,6 +124,16 @@ trait HasTambahTransaksiAction
         return $bukuKas !== null && $bukuKas->user_id === auth()->id();
     }
 
+    /** @return array<int, string> */
+    public static function opsiKategoriForm(Get $get): array
+    {
+        return Transaksi::opsiKategori((int) $get('buku_kas_id'), match ($get('jenis_form')) {
+            'pemasukan' => 'Pemasukan',
+            'pengeluaran' => 'Pengeluaran',
+            default => null,
+        });
+    }
+
     protected function buatAksiTambahTransaksi(): Action
     {
         return Action::make('Tambah transaksi')
@@ -279,6 +289,13 @@ trait HasTambahTransaksiAction
                                 ? $this->opsiBukuKasTransfer()
                                 : Transaksi::opsiBukuKasYangDapatDikelola())
                             ->required()
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set): void {
+                                // Kategori yang tidak terhubung ke kas baru dikosongkan.
+                                if (! array_key_exists((int) $get('kategori_id'), static::opsiKategoriForm($get))) {
+                                    $set('kategori_id', null);
+                                }
+                            })
                             ->hidden(fn (Get $get): bool => $get('jenis_form') === 'transfer_dompet'),
                         Select::make('dompet_id')
                             ->label(fn (Get $get): string => str_starts_with((string) $get('jenis_form'), 'transfer_') ? 'Dompet asal' : 'Dompet')
@@ -306,11 +323,7 @@ trait HasTambahTransaksiAction
                             ->visible(fn (Get $get): bool => $get('jenis_form') === 'transfer_dompet'),
                         Select::make('kategori_id')
                             ->label('Kategori')
-                            ->options(fn (Get $get): array => Transaksi::opsiKategori(match ($get('jenis_form')) {
-                                'pemasukan' => 'Pemasukan',
-                                'pengeluaran' => 'Pengeluaran',
-                                default => null,
-                            }))
+                            ->options(fn (Get $get): array => static::opsiKategoriForm($get))
                             ->placeholder('Tanpa kategori')
                             ->visible(fn (Get $get): bool => in_array($get('jenis_form'), ['pemasukan', 'pengeluaran'], true)),
                         DateTimePicker::make('tanggal')->required()->seconds(false)->native(false)->maxDate(now()),
