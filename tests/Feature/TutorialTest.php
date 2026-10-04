@@ -246,15 +246,15 @@ it('tutorial mengelompokkan topik menurut halaman fitur dan menyembunyikan kelom
     $response = $this->get(route('tutorial', ['q' => 'Viewer']))->assertOk();
     $groups = $response->viewData('groups');
 
-    expect($groups->keys()->all())->toBe(['Kas', 'Langganan Premium']);
-    expect(array_column($response->viewData('topics'), 'id'))->toBe(['kolaborasi', 'kas-publik', 'langganan']);
+    expect($groups->keys()->all())->toBe(['Kategori', 'Kas', 'Langganan Premium']);
+    expect(array_column($response->viewData('topics'), 'id'))->toBe(['kategori', 'kolaborasi', 'kas-publik', 'langganan']);
 
     $document = new DOMDocument;
     @$document->loadHTML($response->getContent());
     $xpath = new DOMXPath($document);
-    expect($xpath->query('//aside/nav/div[@class="page-group"]'))->toHaveCount(2);
-    expect($xpath->query('//main/details[@data-tutorial-chapter]'))->toHaveCount(2);
-    expect($xpath->query('//aside/nav//a[@data-topic-link]'))->toHaveCount(3);
+    expect($xpath->query('//aside/nav/div[@class="page-group"]'))->toHaveCount(3);
+    expect($xpath->query('//main/details[@data-tutorial-chapter]'))->toHaveCount(3);
+    expect($xpath->query('//aside/nav//a[@data-topic-link]'))->toHaveCount(4);
 });
 
 it('tutorial mencari isi panduan tanpa membedakan kapital dan mengabaikan spasi tepi', function () {

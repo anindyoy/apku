@@ -31,13 +31,14 @@ test('transaksi resource dapat menampilkan halaman list', function () {
 
 test('kolom kategori transaksi selalu diawali huruf kapital', function () {
     $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->first();
     $jenis = Kategori::factory()->untukKas($bukuKas)->create([
         'user_id' => $user->id,
         'nama' => 'transfer',
     ]);
     $transaksi = Transaksi::factory()->create([
         'user_id' => $user->id,
-        'buku_kas_id' => $user->buku_kas()->firstOrFail()->id,
+        'buku_kas_id' => $bukuKas->id,
         'jenis' => 'Pemasukan',
         'kategori_id' => $jenis->id,
     ]);
