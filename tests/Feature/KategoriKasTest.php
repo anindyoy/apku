@@ -70,6 +70,20 @@ test('kategori dibuat untuk kas pilihan dan satu kategori dapat dipakai di beber
         ->toThrow(ValidationException::class);
 })->group('kategori-kas');
 
+test('kategori menerima tipe semua dan menolak tipe yang tidak valid', function () {
+    $data = siapkanDataKategoriKas();
+    $service = app(KategoriService::class);
+
+    $kategori = $service->buat($data['user'], ['nama' => 'Transfer', 'tipe' => 'Semua'], [$data['kas']->id]);
+    expect($kategori->tipe)->toBe('Semua');
+
+    $service->ubah($data['user'], $kategori, ['tipe' => 'Pemasukan']);
+    expect($kategori->fresh()->tipe)->toBe('Pemasukan');
+
+    expect(fn () => $service->buat($data['user'], ['nama' => 'Ngaco', 'tipe' => 'Bukan Tipe'], [$data['kas']->id]))
+        ->toThrow(ValidationException::class, 'Tipe kategori tidak valid.');
+})->group('kategori-kas', 'tipe-semua');
+
 test('transaksi menolak kategori yang tidak terhubung ke kasnya', function () {
     $data = siapkanDataKategoriKas();
     $kategori = app(KategoriService::class)->buat($data['user'], ['nama' => 'Belanja', 'tipe' => 'Pengeluaran'], [$data['kas']->id]);
@@ -346,6 +360,41 @@ test('opsi kategori mengikuti kas dan diperbarui saat kategori atau hubungannya 
     $service->buat($pemilikLain, ['nama' => 'Rahasia', 'tipe' => 'Pengeluaran'], [$kasAsing->id]);
     expect(Transaksi::opsiKategori($kasAsing->id, 'Pengeluaran'))->toBe([]);
 })->group('kategori-kas', 'opsi-select-cache');
+
+test('kategori bertipe semua selalu tampil pada dropdown walau difilter sesuai tipe transaksi', function () {
+    $data = siapkanDataKategoriKas();
+    $this->actingAs($data['user']);
+    $service = app(KategoriService::class);
+
+    $belanja = $service->buat($data['user'], ['nama' => 'Belanja', 'tipe' => 'Pengeluaran'], [$data['kas']->id]);
+    $transfer = $service->buat($data['user'], ['nama' => 'Transfer', 'tipe' => 'Semua'], [$data['kas']->id]);
+
+    expect($data['user']->pisahkanTipeKategori())->toBeTrue();
+    expect(Transaksi::opsiKategori($data['kas']->id, 'Pengeluaran'))->toBe([
+        $belanja->id => 'Belanja',
+        $transfer->id => 'Transfer',
+    ])
+        ->and(Transaksi::opsiKategori($data['kas']->id, 'Pemasukan'))->toBe([$transfer->id => 'Transfer']);
+})->group('kategori-kas', 'opsi-select-cache', 'tipe-semua');
+
+test('pengaturan gabung tipe menampilkan seluruh kategori tanpa filter tipe transaksi', function () {
+    $data = siapkanDataKategoriKas();
+    $data['user']->forceFill(['pisahkan_tipe_kategori' => false])->save();
+    $this->actingAs($data['user']->fresh());
+    $service = app(KategoriService::class);
+
+    $belanja = $service->buat($data['user'], ['nama' => 'Belanja', 'tipe' => 'Pengeluaran'], [$data['kas']->id]);
+    $gaji = $service->buat($data['user'], ['nama' => 'Gaji', 'tipe' => 'Pemasukan'], [$data['kas']->id]);
+
+    expect(Transaksi::opsiKategori($data['kas']->id, 'Pengeluaran'))->toBe([
+        $belanja->id => 'Belanja',
+        $gaji->id => 'Gaji',
+    ])
+        ->and(Transaksi::opsiKategori($data['kas']->id, 'Pemasukan'))->toBe([
+            $belanja->id => 'Belanja',
+            $gaji->id => 'Gaji',
+        ]);
+})->group('kategori-kas', 'opsi-select-cache', 'tipe-semua');
 
 test('halaman kategori menampilkan dan mengelola kategori sesuai kas yang dapat diakses', function () {
     $data = siapkanDataKategoriKas();

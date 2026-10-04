@@ -96,6 +96,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Kategori terikat pada kas melalui tabel `kategori_kas`: transaksi hanya dapat memakai kategori yang terhubung ke kasnya, dan satu kategori dapat dipakai di beberapa kas milik pemilik yang sama.
 - Kategori dimiliki pemilik kas (`user_id`) dan mencatat pembuatnya (`dibuat_oleh`). Pemilik dan Editor aktif dapat menambah, mengubah, melepas, dan menghapus kategori kas; Editor hanya dapat mengubah atau menghapus kategori yang seluruh kasnya dapat ia sunting. Viewer hanya melihat.
 - Opsi kategori pada form transaksi disimpan dalam cache per kas dan dibersihkan saat kategori atau hubungannya dengan kas berubah.
+- Kolom `tipe` menerima **Pemasukan**, **Pengeluaran**, atau **Semua** (berlaku untuk kedua jenis transaksi). Setiap pengguna memiliki pengaturan pisah/gabung tipe yang hanya mengatur tampilan: memfilter dropdown kategori pada form transaksi sesuai jenisnya atau menampilkan semuanya, serta menentukan tipe default saat membuat kategori baru. Mengalihkan pengaturan ini tidak mengubah data kategori yang sudah ada. Kategori bertipe Semua selalu ikut tampil pada dropdown walau difilter sesuai tipe transaksi.
 
 ### 7. Laporan keuangan
 
@@ -243,9 +244,10 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 7. Kategori transaksi
 
-- Kategori bertipe Pemasukan atau Pengeluaran dikelola dalam satu tabel berisi nama, tipe, dan kas yang terhubung, dengan filter kas dan tipe.
+- Kategori bertipe Pemasukan, Pengeluaran, atau Semua dikelola dalam satu tabel berisi nama, tipe, dan kas yang terhubung, dengan filter kas dan tipe.
 - Daftar kategori menampilkan jumlah transaksi sebagai keterangan di bawah nama (misalnya **4 transaksi**), tanpa kolom jumlah terpisah. Nama panjang dapat turun baris. Kategori kas bersama menampilkan nama pemiliknya.
-- Form tambah dan ubah memuat nama, tipe, dan daftar centang kas. Semua kas yang dipilih harus milik pemilik yang sama.
+- Form tambah dan ubah memuat nama, tipe, dan daftar centang kas. Semua kas yang dipilih harus milik pemilik yang sama. Tipe default kategori baru mengikuti pengaturan tampilan pengguna.
+- Tombol **Pengaturan tampilan** pada header halaman membuka toggle untuk memisahkan atau menggabungkan tipe kategori pada dropdown transaksi; pengaturan ini tidak mengubah data kategori yang sudah ada.
 - Melepas kategori dari kas yang transaksinya masih memakainya diblokir. Aksi **Lepas dari kas** menyediakan pilihan untuk mengosongkan kategori pada transaksi kas tersebut terlebih dahulu.
 - Menghapus kategori yang masih dipakai menawarkan kategori pengganti yang terhubung ke semua kas terkait; tanpa pengganti, transaksinya menjadi tanpa kategori.
 - Menambah, mengubah, dan menghapus kategori.

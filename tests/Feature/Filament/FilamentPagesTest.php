@@ -119,3 +119,26 @@ test('halaman kategori menampilkan satu tabel dengan kolom nama tipe dan kas', f
         ->and($halaman->instance()->getTableRecords()->pluck('id')->all())->toBe([$kategori->id])
         ->and($halaman->html())->toContain('Belanja', 'Kas Test', 'bersifat opsional');
 })->group('filament', 'pages');
+
+test('pengaturan tampilan kategori dapat diubah dan memengaruhi default tipe kategori baru', function () {
+    $user = createRegularUserWithBukuKas();
+    expect($user->pisahkanTipeKategori())->toBeTrue();
+
+    Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class)
+        ->mountAction('pengaturanTampilan')
+        ->assertActionDataSet(['pisahkan_tipe' => true]);
+
+    Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class)
+        ->mountTableAction('tambah')
+        ->assertTableActionDataSet(['tipe' => 'Pengeluaran']);
+
+    Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class)
+        ->callAction('pengaturanTampilan', data: ['pisahkan_tipe' => false])
+        ->assertHasNoActionErrors();
+
+    expect($user->fresh()->pisahkanTipeKategori())->toBeFalse();
+
+    Livewire::actingAs($user)->test(\App\Filament\Pages\Kategori::class)
+        ->mountTableAction('tambah')
+        ->assertTableActionDataSet(['tipe' => 'Semua']);
+})->group('filament', 'pages', 'tipe-semua');

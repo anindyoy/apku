@@ -22,33 +22,33 @@ class KategoriSeeder extends Seeder
         });
 
         // Buat kategori awal untuk setiap pengguna
-        $list_tipe = ['Pemasukan', 'Pengeluaran'];
-        $jenis = [
-            'transfer',
-            'usaha',
-            'investasi',
-            'rumah_tangga',
-            'pendidikan',
-            'hiburan',
-            'gaji',
-            'bonus',
-            'hadiah',
-            'transportasi',
-            'kesehatan',
-            'lainnya'
+        $daftarTipe = ['Pemasukan', 'Pengeluaran', 'Semua'];
+        $namaKategori = [
+            'Transfer',
+            'Usaha',
+            'Investasi',
+            'Rumah Tangga',
+            'Pendidikan',
+            'Hiburan',
+            'Gaji',
+            'Bonus',
+            'Hadiah',
+            'Transportasi',
+            'Kesehatan',
+            'Lainnya',
         ];
 
         $users = User::whereNot('id', 1)->get();
 
-        foreach ($users as $value) {
-            foreach ($list_tipe as $key => $tipe) {
-                $jenisRandom = fake()->randomElements($jenis, rand(3, 5));
-                foreach ($jenisRandom as $value3) {
+        foreach ($users as $user) {
+            foreach ($daftarTipe as $tipe) {
+                $namaTerpilih = fake()->randomElements($namaKategori, rand(3, 5));
+                foreach ($namaTerpilih as $nama) {
                     Kategori::create([
-                        'user_id' => $value->id,
-                        'dibuat_oleh' => $value->id,
+                        'user_id' => $user->id,
+                        'dibuat_oleh' => $user->id,
                         'tipe' => $tipe,
-                        'nama' => $value3
+                        'nama' => $nama,
                     ]);
                 }
             }

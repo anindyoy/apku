@@ -295,11 +295,14 @@ class Transaksi extends Model
             return [];
         }
 
-        $tipe = in_array($tipe, ['Pemasukan', 'Pengeluaran'], true) ? $tipe : 'semua';
+        $tipe = auth()->user()->pisahkanTipeKategori() && in_array($tipe, ['Pemasukan', 'Pengeluaran'], true)
+            ? $tipe
+            : 'semua';
 
         return OpsiSelectCache::ingat('kategori', fn (): array => Kategori::withoutGlobalScopes()
             ->whereIn('id', DB::table('kategori_kas')->where('buku_kas_id', $bukuKasId)->select('kategori_id'))
-            ->when($tipe !== 'semua', fn ($query) => $query->where('tipe', $tipe))
+            // Kategori bertipe Semua selalu ikut tampil walau dropdown difilter sesuai tipe transaksi.
+            ->when($tipe !== 'semua', fn ($query) => $query->whereIn('tipe', [$tipe, 'Semua']))
             ->orderBy('nama')
             ->pluck('nama', 'id')
             ->all(), $bukuKasId, $tipe);

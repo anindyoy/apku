@@ -63,6 +63,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'masa_aktif' => 'date',
             'password' => 'hashed',
             'dashboard_settings' => 'array',
+            'pisahkan_tipe_kategori' => 'boolean',
         ];
     }
 
@@ -149,6 +150,14 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
                 ->where('user_id', $this->id)
                 ->whereIn('buku_kas_id', $kategori->idKas())
                 ->exists();
+    }
+
+    /** Pisah: dropdown kategori difilter sesuai tipe transaksi. Gabung: semua kategori ditampilkan.
+     *  Fallback true menutup kasus atribut belum termuat (mis. model baru dibuat belum di-refresh dari database).
+     */
+    public function pisahkanTipeKategori(): bool
+    {
+        return $this->pisahkan_tipe_kategori ?? true;
     }
 
     private function bukuKasMasihDapatDikelolaPemilik(BukuKas $bukuKas): bool

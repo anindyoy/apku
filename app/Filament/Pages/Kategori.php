@@ -15,6 +15,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
@@ -42,6 +43,28 @@ class Kategori extends Page implements HasTable
     protected static ?string $title = 'Kategori';
 
     protected string $view = 'filament.pages.kategori';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('pengaturanTampilan')
+                ->label('Pengaturan tampilan')
+                ->icon('heroicon-o-adjustments-horizontal')
+                ->modalHeading('Pengaturan tampilan kategori')
+                ->modalSubmitActionLabel('Simpan pengaturan')
+                ->modalWidth('md')
+                ->form(fn (): array => [
+                    Toggle::make('pisahkan_tipe')
+                        ->label('Pisahkan kategori berdasarkan tipe transaksi')
+                        ->helperText('Aktif: dropdown kategori pada transaksi difilter sesuai Pemasukan/Pengeluaran, dan kategori baru default Pengeluaran. Nonaktif: seluruh kategori ditampilkan tanpa filter, dan kategori baru default Semua. Kategori yang sudah ada tidak berubah.'),
+                ])
+                ->fillForm(fn (): array => ['pisahkan_tipe' => auth()->user()->pisahkanTipeKategori()])
+                ->action(function (array $data): void {
+                    auth()->user()->forceFill(['pisahkan_tipe_kategori' => (bool) $data['pisahkan_tipe']])->save();
+                    Notification::make()->title('Pengaturan kategori disimpan')->success()->send();
+                }),
+        ];
+    }
 
     public function table(Table $table): Table
     {
@@ -95,7 +118,7 @@ class Kategori extends Page implements HasTable
                     ->modalWidth('md')
                     ->form(fn (): array => $this->formKategori())
                     ->fillForm(fn (): array => [
-                        'tipe' => 'Pengeluaran',
+                        'tipe' => auth()->user()->pisahkanTipeKategori() ? 'Pengeluaran' : 'Semua',
                         'kas' => count($this->opsiKas()) === 1 ? array_keys($this->opsiKas()) : [],
                     ])
                     ->action(fn (array $data, Action $action) => $this->jalankan($action, function () use ($data): string {
@@ -204,6 +227,7 @@ class Kategori extends Page implements HasTable
 
             Select::make('tipe')
                 ->options(array_combine(KategoriModel::TIPE, KategoriModel::TIPE))
+                ->helperText('Semua berarti kategori ini muncul untuk pemasukan maupun pengeluaran.')
                 ->required(),
 
             CheckboxList::make('kas')

@@ -9,7 +9,7 @@ Dokumen ini merangkum rekomendasi dan rencana kerja untuk mengubah entitas **Akt
 
 ## Progres
 
-Pembaruan terakhir: 3 Oktober 2026.
+Pembaruan terakhir: 4 Oktober 2026.
 
 | Fase | Status | Commit | Catatan |
 |---|---|---|---|
@@ -17,18 +17,15 @@ Pembaruan terakhir: 3 Oktober 2026.
 | 1. Test pengaman | Selesai | `d9edc4c` | 12 test di `tests/Feature/KategoriPengamanTest.php`, lulus di lokal. |
 | 2. Rename murni | Selesai | `13c8a09` | 302 test terdampak lulus di lokal. |
 | 3. Kategori nullable | Selesai | `8e9bb31` | 156 test terdampak lulus di lokal. |
-| 4. Ikat ke kas | Selesai, menunggu CI | `5b3ce62` | Run lokal: 244 lulus, 6 gagal. Keenamnya sudah diperbaiki tetapi belum dijalankan ulang di lokal; verifikasinya lewat GitHub Actions. |
-| 5. Tipe dan penutup | Belum dimulai | - | Menunggu konfirmasi. |
+| 4. Ikat ke kas | Selesai | `5b3ce62` | Run lokal: 244 lulus, 6 gagal. Keenam gagalnya ternyata bug test (variabel tak terdefinisi, ekspektasi usang), diperbaiki di `f803886`. |
+| 5. Tipe dan penutup | Selesai | - | Kolom `tipe` menerima `Semua`, setting pisah/gabung ditambahkan. Lihat §3.3 dan §6a untuk detail keputusan. |
 
 Commit tambahan `0ce48e1`: aturan test lokal di `AGENTS.md` dan pemicu CI untuk branch ini.
 
-CI: workflow **Tests** run `37102052646` pada `refactor/kategori`, masih berjalan saat catatan ini ditulis.
-
 ### Yang perlu ditindaklanjuti
 
-- Periksa hasil CI run di atas, terutama `BukuKasResourceTest`, `TransaksiResourceListEditTest`, `TransaksiResourceTest`, `PencarianTransaksiTest`, `UserDashboardTest`, dan `TutorialTest`.
 - Hapus `refactor/kategori` dari pemicu `push` di `.github/workflows/tests.yml` sebelum merge ke `main`.
-- Perbandingan coverage dengan baseline (Fase 5) dikerjakan di CI, bukan di lokal.
+- Perbandingan coverage dengan baseline (Fase 0) sebaiknya dikerjakan di CI sebelum merge ke `main`.
 
 ---
 
@@ -85,6 +82,8 @@ Opsional, untuk integritas di level database: foreign key komposit dari `transak
 - Kolom `tipe` pada kategori berisi `pemasukan`, `pengeluaran`, atau `semua`.
 - Setting user hanya mengatur tampilan: dropdown difilter sesuai tipe transaksi atau tidak, dan tipe default saat membuat kategori baru. Data tidak diubah ketika setting dialihkan.
 - Audit saldo: jangan bergantung pada nama kategori sistem "Audit Saldo". Beri penanda lain pada transaksi (kolom sumber atau relasi ke audit). Periksa dulu bagaimana "Transaksi audit saldo" dikenali di kode saat ini.
+- Tipe `Semua` (Fase 5): kategori bertipe `Semua` selalu ikut tampil pada dropdown kategori transaksi, baik saat setting pengguna "pisah" (dropdown difilter sesuai Pemasukan/Pengeluaran) maupun "gabung" (dropdown tidak difilter). Tanpa aturan ini, kategori `Semua` tidak akan terlihat sama sekali dalam mode pisah.
+- Batasan yang disengaja (Fase 5): import transaksi (`ImportTransaksiService::cariKategori()`) tidak diubah untuk mengenali atau membuat kategori bertipe `Semua`; pencocokan otomatis tetap berdasarkan jenis baris (`Pemasukan`/`Pengeluaran`). Ini bukan kelalaian — alur import sudah selesai di Fase 4 dan tidak termasuk cakupan Fase 5.
 
 ### 3.4 Keputusan yang masih terbuka
 
@@ -192,12 +191,13 @@ Hal yang berbeda dari, atau menambah, rencana semula:
 - **Cache opsi input**: opsi kategori kini di-cache per kas dan dibersihkan saat kategori atau pivot berubah.
 - **Dokumentasi**: `tutorial.json`, `FITUR_APLIKASI.md`, dan `docs/PRD_APKu.md` sudah diperbarui sampai Fase 4, tidak menunggu Fase 5.
 
-### Sisa pekerjaan Fase 5
+### Fase 5: ringkasan pelaksanaan
 
-- Kolom `tipe` menerima `Semua`.
-- Setting user pisah/gabung tipe: filter dropdown dan tipe default kategori baru. Validasi tipe di server saat ini masih ketat dan perlu dilonggarkan sesuai aturan "setting hanya mengatur tampilan".
-- Rapikan seeder demo dan cek ulang istilah "aktivitas".
-- Perbarui tutorial dan dokumen fitur untuk tipe `Semua` dan setting baru.
+- Kolom `tipe` (enum database + `Kategori::TIPE`) menerima `Semua`, lewat migrasi `ALTER TABLE` (belum ada data production, jadi aman tanpa migrasi data kompleks).
+- Setting user `pisahkan_tipe_kategori` (boolean, default `true`, kolom baru pada `users`) mengatur filter dropdown kategori (`Transaksi::opsiKategori()`) dan tipe default saat membuat kategori baru di halaman Filament Kategori. Validasi server (`KategoriService::pastikanAtributValid()`) tidak perlu diubah — begitu `Kategori::TIPE` memuat `Semua`, pengecekan `in_array` yang sudah ada otomatis menerimanya.
+- Seeder demo dirapikan: nama kategori dihumanisasi, variabel diberi nama deskriptif, dan tipe `Semua` ditambahkan sebagai contoh. Keterkaitan kategori ke kas tidak perlu diperbaiki — sudah ditangani `TransaksiSeeder` lewat `INSERT INTO kategori_kas ... SELECT ...`.
+- Istilah "aktivitas" sudah bersih sejak Fase 2; satu-satunya sisa adalah komentar docblock historis di `tests/Feature/KategoriPengamanTest.php` yang tidak berdampak ke pengguna.
+- `tutorial.json` dan `FITUR_APLIKASI.md` diperbarui untuk tipe `Semua` dan setting baru.
 
 ## 7. Risiko dan mitigasi
 
@@ -213,8 +213,8 @@ Hal yang berbeda dari, atau menambah, rencana semula:
 ## 8. Definisi selesai
 
 - [ ] Seluruh test lulus dan coverage tidak turun dari baseline. (menunggu CI)
-- [x] Tidak ada lagi istilah "aktivitas" di UI, tutorial, dokumentasi, dan laporan. (dokumen rencana lama di `docs/` sengaja tidak diubah; cek ulang di Fase 5)
+- [x] Tidak ada lagi istilah "aktivitas" di UI, tutorial, dokumentasi, dan laporan. (dokumen rencana lama di `docs/` sengaja tidak diubah; dicek ulang di Fase 5, sisa hanya komentar docblock historis)
 - [x] Transaksi tanpa kategori dapat dibuat, diimpor, dan tampil sebagai "Tanpa kategori" di laporan dan ekspor.
 - [x] Transaksi tidak dapat memakai kategori yang tidak terhubung ke kas-nya.
 - [x] Alur hapus kas dengan pemindahan transaksi menangani kategori sesuai pilihan user.
-- [ ] Pemisahan tipe sesuai setting user. (Fase 5)
+- [x] Pemisahan tipe sesuai setting user. (Fase 5: kolom `tipe` menerima `Semua`, setting `pisahkan_tipe_kategori` mengatur filter dropdown dan tipe default)

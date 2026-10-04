@@ -16,7 +16,7 @@ class Kategori extends Model
     /** @use HasFactory<KategoriFactory> */
     use HasFactory;
 
-    public const TIPE = ['Pemasukan', 'Pengeluaran'];
+    public const TIPE = ['Pemasukan', 'Pengeluaran', 'Semua'];
 
     protected $table = 'kategori';
 
