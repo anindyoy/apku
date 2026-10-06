@@ -2,7 +2,9 @@
 
 namespace App\Filament\Forms;
 
+use App\Enums\JenisSumberDana;
 use App\Models\Dompet;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Validation\Rule;
 
@@ -21,6 +23,12 @@ class DompetFormSchema
                         ->where('user_id', auth()->id())
                         ->ignore($record?->id),
                 ]),
+
+            Select::make('jenis')
+                ->label('Jenis')
+                ->options(JenisSumberDana::opsi())
+                ->default(JenisSumberDana::Tunai->value)
+                ->required(),
 
             TextInput::make('saldo')
                 ->prefix('Rp')

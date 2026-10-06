@@ -174,11 +174,14 @@ Hasil: jumlah test lulus, angka coverage awal, dan daftar file yang menyebut dom
 - Field jenis wajib pada form tambah dan ubah, termasuk pembuatan cepat dari form transaksi.
 - Onboarding membuat sumber dana utama berjenis Tunai dengan nama default "Dompet".
 - Seeder dan factory diperbarui.
+- Status selesai: sudah diimplementasikan dalam commit `ecc9d3a`.
 
 ### Fase D: Perilaku per jenis
 
-- Penghitung uang pada form audit hanya tampil untuk Tunai; validasi di server.
-- Penyamaran jenis untuk anggota lain.
+- Penghitung uang pada form audit hanya tampil untuk sumber dana berjenis Tunai.
+- Server menolak atau mengabaikan pecahan untuk jenis non-Tunai, bukan hanya menyembunyikannya di UI.
+- Audit baru memakai jenis sumber dana saat dibuat, sedangkan riwayat lama tetap membaca data pecahan yang tersimpan.
+- Validasi tambahan untuk penyamaran jenis, transfer lintas jenis, dan audit historis.pil untuk Tunai; validasi di server.- Penyamaran jenis untuk anggota lain.
 - Tampilan riwayat audit berbasis data tersimpan, bukan jenis saat ini; opsional tambahkan snapshot jenis pada detail audit.
 - Opsional: ikon atau warna per jenis pada kartu daftar.
 

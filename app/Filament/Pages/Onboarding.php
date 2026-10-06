@@ -136,6 +136,7 @@ class Onboarding extends Page implements HasForms
             $dompet = Dompet::create([
                 'user_id' => $user->id,
                 'nama_dompet' => $data['nama_dompet'],
+                'jenis' => 'tunai',
                 'saldo' => 0,
                 'is_default' => true,
                 'description' => 'Dompet utama',

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\JenisSumberDana;
 use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
 use Database\Factories\DompetFactory;
@@ -24,6 +25,7 @@ class SumberDana extends Model
     {
         return [
             'is_default' => 'boolean',
+            'jenis' => JenisSumberDana::class,
         ];
     }
 
@@ -40,6 +42,16 @@ class SumberDana extends Model
     public function detailAuditSaldo()
     {
         return $this->hasMany(AuditSaldoDompetDetail::class);
+    }
+
+    public function getJenisLabelAttribute(): string
+    {
+        return $this->jenis?->label() ?? JenisSumberDana::Tunai->label();
+    }
+
+    public function mendukungHitungUang(): bool
+    {
+        return $this->jenis?->mendukungHitungUang() ?? true;
     }
 
     protected function cacheOpsiSelectEntitas(): string

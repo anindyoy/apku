@@ -47,7 +47,7 @@ class Transaksi extends Model
 
             $dompet = Dompet::withoutGlobalScopes()->firstOrCreate(
                 ['user_id' => $transaksi->user_id, 'nama_dompet' => 'Cash'],
-                ['saldo' => 0, 'is_default' => true, 'description' => 'Dompet tunai utama']
+                ['saldo' => 0, 'is_default' => true, 'jenis' => 'tunai', 'description' => 'Dompet tunai utama']
             );
 
             $transaksi->dompet_id = $dompet->id;
