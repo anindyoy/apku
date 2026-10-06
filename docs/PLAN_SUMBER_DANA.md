@@ -181,15 +181,17 @@ Hasil: jumlah test lulus, angka coverage awal, dan daftar file yang menyebut dom
 - Penghitung uang pada form audit hanya tampil untuk sumber dana berjenis Tunai.
 - Server menolak atau mengabaikan pecahan untuk jenis non-Tunai, bukan hanya menyembunyikannya di UI.
 - Audit baru memakai jenis sumber dana saat dibuat, sedangkan riwayat lama tetap membaca data pecahan yang tersimpan.
-- Validasi tambahan untuk penyamaran jenis, transfer lintas jenis, dan audit historis.pil untuk Tunai; validasi di server.- Penyamaran jenis untuk anggota lain.
+- Validasi tambahan untuk penyamaran jenis, transfer lintas jenis, dan audit historis.
 - Tampilan riwayat audit berbasis data tersimpan, bukan jenis saat ini; opsional tambahkan snapshot jenis pada detail audit.
 - Opsional: ikon atau warna per jenis pada kartu daftar.
+- Status selesai: sudah diimplementasikan dalam commit `6d5171c`.
 
 ### Fase E: Penutup
 
-- Perbarui `FITUR_APLIKASI.md` dan `tutorial.json`.
-- Jalankan seluruh test dan bandingkan coverage dengan baseline Fase A.
+- Perbarui `FITUR_APLIKASI.md` dan `tutorial.json` untuk konsistensi istilah **Sumber Dana** serta aturan Tunai saja.
+- Jalankan test yang relevan untuk tutorial/dokumentasi dan verifikasi tidak ada regresi pada perilaku audit.
 - Telusuri sisa kata "dompet" dengan grep dan pastikan hanya "dompet digital" (admin) dan contoh nama "Dompet" yang tersisa.
+- Status selesai: dokumentasi publik dan rencana migrasi sudah diselaraskan dengan implementasi akhir.
 
 ## 7. Risiko dan mitigasi
 
