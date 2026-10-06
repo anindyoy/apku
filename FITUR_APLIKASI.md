@@ -25,6 +25,8 @@ Aturan bisnis dan pemrosesan data aplikasi.
 ### 3. Pengelolaan transaksi
 
 - Mencatat pemasukan dan pengeluaran.
+- Form transaksi menyediakan pembuatan kategori langsung dari pilihan Kategori untuk semua pengguna non-admin; kategori otomatis terhubung ke kas yang dipilih dan tipe awal mengikuti jenis transaksi.
+- Pengguna Premium aktif dapat membuat kas dan dompet dari pilihan pada form transaksi. Kas baru dimulai dengan saldo nol dan seluruh kategori milik pemilik kas otomatis dihubungkan; dompet baru dimulai dengan saldo nol. Opsi ini tetap mematuhi kuota akun dan validasi nama unik.
 - Transaksi baru memengaruhi saldo secara default, termasuk saldo awal dan transfer kas; pengecualian tersedia untuk import riwayat tanpa dampak saldo.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Saldo per baris pada daftar transaksi mengikuti saldo kas dan dompet tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
@@ -251,6 +253,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Melepas kategori dari kas yang transaksinya masih memakainya diblokir. Aksi **Lepas dari kas** menyediakan pilihan untuk mengosongkan kategori pada transaksi kas tersebut terlebih dahulu.
 - Menghapus kategori yang masih dipakai menawarkan kategori pengganti yang terhubung ke semua kas terkait; tanpa pengganti, transaksinya menjadi tanpa kategori.
 - Menambah, mengubah, dan menghapus kategori.
+- Pengguna dapat menambahkan kategori langsung dari form transaksi; kategori baru otomatis terhubung ke kas transaksi dan tersedia untuk jenis transaksi yang dipilih atau tipe Semua.
 
 ### 8. Laporan keuangan
 

@@ -2,9 +2,9 @@
 
 use App\Filament\Resources\TransaksiResource\Pages\EditTransaksi;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
-use App\Models\Kategori;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Services\TransaksiService;
 use Filament\Forms\Components\Select;
@@ -134,6 +134,92 @@ test('transaksi resource - tombol tambah membuka modal transaksi', function () {
         });
 })
     ->group('filament', 'transaksi', 'tambah-transaksi');
+
+test('premium aktif dapat membuat kas dan dompet dari form transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+    $user->update(['masa_aktif' => today()]);
+    Dompet::factory()->create(['user_id' => $user->id, 'is_default' => true]);
+    $kategori = Kategori::factory()->create(['user_id' => $user->id, 'nama' => 'Kategori Kas Baru']);
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountAction('Tambah transaksi');
+    $formName = $komponen->instance()->getMountedActionSchemaName();
+    $komponen
+        ->assertFormComponentActionVisible('buku_kas_id', 'createOption', formName: $formName)
+        ->callFormComponentAction('buku_kas_id', 'createOption', data: [
+            'nama_buku' => 'Kas Baru',
+            'saldo' => 2500,
+            'description' => 'Kas untuk kebutuhan baru',
+            'hubungkan_kategori' => true,
+        ], formName: $formName)
+        ->assertHasNoFormComponentActionErrors();
+
+    $kas = BukuKas::query()->where('user_id', $user->id)->where('nama_buku', 'Kas Baru')->firstOrFail();
+    expect($kas->saldo)->toBe(2500)
+        ->and($kas->description)->toBe('Kas untuk kebutuhan baru')
+        ->and($kategori->terhubungKe($kas->id))->toBeTrue()
+        ->and((int) $komponen->get('mountedActions.0.data.buku_kas_id'))->toBe($kas->id);
+
+    $komponen
+        ->assertFormComponentActionVisible('dompet_id', 'createOption', formName: $formName)
+        ->callFormComponentAction('dompet_id', 'createOption', data: [
+            'nama_dompet' => 'Dompet Baru',
+            'description' => 'Dompet tunai baru',
+        ], formName: $formName)
+        ->assertHasNoFormComponentActionErrors();
+
+    $dompet = Dompet::query()->where('user_id', $user->id)->where('nama_dompet', 'Dompet Baru')->firstOrFail();
+    expect($dompet->saldo)->toBe(0)
+        ->and($dompet->is_default)->toBeFalse()
+        ->and($dompet->description)->toBe('Dompet tunai baru')
+        ->and((int) $komponen->get('mountedActions.0.data.dompet_id'))->toBe($dompet->id);
+
+    $komponen
+        ->set('mountedActions.0.data.jenis_form', 'transfer_kas')
+        ->assertFormComponentActionVisible('buku_kas_id_tujuan', 'createOption', formName: $formName)
+        ->callFormComponentAction('buku_kas_id_tujuan', 'createOption', data: [
+            'nama_buku' => 'Kas Tujuan Baru',
+            'saldo' => 0,
+            'hubungkan_kategori' => false,
+        ], formName: $formName)
+        ->assertHasNoFormComponentActionErrors()
+        ->set('mountedActions.0.data.jenis_form', 'transfer_dompet')
+        ->assertFormComponentActionVisible('dompet_id_tujuan', 'createOption', formName: $formName)
+        ->callFormComponentAction('dompet_id_tujuan', 'createOption', data: [
+            'nama_dompet' => 'Dompet Tujuan Baru',
+        ], formName: $formName)
+        ->assertHasNoFormComponentActionErrors();
+})
+    ->group('filament', 'transaksi', 'tambah-transaksi', 'buat-opsi');
+
+test('semua pengguna dapat membuat kategori yang terhubung ke kas dari form transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+    $user->update(['masa_aktif' => null]);
+    $kas = $user->buku_kas()->firstOrFail();
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->mountAction('Tambah transaksi');
+    $formName = $komponen->instance()->getMountedActionSchemaName();
+    $komponen
+        ->assertFormComponentActionHidden('buku_kas_id', 'createOption', formName: $formName)
+        ->assertFormComponentActionHidden('dompet_id', 'createOption', formName: $formName)
+        ->assertFormComponentActionVisible('kategori_id', 'createOption', formName: $formName)
+        ->set('mountedActions.0.data.jenis_form', 'pengeluaran')
+        ->callFormComponentAction('kategori_id', 'createOption', data: [
+            'nama' => 'Belanja Baru',
+            'tipe' => 'Pengeluaran',
+            'kas' => [$kas->id],
+        ], formName: $formName)
+        ->assertHasNoFormComponentActionErrors();
+
+    $kategori = Kategori::query()->where('user_id', $user->id)->where('nama', 'Belanja Baru')->firstOrFail();
+    expect($kategori->tipe)->toBe('Pengeluaran')
+        ->and($kategori->terhubungKe($kas->id))->toBeTrue()
+        ->and((int) $komponen->get('mountedActions.0.data.kategori_id'))->toBe($kategori->id);
+})
+    ->group('filament', 'transaksi', 'tambah-transaksi', 'buat-opsi');
 
 test('warna tombol submit mengikuti jenis transaksi yang dipilih', function () {
     $user = createRegularUserWithBukuKas();

@@ -4,18 +4,23 @@ namespace App\Filament\Concerns;
 
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\Kategori;
 use App\Models\Transaksi;
+use App\Services\KategoriService;
 use App\Services\TransaksiService;
 use App\Services\TransferDompetService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Validation\Rule;
 
 trait HasTambahTransaksiAction
 {
@@ -134,6 +139,170 @@ trait HasTambahTransaksiAction
         });
     }
 
+    private function dapatMenambahKasDompetDariForm(): bool
+    {
+        $user = auth()->user();
+
+        return ! $user->isAdmin() && $user->masaAktifBerlaku();
+    }
+
+    private function buatKasDariForm(array $data): int
+    {
+        $user = auth()->user();
+        abort_unless($this->dapatMenambahKasDompetDariForm() && $user->dapatMembuatBukuKas(), 403);
+
+        $bukuKas = BukuKas::create([
+            'user_id' => $user->id,
+            'nama_buku' => trim((string) $data['nama_buku']),
+            'saldo' => 0,
+            'description' => $data['description'] ?? null,
+        ]);
+
+        if ((bool) ($data['hubungkan_kategori'] ?? true)) {
+            app(KategoriService::class)->hubungkanSemuaKategoriPemilik($bukuKas);
+        }
+
+        $dompet = Dompet::findOrFail($user->idDompetUtama());
+        app(TransaksiService::class)->buatSaldoAwal(
+            $user,
+            $bukuKas,
+            $dompet,
+            (int) $data['saldo'],
+            'Saldo pertama',
+        );
+
+        return $bukuKas->getKey();
+    }
+
+    private function buatDompetDariForm(array $data): int
+    {
+        $user = auth()->user();
+        abort_unless($this->dapatMenambahKasDompetDariForm() && $user->dapatMembuatDompet(), 403);
+
+        return Dompet::create([
+            'user_id' => $user->id,
+            'nama_dompet' => trim((string) $data['nama_dompet']),
+            'saldo' => 0,
+            'is_default' => false,
+            'description' => $data['description'] ?? null,
+        ])->getKey();
+    }
+
+    private function buatKategoriDariForm(array $data): int
+    {
+        $bukuKasId = (int) ($this->mountedActions[0]['data']['buku_kas_id'] ?? 0);
+        $bukuKas = BukuKas::findOrFail($bukuKasId);
+        $user = auth()->user();
+        abort_unless($user->can('create', Kategori::class), 403);
+        abort_unless($user->dapatMengelolaKategoriPada($bukuKas), 403);
+        $idKas = array_values(array_unique([
+            ...($data['kas'] ?? []),
+            $bukuKas->id,
+        ]));
+
+        return app(KategoriService::class)->buat(
+            $user,
+            ['nama' => $data['nama'], 'tipe' => $data['tipe']],
+            $idKas,
+        )->getKey();
+    }
+
+    /** @return array<int, string> */
+    private function opsiKasKategoriUntukForm(): array
+    {
+        $bukuKas = BukuKas::find((int) ($this->mountedActions[0]['data']['buku_kas_id'] ?? 0));
+        if (! $bukuKas) {
+            return [];
+        }
+
+        $user = auth()->user();
+
+        return BukuKas::query()->with('user:id,name')->get()
+            ->filter(fn (BukuKas $kas): bool => $kas->user_id === $bukuKas->user_id
+                && $user->dapatMengelolaKategoriPada($kas))
+            ->mapWithKeys(fn (BukuKas $kas): array => [
+                $kas->id => $kas->user_id === $user->id
+                    ? $kas->nama_buku
+                    : $kas->nama_buku.' (kas bersama '.($kas->user?->name ?? '-').')',
+            ])
+            ->all();
+    }
+
+    private function idKasAwalKategoriForm(): array
+    {
+        $opsiKas = $this->opsiKasKategoriUntukForm();
+        $bukuKasId = (int) ($this->mountedActions[0]['data']['buku_kas_id'] ?? 0);
+
+        return array_key_exists($bukuKasId, $opsiKas) ? [$bukuKasId] : [];
+    }
+
+    private function selectKasDenganOpsiTambah(Select $select): Select
+    {
+        return $select
+            ->createOptionModalHeading('Tambah kas')
+            ->createOptionForm([
+                Grid::make(1)
+                    ->schema([
+                        TextInput::make('nama_buku')
+                            ->required()
+                            ->rules(fn (?BukuKas $record): array => [
+                                Rule::unique('buku_kas', 'nama_buku')
+                                    ->where('user_id', auth()->id())
+                                    ->ignore($record?->id),
+                            ])
+                            ->maxLength(50),
+                        TextInput::make('saldo')
+                            ->prefix('Rp')
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('description')
+                            ->maxLength(200)
+                            ->default(null),
+                        Toggle::make('hubungkan_kategori')
+                            ->label('Pakai semua kategori saya di kas ini')
+                            ->helperText('Matikan jika kas ini memerlukan daftar kategori sendiri, misalnya untuk kas bersama. Hubungan kategori dapat diubah di Setting > Kategori.')
+                            ->visible(fn (string $operation): bool => $operation === 'create')
+                            ->columnSpanFull(),
+                    ]),
+            ])
+            ->createOptionUsing(fn (array $data): int => $this->buatKasDariForm($data))
+            ->createOptionAction(fn (Action $action): Action => $action
+                ->modalWidth('md')
+                ->visible(fn (): bool => $this->dapatMenambahKasDompetDariForm()));
+    }
+
+    private function selectDompetDenganOpsiTambah(Select $select): Select
+    {
+        return $select
+            ->createOptionModalHeading('Tambah dompet')
+            ->createOptionForm([
+                Grid::make(1)
+                    ->schema([
+                        TextInput::make('nama_dompet')
+                            ->label('Nama dompet')
+                            ->required()
+                            ->maxLength(50)
+                            ->rules(fn (): array => [
+                                Rule::unique('dompet', 'nama_dompet')->where('user_id', auth()->id()),
+                            ]),
+                        TextInput::make('saldo')
+                            ->prefix('Rp')
+                            ->numeric()
+                            ->default(0)
+                            ->disabled()
+                            ->dehydrated(),
+                        TextInput::make('description')
+                            ->label('Deskripsi')
+                            ->maxLength(200)
+                            ->columnSpanFull(),
+                    ]),
+            ])
+            ->createOptionUsing(fn (array $data): int => $this->buatDompetDariForm($data))
+            ->createOptionAction(fn (Action $action): Action => $action
+                ->modalWidth('md')
+                ->visible(fn (): bool => $this->dapatMenambahKasDompetDariForm()));
+    }
+
     protected function buatAksiTambahTransaksi(): Action
     {
         return Action::make('Tambah transaksi')
@@ -212,7 +381,7 @@ trait HasTambahTransaksiAction
                     ]),
             ])
             ->form([
-                Grid::make(2)
+                Grid::make(1)
                     ->extraAttributes([
                         'x-data' => '{ changingTransactionType: false }',
                         'x-on:change.capture' => <<<'JS'
@@ -283,11 +452,12 @@ trait HasTambahTransaksiAction
                             ->extraAttributes(['class' => '[&_.fi-btn]:w-full'])
                             ->required()
                             ->columnSpanFull(),
-                        Select::make('buku_kas_id')
-                            ->label(fn (Get $get): string => $get('jenis_form') === 'transfer_dompet' ? 'Kas pencatatan' : 'Kas')
-                            ->options(fn (Get $get): array => $get('jenis_form') === 'transfer_kas'
-                                ? $this->opsiBukuKasTransfer()
-                                : Transaksi::opsiBukuKasYangDapatDikelola())
+                        $this->selectKasDenganOpsiTambah(
+                            Select::make('buku_kas_id')
+                                ->label(fn (Get $get): string => $get('jenis_form') === 'transfer_dompet' ? 'Kas pencatatan' : 'Kas')
+                                ->options(fn (Get $get): array => $get('jenis_form') === 'transfer_kas'
+                                    ? $this->opsiBukuKasTransfer()
+                                    : Transaksi::opsiBukuKasYangDapatDikelola()))
                             ->required()
                             ->live()
                             ->afterStateUpdated(function (Get $get, Set $set): void {
@@ -297,25 +467,28 @@ trait HasTambahTransaksiAction
                                 }
                             })
                             ->hidden(fn (Get $get): bool => $get('jenis_form') === 'transfer_dompet'),
-                        Select::make('dompet_id')
-                            ->label(fn (Get $get): string => str_starts_with((string) $get('jenis_form'), 'transfer_') ? 'Dompet asal' : 'Dompet')
-                            ->options(fn (Get $get): array => $get('jenis_form') === 'transfer_dompet'
-                                ? Transaksi::opsiDompetSumberTransfer()
-                                : Transaksi::opsiDompetYangDapatDikelola())
+                        $this->selectDompetDenganOpsiTambah(
+                            Select::make('dompet_id')
+                                ->label(fn (Get $get): string => str_starts_with((string) $get('jenis_form'), 'transfer_') ? 'Dompet asal' : 'Dompet')
+                                ->options(fn (Get $get): array => $get('jenis_form') === 'transfer_dompet'
+                                    ? Transaksi::opsiDompetSumberTransfer()
+                                    : Transaksi::opsiDompetYangDapatDikelola()))
                             ->required()
                             ->hidden(fn (Get $get): bool => $get('jenis_form') === 'transfer_kas'),
-                        Select::make('buku_kas_id_tujuan')
-                            ->label('Kas tujuan')
-                            ->options(fn (Get $get): array => array_filter(
-                                $this->opsiBukuKasTransfer(),
-                                fn ($id): bool => (int) $id !== (int) $get('buku_kas_id'),
-                                ARRAY_FILTER_USE_KEY,
-                            ))
+                        $this->selectKasDenganOpsiTambah(
+                            Select::make('buku_kas_id_tujuan')
+                                ->label('Kas tujuan')
+                                ->options(fn (Get $get): array => array_filter(
+                                    $this->opsiBukuKasTransfer(),
+                                    fn ($id): bool => (int) $id !== (int) $get('buku_kas_id'),
+                                    ARRAY_FILTER_USE_KEY,
+                                )))
                             ->required()
                             ->visible(fn (Get $get): bool => $get('jenis_form') === 'transfer_kas'),
-                        Select::make('dompet_id_tujuan')
-                            ->label('Dompet tujuan')
-                            ->options(fn (): array => Transaksi::opsiDompetYangDapatDikelola())
+                        $this->selectDompetDenganOpsiTambah(
+                            Select::make('dompet_id_tujuan')
+                                ->label('Dompet tujuan')
+                                ->options(fn (): array => Transaksi::opsiDompetYangDapatDikelola()))
                             ->different(fn (Get $get): string => $get('jenis_form') === 'transfer_dompet'
                                 ? 'dompet_id'
                                 : 'dompet_id_tidak_digunakan')
@@ -324,6 +497,33 @@ trait HasTambahTransaksiAction
                         Select::make('kategori_id')
                             ->label('Kategori')
                             ->options(fn (Get $get): array => static::opsiKategoriForm($get))
+                            ->createOptionModalHeading('Tambah kategori')
+                            ->createOptionForm([
+                                Grid::make(1)
+                                    ->schema([
+                                        TextInput::make('nama')
+                                            ->label('Nama kategori')
+                                            ->required()
+                                            ->maxLength(255),
+                                        Select::make('tipe')
+                                            ->label('Tipe kategori')
+                                            ->options(array_combine(Kategori::TIPE, Kategori::TIPE))
+                                            ->helperText('Semua berarti kategori ini muncul untuk pemasukan maupun pengeluaran.')
+                                            ->default(fn (): string => auth()->user()->pisahkanTipeKategori() ? 'Pengeluaran' : 'Semua')
+                                            ->required(),
+                                        CheckboxList::make('kas')
+                                            ->label('Dipakai di kas')
+                                            ->options(fn (): array => $this->opsiKasKategoriUntukForm())
+                                            ->helperText('Kategori hanya dapat dipilih pada transaksi kas yang dicentang. Semua kas harus milik pemilik yang sama.')
+                                            ->default(fn (): array => $this->idKasAwalKategoriForm())
+                                            ->required()
+                                            ->columnSpanFull(),
+                                    ]),
+                            ])
+                            ->createOptionUsing(fn (array $data): int => $this->buatKategoriDariForm($data))
+                            ->createOptionAction(fn (Action $action): Action => $action
+                                ->modalWidth('md')
+                                ->visible(fn (): bool => auth()->user()->can('create', Kategori::class)))
                             ->placeholder('Tanpa kategori')
                             ->visible(fn (Get $get): bool => in_array($get('jenis_form'), ['pemasukan', 'pengeluaran'], true)),
                         DateTimePicker::make('tanggal')->required()->seconds(false)->native(false)->maxDate(now()),

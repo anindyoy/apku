@@ -29,6 +29,8 @@ test('tutorial kolaborator menjelaskan kartu dan aksi link publik', function () 
 test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
     expect($topik['transaksi']['intro'])->toContain('Tipe (ikon jenis transaksi), Tanggal, Kas, Kategori, lalu Nominal', 'Pencarian Transaksi', 'Dashboard', 'layar kecil');
+    expect(implode(' ', $topik['transaksi']['steps']))->toContain('form kategori yang sama seperti di Setting', 'Pengguna Premium aktif dapat membuka form kas atau dompet');
+    expect(implode(' ', $topik['kategori']['steps']))->toContain('akun Reguler maupun Premium juga dapat membuat kategori langsung');
     expect($topik['transaksi']['note'])->toContain('Dicatat oleh', 'pernah dikolaborasikan dengan akun lain', 'kedaluwarsa atau dicabut', 'Tautan kas publik');
 });
 
