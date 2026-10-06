@@ -206,23 +206,38 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMengelolaTransaksiPadaDompet(Dompet $dompet): bool
     {
-        return $dompet->user_id === $this->id
+        return $this->dapatMengelolaTransaksiPadaSumberDana($dompet);
+    }
+
+    public function dapatMengelolaTransaksiPadaSumberDana(SumberDana $sumberDana): bool
+    {
+        return $sumberDana->user_id === $this->id
             && ($this->isAdmin()
-                || $dompet->id === $this->idDompetUtama()
-                || $dompet->id === $this->idDompetTambahanGratis()
+                || $sumberDana->id === $this->idDompetUtama()
+                || $sumberDana->id === $this->idDompetTambahanGratis()
                 || $this->masaAktifBerlaku());
     }
 
     public function dapatMembuatDompet(): bool
     {
+        return $this->dapatMembuatSumberDana();
+    }
+
+    public function dapatMembuatSumberDana(): bool
+    {
         return $this->isAdmin()
-            || $this->dompet()->count() < 2
+            || $this->sumberDana()->count() < 2
             || $this->masaAktifBerlaku();
     }
 
     public function idDompetUtama(): ?int
     {
-        return $this->dompet()
+        return $this->idSumberDanaUtama();
+    }
+
+    public function idSumberDanaUtama(): ?int
+    {
+        return $this->sumberDana()
             ->reorder()
             ->orderByDesc('is_default')
             ->orderBy('id')
@@ -231,8 +246,13 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function idDompetTambahanGratis(): ?int
     {
-        return $this->dompet()
-            ->whereKeyNot($this->idDompetUtama())
+        return $this->idSumberDanaTambahanGratis();
+    }
+
+    public function idSumberDanaTambahanGratis(): ?int
+    {
+        return $this->sumberDana()
+            ->whereKeyNot($this->idSumberDanaUtama())
             ->reorder()
             ->orderBy('id')
             ->value('id');
@@ -253,6 +273,16 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(AuditSaldoDompet::class);
     }
 
+    public function sumberDana()
+    {
+        return $this->hasMany(SumberDana::class);
+    }
+
+    public function dompet()
+    {
+        return $this->sumberDana();
+    }
+
     public function shareBukuDiterima(): HasMany
     {
         return $this->hasMany(ShareBuku::class);
@@ -263,11 +293,6 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->belongsToMany(BukuKas::class, 'share_buku')
             ->withPivot(['privilege', 'berlaku_mulai', 'berlaku_sampai', 'invited_by_user_id'])
             ->withTimestamps();
-    }
-
-    public function dompet()
-    {
-        return $this->hasMany(Dompet::class);
     }
 
     public function utang_piutang()

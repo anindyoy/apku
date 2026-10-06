@@ -2,11 +2,11 @@
 
 namespace App\Filament\Forms;
 
-use App\Models\Dompet;
+use App\Models\SumberDana;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Validation\Rule;
 
-class DompetFormSchema
+class SumberDanaFormSchema
 {
     /** @return array<int, mixed> */
     public static function fields(): array
@@ -16,7 +16,7 @@ class DompetFormSchema
                 ->label('Nama sumber dana')
                 ->required()
                 ->maxLength(50)
-                ->rules(fn (?Dompet $record): array => [
+                ->rules(fn (?SumberDana $record): array => [
                     Rule::unique('dompet', 'nama_dompet')
                         ->where('user_id', auth()->id())
                         ->ignore($record?->id),
