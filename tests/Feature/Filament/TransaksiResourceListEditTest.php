@@ -293,6 +293,8 @@ test('input dan tombol submit nonaktif selama perubahan jenis transaksi', functi
 
     expect(ListTransaksis::targetLoadingPerubahanJenisForm())
         ->toBe('mountedActions.0.data.jenis_form')
+        ->and($grid?->getColumns('default'))->toBe(1)
+        ->and($grid?->getColumns('lg'))->toBe(2)
         ->and($submit?->getExtraAttributes())
         ->toMatchArray([
             'wire:loading.attr' => 'disabled',

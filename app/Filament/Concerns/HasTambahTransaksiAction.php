@@ -340,7 +340,7 @@ trait HasTambahTransaksiAction
                     ]),
             ])
             ->form([
-                Grid::make(1)
+                Grid::make(['default' => 1, 'lg' => 2])
                     ->extraAttributes([
                         'x-data' => '{ changingTransactionType: false }',
                         'x-on:change.capture' => <<<'JS'
