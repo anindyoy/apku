@@ -203,6 +203,35 @@ test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () 
         ->and($tunai->fresh()->saldo)->toBe(203500);
 });
 
+test('audit menolak pecahan untuk sumber dana non-Tunai meski data dikirim langsung', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
+    $bank->update(['jenis' => 'rekening']);
+
+    expect(fn () => app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Data tidak valid', [
+        ['dompet_id' => $bank->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 500000, 'jumlah_pecahan' => ['kertas_100000' => 1]],
+        ['dompet_id' => $tunai->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 500000],
+    ]))->toThrow(ValidationException::class)
+        ->and(AuditSaldoDompet::count())->toBe(0)
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(0);
+});
+
+test('riwayat audit tetap menyimpan rincian pecahan lama setelah jenis sumber dana berubah', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
+
+    $audit = app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Audit awal', [
+        ['dompet_id' => $tunai->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 500000, 'jumlah_pecahan' => ['logam_1000' => 2]],
+    ]);
+
+    $tunai->update(['jenis' => 'rekening']);
+    $audit->refresh();
+
+    expect($audit->detail)->toHaveCount(1)
+        ->and($audit->detail->first()->saldo_riil)->toBe(2000)
+        ->and($tunai->fresh()->jenis)->toBe(
+            \App\Enums\JenisSumberDana::Rekening,
+        );
+});
+
 test('bagian uang logam pada penghitung pecahan tertutup secara default', function () {
     $html = view('filament.forms.components.hitung-uang-kas', [
         'kelompokPecahan' => [

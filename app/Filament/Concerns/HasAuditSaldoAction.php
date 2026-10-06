@@ -93,9 +93,16 @@ trait HasAuditSaldoAction
                             ->prefix('Rp')
                             ->numeric()
                             ->required()
-                            ->afterStateUpdated(fn (Set $set): mixed => $set('jumlah_pecahan', $this->pecahanAwal())),
+                            ->afterStateUpdated(function (mixed $state, Get $get, Set $set): mixed {
+                                if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
+                                    return null;
+                                }
+
+                                return $set('jumlah_pecahan', $this->pecahanAwal());
+                            }),
                         Section::make('Hitung uang kas')
                             ->description('Jumlah pecahan akan mengisi saldo riil secara otomatis. Saldo riil juga dapat diisi secara manual.')
+                            ->visible(fn (Get $get): bool => $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
                             ->schema([
                                 ViewField::make('jumlah_pecahan')
                                     ->view('filament.forms.components.hitung-uang-kas')
@@ -103,6 +110,10 @@ trait HasAuditSaldoAction
                                     ->default(fn (): array => $this->pecahanAwal())
                                     ->live(debounce: 300)
                                     ->afterStateUpdated(function (?array $state, Get $get, Set $set): void {
+                                        if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
+                                            return;
+                                        }
+
                                         $total = $this->totalUangDihitung($state ?? []);
                                         $set('saldo_riil', $total ?? (int) $get('saldo_aplikasi'));
                                     }),
@@ -122,7 +133,16 @@ trait HasAuditSaldoAction
             ])
             ->action(function (array $data): void {
                 $data['rincian'] = array_map(function (array $item): array {
-                    $total = $this->totalUangDihitung($item['jumlah_pecahan'] ?? []);
+                    $dompetId = (int) ($item['dompet_id'] ?? 0);
+                    $jumlahPecahan = $item['jumlah_pecahan'] ?? null;
+
+                    if (! $this->dompetMendukungHitungUang($dompetId)) {
+                        unset($item['jumlah_pecahan']);
+
+                        return $item;
+                    }
+
+                    $total = $this->totalUangDihitung($jumlahPecahan ?? []);
 
                     if ($total !== null) {
                         $item['saldo_riil'] = $total;
@@ -146,6 +166,17 @@ trait HasAuditSaldoAction
                     ->success()
                     ->send();
             });
+    }
+
+    private function dompetMendukungHitungUang(int $dompetId): bool
+    {
+        if ($dompetId <= 0) {
+            return false;
+        }
+
+        $dompet = Dompet::withoutGlobalScopes()->find($dompetId);
+
+        return $dompet?->mendukungHitungUang() ?? false;
     }
 
     private function pecahanAwal(): array
