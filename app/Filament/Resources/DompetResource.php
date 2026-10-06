@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Forms\DompetFormSchema;
 use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Models\BukuKas;
 use App\Models\Dompet;
@@ -13,13 +14,11 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Validation\Rule;
 
 class DompetResource extends Resource
 {
@@ -39,26 +38,7 @@ class DompetResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema->schema([
-            TextInput::make('nama_dompet')
-                ->label('Nama dompet')
-                ->required()
-                ->maxLength(50)
-                ->rules(fn (?Dompet $record): array => [
-                    Rule::unique('dompet', 'nama_dompet')
-                        ->where('user_id', auth()->id())
-                        ->ignore($record?->id),
-                ]),
-            TextInput::make('saldo')
-                ->prefix('Rp')
-                ->numeric()
-                ->default(0)
-                ->disabled()
-                ->dehydrated(),
-            TextInput::make('description')
-                ->label('Deskripsi')
-                ->maxLength(200),
-        ]);
+        return $schema->schema(DompetFormSchema::fields());
     }
 
     public static function table(Table $table): Table

@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Forms\KategoriFormSchema;
 use App\Models\BukuKas;
 use App\Models\Kategori as KategoriModel;
 use App\Models\Transaksi;
@@ -12,9 +13,7 @@ use BackedEnum;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -219,23 +218,10 @@ class Kategori extends Page implements HasTable
     /** @return array<int, mixed> */
     private function formKategori(?KategoriModel $kategori = null): array
     {
-        return [
-            TextInput::make('nama')
-                ->label('Nama kategori')
-                ->required()
-                ->maxLength(255),
-
-            Select::make('tipe')
-                ->options(array_combine(KategoriModel::TIPE, KategoriModel::TIPE))
-                ->helperText('Semua berarti kategori ini muncul untuk pemasukan maupun pengeluaran.')
-                ->required(),
-
-            CheckboxList::make('kas')
-                ->label('Dipakai di kas')
-                ->options($this->opsiKas($kategori))
-                ->helperText('Kategori hanya dapat dipilih pada transaksi kas yang dicentang. Semua kas harus milik pemilik yang sama.')
-                ->required($kategori === null),
-        ];
+        return KategoriFormSchema::fields(
+            fn (): array => $this->opsiKas($kategori),
+            $kategori === null,
+        );
     }
 
     /**

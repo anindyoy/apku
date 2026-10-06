@@ -2,6 +2,9 @@
 
 namespace App\Filament\Concerns;
 
+use App\Filament\Forms\BukuKasFormSchema;
+use App\Filament\Forms\DompetFormSchema;
+use App\Filament\Forms\KategoriFormSchema;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Kategori;
@@ -10,17 +13,14 @@ use App\Services\KategoriService;
 use App\Services\TransaksiService;
 use App\Services\TransferDompetService;
 use Filament\Actions\Action;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Illuminate\Validation\Rule;
 
 trait HasTambahTransaksiAction
 {
@@ -241,29 +241,7 @@ trait HasTambahTransaksiAction
         return $select
             ->createOptionModalHeading('Tambah kas')
             ->createOptionForm([
-                Grid::make(1)
-                    ->schema([
-                        TextInput::make('nama_buku')
-                            ->required()
-                            ->rules(fn (?BukuKas $record): array => [
-                                Rule::unique('buku_kas', 'nama_buku')
-                                    ->where('user_id', auth()->id())
-                                    ->ignore($record?->id),
-                            ])
-                            ->maxLength(50),
-                        TextInput::make('saldo')
-                            ->prefix('Rp')
-                            ->required()
-                            ->numeric(),
-                        TextInput::make('description')
-                            ->maxLength(200)
-                            ->default(null),
-                        Toggle::make('hubungkan_kategori')
-                            ->label('Pakai semua kategori saya di kas ini')
-                            ->helperText('Matikan jika kas ini memerlukan daftar kategori sendiri, misalnya untuk kas bersama. Hubungan kategori dapat diubah di Setting > Kategori.')
-                            ->visible(fn (string $operation): bool => $operation === 'create')
-                            ->columnSpanFull(),
-                    ]),
+                Grid::make(2)->schema(BukuKasFormSchema::fields()),
             ])
             ->createOptionUsing(fn (array $data): int => $this->buatKasDariForm($data))
             ->createOptionAction(fn (Action $action): Action => $action
@@ -276,26 +254,7 @@ trait HasTambahTransaksiAction
         return $select
             ->createOptionModalHeading('Tambah dompet')
             ->createOptionForm([
-                Grid::make(1)
-                    ->schema([
-                        TextInput::make('nama_dompet')
-                            ->label('Nama dompet')
-                            ->required()
-                            ->maxLength(50)
-                            ->rules(fn (): array => [
-                                Rule::unique('dompet', 'nama_dompet')->where('user_id', auth()->id()),
-                            ]),
-                        TextInput::make('saldo')
-                            ->prefix('Rp')
-                            ->numeric()
-                            ->default(0)
-                            ->disabled()
-                            ->dehydrated(),
-                        TextInput::make('description')
-                            ->label('Deskripsi')
-                            ->maxLength(200)
-                            ->columnSpanFull(),
-                    ]),
+                Grid::make(2)->schema(DompetFormSchema::fields()),
             ])
             ->createOptionUsing(fn (array $data): int => $this->buatDompetDariForm($data))
             ->createOptionAction(fn (Action $action): Action => $action
@@ -499,26 +458,11 @@ trait HasTambahTransaksiAction
                             ->options(fn (Get $get): array => static::opsiKategoriForm($get))
                             ->createOptionModalHeading('Tambah kategori')
                             ->createOptionForm([
-                                Grid::make(1)
-                                    ->schema([
-                                        TextInput::make('nama')
-                                            ->label('Nama kategori')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Select::make('tipe')
-                                            ->label('Tipe kategori')
-                                            ->options(array_combine(Kategori::TIPE, Kategori::TIPE))
-                                            ->helperText('Semua berarti kategori ini muncul untuk pemasukan maupun pengeluaran.')
-                                            ->default(fn (): string => auth()->user()->pisahkanTipeKategori() ? 'Pengeluaran' : 'Semua')
-                                            ->required(),
-                                        CheckboxList::make('kas')
-                                            ->label('Dipakai di kas')
-                                            ->options(fn (): array => $this->opsiKasKategoriUntukForm())
-                                            ->helperText('Kategori hanya dapat dipilih pada transaksi kas yang dicentang. Semua kas harus milik pemilik yang sama.')
-                                            ->default(fn (): array => $this->idKasAwalKategoriForm())
-                                            ->required()
-                                            ->columnSpanFull(),
-                                    ]),
+                                Grid::make(2)->schema(KategoriFormSchema::fields(
+                                    fn (): array => $this->opsiKasKategoriUntukForm(),
+                                    kasDefault: fn (): array => $this->idKasAwalKategoriForm(),
+                                    tipeDefault: fn (): string => auth()->user()->pisahkanTipeKategori() ? 'Pengeluaran' : 'Semua',
+                                )),
                             ])
                             ->createOptionUsing(fn (array $data): int => $this->buatKategoriDariForm($data))
                             ->createOptionAction(fn (Action $action): Action => $action

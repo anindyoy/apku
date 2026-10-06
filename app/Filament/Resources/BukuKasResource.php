@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Forms\BukuKasFormSchema;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
@@ -17,10 +18,8 @@ use Filament\Actions\Action as FilamentAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -51,41 +50,7 @@ class BukuKasResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->schema([
-                // Forms\Components\TextInput::make('user_id')
-                //     ->required()
-                //     ->numeric(),
-
-                TextInput::make('nama_buku')
-                    ->required()
-                    ->rules(fn (?BukuKas $record): array => [
-                        Rule::unique('buku_kas', 'nama_buku')
-                            ->where('user_id', auth()->id())
-                            ->ignore($record?->id),
-                    ])
-                    ->maxLength(50),
-
-                TextInput::make('saldo')
-                    ->prefix('Rp')
-                    ->required()
-                    ->numeric(),
-
-                // Forms\Components\TextInput::make('goal')
-                //     ->numeric()
-                //     ->default(null),
-                // Forms\Components\DatePicker::make('tanggal_goal'),
-
-                TextInput::make('description')
-                    ->maxLength(200)
-                    ->default(null),
-
-                Toggle::make('hubungkan_kategori')
-                    ->label('Pakai semua kategori saya di kas ini')
-                    ->helperText('Matikan jika kas ini memerlukan daftar kategori sendiri, misalnya untuk kas bersama. Hubungan kategori dapat diubah di Setting > Kategori.')
-                    ->default(true)
-                    ->visible(fn (string $operation): bool => $operation === 'create'),
-            ]);
+        return $schema->schema(BukuKasFormSchema::fields());
     }
 
     public static function table(Table $table): Table
