@@ -171,3 +171,47 @@ test('pengguna dapat menjalankan audit dari halaman dompet atau daftar audit dan
     'halaman dompet' => [ListDompet::class],
     'daftar audit' => [ListAuditSaldoDompet::class],
 ]);
+
+test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->callAction('auditSaldo', data: [
+            'buku_kas_id' => $bukuKas->id,
+            'tanggal' => now(),
+            'catatan' => 'Hitung uang tunai',
+            'rincian' => [
+                [
+                    'dompet_id' => $tunai->id,
+                    'nama_dompet' => $tunai->nama_dompet,
+                    'saldo_aplikasi' => 500000,
+                    'saldo_riil' => 500000,
+                    'jumlah_pecahan' => [
+                        'kertas_100000' => 2,
+                        'kertas_1000' => 2,
+                        'logam_1000' => 1,
+                        'logam_500' => 1,
+                    ],
+                    'catatan' => null,
+                ],
+            ],
+        ])
+        ->assertHasNoActionErrors();
+
+    expect(AuditSaldoDompet::firstOrFail()->detail->firstOrFail()->saldo_riil)->toBe(203500)
+        ->and($tunai->fresh()->saldo)->toBe(203500);
+});
+
+test('bagian uang logam pada penghitung pecahan tertutup secara default', function () {
+    $html = view('filament.forms.components.hitung-uang-kas', [
+        'kelompokPecahan' => [
+            'Uang Kertas' => ['kertas_1000' => 1000],
+            'Uang Logam' => ['logam_1000' => 1000],
+        ],
+        'getStatePath' => fn (): string => 'data.rincian.0.jumlah_pecahan',
+    ])->render();
+
+    expect($html)->toContain('uangLogamTerbuka: false', 'x-show="uangLogamTerbuka"', 'type="checkbox"', 'x-model="uangLogamTerbuka"', 'transform: translateX(')
+        ->and($html)->toContain('pecahan-uang-logam', 'Tampilkan pecahan uang logam', 'Uang Logam');
+});

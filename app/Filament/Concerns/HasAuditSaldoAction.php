@@ -13,10 +13,33 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Validation\ValidationException;
 
 trait HasAuditSaldoAction
 {
+    private const PECAHAN_UANG = [
+        'Uang Kertas' => [
+            'kertas_100000' => 100000,
+            'kertas_50000' => 50000,
+            'kertas_20000' => 20000,
+            'kertas_10000' => 10000,
+            'kertas_5000' => 5000,
+            'kertas_2000' => 2000,
+            'kertas_1000' => 1000,
+        ],
+        'Uang Logam' => [
+            'logam_1000' => 1000,
+            'logam_500' => 500,
+            'logam_200' => 200,
+            'logam_100' => 100,
+        ],
+    ];
+
     protected function auditSaldoAction(): Action
     {
         return Action::make('auditSaldo')
@@ -69,7 +92,24 @@ trait HasAuditSaldoAction
                             ->label('Saldo riil')
                             ->prefix('Rp')
                             ->numeric()
-                            ->required(),
+                            ->required()
+                            ->afterStateUpdated(fn (Set $set): mixed => $set('jumlah_pecahan', $this->pecahanAwal())),
+                        Section::make('Hitung uang kas')
+                            ->description('Jumlah pecahan akan mengisi saldo riil secara otomatis. Saldo riil juga dapat diisi secara manual.')
+                            ->schema([
+                                ViewField::make('jumlah_pecahan')
+                                    ->view('filament.forms.components.hitung-uang-kas')
+                                    ->viewData(['kelompokPecahan' => self::PECAHAN_UANG])
+                                    ->default(fn (): array => $this->pecahanAwal())
+                                    ->live(debounce: 300)
+                                    ->afterStateUpdated(function (?array $state, Get $get, Set $set): void {
+                                        $total = $this->totalUangDihitung($state ?? []);
+                                        $set('saldo_riil', $total ?? (int) $get('saldo_aplikasi'));
+                                    }),
+                            ])
+                            ->columnSpanFull()
+                            ->compact()
+                            ->collapsible(),
                         TextInput::make('catatan')
                             ->label('Catatan dompet')
                             ->maxLength(500),
@@ -81,6 +121,18 @@ trait HasAuditSaldoAction
                     ->required(),
             ])
             ->action(function (array $data): void {
+                $data['rincian'] = array_map(function (array $item): array {
+                    $total = $this->totalUangDihitung($item['jumlah_pecahan'] ?? []);
+
+                    if ($total !== null) {
+                        $item['saldo_riil'] = $total;
+                    }
+
+                    unset($item['jumlah_pecahan']);
+
+                    return $item;
+                }, $data['rincian']);
+
                 app(AuditSaldoDompetService::class)->simpan(
                     auth()->user(),
                     BukuKas::findOrFail($data['buku_kas_id']),
@@ -94,5 +146,54 @@ trait HasAuditSaldoAction
                     ->success()
                     ->send();
             });
+    }
+
+    private function pecahanAwal(): array
+    {
+        return collect(self::PECAHAN_UANG)
+            ->flatMap(fn (array $pecahan): array => array_fill_keys(array_keys($pecahan), null))
+            ->all();
+    }
+
+    private function totalUangDihitung(mixed $pecahan): ?int
+    {
+        if (! is_array($pecahan)) {
+            throw ValidationException::withMessages([
+                'rincian' => 'Data hitung uang tidak valid.',
+            ]);
+        }
+
+        $nominalDiisi = false;
+        $total = 0;
+
+        foreach (self::PECAHAN_UANG as $daftarNominal) {
+            foreach ($daftarNominal as $kunci => $nominal) {
+                $jumlah = $pecahan[$kunci] ?? null;
+
+                if ($jumlah === null || $jumlah === '') {
+                    continue;
+                }
+
+                $nominalDiisi = true;
+
+                if ((! is_int($jumlah) && ! is_string($jumlah)) || ! preg_match('/^\d+$/D', (string) $jumlah)) {
+                    throw ValidationException::withMessages([
+                        'rincian' => 'Jumlah lembar atau keping harus berupa bilangan bulat nonnegatif.',
+                    ]);
+                }
+
+                $jumlah = (int) $jumlah;
+
+                if ($jumlah > 999999 || $jumlah > intdiv(PHP_INT_MAX - $total, $nominal)) {
+                    throw ValidationException::withMessages([
+                        'rincian' => 'Jumlah lembar atau keping melebihi batas yang dapat dihitung.',
+                    ]);
+                }
+
+                $total += $nominal * $jumlah;
+            }
+        }
+
+        return $nominalDiisi ? $total : null;
     }
 }
