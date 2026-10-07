@@ -43,6 +43,7 @@ class PastikanAkunKeuanganDefault
                 $dompet = Dompet::withoutGlobalScopes()->create([
                     'user_id' => $user->id,
                     'nama_dompet' => 'Cash',
+                    'jenis' => 'tunai',
                     'saldo' => (int) BukuKas::withoutGlobalScopes()->where('user_id', $user->id)->sum('saldo'),
                     'is_default' => true,
                     'description' => 'Dompet tunai utama',

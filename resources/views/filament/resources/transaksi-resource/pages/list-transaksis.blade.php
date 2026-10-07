@@ -21,19 +21,19 @@
         <div class="flex flex-wrap items-end gap-4">
             <div class="flex flex-wrap items-end gap-4">
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-400">
                         Periode transaksi
                     </label>
 
                     <div class="flex items-center gap-2">
                         {{-- Navigasi ke bulan sebelumnya --}}
                         <a href="{{ $this->getPreviousPeriodUrl() }}" aria-label="Bulan sebelumnya"
-                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10">
+                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-400 bg-gray-100 text-gray-800 shadow-sm transition hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10">
                             <x-filament::icon icon="heroicon-m-chevron-left" class="h-5 w-5" />
                         </a>
 
-                        <div class="flex h-10 items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
-                            <x-filament::icon icon="heroicon-m-calendar-days" class="ml-3 h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400" />
+                        <div class="flex h-10 items-center overflow-hidden rounded-lg border border-gray-400 bg-gray-100 shadow-sm dark:border-white/10 dark:bg-white/5">
+                            <x-filament::icon icon="heroicon-m-calendar-days" class="ml-3 h-5 w-5 shrink-0 text-gray-700 dark:text-gray-400" />
 
                             <div class="relative h-full w-36">
                                 <select aria-label="Bulan" wire:model.live="filterMonth"
@@ -45,7 +45,7 @@
                                 <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="pointer-events-none absolute inset-y-0 right-3.5 my-auto h-5 w-5 text-gray-600 dark:text-gray-300" />
                             </div>
 
-                            <span class="h-5 w-px bg-gray-300 dark:bg-white/20"></span>
+                            <span class="h-5 w-px bg-gray-400 dark:bg-white/20"></span>
 
                             <div class="relative h-full w-24">
                                 <select aria-label="Tahun" wire:model.live="filterYear"
@@ -60,19 +60,19 @@
 
                         {{-- Navigasi ke bulan berikutnya --}}
                         <a href="{{ $this->getNextPeriodUrl() }}" aria-label="Bulan berikutnya"
-                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10">
+                            class="fi-btn fi-btn-size-sm inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-400 bg-gray-100 text-gray-800 shadow-sm transition hover:bg-gray-200 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10">
                             <x-filament::icon icon="heroicon-m-chevron-right" class="h-5 w-5" />
                         </a>
                     </div>
                 </div>
 
                 <div class="space-y-1.5">
-                    <label for="dompet-filter" class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <label for="dompet-filter" class="block text-xs font-medium text-gray-700 dark:text-gray-400">
                         Dompet
                     </label>
 
-                    <div class="flex h-10 min-w-56 items-center rounded-lg border border-gray-300 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
-                        <x-filament::icon icon="heroicon-m-wallet" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
+                    <div class="flex h-10 min-w-56 items-center rounded-lg border border-gray-400 bg-gray-100 shadow-sm dark:border-white/10 dark:bg-white/5">
+                        <x-filament::icon icon="heroicon-m-wallet" class="ml-3 h-5 w-5 shrink-0 text-gray-700 dark:text-gray-400" />
                         <div class="relative h-full min-w-0 flex-1">
                             <select id="dompet-filter"
                                 onchange="window.location.href='{{ $filterUrl($filterBukuKas ?? '', '__VALUE__') }}'.replace('__VALUE__', this.value)"
@@ -88,12 +88,12 @@
                 </div>
 
                 <div class="space-y-1.5">
-                    <label for="buku-kas-filter" class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+                    <label for="buku-kas-filter" class="block text-xs font-medium text-gray-700 dark:text-gray-400">
                         Kas
                     </label>
 
-                    <div class="flex h-10 min-w-56 items-center rounded-lg border border-gray-300 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
-                        <x-filament::icon icon="heroicon-m-book-open" class="ml-3 h-5 w-5 shrink-0 text-gray-400" />
+                    <div class="flex h-10 min-w-56 items-center rounded-lg border border-gray-400 bg-gray-100 shadow-sm dark:border-white/10 dark:bg-white/5">
+                        <x-filament::icon icon="heroicon-m-book-open" class="ml-3 h-5 w-5 shrink-0 text-gray-700 dark:text-gray-400" />
                         <div class="relative h-full min-w-0 flex-1">
                             <select id="buku-kas-filter"
                                 onchange="window.location.href='{{ $filterUrl('__VALUE__') }}'.replace('__VALUE__', this.value)"
@@ -110,7 +110,7 @@
             </div>
 
             <a href="{{ $resetFilterUrl }}"
-                class="ml-auto inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-600 shadow-sm transition hover:bg-gray-100 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white">
+                class="ml-auto inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-gray-400 bg-gray-100 px-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-200 hover:text-gray-950 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white">
                 <x-filament::icon icon="heroicon-m-arrow-path" class="h-4 w-4" />
                 Reset filter
             </a>

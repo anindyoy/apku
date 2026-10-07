@@ -89,7 +89,10 @@ test('filter transaksi berada dalam section Filament yang tertutup secara defaul
         ->toContain('aria-expanded="false"')
         ->toContain('fi-collapsible')
         ->toContain('Filter transaksi')
-        ->toContain('Reset filter');
+        ->toContain('Reset filter')
+        ->toContain('bg-gray-100')
+        ->toContain('border-gray-400')
+        ->toContain('dark:bg-white/5');
 })
     ->group('filament', 'transaksi', 'filter-section');
 

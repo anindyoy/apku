@@ -1,6 +1,6 @@
 # Rangkuman Fitur Aplikasi APKu
 
-APKu adalah aplikasi web untuk mencatat dan memantau keuangan pribadi melalui kas dan dompet. Aplikasi menyediakan pencatatan transaksi, laporan, pengelolaan utang-piutang, serta administrasi akun.
+APKu adalah aplikasi web untuk mencatat dan memantau keuangan pribadi melalui kas dan sumber dana. Aplikasi menyediakan pencatatan transaksi, laporan, pengelolaan utang-piutang, serta administrasi akun.
 
 Dokumentasi dipisahkan berdasarkan tanggung jawab: backend mencakup aturan bisnis, hak akses, validasi, penyimpanan, dan proses server; frontend mencakup halaman, tampilan, navigasi, dan interaksi pengguna.
 
@@ -20,17 +20,17 @@ Aturan bisnis dan pemrosesan data aplikasi.
 
 ### 2. Onboarding pengguna baru
 
-- Pengaturan awal mencakup pembuatan kas utama beserta deskripsi, dompet utama, saldo awal, serta kategori pemasukan dan pengeluaran yang sering digunakan.
+- Pengaturan awal mencakup pembuatan kas utama beserta deskripsi, sumber dana utama, saldo awal, serta kategori pemasukan dan pengeluaran yang sering digunakan.
 
 ### 3. Pengelolaan transaksi
 
 - Mencatat pemasukan dan pengeluaran.
 - Form transaksi menyediakan pembuatan kategori langsung dari pilihan Kategori untuk semua pengguna non-admin; kategori otomatis terhubung ke kas yang dipilih dan tipe awal mengikuti jenis transaksi.
-- Pengguna Premium aktif dapat membuat kas dan dompet dari pilihan pada form transaksi. Kas baru dimulai dengan saldo nol dan seluruh kategori milik pemilik kas otomatis dihubungkan; dompet baru dimulai dengan saldo nol. Opsi ini tetap mematuhi kuota akun dan validasi nama unik.
+- Pengguna Premium aktif dapat membuat kas dan sumber dana dari pilihan pada form transaksi. Kas baru dimulai dengan saldo nol dan seluruh kategori milik pemilik kas otomatis dihubungkan; sumber dana baru dimulai dengan saldo nol. Opsi ini tetap mematuhi kuota akun dan validasi nama unik.
 - Transaksi baru memengaruhi saldo secara default, termasuk saldo awal dan transfer kas; pengecualian tersedia untuk import riwayat tanpa dampak saldo.
 - Mengubah dan menghapus transaksi sesuai hak akses.
-- Saldo per baris pada daftar transaksi mengikuti saldo kas dan dompet tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
-- Filter periode, kas, dan dompet pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
+- Saldo per baris pada daftar transaksi mengikuti saldo kas dan sumber dana tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
+- Filter periode, kas, dan sumber dana pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
 - Pada layar desktop, header dan isi tabel Transaksi, Pencarian Transaksi, serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Kas, Kategori, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.
 - Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, kategori, dan tanggal secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
 - Transfer saldo antar-kas.
@@ -197,7 +197,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer dompet berwarna kuning.
 - Nama kategori pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
 - Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal hanya pada kas yang sedang atau pernah dikolaborasikan dengan akun lain (termasuk setelah kedaluwarsa atau dicabut, tidak termasuk tautan publik), sedangkan dompet ditampilkan di bawah kas. Saat filter kas atau dompet aktif, saldo berjalan ditampilkan di bawah nominal.
-- Filter transaksi berdasarkan bulan, tahun, kas, dan dompet; pilihan bulan dan tahun dibuat lebih ringkas, chevron filter lebih jelas, dan tombol reset sejajar di kanan ketika ruang tersedia.
+- Filter transaksi berdasarkan bulan, tahun, kas, dan dompet; kontrol menggunakan latar, teks, ikon, dan batas yang kontras pada tema terang maupun gelap. Pilihan bulan dan tahun dibuat lebih ringkas, chevron filter lebih jelas, dan tombol reset sejajar di kanan ketika ruang tersedia.
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data; baris contohnya memakai tanggal `YYYY-MM-DD` tanpa waktu.

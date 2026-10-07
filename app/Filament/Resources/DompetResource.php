@@ -24,13 +24,18 @@ class DompetResource extends Resource
 {
     use HidesFromAdminNavigation;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     protected static ?string $cluster = Pengaturan::class;
 
     protected static ?string $model = Dompet::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-wallet';
 
-    protected static ?string $navigationLabel = 'Dompet';
+    protected static ?string $navigationLabel = 'Sumber Dana';
 
     protected static ?string $slug = 'dompet';
 
@@ -47,7 +52,7 @@ class DompetResource extends Resource
             ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
                 Stack::make([
-                    TextColumn::make('nama_dompet')->label('Dompet')->searchable()->weight('bold')->size('lg')->wrap(),
+                    TextColumn::make('nama_dompet')->label('Sumber dana')->searchable()->weight('bold')->size('lg')->wrap(),
                     TextColumn::make('saldo')
                         ->prefix('Saldo: Rp ')
                         ->numeric()
@@ -87,7 +92,7 @@ class DompetResource extends Resource
                         && auth()->user()->dompet()->count() > 1)
                     ->form(fn (Dompet $record): array => [
                         Select::make('dompet_tujuan_id')
-                            ->label('Dompet tujuan')
+                            ->label('Sumber dana tujuan')
                             ->options(fn (): array => array_filter(
                                 Transaksi::opsiDompetYangDapatDikelola(),
                                 fn ($id): bool => (int) $id !== (int) $record->id,
