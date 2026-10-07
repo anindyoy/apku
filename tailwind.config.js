@@ -2,6 +2,7 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         './app/Filament/Concerns/HasTambahTransaksiAction.php',
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',

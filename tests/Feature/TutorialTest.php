@@ -37,7 +37,7 @@ test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', funct
 test('tutorial audit menjelaskan penghitung pecahan uang', function () {
     $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 
-    expect(implode(' ', $topics['audit-saldo']['steps']))->toContain('Audit saldo pada kartu sumber dana', 'Audit dari kartu hanya mencakup sumber dana tersebut', 'hanya ditampilkan pada sumber dana berjenis Tunai', 'dua kolom pada layar lebar', 'kas tempat sumber dana itu memiliki transaksi', 'Catatan audit boleh dikosongkan', 'Catatan dompet tidak tersedia pada form audit', 'Ulangi')
+    expect(implode(' ', $topics['audit-saldo']['steps']))->toContain('Audit saldo pada kartu sumber dana', 'Audit dari kartu hanya mencakup sumber dana tersebut', 'hanya ditampilkan pada sumber dana berjenis Tunai', 'dua kolom pada layar lebar', 'kas tempat sumber dana itu memiliki transaksi', 'Catatan audit boleh dikosongkan', 'Catatan dompet tidak tersedia pada form audit', 'total kas dan tombol Ulangi tampil dua kolom', 'Ulangi')
         ->and($topics['audit-saldo']['note'])->toContain('Rp100.000', 'Rp500');
 });
 

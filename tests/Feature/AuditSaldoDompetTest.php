@@ -368,6 +368,14 @@ test('bagian uang logam pada penghitung pecahan tertutup secara default', functi
     ])->render();
 
     expect($html)->toContain('uangLogamTerbuka: false', 'x-show="uangLogamTerbuka"', 'type="checkbox"', 'x-model="uangLogamTerbuka"', 'transform: translateX(')
-        ->and($html)->toContain('grid-cols-1 gap-2 p-2 sm:grid-cols-2 sm:p-3', 'bg-blue-50', 'text-slate-800', 'border-slate-200')
-        ->and($html)->toContain('pecahan-uang-logam', 'Tampilkan pecahan uang logam', 'Uang Logam');
+        ->and($html)->toContain(
+            'grid-cols-1 gap-2 p-2 sm:grid-cols-2 sm:p-3',
+            'bg-white',
+            'text-slate-800',
+            'border-slate-200',
+            'dark:bg-gray-900',
+            'dark:text-gray-100',
+            'grid grid-cols-1 gap-3 sm:grid-cols-2',
+        )
+        ->and($html)->toContain('pecahan-uang-logam', 'Tampilkan pecahan uang logam', 'Uang Logam', '<svg', 'Ulangi');
 });

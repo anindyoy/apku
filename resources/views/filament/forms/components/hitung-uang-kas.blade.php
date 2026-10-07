@@ -125,14 +125,19 @@
         </div>
     @endforeach
 
-    <div class="flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950">
-        <span class="text-sm font-semibold text-blue-900 dark:text-gray-300">Total kas</span>
-        <span class="text-lg font-bold text-blue-700 dark:text-blue-300" x-text="formatRupiah(total())"></span>
-    </div>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div class="flex min-h-full items-center justify-between gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-3 dark:border-blue-900 dark:bg-blue-950 sm:px-4">
+            <span class="text-sm font-semibold text-blue-900 dark:text-gray-300">Total kas</span>
+            <span class="text-lg font-bold text-blue-700 dark:text-blue-300" x-text="formatRupiah(total())"></span>
+        </div>
 
-    <button
-        type="button"
-        class="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
-        x-on:click="ulangi()"
-    >Ulangi</button>
+        <button
+            type="button"
+            class="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
+            x-on:click="ulangi()"
+        >
+            <x-filament::icon icon="heroicon-m-arrow-path" class="mr-2 inline-block h-4 w-4" />
+            Ulangi
+        </button>
+    </div>
 </div>
