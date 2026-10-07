@@ -10,5 +10,10 @@ class SumberDanaResource extends DompetResource
 
     protected static ?string $navigationLabel = 'Sumber Dana';
 
-    protected static ?string $slug = 'dompet';
+    protected static ?string $slug = 'sumber-dana';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return ! auth()->user()?->isAdmin();
+    }
 }

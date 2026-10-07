@@ -24,6 +24,11 @@ class DompetResource extends Resource
 {
     use HidesFromAdminNavigation;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
     protected static ?string $cluster = Pengaturan::class;
 
     protected static ?string $model = Dompet::class;
