@@ -35,12 +35,8 @@ class AuditSaldoDompetService
     /**
      * @param  array<int, array{dompet_id: int, saldo_aplikasi: int, saldo_riil: int, catatan?: string|null, jumlah_pecahan?: array<string, int|string|null>|null}>  $rincian
      */
-    public function simpan(User $user, BukuKas $bukuKas, mixed $tanggal, string $catatan, array $rincian): AuditSaldoDompet
+    public function simpan(User $user, BukuKas $bukuKas, mixed $tanggal, ?string $catatan, array $rincian): AuditSaldoDompet
     {
-        if (trim($catatan) === '') {
-            throw ValidationException::withMessages(['catatan' => 'Catatan audit wajib diisi.']);
-        }
-
         if ($bukuKas->user_id !== $user->id || ! $user->dapatMengelolaTransaksiPada($bukuKas)) {
             throw new AuthorizationException('Kas audit tidak dapat dikelola.');
         }
@@ -106,7 +102,7 @@ class AuditSaldoDompetService
                 'user_id' => $user->id,
                 'buku_kas_id' => $bukuKas->id,
                 'tanggal' => $tanggal ?? now(),
-                'catatan' => trim($catatan),
+                'catatan' => filled($catatan) ? trim($catatan) : null,
                 'total_saldo_aplikasi' => $totalAplikasi,
                 'total_saldo_riil' => $totalRiil,
                 'total_selisih' => $totalRiil - $totalAplikasi,
@@ -139,7 +135,9 @@ class AuditSaldoDompetService
                     'dompet_id' => $record->id,
                     'tanggal' => $tanggal ?? now(),
                     'nominal' => abs($selisihAkhir),
-                    'deskripsi' => 'Penyesuaian saldo dompet: '.trim($catatan),
+                    'deskripsi' => filled($catatan)
+                        ? 'Penyesuaian saldo dompet: '.trim($catatan)
+                        : 'Penyesuaian saldo dompet',
                 ], $jenis);
 
                 Transaksi::withoutEvents(fn () => $transaksi->update([

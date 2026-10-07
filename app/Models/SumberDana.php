@@ -51,7 +51,7 @@ class SumberDana extends Model
 
     public function mendukungHitungUang(): bool
     {
-        return $this->jenis?->mendukungHitungUang() ?? true;
+        return $this->jenis?->mendukungHitungUang() ?? false;
     }
 
     protected function cacheOpsiSelectEntitas(): string

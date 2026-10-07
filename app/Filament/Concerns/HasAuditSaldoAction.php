@@ -15,6 +15,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -48,22 +49,25 @@ trait HasAuditSaldoAction
             ->modalHeading('Cocokkan saldo aplikasi dengan saldo riil')
             ->modalDescription('Masukkan saldo riil setiap dompet. Selisih akan dicatat sebagai transaksi penyesuaian Audit Saldo.')
             ->form([
-                Select::make('buku_kas_id')
-                    ->label('Kas pencatatan')
-                    ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
-                    ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
-                    ->required(),
-                DateTimePicker::make('tanggal')
-                    ->default(now())
-                    ->seconds(false)
-                    ->native(false)
-                    ->maxDate(now())
-                    ->required(),
-                Textarea::make('catatan')
-                    ->label('Catatan audit')
-                    ->placeholder('Contoh: Rekonsiliasi saldo September 2026')
-                    ->required()
-                    ->maxLength(1000),
+                Grid::make(['default' => 1, 'lg' => 3])
+                    ->schema([
+                        Select::make('buku_kas_id')
+                            ->label('Kas pencatatan')
+                            ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
+                            ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
+                            ->required(),
+                        DateTimePicker::make('tanggal')
+                            ->default(now())
+                            ->seconds(false)
+                            ->native(false)
+                            ->maxDate(now())
+                            ->required(),
+                        Textarea::make('catatan')
+                            ->label('Catatan audit')
+                            ->placeholder('Contoh: Rekonsiliasi saldo September 2026')
+                            ->nullable()
+                            ->maxLength(1000),
+                    ]),
                 Repeater::make('rincian')
                     ->label('Saldo per dompet')
                     ->default(fn (): array => Dompet::query()
@@ -102,7 +106,7 @@ trait HasAuditSaldoAction
                             }),
                         Section::make('Hitung uang kas')
                             ->description('Jumlah pecahan akan mengisi saldo riil secara otomatis. Saldo riil juga dapat diisi secara manual.')
-                            ->visible(fn (Get $get): bool => $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
+                            ->hidden(fn (Get $get): bool => ! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
                             ->schema([
                                 ViewField::make('jumlah_pecahan')
                                     ->view('filament.forms.components.hitung-uang-kas')

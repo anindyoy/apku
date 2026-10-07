@@ -37,7 +37,7 @@ test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', funct
 test('tutorial audit menjelaskan penghitung pecahan uang', function () {
     $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 
-    expect(implode(' ', $topics['audit-saldo']['steps']))->toContain('jumlah lembar atau keping', 'mengisi saldo riil', 'Ulangi')
+    expect(implode(' ', $topics['audit-saldo']['steps']))->toContain('hanya ditampilkan pada sumber dana berjenis Tunai', 'jumlah lembar atau keping', 'mengisi saldo riil', 'Catatan audit boleh dikosongkan', 'Ulangi')
         ->and($topics['audit-saldo']['note'])->toContain('Rp100.000', 'Rp500');
 });
 

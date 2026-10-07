@@ -87,7 +87,8 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Memindahkan saldo ke dompet lain sebelum menghapus dompet.
 - Audit baru dapat dibuat melalui tombol **Tambah audit** pada daftar Audit Saldo atau tombol **Audit saldo** pada halaman Dompet, menggunakan formulir dan aturan akses yang sama.
 - Audit menyimpan snapshot saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, serta catatan umum dan catatan per dompet.
-- Form audit menyediakan penghitung uang kertas dan logam untuk setiap dompet; toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil juga dapat dimasukkan secara manual.
+- Form audit menempatkan kas pencatatan, tanggal, dan catatan audit dalam grid tiga kolom pada layar lebar; catatan audit bersifat opsional.
+- Form audit hanya menyediakan penghitung uang kertas dan logam pada dompet berjenis **Tunai**; toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil dompet jenis lain tetap dapat dimasukkan secara manual.
 - Selisih positif audit dicatat sebagai pemasukan dan selisih negatif sebagai pengeluaran tanpa kategori pada kas yang dipilih. Transaksi ini dikenali dari relasinya ke audit dan tampil dengan label **Audit Saldo** pada daftar, laporan, dan ekspor.
 - Dompet tanpa selisih tetap tercatat dalam riwayat audit tanpa membuat transaksi penyesuaian.
 - Seluruh penyesuaian dalam satu audit disimpan secara atomik dan dibatalkan jika saldo berubah selama proses audit.
@@ -242,8 +243,8 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Pengguna dapat mengaudit saldo seluruh dompet yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
 - Halaman dompet menyediakan pembuatan, perubahan, pemilihan dompet default, serta pemindahan saldo sebelum penghapusan.
 - Daftar dompet dan modal tambah menjelaskan sisa slot atau batas kuota dompet untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif tidak menampilkan pesan kuota dan memiliki slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
-- Form audit saldo memilih kas utama secara default dan menyediakan saldo riil, tanggal, kas pencatatan, catatan umum, serta catatan per dompet.
-- Form audit menyediakan penghitung uang kertas dan logam untuk setiap dompet; toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil juga dapat dimasukkan secara manual.
+- Form audit saldo memilih kas utama secara default dan menyediakan saldo riil, tanggal, kas pencatatan, catatan umum opsional, serta catatan per dompet. Kas pencatatan, tanggal, dan catatan audit tersusun dalam grid tiga kolom pada layar lebar.
+- Form audit hanya menyediakan penghitung uang kertas dan logam pada dompet berjenis **Tunai**; toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil dompet jenis lain tetap dapat dimasukkan secara manual.
 - Audit Saldo tidak ditampilkan pada navbar. Akses audit tersedia melalui tombol **Audit saldo** dan **Riwayat audit** pada halaman Dompet; daftar riwayat tetap menyediakan tombol **Tambah audit**.
 
 ### 7. Kategori transaksi

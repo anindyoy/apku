@@ -11,6 +11,9 @@ use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\AuditSaldoDompetService;
 use App\Services\TransaksiService;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
@@ -137,7 +140,7 @@ test('pengguna dapat menjalankan audit dari halaman dompet atau daftar audit dan
         ->callAction('auditSaldo', data: [
             'buku_kas_id' => $bukuKas->id,
             'tanggal' => now(),
-            'catatan' => 'Audit dari halaman dompet',
+            'catatan' => null,
             'rincian' => [
                 [
                     'dompet_id' => $tunai->id,
@@ -165,12 +168,31 @@ test('pengguna dapat menjalankan audit dari halaman dompet atau daftar audit dan
         ->test(ListAuditSaldoDompet::class)
         ->assertCanSeeTableRecords(AuditSaldoDompet::all());
 
-    expect($tunai->fresh()->saldo)->toBe(490000)
+    expect(AuditSaldoDompet::firstOrFail()->catatan)->toBeNull()
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->firstOrFail()->deskripsi)->toBe('Penyesuaian saldo dompet')
+        ->and($tunai->fresh()->saldo)->toBe(490000)
         ->and($bukuKas->fresh()->saldo)->toBe(990000);
 })->with([
     'halaman dompet' => [ListDompet::class],
     'daftar audit' => [ListAuditSaldoDompet::class],
 ]);
+
+test('form audit menempatkan kas tanggal dan catatan dalam grid tiga kolom serta catatan opsional', function () {
+    ['user' => $user] = buatDataAuditSaldo();
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->mountAction('auditSaldo');
+    $namaSchema = $komponen->instance()->getMountedActionSchemaName();
+    $grid = collect($komponen->instance()->{$namaSchema}->getComponents())
+        ->first(fn ($component): bool => $component instanceof Grid);
+
+    $komponen->assertFormFieldExists('catatan', fn (Textarea $field): bool => ! $field->isRequired());
+
+    expect($grid)->toBeInstanceOf(Grid::class)
+        ->and($grid->getColumns('lg'))->toBe(3)
+        ->and($grid->getChildSchema()->getFlatFields())->toHaveKeys(['buku_kas_id', 'tanggal', 'catatan']);
+});
 
 test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
@@ -201,6 +223,23 @@ test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () 
 
     expect(AuditSaldoDompet::firstOrFail()->detail->firstOrFail()->saldo_riil)->toBe(203500)
         ->and($tunai->fresh()->saldo)->toBe(203500);
+});
+
+test('form audit menyembunyikan penghitung uang dari sumber dana non-Tunai', function () {
+    ['user' => $user, 'bank' => $bank] = buatDataAuditSaldo();
+    $bank->update(['jenis' => 'rekening']);
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->mountAction('auditSaldo');
+    $namaSchema = $komponen->instance()->getMountedActionSchemaName();
+    $bagianHitungUang = collect($komponen->instance()->{$namaSchema}->getFlatComponents(withActions: false, withHidden: true))
+        ->filter(fn ($bagian): bool => $bagian instanceof Section && $bagian->getHeading() === 'Hitung uang kas')
+        ->values();
+
+    expect($bagianHitungUang)->toHaveCount(2)
+        ->and($bagianHitungUang->map(fn (Section $bagian): bool => $bagian->isVisible())->sort()->values()->all())->toBe([false, true])
+        ->and((new Dompet(['jenis' => null]))->mendukungHitungUang())->toBeFalse();
 });
 
 test('audit menolak pecahan untuk sumber dana non-Tunai meski data dikirim langsung', function () {
