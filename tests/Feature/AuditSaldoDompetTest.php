@@ -41,6 +41,16 @@ function buatDataAuditSaldo(): array
         'nama_dompet' => 'Bank',
         'saldo' => 500000,
     ]);
+    foreach ([$tunai, $bank] as $dompet) {
+        Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
+            'user_id' => $user->id,
+            'buku_kas_id' => $bukuKas->id,
+            'dompet_id' => $dompet->id,
+            'nominal' => 1,
+            'jenis' => 'Pemasukan',
+            'tanggal' => now(),
+        ]));
+    }
 
     return compact('user', 'bukuKas', 'tunai', 'bank');
 }
@@ -177,6 +187,33 @@ test('pengguna dapat menjalankan audit dari halaman dompet atau daftar audit dan
     'daftar audit' => [ListAuditSaldoDompet::class],
 ]);
 
+test('action audit pada record hanya mengaudit sumber dana tersebut', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->assertTableActionVisible('auditSaldo', $tunai)
+        ->callTableAction('auditSaldo', $tunai, data: [
+            'buku_kas_id' => $bukuKas->id,
+            'tanggal' => now(),
+            'catatan' => 'Audit tunai saja',
+            'rincian' => [[
+                'dompet_id' => $tunai->id,
+                'nama_dompet' => $tunai->nama_dompet,
+                'saldo_aplikasi' => 500000,
+                'saldo_riil' => 490000,
+                'catatan' => null,
+            ]],
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $audit = AuditSaldoDompet::firstOrFail();
+    expect($audit->detail)->toHaveCount(1)
+        ->and($audit->detail->first()->dompet_id)->toBe($tunai->id)
+        ->and($tunai->fresh()->saldo)->toBe(490000)
+        ->and($bank->fresh()->saldo)->toBe(500000);
+});
+
 test('form audit menempatkan kas tanggal dan catatan dalam grid tiga kolom serta catatan opsional', function () {
     ['user' => $user] = buatDataAuditSaldo();
 
@@ -188,10 +225,60 @@ test('form audit menempatkan kas tanggal dan catatan dalam grid tiga kolom serta
         ->first(fn ($component): bool => $component instanceof Grid);
 
     $komponen->assertFormFieldExists('catatan', fn (Textarea $field): bool => ! $field->isRequired());
+    $komponen->assertFormFieldDoesNotExist('rincian.0.catatan');
 
     expect($grid)->toBeInstanceOf(Grid::class)
         ->and($grid->getColumns('lg'))->toBe(3)
         ->and($grid->getChildSchema()->getFlatFields())->toHaveKeys(['buku_kas_id', 'tanggal', 'catatan']);
+});
+
+test('form audit hanya menampilkan dompet yang memiliki transaksi pada kas terpilih', function () {
+    ['user' => $user, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
+    $kasLain = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Lain',
+        'saldo' => 0,
+    ]);
+    $dompetLain = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Dompet Kas Lain',
+        'saldo' => 25000,
+    ]);
+    Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $kasLain->id,
+        'dompet_id' => $dompetLain->id,
+        'nominal' => 1,
+        'jenis' => 'Pemasukan',
+        'tanggal' => now(),
+    ]));
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->mountAction('auditSaldo');
+    $namaSchema = $komponen->instance()->getMountedActionSchemaName();
+    $rincian = $komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true)['rincian'];
+    expect(collect($rincian->getState())->pluck('dompet_id')->sort()->values()->all())->toBe([$tunai->id, $bank->id]);
+
+    $komponen->set('mountedActions.0.data.buku_kas_id', $kasLain->id);
+
+    $namaSchema = $komponen->instance()->getMountedActionSchemaName();
+    $rincian = $komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true)['rincian'];
+
+    expect(collect($rincian->getState())->pluck('dompet_id')->values()->all())->toBe([$dompetLain->id]);
+});
+
+test('audit menolak dompet yang tidak memiliki transaksi pada kas terpilih', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
+    $kasLain = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Lain',
+        'saldo' => 0,
+    ]);
+
+    expect(fn () => app(AuditSaldoDompetService::class)->simpan($user, $kasLain, now(), null, [
+        ['dompet_id' => $tunai->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 450000],
+    ]))->toThrow(ValidationException::class);
 });
 
 test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () {
@@ -281,5 +368,6 @@ test('bagian uang logam pada penghitung pecahan tertutup secara default', functi
     ])->render();
 
     expect($html)->toContain('uangLogamTerbuka: false', 'x-show="uangLogamTerbuka"', 'type="checkbox"', 'x-model="uangLogamTerbuka"', 'transform: translateX(')
+        ->and($html)->toContain('grid-cols-1 gap-2 p-2 sm:grid-cols-2 sm:p-3', 'bg-blue-50', 'text-slate-800', 'border-slate-200')
         ->and($html)->toContain('pecahan-uang-logam', 'Tampilkan pecahan uang logam', 'Uang Logam');
 });

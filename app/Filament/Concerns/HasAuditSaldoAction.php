@@ -53,8 +53,13 @@ trait HasAuditSaldoAction
                     ->schema([
                         Select::make('buku_kas_id')
                             ->label('Kas pencatatan')
-                            ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
-                            ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
+                            ->options(fn (?Dompet $record): array => $this->opsiKasAudit($record))
+                            ->default(fn (?Dompet $record): ?int => $this->kasDefaultAudit($record))
+                            ->live()
+                            ->afterStateUpdated(fn (mixed $state, Set $set, ?Dompet $record): mixed => $set(
+                                'rincian',
+                                $this->rincianAuditUntukKas((int) ($state ?? 0), $record),
+                            ))
                             ->required(),
                         DateTimePicker::make('tanggal')
                             ->default(now())
@@ -69,17 +74,12 @@ trait HasAuditSaldoAction
                             ->maxLength(1000),
                     ]),
                 Repeater::make('rincian')
-                    ->label('Saldo per dompet')
-                    ->default(fn (): array => Dompet::query()
-                        ->get()
-                        ->filter(fn (Dompet $dompet): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet))
-                        ->map(fn (Dompet $dompet): array => [
-                            'dompet_id' => $dompet->id,
-                            'nama_dompet' => $dompet->nama_dompet,
-                            'saldo_aplikasi' => (int) $dompet->saldo,
-                            'saldo_riil' => (int) $dompet->saldo,
-                            'catatan' => null,
-                        ])->values()->all())
+                    ->label('Saldo per dompet pada kas terpilih')
+                    ->helperText('Hanya dompet yang memiliki transaksi pada kas terpilih yang ditampilkan.')
+                    ->default(fn (Get $get, ?Dompet $record): array => $this->rincianAuditUntukKas(
+                        (int) ($get('buku_kas_id') ?? 0),
+                        $record,
+                    ))
                     ->schema([
                         Hidden::make('dompet_id'),
                         TextInput::make('nama_dompet')
@@ -125,9 +125,6 @@ trait HasAuditSaldoAction
                             ->columnSpanFull()
                             ->compact()
                             ->collapsible(),
-                        TextInput::make('catatan')
-                            ->label('Catatan dompet')
-                            ->maxLength(500),
                     ])
                     ->columns(2)
                     ->addable(false)
@@ -135,7 +132,19 @@ trait HasAuditSaldoAction
                     ->reorderable(false)
                     ->required(),
             ])
-            ->action(function (array $data): void {
+            ->visible(fn (?Dompet $record): bool => $record === null
+                || (auth()->user()->dapatMengelolaTransaksiPadaDompet($record) && $this->opsiKasAudit($record) !== []))
+            ->action(function (array $data, ?Dompet $record): void {
+                if ($record !== null) {
+                    $dompetIds = collect($data['rincian'] ?? [])->pluck('dompet_id')->map(fn ($id): int => (int) $id);
+
+                    if ($dompetIds->count() !== 1 || $dompetIds->first() !== $record->id) {
+                        throw ValidationException::withMessages([
+                            'rincian' => 'Audit dari daftar sumber dana hanya dapat memproses sumber dana terpilih.',
+                        ]);
+                    }
+                }
+
                 $data['rincian'] = array_map(function (array $item): array {
                     $dompetId = (int) ($item['dompet_id'] ?? 0);
                     $jumlahPecahan = $item['jumlah_pecahan'] ?? null;
@@ -181,6 +190,60 @@ trait HasAuditSaldoAction
         $dompet = Dompet::withoutGlobalScopes()->find($dompetId);
 
         return $dompet?->mendukungHitungUang() ?? false;
+    }
+
+    private function opsiKasAudit(?Dompet $dompet): array
+    {
+        $opsiKas = Transaksi::opsiBukuKasYangDapatDikelola();
+
+        if ($dompet === null) {
+            return $opsiKas;
+        }
+
+        $idKasTerkait = Transaksi::withoutGlobalScopes()
+            ->where('dompet_id', $dompet->id)
+            ->distinct()
+            ->pluck('buku_kas_id')
+            ->map(fn ($id): string => (string) $id)
+            ->all();
+
+        return array_intersect_key($opsiKas, array_flip($idKasTerkait));
+    }
+
+    private function kasDefaultAudit(?Dompet $dompet): ?int
+    {
+        $opsiKas = $this->opsiKasAudit($dompet);
+        $kasDefault = auth()->user()->idBukuKasUtama();
+
+        if ($kasDefault !== null && array_key_exists($kasDefault, $opsiKas)) {
+            return $kasDefault;
+        }
+
+        $kasPertama = array_key_first($opsiKas);
+
+        return $kasPertama === null ? null : (int) $kasPertama;
+    }
+
+    private function rincianAuditUntukKas(int $bukuKasId, ?Dompet $dompetTerpilih = null): array
+    {
+        if ($bukuKasId <= 0) {
+            return [];
+        }
+
+        return Dompet::query()
+            ->when($dompetTerpilih !== null, fn ($query) => $query->whereKey($dompetTerpilih->id))
+            ->whereHas('transaksi', fn ($query) => $query->where('buku_kas_id', $bukuKasId))
+            ->get()
+            ->filter(fn (Dompet $dompet): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet))
+            ->map(fn (Dompet $dompet): array => [
+                'dompet_id' => $dompet->id,
+                'nama_dompet' => $dompet->nama_dompet,
+                'saldo_aplikasi' => (int) $dompet->saldo,
+                'saldo_riil' => (int) $dompet->saldo,
+                'catatan' => null,
+            ])
+            ->values()
+            ->all();
     }
 
     private function pecahanAwal(): array

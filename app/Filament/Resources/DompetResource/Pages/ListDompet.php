@@ -10,6 +10,7 @@ use App\Services\KuotaAkun;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 
 class ListDompet extends ListRecords
@@ -27,6 +28,11 @@ class ListDompet extends ListRecords
     protected function resourceListCacheSection(): string
     {
         return 'dompet';
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table->pushRecordActions([$this->auditSaldoAction()]);
     }
 
     protected function getHeaderActions(): array

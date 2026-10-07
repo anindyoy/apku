@@ -42,14 +42,14 @@
         },
     }"
 >
-    <div class="text-sm font-medium text-gray-700 dark:text-gray-200">💰 Hitung Uang Kas</div>
-    <p class="text-sm text-gray-500 dark:text-gray-400">Masukkan jumlah lembar atau keping tiap pecahan. Total dihitung otomatis.</p>
+    <div class="text-sm font-semibold text-slate-800 dark:text-gray-100">💰 Hitung Uang Kas</div>
+    <p class="text-sm text-slate-600 dark:text-gray-400">Masukkan jumlah lembar atau keping tiap pecahan. Total dihitung otomatis.</p>
 
     @foreach ($kelompokPecahan as $kelompok => $daftarNominal)
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
             @if ($kelompok === 'Uang Logam')
-                <div class="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-                    <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400" x-bind:for="$id('toggle-uang-logam')">
+                <div class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+                    <label class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-gray-300" x-bind:for="$id('toggle-uang-logam')">
                         {{ $kelompok }}
                     </label>
                     <label class="inline-flex cursor-pointer items-center">
@@ -68,22 +68,36 @@
                         </span>
                     </label>
                 </div>
-                <div id="pecahan-uang-logam" x-show="uangLogamTerbuka" x-cloak>
             @else
-                <div class="border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                <div class="border-b border-slate-200 bg-blue-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-blue-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
                     {{ $kelompok }}
                 </div>
             @endif
+            <div
+                @class([
+                    'grid grid-cols-1 gap-2 p-2 sm:grid-cols-2 sm:p-3' => $kelompok === 'Uang Kertas',
+                    'divide-y divide-slate-100 dark:divide-gray-800' => $kelompok === 'Uang Logam',
+                ])
+                @if ($kelompok === 'Uang Logam')
+                    id="pecahan-uang-logam"
+                    x-show="uangLogamTerbuka"
+                    x-cloak
+                @endif
+            >
                 @foreach ($daftarNominal as $kunci => $nominal)
-                    <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(4rem,auto)] items-center gap-2 border-b border-gray-100 px-3 py-2 last:border-b-0 sm:px-4 dark:border-gray-800">
-                        <div class="min-w-0 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <div @class([
+                        'grid grid-cols-[minmax(0,1fr)_auto_minmax(4rem,auto)] items-center gap-2 rounded-lg px-2 py-2 sm:px-3' => $kelompok === 'Uang Kertas',
+                        'grid grid-cols-[minmax(0,1fr)_auto_minmax(4rem,auto)] items-center gap-2 px-2 py-2 sm:px-3' => $kelompok === 'Uang Logam',
+                        'border border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800' => $kelompok === 'Uang Kertas',
+                    ])>
+                        <div class="min-w-0 text-sm font-semibold text-slate-800 dark:text-gray-100">
                             Rp {{ number_format($nominal, 0, ',', '.') }}
                         </div>
                         <div class="flex items-center gap-1">
                             <button
                                 type="button"
                                 aria-label="Kurangi satu pecahan Rp {{ number_format($nominal, 0, ',', '.') }}"
-                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-lg leading-none text-gray-700 active:bg-blue-50 active:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:active:bg-gray-700"
+                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-lg leading-none text-slate-700 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:active:bg-gray-700"
                                 x-on:click="ubah(@js($kunci), -1)"
                             >−</button>
                             <input
@@ -94,27 +108,25 @@
                                 inputmode="numeric"
                                 placeholder="0"
                                 aria-label="Jumlah pecahan Rp {{ number_format($nominal, 0, ',', '.') }}"
-                                class="h-9 w-12 rounded-lg border border-gray-300 bg-white px-1 text-center text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                                class="h-9 w-12 rounded-lg border border-slate-300 bg-white px-1 text-center text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
                                 x-model.number="pecahan[@js($kunci)]"
                             >
                             <button
                                 type="button"
                                 aria-label="Tambah satu pecahan Rp {{ number_format($nominal, 0, ',', '.') }}"
-                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-lg leading-none text-gray-700 active:bg-blue-50 active:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:active:bg-gray-700"
+                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-lg leading-none text-slate-700 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:active:bg-gray-700"
                                 x-on:click="ubah(@js($kunci), 1)"
                             >+</button>
                         </div>
-                        <div class="min-w-16 text-right text-xs text-gray-500 dark:text-gray-400" x-text="formatRupiah(subtotal(@js($kunci), {{ $nominal }}))"></div>
+                        <div class="min-w-16 text-right text-xs text-slate-600 dark:text-gray-400" x-text="formatRupiah(subtotal(@js($kunci), {{ $nominal }}))"></div>
                     </div>
                 @endforeach
-            @if ($kelompok === 'Uang Logam')
-                </div>
-            @endif
+            </div>
         </div>
     @endforeach
 
     <div class="flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950">
-        <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Total kas</span>
+        <span class="text-sm font-semibold text-blue-900 dark:text-gray-300">Total kas</span>
         <span class="text-lg font-bold text-blue-700 dark:text-blue-300" x-text="formatRupiah(total())"></span>
     </div>
 
