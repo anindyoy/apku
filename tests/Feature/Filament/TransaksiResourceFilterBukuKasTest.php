@@ -53,7 +53,7 @@ test('panah select filter transaksi memiliki jarak dari tepi kanan', function ()
         ->and(substr_count($html, 'absolute inset-y-0 right-3.5 my-auto h-5 w-5'))->toBe(4)
         ->and($html)->toContain('relative h-full w-36')
         ->and($html)->toContain('relative h-full w-24')
-        ->and($html)->toContain('rounded-lg border border-gray-300 bg-white px-3');
+        ->and($html)->toContain('rounded-lg border border-gray-400 bg-gray-100 shadow-sm');
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
