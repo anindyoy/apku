@@ -238,7 +238,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 6. Dompet
 
-- Daftar dompet menggunakan card Filament responsif yang menampilkan saldo, status akses, deskripsi, dan status dompet default dengan label yang jelas. Data setiap halaman, pencarian, dan urutan list disimpan dalam cache hingga tiga hari dan diperbarui saat data dompet berubah.
+- Daftar dompet menggunakan card Filament responsif yang menampilkan saldo, status akses, deskripsi, dan status dompet default dengan label yang jelas. Kisi menampilkan minimal dua kolom dan maksimal tiga: satu atau dua sumber dana memakai dua kolom, sedangkan tiga atau lebih memakai tiga kolom pada layar lebar. Data setiap halaman, pencarian, dan urutan list disimpan dalam cache hingga tiga hari dan diperbarui saat data dompet berubah.
 - Tetap menampilkan nama dompet yang sudah dihapus pada riwayat transaksi dan laporan.
 - Pengguna dapat mengaudit saldo seluruh dompet yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
 - Halaman dompet menyediakan pembuatan, perubahan, pemilihan dompet default, serta pemindahan saldo sebelum penghapusan.

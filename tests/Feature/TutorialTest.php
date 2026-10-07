@@ -57,6 +57,7 @@ test('tutorial kuota kas dan dompet menjelaskan batas serta masa aktif premium',
         expect($topik[$id]['note'])->toContain('tidak menampilkan pesan kuota');
     }
 
+    expect($topik['dompet']['note'])->toContain('minimal dua dan maksimal tiga kolom', 'satu atau dua sumber dana', 'tiga atau lebih');
     expect($topik['kas']['note'])->toContain('Kas bersama tidak dihitung');
     $this->get('/tutorial')->assertSuccessful();
 });

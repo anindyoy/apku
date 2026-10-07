@@ -32,7 +32,13 @@ class ListDompet extends ListRecords
 
     public function table(Table $table): Table
     {
-        return $table->pushRecordActions([$this->auditSaldoAction()]);
+        return $table
+            ->contentGrid(fn (): array => [
+                'default' => 2,
+                'md' => 2,
+                'xl' => ($this->getFilteredTableQuery()?->count() ?? 0) >= 3 ? 3 : 2,
+            ])
+            ->pushRecordActions([$this->auditSaldoAction()]);
     }
 
     protected function getHeaderActions(): array

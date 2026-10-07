@@ -87,12 +87,37 @@ test('daftar dompet menggunakan kartu responsif', function () {
     $table = $component->instance()->getTable();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $cash->id);
 
-    expect($table->getContentGrid())->toBe(['default' => 1, 'md' => 2, 'xl' => 3])
+    expect($table->getContentGrid())->toBe(['default' => 2, 'md' => 2, 'xl' => 2])
         ->and($table->getColumn('saldo')->record($record)->getPrefix())->toBe('Saldo: Rp ')
         ->and($table->getColumn('is_default')->record($record)->getPrefix())->toBe('Default: ')
         ->and($table->getColumn('is_default')->record($record)->formatState(true))->toBe('Default: Ya')
         ->and($table->getColumn('status_akses')->record($record)->getPrefix())->toBe('Status: ')
         ->and($table->getColumn('description')->record($record)->getPrefix())->toBe('Deskripsi: ');
+});
+
+test('grid daftar dompet menyesuaikan jumlah sumber dana', function () {
+    ['user' => $user] = buatPenggunaUntukUiDompet();
+
+    $component = Livewire::actingAs($user)->test(ListDompet::class);
+    $table = $component->instance()->getTable();
+
+    expect($table->getContentGrid())->toBe(['default' => 2, 'md' => 2, 'xl' => 2]);
+
+    Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Rekening Bank',
+        'saldo' => 0,
+    ]);
+
+    expect($table->getContentGrid())->toBe(['default' => 2, 'md' => 2, 'xl' => 2]);
+
+    Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'E-Wallet',
+        'saldo' => 0,
+    ]);
+
+    expect($table->getContentGrid())->toBe(['default' => 2, 'md' => 2, 'xl' => 3]);
 });
 
 test('action transaksi biasa menggunakan service untuk memperbarui saldo', function () {
