@@ -20,7 +20,7 @@ class KuotaAkun
 
     public static function sumberDana(User $user): Htmlable
     {
-        return self::ringkasan($user, 'sumber_dana', $user->sumberDana()->count());
+        return self::ringkasan($user, 'sumber dana', $user->sumberDana()->count());
     }
 
     private static function ringkasan(User $user, string $jenis, int $jumlah): Htmlable
