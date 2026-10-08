@@ -97,6 +97,7 @@ trait HasAuditSaldoAction
                             ->prefix('Rp')
                             ->numeric()
                             ->required()
+                            ->placeholder('Masukkan saldo aktual di dompet fisik')
                             ->afterStateUpdated(function (mixed $state, Get $get, Set $set): mixed {
                                 if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
                                     return null;

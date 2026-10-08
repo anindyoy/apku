@@ -173,7 +173,9 @@ class PiutangDetail extends Page implements HasTable
                     ])
                     ->modalWidth('sm')
                     ->form([
-                        TextInput::make('nominal')->required(),
+                        TextInput::make('nominal')
+                            ->required()
+                            ->placeholder('Contoh: 500000'),
 
                         DateTimePicker::make('created_at')
                             ->default(now())

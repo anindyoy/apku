@@ -37,17 +37,33 @@ class MetodePembayaranResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            TextInput::make('label')->required()->maxLength(255),
+            TextInput::make('label')
+                ->required()
+                ->maxLength(255)
+                ->placeholder('Contoh: Transfer Bank BCA, QRIS, VA BCA'),
             Select::make('jenis')->options([
                 'bank' => 'Transfer bank',
                 'dompet_digital' => 'Dompet digital',
                 'qr' => 'QR',
                 'lainnya' => 'Lainnya',
             ])->required(),
-            TextInput::make('nama_penyedia')->label('Nama penyedia')->required()->maxLength(255),
-            TextInput::make('nomor_tujuan')->label('Nomor rekening/akun')->maxLength(255),
-            TextInput::make('nama_pemilik')->label('Nama pemilik')->maxLength(255),
-            Textarea::make('instruksi')->rows(4)->columnSpanFull(),
+            TextInput::make('nama_penyedia')
+                ->label('Nama penyedia')
+                ->required()
+                ->maxLength(255)
+                ->placeholder('Contoh: BCA, DANA, Midtrans, Xendit'),
+            TextInput::make('nomor_tujuan')
+                ->label('Nomor rekening/akun')
+                ->maxLength(255)
+                ->placeholder('Contoh: 1234567890 / 08123456789'),
+            TextInput::make('nama_pemilik')
+                ->label('Nama pemilik')
+                ->maxLength(255)
+                ->placeholder('Nama sesuai rekening'),
+            Textarea::make('instruksi')
+                ->rows(4)
+                ->columnSpanFull()
+                ->placeholder('Instruksi detail untuk user saat bayar'),
             FileUpload::make('gambar_qr_path')
                 ->label('Gambar QR')
                 ->disk('local')
@@ -55,7 +71,13 @@ class MetodePembayaranResource extends Resource
                 ->visibility('private')
                 ->image()
                 ->maxSize(3072),
-            TextInput::make('urutan')->numeric()->integer()->minValue(0)->default(0)->required(),
+            TextInput::make('urutan')
+                ->numeric()
+                ->integer()
+                ->minValue(0)
+                ->default(0)
+                ->required()
+                ->placeholder('Contoh: 1, 2, 3...'),
             Toggle::make('is_active')->label('Aktif')->default(true),
         ]);
     }

@@ -46,18 +46,21 @@ class AkunSaya extends Page implements HasForms
                     ->schema([
                         TextInput::make('name')
                             ->label('Nama')
-                            ->required(),
+                            ->required()
+                            ->placeholder('Nama lengkap Anda'),
 
                         TextInput::make('email')
                             ->disabled(),
 
                         TextInput::make('hp')
                             ->tel()->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->placeholder('Contoh: 0812-3456-7890'),
 
                         Textarea::make('alamat')
                             ->rows(3)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->placeholder('Alamat lengkap (opsional)'),
 
                         Select::make('penggunaan')
                             ->options([
@@ -85,7 +88,8 @@ class AkunSaya extends Page implements HasForms
                             ->revealable()
                             ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                             ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create'),
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->placeholder('Kosongkan jika tidak ingin mengubah password'),
                     ])
                     ->columns(3),
             ])

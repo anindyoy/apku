@@ -471,8 +471,8 @@ trait HasTambahTransaksiAction
                             ->placeholder('Tanpa kategori')
                             ->visible(fn (Get $get): bool => in_array($get('jenis_form'), ['pemasukan', 'pengeluaran'], true)),
                         DateTimePicker::make('tanggal')->required()->seconds(false)->native(false)->maxDate(now()),
-                        TextInput::make('nominal')->required()->numeric()->minValue(1)->prefix('Rp'),
-                        TextInput::make('deskripsi')->columnSpanFull(),
+                        TextInput::make('nominal')->required()->numeric()->minValue(1)->prefix('Rp')->placeholder('Contoh: 50000'),
+                        TextInput::make('deskripsi')->columnSpanFull()->placeholder('Catatan transaksi (opsional)'),
                     ]),
             ])
             ->color(fn (Action $action): string => static::warnaFormTransaksi(

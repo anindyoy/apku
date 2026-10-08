@@ -143,7 +143,8 @@ class BukuKasResource extends Resource
                                 ->prefix('Rp')
                                 ->numeric()
                                 ->minValue(1)
-                                ->required(),
+                                ->required()
+                                ->placeholder('Contoh: 1150000'),
                         ])
                         ->action(fn (BukuKas $record, array $data) => app(HargaEmasService::class)->simpanManual(
                             $record,

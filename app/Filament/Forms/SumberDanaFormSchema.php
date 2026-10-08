@@ -20,7 +20,8 @@ class SumberDanaFormSchema
                     Rule::unique('dompet', 'nama_dompet')
                         ->where('user_id', auth()->id())
                         ->ignore($record?->id),
-                ]),
+                ])
+                ->placeholder('Contoh: Tunai, BCA, Mandiri, OVO, GoPay'),
 
             TextInput::make('saldo')
                 ->prefix('Rp')
@@ -31,7 +32,8 @@ class SumberDanaFormSchema
 
             TextInput::make('description')
                 ->label('Deskripsi')
-                ->maxLength(200),
+                ->maxLength(200)
+                ->placeholder('Catatan tambahan (maks. 200 karakter)'),
         ];
     }
 }

@@ -196,7 +196,9 @@ class UtangDetail extends Page implements HasTable
                         'deskripsi' => $record->deskripsi,
                     ])
                     ->form([
-                        TextInput::make('nominal')->required(),
+                        TextInput::make('nominal')
+                            ->required()
+                            ->placeholder('Contoh: 500000'),
 
                         DateTimePicker::make('created_at')
                             ->default(now())

@@ -36,19 +36,23 @@ class UserResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->placeholder('Nama lengkap'),
                 TextInput::make('email')
                     ->email()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->placeholder('contoh@email.com'),
                 DateTimePicker::make('email_verified_at'),
                 DateTimePicker::make('masa_aktif'),
                 TextInput::make('password')
                     ->password()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->placeholder('Minimal 8 karakter'),
                 TextInput::make('type')
-                    ->required(),
+                    ->required()
+                    ->placeholder('regular / premium / admin'),
             ]);
     }
 

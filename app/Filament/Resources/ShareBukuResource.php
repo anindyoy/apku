@@ -65,6 +65,7 @@ class ShareBukuResource extends Resource
                 ->label('Email Kolaborator')
                 ->email()
                 ->maxLength(255)
+                ->placeholder('contoh@email.com')
                 ->live(onBlur: true)
                 ->afterStateHydrated(function (TextInput $component, ?ShareBuku $record): void {
                     if ($record !== null) {

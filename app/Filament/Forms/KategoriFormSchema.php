@@ -40,7 +40,8 @@ class KategoriFormSchema
             TextInput::make('nama')
                 ->label('Nama kategori')
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->placeholder('Contoh: Gaji, Makan, Transport, Belanja, Tagihan'),
             $tipe,
             $kas,
         ];

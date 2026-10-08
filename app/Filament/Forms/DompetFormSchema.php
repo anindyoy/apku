@@ -22,7 +22,8 @@ class DompetFormSchema
                     Rule::unique('dompet', 'nama_dompet')
                         ->where('user_id', auth()->id())
                         ->ignore($record?->id),
-                ]),
+                ])
+                ->placeholder('Contoh: Dompet Fisik, BCA, DANA, ShopeePay'),
 
             Select::make('jenis')
                 ->label('Jenis')
@@ -39,7 +40,8 @@ class DompetFormSchema
 
             TextInput::make('description')
                 ->label('Deskripsi')
-                ->maxLength(200),
+                ->maxLength(200)
+                ->placeholder('Catatan tambahan (maks. 200 karakter)'),
         ];
     }
 }

@@ -65,7 +65,8 @@ class Onboarding extends Page implements HasForms
                             TextInput::make('nama_dompet')
                                 ->label('Label dompet utama')
                                 ->required()
-                                ->maxLength(50),
+                                ->maxLength(50)
+                                ->placeholder('Contoh: Tunai, BCA, DANA'),
                             Textarea::make('description')
                                 ->label('Deskripsi kas')
                                 ->placeholder('Contoh: Catatan pemasukan dan pengeluaran sehari-hari')
@@ -73,7 +74,7 @@ class Onboarding extends Page implements HasForms
                                 ->maxLength(200),
                             TextInput::make('saldo_awal')
                                 ->label('Saldo awal')
-                                ->placeholder('0')
+                                ->placeholder('Contoh: 1000000')
                                 ->prefix('Rp')
                                 ->required()
                                 ->numeric()

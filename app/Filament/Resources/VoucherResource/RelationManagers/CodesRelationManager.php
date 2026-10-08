@@ -63,6 +63,7 @@ class CodesRelationManager extends RelationManager
                 ->required()
                 ->maxLength(255)
                 ->unique(ignoreRecord: true)
+                ->placeholder('Contoh: PROMO2024, DISKON50')
                 ->dehydrateStateUsing(fn (string $state): string => Str::upper(trim($state))),
         ]);
     }

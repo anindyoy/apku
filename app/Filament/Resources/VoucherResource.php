@@ -34,7 +34,10 @@ class VoucherResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            TextInput::make('label')->required()->maxLength(255),
+            TextInput::make('label')
+                ->required()
+                ->maxLength(255)
+                ->placeholder('Contoh: DISKON20, PROMO-AWAL'),
             DatePicker::make('masa_aktif')
                 ->label('Tanggal kedaluwarsa')
                 ->helperText('Kosongkan jika voucher tidak memiliki tanggal kedaluwarsa.'),
@@ -45,7 +48,8 @@ class VoucherResource extends Resource
                 ->integer()
                 ->minValue(1)
                 ->maxValue(100)
-                ->required(),
+                ->required()
+                ->placeholder('Contoh: 20'),
             Toggle::make('dapat_dipakai_berulang')
                 ->label('Dapat dipakai berulang')
                 ->helperText('Jika aktif, setiap kode dapat digunakan berkali-kali oleh siapa pun.'),

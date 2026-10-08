@@ -20,16 +20,19 @@ class BukuKasFormSchema
                         ->where('user_id', auth()->id())
                         ->ignore($record?->id),
                 ])
-                ->maxLength(50),
+                ->maxLength(50)
+                ->placeholder('Contoh: Kas Pribadi, Kas Rumah Tangga, Kas Usaha'),
 
             TextInput::make('saldo')
                 ->prefix('Rp')
                 ->required()
-                ->numeric(),
+                ->numeric()
+                ->placeholder('Contoh: 500000'),
 
             TextInput::make('description')
                 ->maxLength(200)
-                ->default(null),
+                ->default(null)
+                ->placeholder('Catatan singkat tentang buku kas ini (maks. 200 karakter)'),
 
             Toggle::make('hubungkan_kategori')
                 ->label('Pakai semua kategori saya di kas ini')

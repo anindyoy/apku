@@ -34,9 +34,26 @@ class PaketLanggananResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            TextInput::make('label')->label('Label')->required()->maxLength(255),
-            TextInput::make('harga')->label('Harga')->prefix('Rp')->numeric()->minValue(1)->required(),
-            TextInput::make('durasi_hari')->label('Durasi')->suffix('hari')->numeric()->integer()->minValue(1)->required(),
+            TextInput::make('label')
+                ->label('Label')
+                ->required()
+                ->maxLength(255)
+                ->placeholder('Contoh: Bulanan, Tahunan, Lifetime'),
+            TextInput::make('harga')
+                ->label('Harga')
+                ->prefix('Rp')
+                ->numeric()
+                ->minValue(1)
+                ->required()
+                ->placeholder('Contoh: 50000'),
+            TextInput::make('durasi_hari')
+                ->label('Durasi')
+                ->suffix('hari')
+                ->numeric()
+                ->integer()
+                ->minValue(1)
+                ->required()
+                ->placeholder('Contoh: 30'),
             Toggle::make('is_active')->label('Aktif')->default(true),
         ]);
     }

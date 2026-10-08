@@ -75,8 +75,8 @@ class TabunganEmasResource extends Resource
                     ->visible(fn (TabunganEmas $record): bool => $record->bukuKas->user_id === auth()->id() && (float) $record->berat_gram === 0.0)
                     ->form([
                         static::inputBerat(),
-                        TextInput::make('total_modal')->label('Total modal')->prefix('Rp')->numeric()->minValue(0)->default(0)->required(),
-                        TextInput::make('catatan')->maxLength(255),
+                        TextInput::make('total_modal')->label('Total modal')->prefix('Rp')->numeric()->minValue(0)->default(0)->required()->placeholder('Contoh: 750000'),
+                        TextInput::make('catatan')->maxLength(255)->placeholder('Catatan pembelian (opsional)'),
                     ])
                     ->action(fn (TabunganEmas $record, array $data) => app(TabunganEmasService::class)->catatSaldoAwal(
                         auth()->user(), $record, (float) $data['berat_gram'], (int) $data['total_modal'], $data['catatan'] ?? null
