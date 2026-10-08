@@ -12,6 +12,7 @@ class ResourceListCache
     private const DEPENDENCIES = [
         'kas' => ['buku_kas', 'transaksi', 'tabungan_emas', 'share_buku', 'users'],
         'dompet' => ['dompet', 'users'],
+        'sumber_dana' => ['sumber_dana', 'users'],
     ];
 
     public static function remember(string $section, int $userId, array $state, Closure $load, ?Carbon $expiresAt = null): mixed

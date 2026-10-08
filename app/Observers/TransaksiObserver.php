@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Models\Dompet;
+use App\Models\SumberDana;
 use App\Models\Transaksi;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
@@ -18,21 +18,21 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
     public function created(Transaksi $transaksi): void
     {
         $kas = $transaksi->buku_kas;
-        $dompet = $transaksi->dompet;
+        $sumberDana = $transaksi->sumberDana;
         $dampak = in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])
             ? -$transaksi->nominal
             : $transaksi->nominal;
 
         $saldoSudahMasukBukuKas = $transaksi->created_at == $kas->created_at;
-        $saldoSudahMasukDompet = $transaksi->deskripsi === 'Saldo awal'
-            && $transaksi->created_at == $dompet->created_at;
+        $saldoSudahMasukSumberDana = $transaksi->deskripsi === 'Saldo awal'
+            && $transaksi->created_at == $sumberDana->created_at;
 
         if (! $saldoSudahMasukBukuKas) {
             $kas->increment('saldo', $dampak);
         }
 
-        if (! $saldoSudahMasukDompet) {
-            $dompet->increment('saldo', $dampak);
+        if (! $saldoSudahMasukSumberDana) {
+            $sumberDana->increment('saldo', $dampak);
         }
     }
 
@@ -50,20 +50,20 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
             $kas->save();
         }
 
-        if ($transaksi->isDirty(['nominal', 'jenis', 'dompet_id'])) {
+        if ($transaksi->isDirty(['nominal', 'jenis', 'sumber_dana_id'])) {
             $nominalLama = (int) $transaksi->getOriginal('nominal');
             $jenisLama = $transaksi->getOriginal('jenis');
-            $dompetAsal = Dompet::withoutGlobalScopes()->find($transaksi->getOriginal('dompet_id'));
-            $dompetBaru = Dompet::withoutGlobalScopes()->find($transaksi->dompet_id);
+            $sumberDanaAsal = SumberDana::withoutGlobalScopes()->find($transaksi->getOriginal('sumber_dana_id'));
+            $sumberDanaBaru = SumberDana::withoutGlobalScopes()->find($transaksi->sumber_dana_id);
 
-            if ($dompetAsal) {
+            if ($sumberDanaAsal) {
                 $dampakLama = in_array($jenisLama, ['Pengeluaran', 'Transfer Pengeluaran']) ? -$nominalLama : $nominalLama;
-                $dompetAsal->decrement('saldo', $dampakLama);
+                $sumberDanaAsal->decrement('saldo', $dampakLama);
             }
 
-            if ($dompetBaru) {
+            if ($sumberDanaBaru) {
                 $dampakBaru = in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran']) ? -$transaksi->nominal : $transaksi->nominal;
-                $dompetBaru->increment('saldo', $dampakBaru);
+                $sumberDanaBaru->increment('saldo', $dampakBaru);
             }
         }
     }
@@ -71,16 +71,16 @@ class TransaksiObserver implements ShouldHandleEventsAfterCommit
     /** Menangani event penghapusan transaksi. */
     public function deleted(Transaksi $transaksi): void
     {
-        $dompet = $transaksi->dompet;
+        $sumberDana = $transaksi->sumberDana;
 
-        if (! $dompet) {
+        if (! $sumberDana) {
             return;
         }
 
         if (in_array($transaksi->jenis, ['Pengeluaran', 'Transfer Pengeluaran'])) {
-            $dompet->increment('saldo', $transaksi->nominal);
+            $sumberDana->increment('saldo', $transaksi->nominal);
         } else {
-            $dompet->decrement('saldo', $transaksi->nominal);
+            $sumberDana->decrement('saldo', $transaksi->nominal);
         }
     }
 

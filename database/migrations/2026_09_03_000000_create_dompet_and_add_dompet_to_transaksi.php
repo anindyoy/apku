@@ -9,10 +9,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('dompet', function (Blueprint $table) {
+        Schema::create('sumber_dana', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('nama_dompet', 50);
+            $table->string('jenis', 20)->default('tunai')->index();
             $table->bigInteger('saldo')->default(0);
             $table->boolean('is_default')->default(false);
             $table->string('description', 200)->nullable();
@@ -29,10 +30,10 @@ return new class extends Migration
 
         Schema::table('transaksi', function (Blueprint $table) {
             $table->string('transfer_code', 36)->nullable()->change();
-            $table->foreignId('dompet_id')
+            $table->foreignId('sumber_dana_id')
                 ->nullable()
                 ->after('buku_kas_id')
-                ->constrained('dompet')
+                ->constrained('sumber_dana')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
             $table->string('tipe_transfer', 20)->nullable()->after('transfer_code');
@@ -62,9 +63,10 @@ return new class extends Migration
             }
 
             $saldo = (int) DB::table('buku_kas')->where('user_id', $user->id)->sum('saldo');
-            $dompetId = DB::table('dompet')->insertGetId([
+            $sumberDanaId = DB::table('sumber_dana')->insertGetId([
                 'user_id' => $user->id,
                 'nama_dompet' => 'Cash',
+                'jenis' => 'tunai',
                 'saldo' => $saldo,
                 'is_default' => true,
                 'description' => 'Dompet tunai utama',
@@ -72,18 +74,18 @@ return new class extends Migration
                 'updated_at' => $waktu,
             ]);
 
-            DB::table('transaksi')->where('user_id', $user->id)->update(['dompet_id' => $dompetId]);
+            DB::table('transaksi')->where('user_id', $user->id)->update(['sumber_dana_id' => $sumberDanaId]);
         });
 
         Schema::table('transaksi', function (Blueprint $table) {
-            $table->foreignId('dompet_id')->nullable(false)->change();
+            $table->foreignId('sumber_dana_id')->nullable(false)->change();
         });
     }
 
     public function down(): void
     {
         Schema::table('transaksi', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('dompet_id');
+            $table->dropConstrainedForeignId('sumber_dana_id');
             $table->dropColumn('tipe_transfer');
             $table->string('transfer_code', 30)->nullable()->change();
         });
@@ -92,6 +94,6 @@ return new class extends Migration
             $table->dropColumn('is_default');
         });
 
-        Schema::dropIfExists('dompet');
+        Schema::dropIfExists('sumber_dana');
     }
 };

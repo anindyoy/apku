@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use App\Enums\StatusLangganan;
-use App\Models\Dompet;
 use App\Models\Langganan;
 use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
 use App\Models\ShareBuku;
+use App\Models\SumberDana;
 use App\Models\TabunganEmas;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -57,24 +57,25 @@ class DemoFiturSeeder extends Seeder
     {
         foreach ($users as $user) {
             $bukuKas = $user->buku_kas()->orderByDesc('is_default')->firstOrFail();
-            $dompetUtama = Dompet::withoutGlobalScopes()
+            $sumberDanaUtama = SumberDana::withoutGlobalScopes()
                 ->where('user_id', $user->id)
                 ->where('is_default', true)
                 ->firstOrFail();
-            $dompetBank = Dompet::withoutGlobalScopes()->create([
+            $sumberDanaBank = SumberDana::withoutGlobalScopes()->create([
                 'user_id' => $user->id,
                 'nama_dompet' => 'Rekening Bank',
+                'jenis' => 'rekening',
                 'saldo' => 0,
                 'is_default' => false,
                 'description' => 'Rekening untuk tabungan dan pembayaran digital',
             ]);
             $waktu = now()->subDays(5);
 
-            Transaksi::withoutEvents(function () use ($user, $bukuKas, $dompetUtama, $dompetBank, $waktu): void {
+            Transaksi::withoutEvents(function () use ($user, $bukuKas, $sumberDanaUtama, $sumberDanaBank, $waktu): void {
                 Transaksi::create([
                     'user_id' => $user->id,
                     'buku_kas_id' => $bukuKas->id,
-                    'dompet_id' => $dompetBank->id,
+                    'sumber_dana_id' => $sumberDanaBank->id,
                     'tanggal' => $waktu->copy()->subDay(),
                     'nominal' => 100000,
                     'jenis' => 'Pemasukan',
@@ -92,18 +93,18 @@ class DemoFiturSeeder extends Seeder
                 ];
 
                 Transaksi::create($dataTransfer + [
-                    'dompet_id' => $dompetBank->id,
+                    'sumber_dana_id' => $sumberDanaBank->id,
                     'jenis' => 'Transfer Pengeluaran',
-                    'deskripsi' => 'Transfer ke dompet tunai',
+                    'deskripsi' => 'Transfer ke sumber dana tunai',
                 ]);
                 Transaksi::create($dataTransfer + [
-                    'dompet_id' => $dompetUtama->id,
+                    'sumber_dana_id' => $sumberDanaUtama->id,
                     'jenis' => 'Transfer Pemasukan',
                     'deskripsi' => 'Transfer dari rekening bank',
                 ]);
             });
 
-            $dompetUtama->increment('saldo', 100000);
+            $sumberDanaUtama->increment('saldo', 100000);
             $bukuKas->increment('saldo', 100000);
         }
     }

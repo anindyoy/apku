@@ -6,6 +6,7 @@ use App\Models\Scopes\UserScope;
 use App\Observers\TransaksiObserver;
 use App\Services\OpsiSelectCache;
 use Database\Factories\TransaksiFactory;
+use App\Models\SumberDana;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -41,16 +42,16 @@ class Transaksi extends Model
     protected static function booted(): void
     {
         static::creating(function (Transaksi $transaksi): void {
-            if ($transaksi->dompet_id || ! $transaksi->user_id) {
+            if ($transaksi->sumber_dana_id || ! $transaksi->user_id) {
                 return;
             }
 
-            $dompet = Dompet::withoutGlobalScopes()->firstOrCreate(
+            $sumberDana = SumberDana::withoutGlobalScopes()->firstOrCreate(
                 ['user_id' => $transaksi->user_id, 'nama_dompet' => 'Cash'],
                 ['saldo' => 0, 'is_default' => true, 'jenis' => 'tunai', 'description' => 'Dompet tunai utama']
             );
 
-            $transaksi->dompet_id = $dompet->id;
+            $transaksi->sumber_dana_id = $sumberDana->id;
         });
     }
 
@@ -64,16 +65,16 @@ class Transaksi extends Model
         return $this->belongsTo(BukuKas::class);
     }
 
-    public function dompet()
+    public function sumberDana()
     {
-        return $this->belongsTo(Dompet::class)->withTrashed();
+        return $this->belongsTo(SumberDana::class, 'sumber_dana_id')->withTrashed();
     }
 
-    public function labelDompetUntuk(User $user): string
+    public function labelSumberDanaUntuk(User $user): string
     {
-        return $this->dompet?->user_id === $user->id
-            ? ($this->dompet?->nama_dompet ?? '-')
-            : 'Dompet anggota';
+        return $this->sumberDana?->user_id === $user->id
+            ? ($this->sumberDana?->nama_dompet ?? '-')
+            : 'Sumber dana anggota';
     }
 
     public function kategori()
@@ -155,17 +156,17 @@ class Transaksi extends Model
                         ->required()
                         ->visible(fn (?Transaksi $record): bool => (bool) $record?->transfer_code && $record->tipe_transfer !== 'dompet'),
 
-                    Select::make('dompet_id')
-                        ->label(fn (?Transaksi $record): string => $record?->tipe_transfer === 'dompet' || $transfer ? 'Dompet asal' : 'Dompet')
-                        ->options(fn (): array => Dompet::query()->pluck('nama_dompet', 'id')->all())
-                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
+                    Select::make('sumber_dana_id')
+                        ->label(fn (?Transaksi $record): string => $record?->tipe_transfer === 'dompet' || $transfer ? 'Sumber dana asal' : 'Sumber dana')
+                        ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
+                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiSumberDanaYangDapatDikelola()))
                         ->required(),
 
-                    Select::make('dompet_id_tujuan')
-                        ->label('Dompet tujuan')
-                        ->options(fn (): array => Dompet::query()->pluck('nama_dompet', 'id')->all())
-                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
-                        ->different('dompet_id')
+                    Select::make('sumber_dana_id_tujuan')
+                        ->label('Sumber dana tujuan')
+                        ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
+                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiSumberDanaYangDapatDikelola()))
+                        ->different('sumber_dana_id')
                         ->required()
                         ->visible(fn (?Transaksi $record): bool => $transfer || $record?->tipe_transfer === 'dompet'),
 
@@ -220,9 +221,9 @@ class Transaksi extends Model
 
         return array_replace($data, [
             'buku_kas_id' => $asal->buku_kas_id,
-            'dompet_id' => $asal->dompet_id,
+            'sumber_dana_id' => $asal->sumber_dana_id,
             'buku_kas_id_tujuan' => $tujuan->buku_kas_id,
-            'dompet_id_tujuan' => $tujuan->dompet_id,
+            'sumber_dana_id_tujuan' => $tujuan->sumber_dana_id,
         ]);
     }
 
@@ -251,7 +252,7 @@ class Transaksi extends Model
         });
     }
 
-    private static function batasiDompetYangDapatDikelola($query)
+    private static function batasiSumberDanaYangDapatDikelola($query)
     {
         $user = auth()->user();
         $query->withoutTrashed();
@@ -266,16 +267,16 @@ class Transaksi extends Model
         ]));
     }
 
-    public static function opsiDompetYangDapatDikelola(): array
+    public static function opsiSumberDanaYangDapatDikelola(): array
     {
-        return OpsiSelectCache::ingat('dompet', fn (): array => static::batasiDompetYangDapatDikelola(Dompet::query())
+        return OpsiSelectCache::ingat('sumber_dana', fn (): array => static::batasiSumberDanaYangDapatDikelola(SumberDana::query())
             ->pluck('nama_dompet', 'id')
             ->all(), auth()->id(), 'dapat-dikelola');
     }
 
-    public static function opsiDompetSumberTransfer(): array
+    public static function opsiSumberDanaSumberTransfer(): array
     {
-        return OpsiSelectCache::ingat('dompet', fn (): array => Dompet::query()
+        return OpsiSelectCache::ingat('sumber_dana', fn (): array => SumberDana::query()
             ->pluck('nama_dompet', 'id')
             ->all(), auth()->id(), 'aktif');
     }

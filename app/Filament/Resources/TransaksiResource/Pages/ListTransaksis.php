@@ -7,7 +7,7 @@ use App\Filament\Resources\ImportTransaksiResource;
 use App\Filament\Resources\TransaksiResource;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
-use App\Models\Dompet;
+use App\Models\SumberDana;
 use App\Models\User;
 use App\Services\ImportTransaksiService;
 use App\Services\OpsiSelectCache;
@@ -64,7 +64,7 @@ class ListTransaksis extends ListRecords
         $requestedBukuKas = $filterBukuKas ?? request()->query('filter_buku_kas');
         $this->filterBukuKas = filled($requestedBukuKas) ? (string) $requestedBukuKas : null;
         $requestedDompet = request()->query('filter_dompet');
-        $this->filterDompet = filled($requestedDompet) && Dompet::withTrashed()->whereKey($requestedDompet)->exists()
+        $this->filterDompet = filled($requestedDompet) && SumberDana::withTrashed()->whereKey($requestedDompet)->exists()
             ? (string) $requestedDompet
             : null;
     }
@@ -133,12 +133,12 @@ class ListTransaksis extends ListRecords
 
     public function getDompetOptions(): array
     {
-        return OpsiSelectCache::ingat('dompet', fn (): array => Dompet::withTrashed()
+        return OpsiSelectCache::ingat('sumber_dana', fn (): array => SumberDana::withTrashed()
             ->orderByDesc('is_default')
             ->orderBy('nama_dompet')
             ->get()
-            ->mapWithKeys(fn (Dompet $dompet): array => [
-                $dompet->id => $dompet->nama_dompet.($dompet->trashed() ? ' (Dihapus)' : ''),
+            ->mapWithKeys(fn (SumberDana $sumberDana): array => [
+                $sumberDana->id => $sumberDana->nama_dompet.($sumberDana->trashed() ? ' (Dihapus)' : ''),
             ])
             ->all(), auth()->id(), 'dengan-terhapus');
     }
@@ -157,7 +157,7 @@ class ListTransaksis extends ListRecords
         }
 
         if ($query && ! empty($this->filterDompet)) {
-            $query->where('dompet_id', $this->filterDompet);
+            $query->where('sumber_dana_id', $this->filterDompet);
         }
 
         return $query;

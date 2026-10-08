@@ -29,15 +29,15 @@ return new class extends Migration
         Schema::create('audit_saldo_dompet_detail', function (Blueprint $table) {
             $table->id();
             $table->foreignId('audit_saldo_dompet_id')->constrained('audit_saldo_dompet')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('dompet_id')->constrained('dompet')->cascadeOnUpdate()->restrictOnDelete();
-            $table->string('nama_dompet', 50);
+            $table->foreignId('sumber_dana_id')->constrained('sumber_dana')->cascadeOnUpdate()->restrictOnDelete();
+            $table->string('nama_sumber_dana', 50);
             $table->bigInteger('saldo_aplikasi');
             $table->bigInteger('saldo_riil');
             $table->bigInteger('selisih');
             $table->text('catatan')->nullable();
             $table->timestamps();
 
-            $table->unique(['audit_saldo_dompet_id', 'dompet_id']);
+            $table->unique(['audit_saldo_dompet_id', 'sumber_dana_id'], 'audit_saldo_dompet_detail_audit_sd_unique');
         });
 
         Schema::table('transaksi', function (Blueprint $table) {

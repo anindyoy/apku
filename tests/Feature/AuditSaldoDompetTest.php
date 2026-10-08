@@ -2,11 +2,11 @@
 
 use App\Filament\Resources\AuditSaldoDompetResource;
 use App\Filament\Resources\AuditSaldoDompetResource\Pages\ListAuditSaldoDompet;
-use App\Filament\Resources\DompetResource\Pages\ListDompet;
+use App\Filament\Resources\SumberDanaResource\Pages\ListSumberDana;
 use App\Models\AuditSaldoDompet;
 use App\Models\BukuKas;
-use App\Models\Dompet;
 use App\Models\Kategori;
+use App\Models\SumberDana;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\AuditSaldoDompetService;
@@ -30,22 +30,24 @@ function buatDataAuditSaldo(): array
         'saldo' => 1000000,
         'is_default' => true,
     ]);
-    $tunai = Dompet::create([
+    $tunai = SumberDana::create([
         'user_id' => $user->id,
         'nama_dompet' => 'Tunai',
+        'jenis' => 'tunai',
         'saldo' => 500000,
         'is_default' => true,
     ]);
-    $bank = Dompet::create([
+    $bank = SumberDana::create([
         'user_id' => $user->id,
         'nama_dompet' => 'Bank',
+        'jenis' => 'rekening',
         'saldo' => 500000,
     ]);
-    foreach ([$tunai, $bank] as $dompet) {
+    foreach ([$tunai, $bank] as $sumberDana) {
         Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
             'user_id' => $user->id,
             'buku_kas_id' => $bukuKas->id,
-            'dompet_id' => $dompet->id,
+            'sumber_dana_id' => $sumberDana->id,
             'nominal' => 1,
             'jenis' => 'Pemasukan',
             'tanggal' => now(),
@@ -61,7 +63,7 @@ test('audit saldo tidak terdaftar di navigasi untuk semua peran', function (stri
     expect(AuditSaldoDompetResource::shouldRegisterNavigation())->toBeFalse();
 })->with(['reguler', 'premium', 'admin']);
 
-test('audit saldo membuat transaksi penyesuaian per dompet dan menyimpan snapshot', function () {
+test('audit saldo membuat transaksi penyesuaian per sumber dana dan menyimpan snapshot', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
 
     $audit = app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Rekonsiliasi bulanan', [
@@ -107,18 +109,18 @@ test('audit menolak snapshot saat saldo aplikasi telah berubah', function () {
         ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(0);
 });
 
-test('audit menolak dompet milik pengguna lain', function () {
+test('audit menolak sumber dana milik pengguna lain', function () {
     ['user' => $user, 'bukuKas' => $bukuKas] = buatDataAuditSaldo();
     $userLain = User::factory()->create(['role' => 'reguler', 'masa_aktif' => today()->addMonth()]);
-    $dompetLain = Dompet::withoutGlobalScopes()->create([
+    $sumberDanaLain = SumberDana::withoutGlobalScopes()->create([
         'user_id' => $userLain->id,
-        'nama_dompet' => 'Dompet lain',
+        'nama_dompet' => 'Sumber dana lain',
         'saldo' => 1000,
         'is_default' => true,
     ]);
 
     expect(fn () => app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Tidak sah', [
-        ['dompet_id' => $dompetLain->id, 'saldo_aplikasi' => 1000, 'saldo_riil' => 2000],
+        ['dompet_id' => $sumberDanaLain->id, 'saldo_aplikasi' => 1000, 'saldo_riil' => 2000],
     ]))->toThrow(AuthorizationException::class)
         ->and(AuditSaldoDompet::count())->toBe(0);
 });
@@ -232,29 +234,29 @@ test('form audit menempatkan kas tanggal dan catatan dalam grid tiga kolom serta
         ->and($grid->getChildSchema()->getFlatFields())->toHaveKeys(['buku_kas_id', 'tanggal', 'catatan']);
 });
 
-test('form audit hanya menampilkan dompet yang memiliki transaksi pada kas terpilih', function () {
+test('form audit hanya menampilkan sumber dana yang memiliki transaksi pada kas terpilih', function () {
     ['user' => $user, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
     $kasLain = BukuKas::create([
         'user_id' => $user->id,
         'nama_buku' => 'Kas Lain',
         'saldo' => 0,
     ]);
-    $dompetLain = Dompet::create([
+    $sumberDanaLain = SumberDana::create([
         'user_id' => $user->id,
-        'nama_dompet' => 'Dompet Kas Lain',
+        'nama_dompet' => 'Sumber Dana Kas Lain',
         'saldo' => 25000,
     ]);
     Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
         'user_id' => $user->id,
         'buku_kas_id' => $kasLain->id,
-        'dompet_id' => $dompetLain->id,
+        'sumber_dana_id' => $sumberDanaLain->id,
         'nominal' => 1,
         'jenis' => 'Pemasukan',
         'tanggal' => now(),
     ]));
 
     $komponen = Livewire::actingAs($user)
-        ->test(ListDompet::class)
+        ->test(ListSumberDana::class)
         ->mountAction('auditSaldo');
     $namaSchema = $komponen->instance()->getMountedActionSchemaName();
     $rincian = $komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true)['rincian'];
@@ -265,10 +267,10 @@ test('form audit hanya menampilkan dompet yang memiliki transaksi pada kas terpi
     $namaSchema = $komponen->instance()->getMountedActionSchemaName();
     $rincian = $komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true)['rincian'];
 
-    expect(collect($rincian->getState())->pluck('dompet_id')->values()->all())->toBe([$dompetLain->id]);
+    expect(collect($rincian->getState())->pluck('dompet_id')->values()->all())->toBe([$sumberDanaLain->id]);
 });
 
-test('audit menolak dompet yang tidak memiliki transaksi pada kas terpilih', function () {
+test('audit menolak sumber dana yang tidak memiliki transaksi pada kas terpilih', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
     $kasLain = BukuKas::create([
         'user_id' => $user->id,
@@ -317,7 +319,7 @@ test('form audit menyembunyikan penghitung uang dari sumber dana non-Tunai', fun
     $bank->update(['jenis' => 'rekening']);
 
     $komponen = Livewire::actingAs($user)
-        ->test(ListDompet::class)
+        ->test(ListSumberDana::class)
         ->mountAction('auditSaldo');
     $namaSchema = $komponen->instance()->getMountedActionSchemaName();
     $bagianHitungUang = collect($komponen->instance()->{$namaSchema}->getFlatComponents(withActions: false, withHidden: true))
@@ -326,7 +328,7 @@ test('form audit menyembunyikan penghitung uang dari sumber dana non-Tunai', fun
 
     expect($bagianHitungUang)->toHaveCount(2)
         ->and($bagianHitungUang->map(fn (Section $bagian): bool => $bagian->isVisible())->sort()->values()->all())->toBe([false, true])
-        ->and((new Dompet(['jenis' => null]))->mendukungHitungUang())->toBeFalse();
+        ->and((new SumberDana(['jenis' => null]))->mendukungHitungUang())->toBeFalse();
 });
 
 test('audit menolak pecahan untuk sumber dana non-Tunai meski data dikirim langsung', function () {

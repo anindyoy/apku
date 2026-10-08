@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\AuditSaldoDompet;
 use App\Models\AuditSaldoDompetDetail;
 use App\Models\BukuKas;
-use App\Models\Dompet;
+use App\Models\SumberDana;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -46,22 +46,22 @@ class AuditSaldoDompetService
         }
 
         $proses = function () use ($user, $bukuKas, $tanggal, $catatan, $rincian): AuditSaldoDompet {
-            $idDompet = collect($rincian)->pluck('dompet_id')->map(fn ($id): int => (int) $id);
+            $idSumberDana = collect($rincian)->pluck('dompet_id')->map(fn ($id): int => (int) $id);
 
-            if ($idDompet->duplicates()->isNotEmpty()) {
-                throw ValidationException::withMessages(['rincian' => 'Dompet audit tidak boleh duplikat.']);
+            if ($idSumberDana->duplicates()->isNotEmpty()) {
+                throw ValidationException::withMessages(['rincian' => 'Sumber dana audit tidak boleh duplikat.']);
             }
 
-            $dompet = Dompet::withoutGlobalScopes()
+            $sumberDana = SumberDana::withoutGlobalScopes()
                 ->whereNull('deleted_at')
-                ->whereKey($idDompet)
+                ->whereKey($idSumberDana)
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
 
-            if ($dompet->count() !== $idDompet->count()) {
-                throw ValidationException::withMessages(['rincian' => 'Salah satu dompet sudah tidak tersedia.']);
+            if ($sumberDana->count() !== $idSumberDana->count()) {
+                throw ValidationException::withMessages(['rincian' => 'Salah satu sumber dana sudah tidak tersedia.']);
             }
 
             BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
@@ -70,24 +70,24 @@ class AuditSaldoDompetService
             $totalRiil = 0;
 
             foreach ($rincian as $index => $item) {
-                $record = $dompet->get((int) $item['dompet_id']);
+                $record = $sumberDana->get((int) $item['dompet_id']);
 
                 if ($record->user_id !== $user->id || ! $user->dapatMengelolaTransaksiPadaDompet($record)) {
-                    throw new AuthorizationException('Dompet audit tidak dapat dikelola.');
+                    throw new AuthorizationException('Sumber dana audit tidak dapat dikelola.');
                 }
 
                 if (! Transaksi::withoutGlobalScopes()
                     ->where('buku_kas_id', $bukuKas->id)
-                    ->where('dompet_id', $record->id)
+                    ->where('sumber_dana_id', $record->id)
                     ->exists()) {
                     throw ValidationException::withMessages([
-                        'rincian' => "Dompet {$record->nama_dompet} tidak memiliki transaksi pada kas terpilih.",
+                        'rincian' => "Sumber dana {$record->nama_dompet} tidak memiliki transaksi pada kas terpilih.",
                     ]);
                 }
 
                 if ((int) $record->saldo !== (int) $item['saldo_aplikasi']) {
                     throw ValidationException::withMessages([
-                        'rincian' => "Saldo dompet {$record->nama_dompet} telah berubah. Muat ulang data audit.",
+                        'rincian' => "Saldo sumber dana {$record->nama_dompet} telah berubah. Muat ulang data audit.",
                     ]);
                 }
 
@@ -118,14 +118,14 @@ class AuditSaldoDompetService
             ]);
 
             foreach ($rincian as $item) {
-                $record = $dompet->get((int) $item['dompet_id']);
+                $record = $sumberDana->get((int) $item['dompet_id']);
                 $saldoRiilAkhir = (int) $item['saldo_riil'];
                 $selisih = $saldoRiilAkhir - (int) $record->saldo;
 
                 $detail = AuditSaldoDompetDetail::create([
                     'audit_saldo_dompet_id' => $audit->id,
-                    'dompet_id' => $record->id,
-                    'nama_dompet' => $record->nama_dompet,
+                    'sumber_dana_id' => $record->id,
+                    'nama_sumber_dana' => $record->nama_dompet,
                     'saldo_aplikasi' => (int) $record->saldo,
                     'saldo_riil' => $saldoRiilAkhir,
                     'selisih' => $saldoRiilAkhir - (int) $record->saldo,
@@ -141,12 +141,12 @@ class AuditSaldoDompetService
                 $jenis = $selisihAkhir > 0 ? 'Pemasukan' : 'Pengeluaran';
                 $transaksi = app(TransaksiService::class)->buat($user, [
                     'buku_kas_id' => $bukuKas->id,
-                    'dompet_id' => $record->id,
+                    'sumber_dana_id' => $record->id,
                     'tanggal' => $tanggal ?? now(),
                     'nominal' => abs($selisihAkhir),
                     'deskripsi' => filled($catatan)
-                        ? 'Penyesuaian saldo dompet: '.trim($catatan)
-                        : 'Penyesuaian saldo dompet',
+                        ? 'Penyesuaian saldo sumber dana: '.trim($catatan)
+                        : 'Penyesuaian saldo sumber dana',
                 ], $jenis);
 
                 Transaksi::withoutEvents(fn () => $transaksi->update([

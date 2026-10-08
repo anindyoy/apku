@@ -2,7 +2,9 @@
 
 namespace App\Filament\Forms;
 
+use App\Enums\JenisSumberDana;
 use App\Models\SumberDana;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Validation\Rule;
 
@@ -17,11 +19,17 @@ class SumberDanaFormSchema
                 ->required()
                 ->maxLength(50)
                 ->rules(fn (?SumberDana $record): array => [
-                    Rule::unique('dompet', 'nama_dompet')
+                    Rule::unique('sumber_dana', 'nama_dompet')
                         ->where('user_id', auth()->id())
                         ->ignore($record?->id),
                 ])
-                ->placeholder('Contoh: Tunai, BCA, Mandiri, OVO, GoPay'),
+                ->placeholder('Contoh: Dompet Fisik, BCA, DANA, ShopeePay'),
+
+            Select::make('jenis')
+                ->label('Jenis')
+                ->options(JenisSumberDana::opsi())
+                ->default(JenisSumberDana::Tunai->value)
+                ->required(),
 
             TextInput::make('saldo')
                 ->prefix('Rp')

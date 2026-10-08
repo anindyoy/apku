@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\BukuKas;
-use App\Models\Dompet;
+use App\Models\SumberDana;
 use App\Models\TabunganEmas;
 use App\Models\TransaksiEmas;
 use App\Models\User;
@@ -38,19 +38,19 @@ class TabunganEmasService
         return DB::transactionLevel() > 0 ? $proses() : DB::transaction($proses);
     }
 
-    public function beli(User $user, TabunganEmas $tabungan, Dompet $dompet, array $data): TransaksiEmas
+    public function beli(User $user, TabunganEmas $tabungan, SumberDana $sumberDana, array $data): TransaksiEmas
     {
         $berat = (float) ($data['berat_gram'] ?? 0);
         $harga = (int) ($data['harga_per_gram'] ?? 0);
         $biaya = (int) ($data['biaya_tambahan'] ?? 0);
         $total = (int) round($berat * $harga) + $biaya;
-        $this->validasiMutasi($user, $tabungan, $dompet, $berat, $harga, $biaya);
+        $this->validasiMutasi($user, $tabungan, $sumberDana, $berat, $harga, $biaya);
 
-        $proses = function () use ($user, $tabungan, $dompet, $data, $berat, $harga, $biaya, $total): TransaksiEmas {
+        $proses = function () use ($user, $tabungan, $sumberDana, $data, $berat, $harga, $biaya, $total): TransaksiEmas {
             $terkunci = TabunganEmas::query()->whereKey($tabungan->id)->lockForUpdate()->firstOrFail();
             $transaksi = $this->transaksiService->buat($user, [
                 'buku_kas_id' => $terkunci->buku_kas_id,
-                'dompet_id' => $dompet->id,
+                'sumber_dana_id' => $sumberDana->id,
                 'kategori_id' => $data['kategori_id'] ?? null,
                 'tanggal' => $data['tanggal'] ?? now(),
                 'nominal' => $total,
@@ -75,19 +75,19 @@ class TabunganEmasService
         return DB::transactionLevel() > 0 ? $proses() : DB::transaction($proses);
     }
 
-    public function jual(User $user, TabunganEmas $tabungan, Dompet $dompet, array $data): TransaksiEmas
+    public function jual(User $user, TabunganEmas $tabungan, SumberDana $sumberDana, array $data): TransaksiEmas
     {
         $berat = (float) ($data['berat_gram'] ?? 0);
         $harga = (int) ($data['harga_per_gram'] ?? 0);
         $biaya = (int) ($data['biaya_tambahan'] ?? 0);
         $total = (int) round($berat * $harga) - $biaya;
-        $this->validasiMutasi($user, $tabungan, $dompet, $berat, $harga, $biaya);
+        $this->validasiMutasi($user, $tabungan, $sumberDana, $berat, $harga, $biaya);
 
         if ($total <= 0) {
             throw ValidationException::withMessages(['total_rupiah' => 'Total penerimaan penjualan harus lebih dari nol.']);
         }
 
-        $proses = function () use ($user, $tabungan, $dompet, $data, $berat, $harga, $biaya, $total): TransaksiEmas {
+        $proses = function () use ($user, $tabungan, $sumberDana, $data, $berat, $harga, $biaya, $total): TransaksiEmas {
             $terkunci = TabunganEmas::query()->whereKey($tabungan->id)->lockForUpdate()->firstOrFail();
             $beratLama = (float) $terkunci->berat_gram;
 
@@ -100,7 +100,7 @@ class TabunganEmasService
                 : (int) round((int) $terkunci->total_modal * ($berat / $beratLama));
             $transaksi = $this->transaksiService->buat($user, [
                 'buku_kas_id' => $terkunci->buku_kas_id,
-                'dompet_id' => $dompet->id,
+                'sumber_dana_id' => $sumberDana->id,
                 'kategori_id' => $data['kategori_id'] ?? null,
                 'tanggal' => $data['tanggal'] ?? now(),
                 'nominal' => $total,
@@ -142,10 +142,10 @@ class TabunganEmasService
         ];
     }
 
-    private function validasiMutasi(User $user, TabunganEmas $tabungan, Dompet $dompet, float $berat, int $harga, int $biaya): void
+    private function validasiMutasi(User $user, TabunganEmas $tabungan, SumberDana $sumberDana, float $berat, int $harga, int $biaya): void
     {
-        if (! $user->dapatMengelolaTransaksiPada($tabungan->bukuKas) || ! $user->dapatMengelolaTransaksiPadaDompet($dompet)) {
-            throw new AuthorizationException('Tabungan emas atau dompet tidak dapat dikelola.');
+        if (! $user->dapatMengelolaTransaksiPada($tabungan->bukuKas) || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDana)) {
+            throw new AuthorizationException('Tabungan emas atau sumber dana tidak dapat dikelola.');
         }
 
         if ($berat <= 0 || $harga <= 0 || $biaya < 0) {

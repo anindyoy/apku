@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Enums\JenisSumberDana;
 use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
-use Database\Factories\DompetFactory;
+use Database\Factories\SumberDanaFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +17,7 @@ class SumberDana extends Model
     /** @use HasFactory<DompetFactory> */
     use HasFactory, MembersihkanCacheOpsiSelect, SoftDeletes;
 
-    protected $table = 'dompet';
+    protected $table = 'sumber_dana';
 
     protected $guarded = [];
 
@@ -41,7 +41,7 @@ class SumberDana extends Model
 
     public function detailAuditSaldo()
     {
-        return $this->hasMany(AuditSaldoDompetDetail::class);
+        return $this->hasMany(AuditSaldoDompetDetail::class, 'sumber_dana_id');
     }
 
     public function getJenisLabelAttribute(): string
@@ -56,6 +56,6 @@ class SumberDana extends Model
 
     protected function cacheOpsiSelectEntitas(): string
     {
-        return 'dompet';
+        return 'sumber_dana';
     }
 }

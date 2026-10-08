@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Jobs\ProsesImportTransaksi;
 use App\Models\BukuKas;
-use App\Models\Dompet;
 use App\Models\ImportTransaksi;
 use App\Models\Kategori;
+use App\Models\SumberDana;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
@@ -48,7 +48,7 @@ class ImportTransaksiService
 
     public function buatTemplateXlsx(string $path, User $user): void
     {
-        $dompet = Dompet::query()
+        $sumberDana = SumberDana::query()
             ->where('user_id', $user->id)
             ->pluck('nama_dompet')
             ->all();
@@ -78,6 +78,7 @@ class ImportTransaksiService
         $kasPertama = $bukuKas->get(0);
         $kasKedua = $bukuKas->get(1) ?? $kasPertama;
         $bukuKas = $bukuKas->pluck('nama_buku')->all();
+        $dompet = $sumberDana;
 
         $writer = new XlsxWriter;
         $writer->openToFile($path);
@@ -657,7 +658,7 @@ class ImportTransaksiService
         $errors = [];
         $jenis = Str::title(trim((string) ($data['jenis'] ?? '')));
         $bukuKas = $this->cariBukuKas($user, $data['buku_kas'] ?? null);
-        $dompet = $this->cariDompet($user, $data['dompet'] ?? null);
+        $sumberDana = $this->cariSumberDana($user, $data['dompet'] ?? null);
         $jenisValid = in_array($jenis, ['Pemasukan', 'Pengeluaran'], true);
         $namaKategoriBaru = trim((string) ($data['kategori'] ?? ''));
         // Kategori dicari pada kas baris ini; kategori pemilik yang belum terhubung dicatat terpisah.
@@ -685,8 +686,8 @@ class ImportTransaksiService
             $errors[] = "Baris {$nomorBaris}, kolom buku_kas: kas tidak ditemukan atau tidak dapat dikelola.";
         }
 
-        if ($dompet === null) {
-            $errors[] = "Baris {$nomorBaris}, kolom dompet: dompet aktif tidak ditemukan atau tidak dapat dikelola.";
+        if ($sumberDana === null) {
+            $errors[] = "Baris {$nomorBaris}, kolom dompet: sumber dana aktif tidak ditemukan atau tidak dapat dikelola.";
         }
 
         $kategoriDapatDibuat = $buatKategoriOtomatis
@@ -710,7 +711,7 @@ class ImportTransaksiService
             'jenis' => $jenis,
             'buku_kas_id' => $bukuKas?->id,
             'nama_buku_kas' => $bukuKas?->nama_buku,
-            'dompet_id' => $dompet?->id,
+            'sumber_dana_id' => $sumberDana?->id,
             'kategori_id' => $kategori?->id ?? ($hubungkanKategori ? $kategoriBelumTerhubung->id : null),
             'nama_kategori' => $kategori?->nama ?? $kategoriBelumTerhubung?->nama,
             'hubungkan_kategori' => $hubungkanKategori,
@@ -735,16 +736,16 @@ class ImportTransaksiService
         return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPada($hasil->first()) ? $hasil->first() : null;
     }
 
-    private function cariDompet(User $user, mixed $nama): ?Dompet
+    private function cariSumberDana(User $user, mixed $nama): ?SumberDana
     {
         if (blank(trim((string) $nama))) {
-            $hasil = Dompet::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
+            $hasil = SumberDana::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
                 ->where('is_default', true)->get();
 
             return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;
         }
 
-        $hasil = Dompet::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
+        $hasil = SumberDana::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
             ->whereRaw('LOWER(nama_dompet) = ?', [mb_strtolower(trim((string) $nama))])->get();
 
         return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;

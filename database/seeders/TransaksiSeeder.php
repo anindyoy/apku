@@ -21,15 +21,15 @@ class TransaksiSeeder extends Seeder
         $now = Carbon::now();
 
         // Hapus data lama dan atur ulang nomor otomatis.
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        DB::table('transaksi')->delete();
-        DB::table('kategori_kas')->delete();
-        DB::table('buku_kas')->delete();
-        DB::table('dompet')->delete();
-        DB::statement('ALTER TABLE transaksi AUTO_INCREMENT=1');
-        DB::statement('ALTER TABLE buku_kas AUTO_INCREMENT=1');
-        DB::statement('ALTER TABLE dompet AUTO_INCREMENT=1');
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+       DB::statement('SET FOREIGN_KEY_CHECKS=0');
+       DB::table('transaksi')->delete();
+       DB::table('kategori_kas')->delete();
+       DB::table('buku_kas')->delete();
+       DB::table('sumber_dana')->delete();
+       DB::statement('ALTER TABLE transaksi AUTO_INCREMENT=1');
+       DB::statement('ALTER TABLE buku_kas AUTO_INCREMENT=1');
+       DB::statement('ALTER TABLE sumber_dana AUTO_INCREMENT=1');
+       DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $users = User::all()->except(1);
 
@@ -37,16 +37,17 @@ class TransaksiSeeder extends Seeder
         $jenisByUser = Kategori::all()->groupBy(fn ($jt) => "{$jt->user_id}_{$jt->tipe}");
 
         foreach ($users as $user) {
-            $dompetId = DB::table('dompet')->insertGetId([
+            $sumberDanaId = DB::table('sumber_dana')->insertGetId([
                 'user_id' => $user->id,
                 'nama_dompet' => 'Cash',
+                'jenis' => 'tunai',
                 'saldo' => 0,
                 'is_default' => true,
                 'description' => 'Dompet tunai utama',
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
-            $saldoDompet = 0;
+            $saldoSumberDana = 0;
             $bukuKasRows = [];
             $bukuSaldos = [];
             $transaksiRows = [];
@@ -73,7 +74,7 @@ class TransaksiSeeder extends Seeder
                 $transaksiRows[] = [
                     'user_id' => $user->id,
                     'buku_kas_id' => 0, // Nilai sementara sebelum insert massal selesai.
-                    'dompet_id' => $dompetId,
+                    'sumber_dana_id' => $sumberDanaId,
                     'kategori_id' => null,
                     'tanggal' => fake()->dateTimeBetween('-3 weeks', 'now'),
                     'nominal' => $nominal,
@@ -88,7 +89,7 @@ class TransaksiSeeder extends Seeder
                 ];
 
                 $bukuSaldos[$i] = $nominal;
-                $saldoDompet += $nominal;
+                $saldoSumberDana += $nominal;
             }
 
             // Simpan buku kas secara massal lalu ambil ID yang dihasilkan.
@@ -140,7 +141,7 @@ class TransaksiSeeder extends Seeder
                     $transaksiRows[] = [
                         'user_id' => $user->id,
                         'buku_kas_id' => $kasId,
-                        'dompet_id' => $dompetId,
+                        'sumber_dana_id' => $sumberDanaId,
                         'kategori_id' => null,
                         'tanggal' => $tanggal,
                         'nominal' => $nominal,
@@ -157,7 +158,7 @@ class TransaksiSeeder extends Seeder
                     $transaksiRows[] = [
                         'user_id' => $user->id,
                         'buku_kas_id' => $tujuanId,
-                        'dompet_id' => $dompetId,
+                        'sumber_dana_id' => $sumberDanaId,
                         'kategori_id' => null,
                         'tanggal' => $tanggal,
                         'nominal' => $nominal,
@@ -189,7 +190,7 @@ class TransaksiSeeder extends Seeder
                     $transaksiRows[] = [
                         'user_id' => $user->id,
                         'buku_kas_id' => $kasId,
-                        'dompet_id' => $dompetId,
+                        'sumber_dana_id' => $sumberDanaId,
                         'kategori_id' => $kategoriId,
                         'tanggal' => fake()->dateTimeBetween($baseTanggal, 'now'),
                         'nominal' => $nominal,
@@ -204,7 +205,7 @@ class TransaksiSeeder extends Seeder
                     ];
 
                     $bukuSaldos[$kasIdx] += ($jenis === 'Pemasukan' ? $nominal : -$nominal);
-                    $saldoDompet += ($jenis === 'Pemasukan' ? $nominal : -$nominal);
+                    $saldoSumberDana += ($jenis === 'Pemasukan' ? $nominal : -$nominal);
                 }
             }
 
@@ -220,8 +221,8 @@ class TransaksiSeeder extends Seeder
                     ->update(['saldo' => $saldo, 'updated_at' => $now]);
             }
 
-            DB::table('dompet')->where('id', $dompetId)->update([
-                'saldo' => $saldoDompet,
+            DB::table('sumber_dana')->where('id', $sumberDanaId)->update([
+                'saldo' => $saldoSumberDana,
                 'updated_at' => $now,
             ]);
         }

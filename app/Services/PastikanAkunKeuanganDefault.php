@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\Models\BukuKas;
-use App\Models\Dompet;
+use App\Models\SumberDana;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class PastikanAkunKeuanganDefault
 {
-    /** @return array{bukuKas: BukuKas, dompet: Dompet} */
+    /** @return array{bukuKas: BukuKas, sumberDana: SumberDana} */
     public function jalankan(User $user): array
     {
         return DB::transaction(function () use ($user): array {
@@ -20,7 +20,7 @@ class PastikanAkunKeuanganDefault
                 ->orderByDesc('is_default')
                 ->orderBy('id')
                 ->first();
-            $dompet = Dompet::withoutGlobalScopes()
+            $sumberDana = SumberDana::withoutGlobalScopes()
                 ->withTrashed()
                 ->where('user_id', $user->id)
                 ->orderByDesc('is_default')
@@ -31,7 +31,7 @@ class PastikanAkunKeuanganDefault
                 $bukuKas = BukuKas::withoutGlobalScopes()->create([
                     'user_id' => $user->id,
                     'nama_buku' => 'Kas Utama',
-                    'saldo' => (int) Dompet::withoutGlobalScopes()->where('user_id', $user->id)->sum('saldo'),
+                    'saldo' => (int) SumberDana::withoutGlobalScopes()->where('user_id', $user->id)->sum('saldo'),
                     'is_default' => true,
                     'description' => 'Kas utama',
                 ]);
@@ -39,8 +39,8 @@ class PastikanAkunKeuanganDefault
                 app(KategoriService::class)->hubungkanSemuaKategoriPemilik($bukuKas);
             }
 
-            if (! $dompet) {
-                $dompet = Dompet::withoutGlobalScopes()->create([
+            if (! $sumberDana) {
+                $sumberDana = SumberDana::withoutGlobalScopes()->create([
                     'user_id' => $user->id,
                     'nama_dompet' => 'Cash',
                     'jenis' => 'tunai',
@@ -48,28 +48,28 @@ class PastikanAkunKeuanganDefault
                     'is_default' => true,
                     'description' => 'Dompet tunai utama',
                 ]);
-            } elseif ($dompet->trashed()) {
-                $dompet->restore();
+            } elseif ($sumberDana->trashed()) {
+                $sumberDana->restore();
             }
 
             BukuKas::withoutGlobalScopes()
                 ->where('user_id', $user->id)
                 ->whereKeyNot($bukuKas->id)
                 ->update(['is_default' => false]);
-            Dompet::withoutGlobalScopes()
+            SumberDana::withoutGlobalScopes()
                 ->where('user_id', $user->id)
-                ->whereKeyNot($dompet->id)
+                ->whereKeyNot($sumberDana->id)
                 ->update(['is_default' => false]);
 
             if (! $bukuKas->is_default) {
                 $bukuKas->update(['is_default' => true]);
             }
 
-            if (! $dompet->is_default) {
-                $dompet->update(['is_default' => true]);
+            if (! $sumberDana->is_default) {
+                $sumberDana->update(['is_default' => true]);
             }
 
-            return ['bukuKas' => $bukuKas->fresh(), 'dompet' => $dompet->fresh()];
+            return ['bukuKas' => $bukuKas->fresh(), 'sumberDana' => $sumberDana->fresh()];
         });
     }
 }

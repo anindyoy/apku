@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\BukuKas;
-use App\Models\Dompet;
+use App\Models\SumberDana;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -16,8 +16,8 @@ class TransferDompetService
     /** @return array{keluar: Transaksi, masuk: Transaksi} */
     public function transfer(
         User $user,
-        Dompet $dompetAsal,
-        Dompet $dompetTujuan,
+        SumberDana $sumberDanaAsal,
+        SumberDana $sumberDanaTujuan,
         BukuKas $bukuKas,
         int $nominal,
         mixed $tanggal = null,
@@ -27,34 +27,34 @@ class TransferDompetService
             throw ValidationException::withMessages(['nominal' => 'Nominal transfer harus lebih dari nol.']);
         }
 
-        if ($dompetAsal->is($dompetTujuan)) {
-            throw ValidationException::withMessages(['dompet_tujuan_id' => 'Dompet tujuan harus berbeda dari dompet asal.']);
+        if ($sumberDanaAsal->is($sumberDanaTujuan)) {
+            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana tujuan harus berbeda dari sumber dana asal.']);
         }
 
         if (
-            $dompetAsal->user_id !== $user->id
-            || $dompetTujuan->user_id !== $user->id
+            $sumberDanaAsal->user_id !== $user->id
+            || $sumberDanaTujuan->user_id !== $user->id
             || $bukuKas->user_id !== $user->id
-            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
+            || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDanaTujuan)
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
         ) {
-            throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
+            throw new AuthorizationException('Sumber dana atau kas tidak dapat dikelola.');
         }
 
-        $prosesTransfer = function () use ($user, $dompetAsal, $dompetTujuan, $bukuKas, $nominal, $tanggal, $deskripsi): array {
-            $dompet = Dompet::withoutGlobalScopes()
+        $prosesTransfer = function () use ($user, $sumberDanaAsal, $sumberDanaTujuan, $bukuKas, $nominal, $tanggal, $deskripsi): array {
+            $sumberDana = SumberDana::withoutGlobalScopes()
                 ->where('user_id', $user->id)
-                ->whereKey([$dompetAsal->id, $dompetTujuan->id])
+                ->whereKey([$sumberDanaAsal->id, $sumberDanaTujuan->id])
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
 
-            $asal = $dompet->get($dompetAsal->id);
-            $tujuan = $dompet->get($dompetTujuan->id);
+            $asal = $sumberDana->get($sumberDanaAsal->id);
+            $tujuan = $sumberDana->get($sumberDanaTujuan->id);
 
             if (! $asal || ! $tujuan) {
-                throw new AuthorizationException('Dompet tidak tersedia.');
+                throw new AuthorizationException('Sumber dana tidak tersedia.');
             }
 
             $kodeTransfer = (string) Str::uuid();
@@ -73,11 +73,11 @@ class TransferDompetService
 
                 return [
                     'keluar' => Transaksi::create($data + [
-                        'dompet_id' => $asal->id,
+                        'sumber_dana_id' => $asal->id,
                         'jenis' => 'Transfer Pengeluaran',
                     ]),
                     'masuk' => Transaksi::create($data + [
-                        'dompet_id' => $tujuan->id,
+                        'sumber_dana_id' => $tujuan->id,
                         'jenis' => 'Transfer Pemasukan',
                     ]),
                 ];
@@ -94,59 +94,59 @@ class TransferDompetService
 
     public function pindahkanSaldoDanHapus(
         User $user,
-        Dompet $dompetAsal,
-        Dompet $dompetTujuan,
+        SumberDana $sumberDanaAsal,
+        SumberDana $sumberDanaTujuan,
         BukuKas $bukuKas,
     ): void {
-        if ($user->dompet()->count() <= 1) {
-            throw ValidationException::withMessages(['dompet_tujuan_id' => 'Dompet terakhir tidak dapat dihapus.']);
+        if ($user->sumberDana()->count() <= 1) {
+            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana terakhir tidak dapat dihapus.']);
         }
 
-        if ($dompetAsal->is_default) {
-            throw ValidationException::withMessages(['dompet_tujuan_id' => 'Dompet default tidak dapat dihapus.']);
+        if ($sumberDanaAsal->is_default) {
+            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana default tidak dapat dihapus.']);
         }
 
-        if ($dompetAsal->is($dompetTujuan)) {
-            throw ValidationException::withMessages(['dompet_tujuan_id' => 'Dompet tujuan harus berbeda dari dompet yang dihapus.']);
+        if ($sumberDanaAsal->is($sumberDanaTujuan)) {
+            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana tujuan harus berbeda dari sumber dana yang dihapus.']);
         }
 
         if (
-            $dompetAsal->user_id !== $user->id
-            || $dompetTujuan->user_id !== $user->id
+            $sumberDanaAsal->user_id !== $user->id
+            || $sumberDanaTujuan->user_id !== $user->id
             || $bukuKas->user_id !== $user->id
-            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetAsal)
-            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
+            || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDanaAsal)
+            || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDanaTujuan)
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
         ) {
-            throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
+            throw new AuthorizationException('Sumber dana atau kas tidak dapat dikelola.');
         }
 
-        $prosesPenghapusan = function () use ($user, $dompetAsal, $dompetTujuan, $bukuKas): void {
-            $dompet = Dompet::withoutGlobalScopes()
-                ->whereKey([$dompetAsal->id, $dompetTujuan->id])
+        $prosesPenghapusan = function () use ($user, $sumberDanaAsal, $sumberDanaTujuan, $bukuKas): void {
+            $sumberDana = SumberDana::withoutGlobalScopes()
+                ->whereKey([$sumberDanaAsal->id, $sumberDanaTujuan->id])
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
-            $asal = $dompet->get($dompetAsal->id);
-            $tujuan = $dompet->get($dompetTujuan->id);
+            $asal = $sumberDana->get($sumberDanaAsal->id);
+            $tujuan = $sumberDana->get($sumberDanaTujuan->id);
 
             if (! $asal || ! $tujuan) {
-                throw new AuthorizationException('Dompet tidak tersedia.');
+                throw new AuthorizationException('Sumber dana tidak tersedia.');
             }
 
             $saldo = (int) $asal->saldo;
 
             if ($saldo > 0) {
-                $this->transfer($user, $asal, $tujuan, $bukuKas, $saldo, now(), 'Pemindahan saldo sebelum penghapusan dompet');
+                $this->transfer($user, $asal, $tujuan, $bukuKas, $saldo, now(), 'Pemindahan saldo sebelum penghapusan sumber dana');
             } elseif ($saldo < 0) {
-                $this->transfer($user, $tujuan, $asal, $bukuKas, abs($saldo), now(), 'Pemindahan kewajiban sebelum penghapusan dompet');
+                $this->transfer($user, $tujuan, $asal, $bukuKas, abs($saldo), now(), 'Pemindahan kewajiban sebelum penghapusan sumber dana');
             }
 
             $asal->refresh();
 
             if ((int) $asal->saldo !== 0) {
-                throw ValidationException::withMessages(['dompet_tujuan_id' => 'Saldo dompet asal gagal dipindahkan.']);
+                throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Saldo sumber dana asal gagal dipindahkan.']);
             }
 
             $asal->delete();

@@ -204,9 +204,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             ->value('id');
     }
 
-    public function dapatMengelolaTransaksiPadaDompet(Dompet $dompet): bool
+    public function dapatMengelolaTransaksiPadaDompet(SumberDana $sumberDana): bool
     {
-        return $this->dapatMengelolaTransaksiPadaSumberDana($dompet);
+        return $this->dapatMengelolaTransaksiPadaSumberDana($sumberDana);
     }
 
     public function dapatMengelolaTransaksiPadaSumberDana(SumberDana $sumberDana): bool

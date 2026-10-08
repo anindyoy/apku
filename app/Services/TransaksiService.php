@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\BukuKas;
-use App\Models\Dompet;
 use App\Models\Kategori;
+use App\Models\SumberDana;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -17,7 +17,7 @@ class TransaksiService
     public function buatSaldoAwal(
         User $user,
         BukuKas $bukuKas,
-        Dompet $dompet,
+        SumberDana $sumberDana,
         int $nominal,
         string $deskripsi = 'Saldo awal',
     ): Transaksi {
@@ -25,15 +25,15 @@ class TransaksiService
             throw ValidationException::withMessages(['nominal' => 'Saldo awal tidak boleh negatif.']);
         }
 
-        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
+        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
 
-        return DB::transaction(function () use ($user, $bukuKas, $dompet, $nominal, $deskripsi): Transaksi {
+        return DB::transaction(function () use ($user, $bukuKas, $sumberDana, $nominal, $deskripsi): Transaksi {
             BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
-            Dompet::withoutGlobalScopes()->whereKey($dompet->id)->lockForUpdate()->firstOrFail();
+            SumberDana::withoutGlobalScopes()->whereKey($sumberDana->id)->lockForUpdate()->firstOrFail();
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
                 'user_id' => $user->id,
                 'buku_kas_id' => $bukuKas->id,
-                'dompet_id' => $dompet->id,
+                'sumber_dana_id' => $sumberDana->id,
                 'tanggal' => now(),
                 'nominal' => $nominal,
                 'jenis' => 'Pemasukan',
@@ -56,14 +56,14 @@ class TransaksiService
         }
 
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($data['buku_kas_id']);
-        $dompet = Dompet::withoutGlobalScopes()->findOrFail($data['dompet_id']);
-        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
+        $sumberDana = SumberDana::withoutGlobalScopes()->findOrFail($data['sumber_dana_id']);
+        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
         $this->pastikanKategoriValid($bukuKas, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
 
         return DB::transaction(function () use ($user, $data, $jenis): Transaksi {
             $bukuKas = BukuKas::withoutGlobalScopes()->whereKey($data['buku_kas_id'])->lockForUpdate()->firstOrFail();
-            $dompet = Dompet::withoutGlobalScopes()->whereKey($data['dompet_id'])->lockForUpdate()->firstOrFail();
-            $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
+            $sumberDana = SumberDana::withoutGlobalScopes()->whereKey($data['sumber_dana_id'])->lockForUpdate()->firstOrFail();
+            $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
             $this->pastikanKategoriValid($bukuKas, filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null, $jenis);
 
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
@@ -71,7 +71,7 @@ class TransaksiService
                 'import_transaksi_id' => $data['import_transaksi_id'] ?? null,
                 'pengaruhi_saldo' => $data['pengaruhi_saldo'] ?? true,
                 'buku_kas_id' => $bukuKas->id,
-                'dompet_id' => $dompet->id,
+                'sumber_dana_id' => $sumberDana->id,
                 'kategori_id' => filled($data['kategori_id'] ?? null) ? (int) $data['kategori_id'] : null,
                 'tanggal' => $data['tanggal'] ?? now(),
                 'nominal' => (int) $data['nominal'],
@@ -89,8 +89,8 @@ class TransaksiService
         User $user,
         BukuKas $bukuKasAsal,
         BukuKas $bukuKasTujuan,
-        Dompet $dompetAsal,
-        Dompet $dompetTujuan,
+        SumberDana $sumberDanaAsal,
+        SumberDana $sumberDanaTujuan,
         int $nominal,
         mixed $tanggal = null,
         ?string $deskripsi = null,
@@ -106,31 +106,31 @@ class TransaksiService
         if (
             $bukuKasAsal->user_id !== $user->id
             || $bukuKasTujuan->user_id !== $user->id
-            || $dompetAsal->user_id !== $user->id
-            || $dompetTujuan->user_id !== $user->id
+            || $sumberDanaAsal->user_id !== $user->id
+            || $sumberDanaTujuan->user_id !== $user->id
             || ! $user->dapatMengelolaTransaksiPada($bukuKasAsal)
             || ! $user->dapatMengelolaTransaksiPada($bukuKasTujuan)
-            || ! $user->dapatMengelolaTransaksiPadaDompet($dompetTujuan)
+            || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDanaTujuan)
         ) {
-            throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
+            throw new AuthorizationException('Sumber dana atau kas tidak dapat dikelola.');
         }
 
-        return DB::transaction(function () use ($user, $bukuKasAsal, $bukuKasTujuan, $dompetAsal, $dompetTujuan, $nominal, $tanggal, $deskripsi): array {
+        return DB::transaction(function () use ($user, $bukuKasAsal, $bukuKasTujuan, $sumberDanaAsal, $sumberDanaTujuan, $nominal, $tanggal, $deskripsi): array {
             $bukuKas = BukuKas::withoutGlobalScopes()
                 ->whereKey([$bukuKasAsal->id, $bukuKasTujuan->id])
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
-            $dompet = Dompet::withoutGlobalScopes()
-                ->whereKey([$dompetAsal->id, $dompetTujuan->id])
+            $sumberDana = SumberDana::withoutGlobalScopes()
+                ->whereKey([$sumberDanaAsal->id, $sumberDanaTujuan->id])
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
 
-            if ($bukuKas->count() !== 2 || $dompet->count() !== ($dompetAsal->is($dompetTujuan) ? 1 : 2)) {
-                throw new AuthorizationException('Dompet atau kas tidak tersedia.');
+            if ($bukuKas->count() !== 2 || $sumberDana->count() !== ($sumberDanaAsal->is($sumberDanaTujuan) ? 1 : 2)) {
+                throw new AuthorizationException('Sumber dana atau kas tidak tersedia.');
             }
 
             $kodeTransfer = (string) Str::uuid();
@@ -145,13 +145,13 @@ class TransaksiService
             $transaksi = Transaksi::withoutEvents(fn (): array => [
                 'keluar' => Transaksi::create($data + [
                     'buku_kas_id' => $bukuKasAsal->id,
-                    'dompet_id' => $dompetAsal->id,
+                    'sumber_dana_id' => $sumberDanaAsal->id,
                     'jenis' => 'Transfer Pengeluaran',
                     'tujuan_buku_tabungan_id' => $bukuKasTujuan->id,
                 ]),
                 'masuk' => Transaksi::create($data + [
                     'buku_kas_id' => $bukuKasTujuan->id,
-                    'dompet_id' => $dompetTujuan->id,
+                    'sumber_dana_id' => $sumberDanaTujuan->id,
                     'jenis' => 'Transfer Pemasukan',
                     'asal_buku_tabungan_id' => $bukuKasAsal->id,
                 ]),
@@ -182,12 +182,12 @@ class TransaksiService
             }
 
             $dataBaru = array_merge($terkunci->only([
-                'buku_kas_id', 'dompet_id', 'kategori_id', 'tanggal', 'nominal', 'jenis', 'deskripsi',
+                'buku_kas_id', 'sumber_dana_id', 'kategori_id', 'tanggal', 'nominal', 'jenis', 'deskripsi',
             ]), $data);
             $bukuKasBaru = BukuKas::withoutGlobalScopes()->findOrFail($dataBaru['buku_kas_id']);
-            $dompetBaru = Dompet::withoutGlobalScopes()->findOrFail($dataBaru['dompet_id']);
+            $sumberDanaBaru = SumberDana::withoutGlobalScopes()->findOrFail($dataBaru['sumber_dana_id']);
 
-            $this->pastikanTujuanDapatDikelola($user, $bukuKasBaru, $dompetBaru);
+            $this->pastikanTujuanDapatDikelola($user, $bukuKasBaru, $sumberDanaBaru);
             $dataBaru['kategori_id'] = filled($dataBaru['kategori_id'] ?? null) ? (int) $dataBaru['kategori_id'] : null;
 
             // Pasangan kas dan kategori divalidasi ulang hanya ketika salah satunya berubah.
@@ -267,17 +267,17 @@ class TransaksiService
         $kasTujuanId = (int) ($tipeTransfer === 'buku_kas'
             ? ($data['buku_kas_id_tujuan'] ?? $masuk->buku_kas_id)
             : ($data['buku_kas_id'] ?? $masuk->buku_kas_id));
-        $dompetAsalId = (int) ($data['dompet_id'] ?? $keluar->dompet_id);
-        $dompetTujuanId = (int) ($tipeTransfer === 'dompet'
-            ? ($data['dompet_id_tujuan'] ?? $masuk->dompet_id)
-            : ($data['dompet_id'] ?? $masuk->dompet_id));
+        $sumberDanaAsalId = (int) ($data['sumber_dana_id'] ?? $keluar->sumber_dana_id);
+        $sumberDanaTujuanId = (int) ($tipeTransfer === 'dompet'
+            ? ($data['sumber_dana_id_tujuan'] ?? $masuk->sumber_dana_id)
+            : ($data['sumber_dana_id'] ?? $masuk->sumber_dana_id));
 
         if ($tipeTransfer === 'buku_kas' && $kasAsalId === $kasTujuanId) {
             throw ValidationException::withMessages(['buku_kas_id_tujuan' => 'Kas tujuan harus berbeda dari kas asal.']);
         }
 
-        if ($tipeTransfer === 'dompet' && $dompetAsalId === $dompetTujuanId) {
-            throw ValidationException::withMessages(['dompet_id_tujuan' => 'Dompet tujuan harus berbeda dari dompet asal.']);
+        if ($tipeTransfer === 'dompet' && $sumberDanaAsalId === $sumberDanaTujuanId) {
+            throw ValidationException::withMessages(['sumber_dana_id_tujuan' => 'Sumber dana tujuan harus berbeda dari sumber dana asal.']);
         }
 
         $kas = BukuKas::withoutGlobalScopes()
@@ -286,22 +286,22 @@ class TransaksiService
             ->lockForUpdate()
             ->get()
             ->keyBy('id');
-        $dompet = Dompet::withoutGlobalScopes()
-            ->whereKey(array_unique([$dompetAsalId, $dompetTujuanId]))
+        $sumberDana = SumberDana::withoutGlobalScopes()
+            ->whereKey(array_unique([$sumberDanaAsalId, $sumberDanaTujuanId]))
             ->orderBy('id')
             ->lockForUpdate()
             ->get()
             ->keyBy('id');
 
-        foreach ([[$kasAsalId, $dompetAsalId], [$kasTujuanId, $dompetTujuanId]] as [$kasId, $dompetId]) {
+        foreach ([[$kasAsalId, $sumberDanaAsalId], [$kasTujuanId, $sumberDanaTujuanId]] as [$kasId, $sumberDanaId]) {
             $bukuKas = $kas->get($kasId);
-            $dompetTerpilih = $dompet->get($dompetId);
+            $sumberDanaTerpilih = $sumberDana->get($sumberDanaId);
 
-            if (! $bukuKas || ! $dompetTerpilih || $bukuKas->user_id !== $user->id) {
-                throw new AuthorizationException('Dompet atau kas tidak dapat dikelola.');
+            if (! $bukuKas || ! $sumberDanaTerpilih || $bukuKas->user_id !== $user->id) {
+                throw new AuthorizationException('Sumber dana atau kas tidak dapat dikelola.');
             }
 
-            $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompetTerpilih);
+            $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDanaTerpilih);
         }
 
         foreach ($pasangan as $item) {
@@ -313,7 +313,7 @@ class TransaksiService
             $pengeluaran = $item->jenis === 'Transfer Pengeluaran';
             Transaksi::withoutEvents(fn () => $item->update([
                 'buku_kas_id' => $pengeluaran ? $kasAsalId : $kasTujuanId,
-                'dompet_id' => $pengeluaran ? $dompetAsalId : $dompetTujuanId,
+                'sumber_dana_id' => $pengeluaran ? $sumberDanaAsalId : $sumberDanaTujuanId,
                 'tujuan_buku_tabungan_id' => $tipeTransfer === 'buku_kas' && $pengeluaran ? $kasTujuanId : null,
                 'asal_buku_tabungan_id' => $tipeTransfer === 'buku_kas' && ! $pengeluaran ? $kasAsalId : null,
                 'nominal' => $nominal,
@@ -333,17 +333,17 @@ class TransaksiService
         }
 
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($transaksi->buku_kas_id);
-        $dompet = Dompet::withoutGlobalScopes()->withTrashed()->findOrFail($transaksi->dompet_id);
-        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $dompet);
+        $sumberDana = SumberDana::withoutGlobalScopes()->withTrashed()->findOrFail($transaksi->sumber_dana_id);
+        $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
     }
 
-    private function pastikanTujuanDapatDikelola(User $user, BukuKas $bukuKas, Dompet $dompet): void
+    private function pastikanTujuanDapatDikelola(User $user, BukuKas $bukuKas, SumberDana $sumberDana): void
     {
         if (
-            $dompet->user_id !== $user->id
-            || $dompet->trashed()
+            $sumberDana->user_id !== $user->id
+            || $sumberDana->trashed()
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
-            || ! $user->dapatMengelolaTransaksiPadaDompet($dompet)
+            || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDana)
         ) {
             throw new AuthorizationException('Transaksi tidak dapat dikelola.');
         }
@@ -379,7 +379,7 @@ class TransaksiService
 
         $dampak = $this->dampak($transaksi);
         BukuKas::withoutGlobalScopes()->whereKey($transaksi->buku_kas_id)->decrement('saldo', $dampak);
-        Dompet::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->dompet_id)->decrement('saldo', $dampak);
+        SumberDana::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->sumber_dana_id)->decrement('saldo', $dampak);
     }
 
     private function terapkanDampak(Transaksi $transaksi): void
@@ -390,7 +390,7 @@ class TransaksiService
 
         $dampak = $this->dampak($transaksi);
         BukuKas::withoutGlobalScopes()->whereKey($transaksi->buku_kas_id)->increment('saldo', $dampak);
-        Dompet::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->dompet_id)->increment('saldo', $dampak);
+        SumberDana::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->sumber_dana_id)->increment('saldo', $dampak);
     }
 
     private function dampak(Transaksi $transaksi): int

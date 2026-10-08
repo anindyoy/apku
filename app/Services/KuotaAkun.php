@@ -18,6 +18,11 @@ class KuotaAkun
         return self::ringkasan($user, 'dompet', $user->dompet()->count());
     }
 
+    public static function sumberDana(User $user): Htmlable
+    {
+        return self::ringkasan($user, 'sumber_dana', $user->sumberDana()->count());
+    }
+
     private static function ringkasan(User $user, string $jenis, int $jumlah): Htmlable
     {
         $admin = $user->isAdmin();
@@ -28,7 +33,7 @@ class KuotaAkun
 
         $tanpaBatas = $admin || $premium;
         $sisa = max(0, 2 - $jumlah);
-        $pesan = ucfirst($jenis).' '.$jumlah;
+        $pesan = ucfirst(str_replace('_', ' ', $jenis)).' '.$jumlah;
 
         if ($admin) {
             $pesan .= ', kuota Admin tidak terbatas.';

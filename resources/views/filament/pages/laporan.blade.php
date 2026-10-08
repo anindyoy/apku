@@ -12,11 +12,10 @@
                     </select>
                 </div>
                 <div class="laporan-filter__input">
-                    <label for="dompet">Dompet</label>
-                    <select id="dompet" wire:model.live="dompetId">
-                        <option value="semua">Semua Dompet</option>
-                        @foreach (\App\Models\Dompet::withTrashed()->get() as $dompet)
-                            <option value="{{ $dompet->id }}">{{ $dompet->nama_dompet }}{{ $dompet->trashed() ? ' (Dihapus)' : '' }}</option>
+                    <select id="sumber-dana" wire:model.live="dompetId">
+                        <option value="semua">Semua Sumber Dana</option>
+                        @foreach (\App\Models\SumberDana::withTrashed()->get() as $sumberDana)
+                            <option value="{{ $sumberDana->id }}">{{ $sumberDana->nama_dompet }}{{ $sumberDana->trashed() ? ' (Dihapus)' : '' }}</option>
                         @endforeach
                     </select>
                 </div>

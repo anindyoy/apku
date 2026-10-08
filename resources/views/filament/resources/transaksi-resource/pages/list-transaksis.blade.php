@@ -67,17 +67,14 @@
                 </div>
 
                 <div class="space-y-1.5">
-                    <label for="dompet-filter" class="block text-xs font-medium text-gray-700 dark:text-gray-400">
-                        Dompet
-                    </label>
 
                     <div class="flex h-10 min-w-56 items-center rounded-lg border border-gray-400 bg-gray-100 shadow-sm dark:border-white/10 dark:bg-white/5">
                         <x-filament::icon icon="heroicon-m-wallet" class="ml-3 h-5 w-5 shrink-0 text-gray-700 dark:text-gray-400" />
                         <div class="relative h-full min-w-0 flex-1">
-                            <select id="dompet-filter"
+                            <select id="sumber-dana-filter"
                                 onchange="window.location.href='{{ $filterUrl($filterBukuKas ?? '', '__VALUE__') }}'.replace('__VALUE__', this.value)"
                                 class="h-full w-full appearance-none border-0 bg-transparent bg-none py-0 pl-2 pr-10 text-sm font-semibold !text-gray-950 focus:ring-0 dark:!text-white">
-                                <option value="" {{ blank($filterDompet) ? 'selected' : '' }}>Semua Dompet</option>
+                                <option value="" {{ blank($filterDompet) ? 'selected' : '' }}>Semua Sumber Dana</option>
                                 @foreach($this->getDompetOptions() as $id => $nama)
                                     <option class="bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-200" value="{{ $id }}" {{ (string) $filterDompet === (string) $id ? 'selected' : '' }}>{{ $nama }}</option>
                                 @endforeach
