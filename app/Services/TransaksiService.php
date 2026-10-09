@@ -55,6 +55,10 @@ class TransaksiService
             throw ValidationException::withMessages(['nominal' => 'Nominal transaksi harus lebih dari nol.']);
         }
 
+        // Normalisasi kunci lama dompet_id ke sumber_dana_id untuk kompatibilitas test lama.
+        $data['sumber_dana_id'] ??= $data['dompet_id'] ?? null;
+        $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'] ?? null;
+
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($data['buku_kas_id']);
         $sumberDana = SumberDana::withoutGlobalScopes()->findOrFail($data['sumber_dana_id']);
         $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
@@ -166,6 +170,11 @@ class TransaksiService
 
     public function ubah(User $user, Transaksi $transaksi, array $data): Transaksi
     {
+        // Normalisasi kunci lama dompet_id ke sumber_dana_id untuk kompatibilitas test lama.
+        $data['sumber_dana_id'] ??= $data['dompet_id'] ?? null;
+        $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'] ?? null;
+        unset($data['dompet_id'], $data['dompet_id_tujuan']);
+
         $this->pastikanDapatMengelola($user, $transaksi);
 
         if ($transaksi->audit_saldo_dompet_detail_id) {
@@ -262,6 +271,10 @@ class TransaksiService
         if ($nominal <= 0) {
             throw ValidationException::withMessages(['nominal' => 'Nominal transfer harus lebih dari nol.']);
         }
+
+        // Normalisasi kunci lama dompet_id agar pasangan transfer lama tetap dapat diubah.
+        $data['sumber_dana_id'] ??= $data['dompet_id'] ?? null;
+        $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'] ?? null;
 
         $kasAsalId = (int) ($data['buku_kas_id'] ?? $keluar->buku_kas_id);
         $kasTujuanId = (int) ($tipeTransfer === 'buku_kas'

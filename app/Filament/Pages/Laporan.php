@@ -220,7 +220,8 @@ class Laporan extends Page
     {
         return Transaksi::query()
             ->when($this->bukuKasId !== 'semua', fn (Builder $q) => $q->where('buku_kas_id', $this->bukuKasId))
-            ->when($this->dompetId !== 'semua', fn (Builder $q) => $q->where('dompet_id', $this->dompetId));
+            // Kolom aktual adalah sumber_dana_id; dompetId hanya nama properti filter lama.
+            ->when($this->dompetId !== 'semua', fn (Builder $q) => $q->where('sumber_dana_id', $this->dompetId));
     }
 
     private function perubahanSaldo(Collection $transaksi): int

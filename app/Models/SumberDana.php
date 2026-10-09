@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[ScopedBy([UserScope::class])]
 class SumberDana extends Model
 {
-    /** @use HasFactory<DompetFactory> */
+    /** @use HasFactory<SumberDanaFactory> */
     use HasFactory, MembersihkanCacheOpsiSelect, SoftDeletes;
 
     protected $table = 'sumber_dana';

@@ -12,12 +12,13 @@ class DashboardCache
 {
     private const DEPENDENCIES = [
         'kas' => ['buku_kas', 'tabungan_emas'],
-        'dompet' => ['dompet'],
+        // Tabel dompet sudah bernama sumber_dana; alias dipertahankan untuk kompatibilitas cache lama.
+        'dompet' => ['sumber_dana'],
         'utang' => ['utang_piutang', 'utang_piutang_detail'],
         'piutang' => ['utang_piutang', 'utang_piutang_detail'],
         'langganan' => ['users', 'langganans'],
         'settings' => ['users'],
-        'transaksi' => ['transaksi', 'users', 'buku_kas', 'dompet', 'kategori', 'share_buku'],
+        'transaksi' => ['transaksi', 'users', 'buku_kas', 'sumber_dana', 'kategori', 'share_buku'],
         'admin' => ['users', 'langganans'],
     ];
 

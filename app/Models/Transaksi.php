@@ -70,11 +70,48 @@ class Transaksi extends Model
         return $this->belongsTo(SumberDana::class, 'sumber_dana_id')->withTrashed();
     }
 
+    // Alias kompatibilitas untuk sisa referensi refactor Dompet ke Sumber Dana.
+    public function dompet()
+    {
+        return $this->sumberDana();
+    }
+
+    public function getDompetIdAttribute(): ?int
+    {
+        return $this->attributes['sumber_dana_id'] ?? null;
+    }
+
+    public function setDompetIdAttribute(mixed $value): void
+    {
+        $this->attributes['sumber_dana_id'] = $value;
+    }
+
+    public function getDompetIdTujuanAttribute(): ?int
+    {
+        return $this->attributes['sumber_dana_id_tujuan'] ?? null;
+    }
+
+    public function setDompetIdTujuanAttribute(mixed $value): void
+    {
+        $this->attributes['sumber_dana_id_tujuan'] = $value;
+    }
+
+    public function scopeWhereDompetId($query, mixed $id)
+    {
+        return $query->where('sumber_dana_id', $id);
+    }
+
     public function labelSumberDanaUntuk(User $user): string
     {
         return $this->sumberDana?->user_id === $user->id
             ? ($this->sumberDana?->nama_dompet ?? '-')
             : 'Sumber dana anggota';
+    }
+
+    // Alias kompatibilitas untuk sisa referensi refactor Dompet ke Sumber Dana.
+    public function labelDompetUntuk(User $user): string
+    {
+        return $this->labelSumberDanaUntuk($user);
     }
 
     public function kategori()
@@ -274,11 +311,23 @@ class Transaksi extends Model
             ->all(), auth()->id(), 'dapat-dikelola');
     }
 
+    // Alias kompatibilitas untuk sisa referensi refactor Dompet ke Sumber Dana.
+    public static function opsiDompetYangDapatDikelola(): array
+    {
+        return static::opsiSumberDanaYangDapatDikelola();
+    }
+
     public static function opsiSumberDanaSumberTransfer(): array
     {
         return OpsiSelectCache::ingat('sumber_dana', fn (): array => SumberDana::query()
             ->pluck('nama_dompet', 'id')
             ->all(), auth()->id(), 'aktif');
+    }
+
+    // Alias kompatibilitas untuk sisa referensi refactor Dompet ke Sumber Dana.
+    public static function opsiDompetSumberTransfer(): array
+    {
+        return static::opsiSumberDanaSumberTransfer();
     }
 
     public static function opsiBukuKasYangDapatDikelola(): array

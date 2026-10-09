@@ -20,6 +20,17 @@ class AuditSaldoDompetDetail extends Model
         return $this->belongsTo(SumberDana::class, 'sumber_dana_id')->withTrashed();
     }
 
+    // Alias kompatibilitas untuk sisa referensi refactor Dompet ke Sumber Dana.
+    public function getDompetIdAttribute(): ?int
+    {
+        return $this->attributes['sumber_dana_id'] ?? null;
+    }
+
+    public function setDompetIdAttribute(mixed $value): void
+    {
+        $this->attributes['sumber_dana_id'] = $value;
+    }
+
     public function transaksi()
     {
         return $this->hasOne(Transaksi::class);

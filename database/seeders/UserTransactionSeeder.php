@@ -267,7 +267,8 @@ class UserTransactionSeeder extends Seeder
                 'updated_at' => $now,
             ]);
 
-        DB::table('dompet')->where('id', $dompet->id)->update([
+        // Tabel aktual adalah sumber_dana; nama dompet hanya istilah lama.
+        DB::table('sumber_dana')->where('id', $dompet->id)->update([
             'saldo' => $totalPemasukan - $totalPengeluaran,
             'updated_at' => $now,
         ]);

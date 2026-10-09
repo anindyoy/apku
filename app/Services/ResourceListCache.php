@@ -11,7 +11,8 @@ class ResourceListCache
 {
     private const DEPENDENCIES = [
         'kas' => ['buku_kas', 'transaksi', 'tabungan_emas', 'share_buku', 'users'],
-        'dompet' => ['dompet', 'users'],
+        // Alias dompet dipertahankan untuk kompatibilitas halaman ListDompet lama.
+        'dompet' => ['sumber_dana', 'users'],
         'sumber_dana' => ['sumber_dana', 'users'],
     ];
 

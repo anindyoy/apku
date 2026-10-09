@@ -34,7 +34,9 @@ class OpsiSelectCache
     {
         return match ($entitas) {
             'buku-kas' => ['default', 'dapat-dikelola'],
+            // Kunci dompet dipertahankan untuk kompatibilitas test lama; entitas baru memakai sumber_dana.
             'dompet' => ['aktif', 'dapat-dikelola', 'dengan-terhapus'],
+            'sumber_dana' => ['aktif', 'dapat-dikelola', 'dengan-terhapus'],
             'kategori' => ['Pemasukan', 'Pengeluaran', 'semua'],
             default => ['default'],
         };
