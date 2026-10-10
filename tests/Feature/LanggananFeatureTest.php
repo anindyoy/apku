@@ -1,7 +1,10 @@
 <?php
 
 use App\Enums\StatusLangganan;
+use App\Filament\Resources\LanggananResource;
+use App\Filament\Resources\LanggananResource\Pages\CreateLangganan;
 use App\Filament\Resources\LanggananResource\Pages\ListLangganans;
+use Symfony\Component\Process\Process;
 use App\Models\Langganan;
 use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
@@ -10,8 +13,11 @@ use App\Services\BuatOrderLangganan;
 use App\Services\KonfirmasiPembayaranLangganan;
 use App\Services\SetujuiLangganan;
 use App\Services\TolakLangganan;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Js;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 
@@ -262,7 +268,7 @@ test('tabel perbandingan akun langganan sesuai batasan dan tersembunyi bagi admi
         );
         $expected = [
             'Jumlah kas' => ['Maksimal 2', 'Tidak terbatas'],
-            'Jumlah Dompet' => ['Maksimal 2', 'Tidak terbatas'],
+            'Jumlah Sumber Dana' => ['Maksimal 2', 'Tidak terbatas'],
             'Membuat kolaborasi kas (Viewer / Editor)' => ['Tidak tersedia', 'Tersedia'],
             'Membuat link kas publik tanpa login (hanya lihat)' => ['Tidak tersedia', 'Tersedia'],
         ];
@@ -288,3 +294,167 @@ test('tabel perbandingan akun langganan sesuai batasan dan tersembunyi bagi admi
             ->toContain('tidak mengurangi kuota kas sendiri', 'Saat Premium berakhir', 'Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik', 'hanya tersedia bagi pemilik kas');
     }
 })->with(['user', 'admin'])->group('langganan');
+
+test('invoice hanya dapat dibuka pemilik atau admin dengan header privat', function () {
+    $pemilik = User::factory()->create(['role' => 'user']);
+    $userLain = User::factory()->create(['role' => 'user']);
+    $admin = User::factory()->create(['role' => 'admin']);
+    $order = Langganan::factory()->create([
+        'user_id' => $pemilik->getKey(),
+        'label_paket' => 'Premium 30 Hari',
+        'harga' => 25000,
+        'nominal_diskon' => 5000,
+        'total_pembayaran' => 20000,
+    ]);
+    $url = route('langganan.invoice', $order);
+
+    // Tamu tanpa login diarahkan ke login admin dan tidak melihat isi invoice.
+    $this->get($url)->assertRedirectToRoute('filament.admin.auth.login');
+
+    $this->actingAs($userLain)->get($url)->assertForbidden();
+
+    $responsPemilik = $this->actingAs($pemilik)->get($url);
+    $responsPemilik->assertOk()->assertViewIs('langganan-invoice')->assertViewHas('order');
+    $konten = $responsPemilik->getContent();
+    expect($konten)->toContain($order->kode_order)
+        ->and($konten)->toContain('Rp 20.000')
+        ->and($konten)->toContain('data-invoice')
+        ->and($konten)->toContain('data-invoice-code')
+        ->and($konten)->toContain('data-invoice-total')
+        ->and($konten)->toContain('data-invoice-account')
+        ->and($konten)->toContain('data-invoice-account-box')
+        ->and($konten)->toContain('data-copy-account-button="1234567890"')
+        ->and($konten)->toContain('>1234567890<')
+        ->and($konten)->toContain('>Salin<')
+        ->and($konten)->toContain('font-extrabold')
+        ->and($konten)->toContain('text-2xl')
+        ->and($konten)->toContain('js/invoice-copy.js')
+        ->and($responsPemilik->headers->get('Cache-Control'))->toContain('no-store');
+    $responsPemilik->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+        ->assertHeader('Referrer-Policy', 'no-referrer');
+
+    $this->actingAs($admin)->get($url)->assertOk();
+})->group('langganan', 'langganan-invoice');
+
+test('daftar langganan menyediakan aksi lihat invoice di tab baru', function (string $role) {
+    $user = User::factory()->create(['role' => $role]);
+    $order = Langganan::factory()->create(['user_id' => $user->id]);
+    $url = route('langganan.invoice', $order);
+
+    Livewire::actingAs($user)->test(ListLangganans::class)
+        ->assertSuccessful()
+        ->assertTableActionVisible('lihatInvoice', $order)
+        ->assertTableActionHasUrl('lihatInvoice', $url, $order)
+        ->assertTableActionShouldOpenUrlInNewTab('lihatInvoice', $order);
+})->with(['user', 'admin'])->group('langganan', 'langganan-invoice');
+
+test('submit order membuka invoice di tab baru dan memberi notifikasi cadangan', function () {
+    Cache::clear();
+    $user = createRegularUserWithBukuKas();
+    $paket = PaketLangganan::factory()->create(['label' => 'Premium 30 Hari', 'harga' => 25000, 'durasi_hari' => 30, 'is_active' => true]);
+    $metode = MetodePembayaran::factory()->create(['label' => 'Transfer Bank', 'is_active' => true]);
+    Cache::clear();
+
+    $komponen = Livewire::actingAs($user)->test(CreateLangganan::class)
+        ->assertSuccessful()
+        ->set('data.paket_langganan_id', $paket->getKey())
+        ->set('data.metode_pembayaran_id', $metode->getKey())
+        ->set('data.kode_voucher', null)
+        ->call('create')
+        ->assertHasNoErrors();
+
+    $order = Langganan::query()->where('user_id', $user->getKey())->latest('id')->first();
+    expect($order)->not->toBeNull();
+    $urlInvoice = route('langganan.invoice', $order);
+    $ekspresiJs = 'window.open('.Js::from($urlInvoice).", '_blank', 'noopener')";
+
+    $komponen->assertJs($ekspresiJs)
+        ->assertRedirect(LanggananResource::getUrl('index'));
+
+    // Ambil salinan notifikasi tanpa mengosongkan session agar assertNotified tetap dapat membaca session.
+    $notifikasi = collect(session()->get('filament.notifications', []))
+        ->firstWhere('title', 'Order langganan berhasil dibuat');
+    expect($notifikasi)->not->toBeNull();
+    $aksi = collect($notifikasi['actions'] ?? [])->firstWhere('name', 'lihatInvoice');
+    expect($aksi)->not->toBeNull()
+        ->and($aksi['url'] ?? null)->toBe($urlInvoice)
+        ->and($aksi['shouldOpenUrlInNewTab'] ?? false)->toBeTrue();
+})->group('langganan', 'langganan-invoice');
+
+test('invoice menyalin nomor tujuan lewat clipboard atau manual', function () {
+    $script = <<<'JS'
+    import assert from 'node:assert/strict';
+    import { salinNomorTujuan, initPenyalinanInvoice } from './public/js/invoice-copy.js';
+
+    let disalin;
+    let hasil = await salinNomorTujuan('1234567890', {
+        clipboard: { writeText: async (nilai) => { disalin = nilai; } },
+        salinManual: () => { throw new Error('salin manual tidak boleh dipanggil'); },
+    });
+    assert.equal(hasil, 'clipboard');
+    assert.equal(disalin, '1234567890');
+
+    let manualDipanggil = 0;
+    hasil = await salinNomorTujuan('1234567890', {
+        clipboard: { writeText: async () => { throw new Error('ditolak'); } },
+        salinManual: () => { manualDipanggil++; return true; },
+    });
+    assert.equal(hasil, 'manual');
+    assert.equal(manualDipanggil, 1);
+
+    hasil = await salinNomorTujuan('1234567890', {
+        clipboard: { writeText: async () => { throw new Error('ditolak'); } },
+        salinManual: () => false,
+    });
+    assert.equal(hasil, 'gagal');
+
+    hasil = await salinNomorTujuan('1234567890', { clipboard: undefined, salinManual: () => true });
+    assert.equal(hasil, 'manual');
+    hasil = await salinNomorTujuan('1234567890', { clipboard: undefined, salinManual: () => false });
+    assert.equal(hasil, 'gagal');
+
+    const revertCallbacks = [];
+    global.setTimeout = (callback) => { revertCallbacks.push(callback); return 0; };
+    disalin = undefined;
+    const umpanBalik = {
+        removed: [],
+        added: [],
+        classList: {
+            remove: (kelas) => umpanBalik.removed.push(kelas),
+            add: (kelas) => umpanBalik.added.push(kelas),
+        },
+    };
+    const kotak = { querySelector: (selector) => (selector === '[data-copy-feedback]' ? umpanBalik : null) };
+    const tombol = {
+        textContent: 'Salin',
+        attrs: { 'data-copy-account-button': '1234567890' },
+        getAttribute: function (nama) { return this.attrs[nama]; },
+        closest: function (selector) { assert.equal(selector, '[data-invoice-account-box]'); return kotak; },
+        listeners: {},
+        addEventListener: function (event, callback) { this.listeners[event] = callback; },
+    };
+    const dokumen = {
+        querySelectorAll: (selector) => { assert.equal(selector, '[data-copy-account-button]'); return [tombol]; },
+        createElement: () => { assert.fail('salin manual tidak boleh dipanggil'); },
+        body: {},
+        execCommand: () => { assert.fail('execCommand tidak boleh dipanggil'); },
+        defaultView: { navigator: { clipboard: { writeText: async (nilai) => { disalin = nilai; } } } },
+    };
+    initPenyalinanInvoice(dokumen);
+    assert.ok(tombol.listeners.click);
+    await tombol.listeners.click();
+    assert.equal(disalin, '1234567890');
+    assert.equal(tombol.textContent, 'Tersalin');
+    assert.deepEqual(umpanBalik.removed, ['hidden']);
+    assert.equal(revertCallbacks.length, 1);
+    revertCallbacks[0]();
+    assert.equal(tombol.textContent, 'Salin');
+    assert.deepEqual(umpanBalik.added, ['hidden']);
+
+    process.stdout.write('ok');
+    JS;
+    $process = new Process(['node', '--input-type=module'], base_path());
+    $process->setInput($script)->run();
+    expect($process->isSuccessful())->toBeTrue($process->getErrorOutput())
+        ->and($process->getOutput())->toBe('ok');
+})->group('langganan', 'langganan-invoice');

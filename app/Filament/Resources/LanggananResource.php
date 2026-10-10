@@ -135,6 +135,11 @@ class LanggananResource extends Resource
                     ->all()),
             ])
             ->actions([
+                Action::make('lihatInvoice')
+                    ->label('Lihat invoice')
+                    ->icon('heroicon-o-receipt-percent')
+                    ->url(fn (Langganan $record): string => route('langganan.invoice', $record))
+                    ->openUrlInNewTab(),
                 Action::make('lihatQr')
                     ->label('Lihat QR')
                     ->icon('heroicon-o-qr-code')

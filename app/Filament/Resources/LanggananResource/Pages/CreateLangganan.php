@@ -7,8 +7,11 @@ use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
 use App\Models\VoucherCode;
 use App\Services\BuatOrderLangganan;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Js;
 use Illuminate\Validation\ValidationException;
 
 class CreateLangganan extends CreateRecord
@@ -35,6 +38,34 @@ class CreateLangganan extends CreateRecord
             MetodePembayaran::findOrFail($data['metode_pembayaran_id']),
             $voucherCode,
         );
+    }
+
+    protected function afterCreate(): void
+    {
+        // Buka invoice di tab baru; redirect ke daftar tetap berjalan di tab lama.
+        // Jika popup diblokir, notifikasi sukses menyediakan tombol Lihat invoice.
+        $record = $this->getRecord();
+
+        if ($record) {
+            $this->js('window.open('.Js::from(route('langganan.invoice', $record)).", '_blank', 'noopener')");
+        }
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        $record = $this->getRecord();
+        $url = $record ? route('langganan.invoice', $record) : static::getResource()::getUrl('index');
+
+        return Notification::make()
+            ->title('Order langganan berhasil dibuat')
+            ->body('Invoice dibuka di tab baru. Gunakan Lihat invoice jika tab tidak terbuka otomatis.')
+            ->success()
+            ->actions([
+                Action::make('lihatInvoice')
+                    ->label('Lihat invoice')
+                    ->url($url, shouldOpenInNewTab: true)
+                    ->button(),
+            ]);
     }
 
     protected function getRedirectUrl(): string

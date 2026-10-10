@@ -49,6 +49,12 @@ test('tutorial dashboard menjelaskan tata letak tab mobile', function () {
         ->not->toContain('geser baris tab ke samping');
 });
 
+test('tutorial langganan menjelaskan tombol salin nomor tujuan', function () {
+    $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+
+    expect(implode(' ', $topik['langganan']['steps']))->toContain('tombol Salin');
+});
+
 test('tutorial kuota kas dan dompet menjelaskan batas serta masa aktif premium', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 

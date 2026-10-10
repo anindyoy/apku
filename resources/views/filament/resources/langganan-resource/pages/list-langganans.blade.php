@@ -43,7 +43,7 @@
                         <thead><tr><th scope="col">Fitur</th><th scope="col">Free (Reguler)<small>Gratis</small></th><th scope="col">Premium<small>Selama masa aktif berlaku</small></th></tr></thead>
                         <tbody>
                             <tr><th scope="row">Jumlah kas</th><td>Maksimal 2</td><td>Tidak terbatas</td></tr>
-                            <tr><th scope="row">Jumlah Dompet</th><td>Maksimal 2</td><td>Tidak terbatas</td></tr>
+                            <tr><th scope="row">Jumlah Sumber Dana</th><td>Maksimal 2</td><td>Tidak terbatas</td></tr>
                             @foreach (['Import transaksi CSV / XLSX', 'Laporan dan ekspor PDF / Excel', 'Utang dan piutang', 'Audit saldo dompet', 'Tabungan emas dan estimasi nilai'] as $fitur)
                                 <tr><th scope="row">{{ $fitur }}</th>
                                     <td><span class="plan-status" role="img" aria-label="Tersedia"><x-heroicon-o-check aria-hidden="true" /></span></td>
