@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Langganan Premium - APKu</title>
+<script>
+// Tema: ikuti pengaturan sistem, kecuali data-theme menentukan lain
+(function(){var r=document.documentElement,t=r.getAttribute("data-theme");
+var d=t==="dark"||(t!=="light"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+r.classList.toggle("dark",d)})();
+</script>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>tailwind.config={darkMode:"class"}</script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+<div class="max-w-5xl mx-auto px-4 py-5">
+ <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
+  <div class="relative px-6 pt-7 pb-6">
+   <h1 class="text-3xl md:text-4xl font-light tracking-tight">Upgrade <span class="font-extrabold">Premium</span></h1>
+   <p class="mt-1 text-gray-500 dark:text-gray-400">Nikmati semua fitur APKu: kas tanpa batas, import, laporan, dan kolaborasi.</p>
+   <div id="tag" class="inline-block mt-3 md:mt-0 md:absolute md:top-5 md:right-7 md:text-xl bg-teal-700 text-white font-bold px-4 py-2 rounded shadow-lg -rotate-2 md:rotate-6"></div>
+  </div>
+  <div class="bg-teal-700 dark:bg-teal-900 text-white px-6 py-4">
+   <h2 class="text-2xl md:text-3xl font-light">Perpanjangan</h2>
+  </div>
+  <div class="p-6">
+   <div class="p-4 mb-5 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-700 dark:text-green-400" role="alert">
+    Anda sudah menjadi member Premium. Setelah pembelian, masa aktif Anda diperpanjang dari sisa yang ada.
+   </div>
+   <div id="grid" class="grid grid-cols-1 min-[481px]:grid-cols-2 lg:grid-cols-4 gap-5"></div>
+   <p class="mt-7 text-center text-sm text-gray-500 dark:text-gray-400">
+    Klik <b>Beli</b> pada paket pilihan Anda, lalu konfirmasi metode pembayaran.<br>
+    <a href="#" class="font-medium text-teal-600 dark:text-teal-500 hover:underline">Lihat perbedaan fitur akun Reguler dan Premium</a>
+   </p>
+  </div>
+ </div>
+</div>
+
+<!-- Modal konfirmasi (markup gaya Flowbite) -->
+<div id="modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-gray-900/50 p-3" role="dialog" aria-modal="true" aria-labelledby="mt">
+ <div class="relative w-full max-w-md bg-white rounded-lg shadow dark:bg-gray-700">
+  <div class="flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600">
+   <h3 id="mt" class="text-lg font-semibold text-gray-900 dark:text-white">Konfirmasi order</h3>
+   <button id="tutup" type="button" aria-label="Tutup" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-xl w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">&times;</button>
+  </div>
+  <div class="p-4 space-y-4">
+   <div>
+    <label for="metode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Metode pembayaran</label>
+    <select id="metode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+     <option>Transfer Bank BCA</option><option>QRIS</option><option>DANA</option>
+    </select>
+   </div>
+   <div>
+    <label for="kode" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Kode voucher (opsional)</label>
+    <div class="flex gap-2">
+     <input id="kode" type="text" autocomplete="off" placeholder="Contoh: HEMAT10" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+     <button id="terapkan" type="button" class="shrink-0 text-teal-700 border border-teal-700 hover:bg-teal-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-4 dark:border-teal-500 dark:text-teal-500 dark:hover:text-white dark:hover:bg-teal-500 dark:focus:ring-teal-800">Terapkan</button>
+    </div>
+    <p id="msg" role="status" class="mt-1 min-h-[1.25rem] text-sm"></p>
+   </div>
+   <div id="sum" class="p-3 text-sm border border-gray-200 rounded-lg dark:border-gray-600"></div>
+  </div>
+  <div class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 rounded-b dark:border-gray-600">
+   <button id="batal" type="button" class="py-2.5 px-5 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-teal-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Batal</button>
+   <button id="buat" type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800 focus:outline-none">Buat order</button>
+  </div>
+ </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" role="status" class="hidden fixed left-1/2 -translate-x-1/2 bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] z-[60] max-w-[90%] p-4 text-sm text-white bg-teal-700 rounded-lg shadow"></div>
+
+<script>
+// Data contoh: di aplikasi nyata berasal dari paket_langganans yang aktif
+var PAKET=[{label:"3 Bulan",harga:63000,hari:90},{label:"6 Bulan",harga:126000,hari:180},{label:"9 Bulan",harga:169000,hari:270},{label:"1 Tahun",harga:199000,hari:365}];
+var VOUCHER={HEMAT10:10,PROMO5:5};
+var rp=function(n){return "Rp"+Math.round(n).toLocaleString("id-ID")};
+var data=PAKET.map(function(p){return Object.assign({bulan:Math.max(1,Math.round(p.hari/30))},p)});
+// Acuan: paket aktif dengan durasi terpendek
+var acuan=data.reduce(function(a,b){return b.hari<a.hari?b:a});
+var acuanBulan=acuan.harga/acuan.bulan;
+data.forEach(function(p){
+  p.perBulan=p.harga/p.bulan;
+  p.coret=acuanBulan*p.bulan;
+  p.hematBulan=Math.max(0,acuanBulan-p.perBulan);
+  p.hematTotal=Math.max(0,p.coret-p.harga);
+  p.persen=Math.floor((1-p.harga/p.coret)*100);
+});
+var terendah=Math.min.apply(null,data.map(function(p){return p.perBulan}));
+document.getElementById("tag").textContent="mulai "+rp(terendah)+" / bulan";
+var urut=data.slice().sort(function(a,b){return b.hari-a.hari});
+var terbaik=data.reduce(function(a,b){return b.hematBulan>a.hematBulan?b:a});
+document.getElementById("grid").innerHTML=urut.map(function(p){
+  var ada=p.hematBulan>0,top=ada&&p===terbaik;
+  return '<article class="relative flex flex-col rounded-xl bg-white p-5 dark:bg-gray-800 '+(top?'border-2 border-teal-600 shadow-lg ring-4 ring-teal-100 dark:ring-teal-900/40':'border border-gray-200 dark:border-gray-700')+'">'+
+   (top?'<span class="absolute -top-3 left-5 rounded-full bg-amber-300 px-3 py-0.5 text-xs font-bold text-teal-950">Paling hemat</span>':'')+
+   '<h3 class="text-lg font-semibold text-gray-900 dark:text-white">'+p.label+'</h3>'+
+   '<div class="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">'+rp(p.harga)+'</div>'+
+   '<div class="mt-1 text-sm text-gray-500 dark:text-gray-400">'+rp(p.perBulan)+' / bulan'+(ada?' <s class="ml-1 text-gray-400">'+rp(p.coret)+'</s>':'')+'</div>'+
+   
+   '<div class="mt-4 mb-5 min-h-[2.25rem] text-sm '+(ada?'font-semibold text-teal-700 dark:text-teal-400':'text-gray-500 dark:text-gray-400')+'">'+(ada?'Hemat '+rp(p.hematBulan)+' / bulan ('+p.persen+'%)':'Harga acuan per bulan')+'</div>'+
+   '<button type="button" data-label="'+p.label+'" class="beli mt-auto w-full rounded-lg px-5 py-2.5 text-sm font-medium focus:outline-none focus:ring-4 '+(top?'bg-teal-700 text-white hover:bg-teal-800 focus:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800':'border border-teal-700 text-teal-700 hover:bg-teal-700 hover:text-white focus:ring-teal-300 dark:border-teal-500 dark:text-teal-500 dark:hover:bg-teal-500 dark:hover:text-white dark:focus:ring-teal-800')+'">Beli paket</button></article>';
+}).join("");
+
+var modal=document.getElementById("modal"),pilih=null,diskon=0,kode="",lastBtn=null;
+function buka(){modal.classList.remove("hidden");modal.classList.add("flex");document.getElementById("metode").focus()}
+function tutup(){modal.classList.add("hidden");modal.classList.remove("flex");if(lastBtn)lastBtn.focus()}
+function ringkas(){
+  var pot=Math.round(pilih.harga*diskon/100),total=pilih.harga-pot,row="flex justify-between py-0.5 ";
+  document.getElementById("sum").innerHTML=
+   '<div class="'+row+'"><span>Paket</span><span>'+pilih.label+'</span></div>'+
+   '<div class="'+row+'"><span>Harga</span><span>'+rp(pilih.harga)+'</span></div>'+
+   (pilih.hematTotal>0?'<div class="'+row+'text-green-700 dark:text-green-400"><span>Hemat dibanding acuan</span><span>'+rp(pilih.hematTotal)+'</span></div>':'')+
+   (diskon?'<div class="'+row+'text-green-700 dark:text-green-400"><span>Voucher '+kode+' ('+diskon+'%)</span><span>-'+rp(pot)+'</span></div>':'')+
+   '<div class="'+row+'mt-1.5 pt-2 border-t border-gray-200 dark:border-gray-600 text-base font-bold"><span>Total bayar</span><span>'+rp(total)+'</span></div>';
+}
+document.getElementById("grid").addEventListener("click",function(e){
+  var b=e.target.closest(".beli");if(!b)return;
+  lastBtn=b;pilih=data.find(function(p){return p.label===b.dataset.label});
+  diskon=0;kode="";document.getElementById("kode").value="";document.getElementById("msg").textContent="";
+  ringkas();buka();
+});
+document.getElementById("terapkan").onclick=function(){
+  var v=document.getElementById("kode").value.trim().toUpperCase(),m=document.getElementById("msg");
+  if(!v){diskon=0;kode="";m.textContent="";}
+  else if(VOUCHER[v]){diskon=VOUCHER[v];kode=v;m.textContent="Voucher dipakai: diskon "+diskon+"%.";m.className="mt-1 min-h-[1.25rem] text-sm text-green-600 dark:text-green-400"}
+  else{diskon=0;kode="";m.textContent="Kode voucher tidak ditemukan. Periksa penulisannya.";m.className="mt-1 min-h-[1.25rem] text-sm text-red-600 dark:text-red-400"}
+  ringkas();
+};
+document.getElementById("tutup").onclick=tutup;
+document.getElementById("batal").onclick=tutup;
+modal.addEventListener("click",function(e){if(e.target===modal)tutup()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!modal.classList.contains("hidden"))tutup()});
+document.getElementById("buat").onclick=function(){
+  var l=pilih.label;tutup();var t=document.getElementById("toast");
+  t.textContent="Order "+l+" dibuat. Invoice dibuka di tab baru (demo).";
+  t.classList.remove("hidden");setTimeout(function(){t.classList.add("hidden")},3500);
+};
+</script>
+</body>
+</html>
