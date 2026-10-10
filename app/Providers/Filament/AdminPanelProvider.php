@@ -37,6 +37,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('APKu')
+            // Logo di atas menu sidebar memakai wordmark dompet yang sama dengan landing page.
+            ->brandLogo(asset('logo-options/apku-dompet-wordmark.svg'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('logo-options/apku-dompet.svg'))
             ->maxContentWidth(Width::Full)
             ->login()
             ->navigationItems([
