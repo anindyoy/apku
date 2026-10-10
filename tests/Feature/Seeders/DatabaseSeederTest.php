@@ -41,7 +41,9 @@ test('database seeder dapat dijalankan ulang tanpa menggandakan data demo', func
     app(DatabaseSeeder::class)->run();
 
     expect(User::where('email', 'admin@apku.com')->count())->toBe(1)
-        ->and(PaketLangganan::count())->toBe(3)
+        ->and(PaketLangganan::count())->toBe(7)
+        ->and(PaketLangganan::whereIn('label', ['1 Tahun', '9 Bulan', '6 Bulan', '3 Bulan'])->count())->toBe(4)
+        ->and(PaketLangganan::whereNotIn('label', ['1 Tahun', '9 Bulan', '6 Bulan', '3 Bulan'])->count())->toBe(3)
         ->and(MetodePembayaran::count())->toBe(3)
         ->and(Voucher::count())->toBe(2)
         ->and(Langganan::count())->toBe(count(StatusLangganan::cases()));

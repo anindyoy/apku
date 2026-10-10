@@ -23,6 +23,11 @@ use Illuminate\Support\Str;
 class DemoFiturSeeder extends Seeder
 {
     /**
+     * Label paket bawaan dari migration insert_pilihan_paket_langganan yang wajib dipertahankan.
+     */
+    private const PAKET_BAWAAN = ['1 Tahun', '9 Bulan', '6 Bulan', '3 Bulan'];
+
+    /**
      * Melengkapi data contoh untuk fitur yang belum dicakup seeder utama.
      */
     public function run(): void
@@ -49,7 +54,8 @@ class DemoFiturSeeder extends Seeder
         DB::table('voucher_codes')->delete();
         DB::table('vouchers')->delete();
         DB::table('metode_pembayarans')->delete();
-        DB::table('paket_langganans')->delete();
+        // Pertahankan paket bawaan migration agar pilihan awal tidak ikut terhapus saat data demo dibersihkan.
+        DB::table('paket_langganans')->whereNotIn('label', self::PAKET_BAWAAN)->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
