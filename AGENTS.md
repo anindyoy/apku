@@ -6,6 +6,7 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 
 - Baca dan gunakan [`FITUR_APLIKASI.md`](FITUR_APLIKASI.md) sebagai acuan untuk memahami fitur, alur pengguna, hak akses, dan cakupan aplikasi yang tersedia.
 - Jika suatu perubahan menambah, mengubah, menonaktifkan, atau menghapus fitur aplikasi, perbarui [`FITUR_APLIKASI.md`](FITUR_APLIKASI.md) agar tetap sesuai dengan implementasi terbaru.
+- Setiap perubahan skema database (migrasi baru, perubahan kolom, indeks, foreign key, maupun trigger pada [`database/migrations`](database/migrations)) wajib disertai pembaruan bagian Skema database di [`FITUR_APLIKASI.md`](FITUR_APLIKASI.md) dalam pekerjaan yang sama, tanpa menunggu permintaan terpisah dari pengguna.
 - Jika terdapat perbedaan antara rangkuman fitur dan implementasi, source code serta test yang berlaku menjadi sumber kebenaran; sesuaikan rangkuman fitur dalam pekerjaan yang sama.
 
 ## Pemeliharaan Tutorial Pengguna

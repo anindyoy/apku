@@ -346,4 +346,61 @@ Fitur berikut hanya tersedia untuk admin:
 - Pilih tab untuk berpindah panel. Navigasi keyboard mendukung panah kiri/kanan serta Home/End, dengan penanda tab aktif dan relasi aksesibel antara tab dan panel. Perubahan data atau aksi Livewire mempertahankan tab aktif selama pengaturan urutan/visibilitas tidak berubah.
 - Dashboard admin tetap hanya berisi statistik agregat administrasi.
 
-Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 5 September 2026. Struktur dokumentasi dipisahkan menjadi backend dan frontend pada 12 September 2026.
+### 15. Skema database
+
+- Ringkasan ini mencerminkan hasil akhir seluruh migrasi pada `database/migrations` per 10 Oktober 2026. Migrasi tetap menjadi sumber kebenaran; perbarui bagian ini setiap ada migrasi baru, diubah, atau dihapus.
+- Konvensi: `FK users` berarti foreign key ke tabel pengguna dengan `cascadeOnUpdate`; perilaku `onDelete` ditulis eksplisit bila bukan cascade.
+
+#### Akun dan sesi
+
+- `users`: `id`, `name`, `email` unik, `hp(100)` nullable, `penggunaan(100)` nullable, `email_verified_at` nullable, `provinsi(30)` nullable, `kota(30)` nullable, `masa_aktif` date nullable, `password`, `role(20)` default `user` (`user`, `admin`), `type` enum `reguler`/`premium` default `reguler`, `dashboard_settings` JSON nullable, `pisahkan_tipe_kategori` boolean default true, `rememberToken`, `timestamps`.
+- `password_reset_tokens`: `email` PK, `token`, `created_at` nullable.
+- `sessions`: `id` string PK, `user_id` FK users nullable cascade delete, `ip_address(45)` nullable, `user_agent` text nullable, `payload` longText, `last_activity` integer terindeks.
+- `notifications`: `id` UUID PK, `type`, `notifiable_type` + `notifiable_id` (morph), `data` text, `read_at` nullable, `timestamps`.
+
+#### Kas, kolaborasi, dan dompet
+
+- `buku_kas`: `id`, `user_id` FK users cascade delete, `nama_buku`, `saldo` integer, `is_default` boolean default false, `goal` integer nullable, `tanggal_goal` date nullable, `description(200)` nullable, `pernah_dikolaborasikan` boolean default false, `timestamps`, unik `[user_id, nama_buku]`.
+- `share_buku`: `id`, `buku_kas_id` FK `buku_kas` cascade delete, `user_id` FK users nullable cascade delete (kosong untuk link publik), `privilege` enum `viewer`/`editor`, `berlaku_mulai` datetime nullable, `berlaku_sampai` datetime nullable, `invited_by_user_id` FK users nullable null on delete, `public_token(64)` nullable unik, `timestamps`, unik `[buku_kas_id, user_id]`, indeks `[user_id, berlaku_mulai, berlaku_sampai]`.
+- `sumber_dana` (dompet): `id`, `user_id` FK users cascade delete, `nama_dompet(50)`, `jenis(20)` default `tunai` terindeks, `saldo` bigInteger default 0, `is_default` boolean default false, `description(200)` nullable, `timestamps` + `deleted_at` (soft delete), unik `[user_id, nama_dompet]`, indeks `[user_id, is_default]`.
+
+#### Kategori
+
+- `kategori`: `id`, `user_id` FK users cascade delete (pemilik), `dibuat_oleh` FK users nullable null on delete (pencatat), `nama`, `tipe` enum `Pemasukan`/`Pengeluaran`/`Semua`, `timestamps`, unik `[user_id, nama, tipe]`.
+- `kategori_kas` (pivot tanpa timestamps): `id`, `kategori_id` FK `kategori` cascade delete, `buku_kas_id` FK `buku_kas` cascade delete, unik `[kategori_id, buku_kas_id]`.
+
+#### Transaksi dan import
+
+- `transaksi`: `id`, `buku_kas_id` FK `buku_kas` cascade delete, `sumber_dana_id` FK `sumber_dana` restrict delete (wajib diisi), `dompet_id` nullable terindeks untuk kompatibilitas dan disinkronkan dua arah ke `sumber_dana_id` via trigger `trg_transaksi_sync_dompet_bi`/`bu`, `user_id` FK users cascade delete (pencatat), `import_transaksi_id` FK `import_transaksi` nullable null on delete, `audit_saldo_dompet_detail_id` FK `audit_saldo_dompet_detail` nullable restrict delete, `kategori_id` FK `kategori` nullable null on delete, `tanggal` datetime, `nominal` integer, `jenis` enum `Pemasukan`/`Pengeluaran`/`Transfer Pemasukan`/`Transfer Pengeluaran`, `transfer_code(36)` nullable, `tipe_transfer(20)` nullable, `tujuan_buku_tabungan_id` FK `buku_kas` nullable null on delete, `asal_buku_tabungan_id` FK `buku_kas` nullable null on delete, `pengaruhi_saldo` boolean default true, `timestamps`.
+- `import_transaksi`: `id`, `user_id` FK users cascade delete, `nama_file`, `hash_file(64)`, `path_file` nullable, `pemetaan` JSON nullable, `buat_kategori_otomatis` boolean default false, `jumlah_baris` unsigned, `jumlah_diproses` unsigned default 0, `status(20)` default `berhasil`, `pesan_error` text nullable, `pengaruhi_saldo` boolean default true, `dibatalkan_at` nullable, `mulai_diproses_at` nullable, `selesai_diproses_at` nullable, `timestamps`, unik `[user_id, hash_file]`.
+
+#### Audit saldo
+
+- `audit_saldo_dompet`: `id`, `user_id` FK users cascade delete, `buku_kas_id` FK `buku_kas` restrict delete, `tanggal` datetime, `catatan` text nullable, `total_saldo_aplikasi`/`total_saldo_riil`/`total_selisih` bigInteger, `timestamps`, indeks `[user_id, tanggal]`.
+- `audit_saldo_dompet_detail`: `id`, `audit_saldo_dompet_id` FK `audit_saldo_dompet` cascade delete, `sumber_dana_id` FK `sumber_dana` restrict delete, `nama_sumber_dana(50)`, `saldo_aplikasi`/`saldo_riil`/`selisih` bigInteger, `catatan` text nullable, `timestamps`, unik `[audit_saldo_dompet_id, sumber_dana_id]`.
+
+#### Emas
+
+- `tabungan_emas`: `id`, `buku_kas_id` FK `buku_kas` restrict delete, `label`, `berat_gram` decimal(12,4) default 0, `total_modal` unsigned default 0, `harga_beli` unsigned nullable, `keterangan` text nullable, `timestamps`.
+- `transaksi_emas`: `id`, `tabungan_emas_id` FK `tabungan_emas` restrict delete, `user_id` FK users restrict delete, `transaksi_id` FK `transaksi` nullable null on delete, `jenis(20)`, `tanggal` datetime, `berat_gram` decimal(12,4), `harga_per_gram` unsigned nullable, `biaya_tambahan` unsigned default 0, `total_rupiah` unsigned nullable, `catatan` text nullable, `timestamps`.
+- `harga_emas`: `id`, `buku_kas_id` FK `buku_kas` nullable cascade delete, `user_id` FK users nullable null on delete, `provider(100)`, `sumber(20)`, `jenis_harga(20)` default `buyback`, `harga_per_gram` unsigned, `berlaku_pada` datetime, `diambil_pada` datetime, `metadata` JSON nullable, `timestamps`, indeks `[sumber, jenis_harga, berlaku_pada]` dan `[buku_kas_id, sumber, berlaku_pada]`.
+
+#### Utang piutang
+
+- `utang_piutang`: `id`, `code(30)` nullable, `user_id` FK users cascade delete, `tipe` enum `utang`/`piutang`, `kepada(150)`, `deskripsi` nullable, `sambung_kas` boolean default false, `tempo` date nullable, `timestamps`.
+- `utang_piutang_detail`: `id`, `utang_piutang_id` FK `utang_piutang` cascade delete, `nominal` integer, `tipe` enum `tambah`/`kurang`, `deskripsi` nullable, `timestamps`.
+
+#### Langganan dan voucher
+
+- `paket_langganans`: `id`, `label`, `harga` unsigned, `durasi_hari` unsigned, `is_active` boolean default true terindeks, `timestamps`; seed awal 1 Tahun/365, 9 Bulan/270, 6 Bulan/180, 3 Bulan/90 dengan harga 0 nonaktif.
+- `metode_pembayarans`: `id`, `label`, `jenis(50)`, `nama_penyedia`, `nomor_tujuan` nullable, `nama_pemilik` nullable, `instruksi` text nullable, `gambar_qr_path` nullable, `is_active` boolean default true terindeks, `urutan` unsigned default 0, `timestamps`.
+- `langganans`: `id`, `kode_order` unik, `user_id` FK users cascade delete, `paket_langganan_id` FK nullable null on delete, `metode_pembayaran_id` FK nullable null on delete, `voucher_code_id` FK `voucher_codes` nullable null on delete, `label_paket`, `harga` unsigned, `durasi_hari` unsigned, `label_metode_pembayaran`, `detail_pembayaran` JSON, `kode_voucher` nullable, `persentase_diskon` unsigned tiny default 0, `nominal_diskon` unsigned default 0, `total_pembayaran` unsigned default 0, `status` string default menunggu pembayaran terindeks, `bukti_pembayaran_path` nullable, `tanggal_konfirmasi` nullable, `catatan_user`/`catatan_admin` text nullable, `diverifikasi_oleh` FK users nullable null on delete, `tanggal_verifikasi` nullable, `masa_aktif_mulai`/`masa_aktif_sampai` date nullable, `timestamps`, indeks `[user_id, created_at]`.
+- `vouchers`: `id`, `label`, `masa_aktif` date nullable terindeks, `jumlah_diskon` unsigned tiny (persen), `dapat_dipakai_berulang` boolean default false, `timestamps`.
+- `voucher_codes`: `id`, `voucher_id` FK `vouchers` cascade delete, `code` unik, `timestamps`.
+
+#### Pengaturan dan tabel framework
+
+- `application_settings`: `key` string PK, `value` JSON, `timestamps`; dipakai untuk pengaturan global harga emas.
+- `cache`/`cache_locks`, `jobs`/`job_batches`/`failed_jobs`, `telescope_entries`/`telescope_entries_tags`/`telescope_monitoring` mengikuti bawaan Laravel/Telescope dan tidak menyimpan data bisnis.
+
+Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 5 September 2026. Struktur dokumentasi dipisahkan menjadi backend dan frontend pada 12 September 2026. Skema database ditambahkan pada 10 Oktober 2026.
