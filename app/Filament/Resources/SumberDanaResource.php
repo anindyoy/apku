@@ -26,7 +26,8 @@ class SumberDanaResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return false;
+        // Sumber Dana tetap tampil di submenu Setting untuk pengguna non-admin.
+        return ! auth()->user()?->isAdmin();
     }
 
     protected static ?string $cluster = Pengaturan::class;
@@ -91,7 +92,7 @@ class SumberDanaResource extends Resource
                         && auth()->user()->dapatMengelolaTransaksiPadaDompet($record)
                         && auth()->user()->sumberDana()->count() > 1)
                     ->form(fn (SumberDana $record): array => [
-                        Select::make('sumber_dana_tujuan_id')
+                        Select::make('dompet_tujuan_id')
                             ->label('Sumber dana tujuan')
                             ->options(fn (): array => array_filter(
                                 Transaksi::opsiSumberDanaYangDapatDikelola(),
@@ -109,7 +110,7 @@ class SumberDanaResource extends Resource
                         app(TransferDompetService::class)->pindahkanSaldoDanHapus(
                             auth()->user(),
                             $record,
-                            SumberDana::findOrFail($data['sumber_dana_tujuan_id']),
+                            SumberDana::findOrFail($data['dompet_tujuan_id']),
                             BukuKas::findOrFail($data['buku_kas_id']),
                         );
                     }),

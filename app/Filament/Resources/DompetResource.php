@@ -13,6 +13,12 @@ class DompetResource extends SumberDanaResource
 
     protected static ?string $slug = 'dompet';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        // Hanya SumberDanaResource yang muncul di navigasi agar tidak ada menu ganda.
+        return false;
+    }
+
     public static function getPages(): array
     {
         return ['index' => ListDompet::route('/')];

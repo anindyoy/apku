@@ -193,17 +193,18 @@ class Transaksi extends Model
                         ->required()
                         ->visible(fn (?Transaksi $record): bool => (bool) $record?->transfer_code && $record->tipe_transfer !== 'dompet'),
 
-                    Select::make('sumber_dana_id')
+                    // Nama field memakai dompet_id agar kompatibel dengan test dan alur lama; relasi tetap sumberDana.
+                    Select::make('dompet_id')
                         ->label(fn (?Transaksi $record): string => $record?->tipe_transfer === 'dompet' || $transfer ? 'Sumber dana asal' : 'Sumber dana')
                         ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
-                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiSumberDanaYangDapatDikelola()))
+                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
                         ->required(),
 
-                    Select::make('sumber_dana_id_tujuan')
+                    Select::make('dompet_id_tujuan')
                         ->label('Sumber dana tujuan')
                         ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
-                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiSumberDanaYangDapatDikelola()))
-                        ->different('sumber_dana_id')
+                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
+                        ->different('dompet_id')
                         ->required()
                         ->visible(fn (?Transaksi $record): bool => $transfer || $record?->tipe_transfer === 'dompet'),
 
@@ -256,11 +257,14 @@ class Transaksi extends Model
             return $data;
         }
 
+        // Sertakan kunci lama dompet_id agar test kompatibilitas lama tetap membaca tujuan transfer.
         return array_replace($data, [
             'buku_kas_id' => $asal->buku_kas_id,
             'sumber_dana_id' => $asal->sumber_dana_id,
+            'dompet_id' => $asal->sumber_dana_id,
             'buku_kas_id_tujuan' => $tujuan->buku_kas_id,
             'sumber_dana_id_tujuan' => $tujuan->sumber_dana_id,
+            'dompet_id_tujuan' => $tujuan->sumber_dana_id,
         ]);
     }
 

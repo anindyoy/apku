@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class PastikanAkunKeuanganDefault
 {
-    /** @return array{bukuKas: BukuKas, sumberDana: SumberDana} */
+    /** @return array{bukuKas: BukuKas, dompet: SumberDana} */
     public function jalankan(User $user): array
     {
         return DB::transaction(function () use ($user): array {
@@ -69,7 +69,8 @@ class PastikanAkunKeuanganDefault
                 $sumberDana->update(['is_default' => true]);
             }
 
-            return ['bukuKas' => $bukuKas->fresh(), 'sumberDana' => $sumberDana->fresh()];
+            // Kunci 'dompet' dipertahankan agar kompatibel dengan pemanggil dan test lama.
+            return ['bukuKas' => $bukuKas->fresh(), 'dompet' => $sumberDana->fresh()];
         });
     }
 }

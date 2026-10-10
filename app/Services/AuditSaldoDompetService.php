@@ -145,8 +145,8 @@ class AuditSaldoDompetService
                     'tanggal' => $tanggal ?? now(),
                     'nominal' => abs($selisihAkhir),
                     'deskripsi' => filled($catatan)
-                        ? 'Penyesuaian saldo sumber dana: '.trim($catatan)
-                        : 'Penyesuaian saldo sumber dana',
+                        ? 'Penyesuaian saldo dompet: '.trim($catatan)
+                        : 'Penyesuaian saldo dompet',
                 ], $jenis);
 
                 Transaksi::withoutEvents(fn () => $transaksi->update([

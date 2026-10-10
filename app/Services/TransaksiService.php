@@ -56,8 +56,15 @@ class TransaksiService
         }
 
         // Normalisasi kunci lama dompet_id ke sumber_dana_id untuk kompatibilitas test lama.
-        $data['sumber_dana_id'] ??= $data['dompet_id'] ?? null;
-        $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'] ?? null;
+        // Hanya dipetakan bila kunci lama ada agar tidak menyuntik nilai null ke update.
+        if (array_key_exists('dompet_id', $data)) {
+            $data['sumber_dana_id'] ??= $data['dompet_id'];
+            unset($data['dompet_id']);
+        }
+        if (array_key_exists('dompet_id_tujuan', $data)) {
+            $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'];
+            unset($data['dompet_id_tujuan']);
+        }
 
         $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($data['buku_kas_id']);
         $sumberDana = SumberDana::withoutGlobalScopes()->findOrFail($data['sumber_dana_id']);
@@ -171,9 +178,15 @@ class TransaksiService
     public function ubah(User $user, Transaksi $transaksi, array $data): Transaksi
     {
         // Normalisasi kunci lama dompet_id ke sumber_dana_id untuk kompatibilitas test lama.
-        $data['sumber_dana_id'] ??= $data['dompet_id'] ?? null;
-        $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'] ?? null;
-        unset($data['dompet_id'], $data['dompet_id_tujuan']);
+        // Hanya dipetakan bila kunci lama ada agar tidak menyuntik nilai null ke update.
+        if (array_key_exists('dompet_id', $data)) {
+            $data['sumber_dana_id'] ??= $data['dompet_id'];
+            unset($data['dompet_id']);
+        }
+        if (array_key_exists('dompet_id_tujuan', $data)) {
+            $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'];
+            unset($data['dompet_id_tujuan']);
+        }
 
         $this->pastikanDapatMengelola($user, $transaksi);
 
@@ -189,6 +202,9 @@ class TransaksiService
             if ($terkunci->transfer_code) {
                 return $this->ubahPasanganTransfer($user, $terkunci, $data);
             }
+
+            // Kunci tujuan tidak ada di tabel transaksi; buang agar update transaksi biasa tidak error kolom.
+            unset($data['sumber_dana_id_tujuan']);
 
             $dataBaru = array_merge($terkunci->only([
                 'buku_kas_id', 'sumber_dana_id', 'kategori_id', 'tanggal', 'nominal', 'jenis', 'deskripsi',
@@ -273,8 +289,15 @@ class TransaksiService
         }
 
         // Normalisasi kunci lama dompet_id agar pasangan transfer lama tetap dapat diubah.
-        $data['sumber_dana_id'] ??= $data['dompet_id'] ?? null;
-        $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'] ?? null;
+        // Hanya dipetakan bila kunci lama ada agar tidak menyuntik nilai null.
+        if (array_key_exists('dompet_id', $data)) {
+            $data['sumber_dana_id'] ??= $data['dompet_id'];
+            unset($data['dompet_id']);
+        }
+        if (array_key_exists('dompet_id_tujuan', $data)) {
+            $data['sumber_dana_id_tujuan'] ??= $data['dompet_id_tujuan'];
+            unset($data['dompet_id_tujuan']);
+        }
 
         $kasAsalId = (int) ($data['buku_kas_id'] ?? $keluar->buku_kas_id);
         $kasTujuanId = (int) ($tipeTransfer === 'buku_kas'

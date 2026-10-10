@@ -2,6 +2,7 @@
 
 use App\Filament\Resources\AuditSaldoDompetResource;
 use App\Filament\Resources\AuditSaldoDompetResource\Pages\ListAuditSaldoDompet;
+use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Filament\Resources\SumberDanaResource\Pages\ListSumberDana;
 use App\Models\AuditSaldoDompet;
 use App\Models\BukuKas;
