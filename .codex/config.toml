@@ -1,2 +1,6 @@
 [mcp_servers.clickup]
 url = "https://mcp.clickup.com/mcp"
+
+[mcp_servers.domainesia]
+url = "https://mcp.invishar.com/"
+bearer_token_env_var = "DOMAINESIA_MCP_KEY"

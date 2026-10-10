@@ -9,3 +9,4 @@ return array_merge([
     App\Providers\AppServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
 ], $telescopeProviders);
+ 
