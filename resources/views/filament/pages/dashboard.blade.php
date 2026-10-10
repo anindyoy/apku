@@ -4,6 +4,13 @@
         {{ $this->content }}
     @else
         @php
+            $trialBanner = $this->sectionData('langganan')['trial'] ?? null;
+            $infoTrialDashboard = $this->infoTrialPremium();
+        @endphp
+        @if ($trialBanner)
+            @include('filament.components.trial-premium-banner', ['trial' => $trialBanner])
+        @endif
+        @php
             $sections = $this->visibleTabs();
             $firstTab = $sections[0]['key'] ?? null;
             $icons = [
@@ -136,6 +143,17 @@
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Masa aktif premium berakhir pada {{ $data['expires'] }}.</p>
                         @else
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Belum memiliki langganan premium aktif.</p>
+                        @endif
+                        @if (($data['trial'] ?? null) && ! ($infoTrialDashboard['layak'] ?? false))
+                            <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Trial Premium: {{ ($data['trial']['sisa'] ?? 0) === 0 ? 'berakhir hari ini' : ($data['trial']['sisa'] ?? 0).' hari tersisa' }} sampai {{ $data['trial']['berakhir'] ?? '-' }}.</p>
+                        @elseif ($infoTrialDashboard['layak'] ?? false)
+                            <div class="mt-3 rounded-lg bg-[var(--dash-bg)] p-3" data-testid="trial-premium-cta">
+                                <p class="text-sm font-semibold">Coba Premium gratis {{ $infoTrialDashboard['durasi'] }} hari</p>
+                                <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Kas dan dompet tanpa batas, kolaborasi kas, dan tautan kas publik.</p>
+                                <div class="mt-2">{{ $this->mulaiTrialPremiumAction }}</div>
+                            </div>
+                        @elseif (! empty($infoTrialDashboard['alasan'] ?? null))
+                            <p class="dashboard-caption mt-2 text-xs leading-normal text-[color:var(--dash-muted)]" data-testid="trial-premium-guidance">{{ $infoTrialDashboard['alasan'] }}</p>
                         @endif
                                 @endif
                                 @if ($manageUrl)

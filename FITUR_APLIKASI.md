@@ -14,7 +14,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Verifikasi alamat email.
 - Lupa dan reset password.
 - Email verifikasi akun, email reset kata sandi, pesan validasi formulir, status autentikasi, dan navigasi halaman bawaan Laravel ditampilkan dalam bahasa Indonesia.
-- Pengingat perpanjangan masa aktif pada H-30 dan H-7 sebelum masa aktif berakhir.
+- Pengingat perpanjangan masa aktif pada H-30 dan H-7 sebelum masa aktif berakhir. Pengguna dengan trial Premium aktif dilewati dari pengingat bawaan dan memakai pengingat khusus trial H-7 serta H-1.
 - Akun admin awal dibuat saat migration menggunakan password dari `ADMIN_PASSWORD` pada environment.
 - Penyimpanan perubahan profil pengguna: nama, email, nomor HP, penggunaan aplikasi, dan password.
 
@@ -135,8 +135,12 @@ Fitur berikut hanya tersedia untuk admin:
 - Pencatatan log dan debugging melalui Laravel Telescope serta Debugbar pada lingkungan yang sesuai.
 - Notifikasi otomatis ke Telegram untuk exception yang dilaporkan pada lingkungan production apabila kredensial bot dan chat telah dikonfigurasi.
 
-### 12. Langganan premium
+### 12. Langganan premium dan coba gratis
 
+- Akun baru Reguler yang belum pernah memiliki `masa_aktif` maupun langganan disetujui dapat memulai **Coba Premium gratis 30 hari** dari Dashboard atau halaman Langganan, sekali per akun, nomor HP ternormalisasi, dan email ternormalisasi. Syaratnya email terverifikasi, nomor HP terisi, dan saklar program `trial.aktif` menyala. Aktivasi memakai kunci baris user agar klik ganda atau permintaan paralel hanya membuat satu trial, lalu akun menjadi Premium dengan `masa_aktif` inklusif (hari ini + durasi - 1, default 30 hari). Catatan trial dipertahankan walau akun dihapus sehingga HP atau email yang sama tidak dapat dipakai ulang.
+- Kartu CTA hanya tampil bagi yang layak atau hampir layak; akun yang belum memenuhi syarat melihat arahan verifikasi email atau pengisian HP di Akun Saya. Modal konfirmasi menyebut manfaat, durasi, tanggal berakhir, serta peringatan kas/dompet tambahan akan terkunci setelah trial. Banner status tampil di Dashboard (kuning pada H-7, merah pada H-1) plus badge Trial pada nama pengguna, sedangkan Akun Saya menampilkan status dan tanggal berakhir trial.
+- Perintah harian `trial-premium:proses` (08:15 Asia/Jakarta) mengirim pengingat H-7 dan H-1 lalu menutup trial yang lewat `berakhir_pada` menjadi `berakhir`; akun kembali Reguler bila masa aktif tidak diperpanjang berbayar, tanpa menghapus data. Notifikasi H0, H-7, H-1, dan berakhir dikirim via email sekaligus dalam aplikasi, termasuk jumlah kas/dompet yang terkunci pada email penutup.
+- Persetujuan langganan saat trial aktif menandai trial sebagai `dikonversi` beserta `langganan_id` dan `dikonversi_pada`; sisa trial ikut ditambahkan ke masa aktif paket karena perhitungan mulai dari masa aktif yang masih berlaku. Admin dapat membatalkan trial aktif yang mencurigakan sehingga akses Premium dari trial langsung dicabut bila belum ada masa aktif berbayar.
 - Admin mengelola paket langganan yang terdiri dari label, harga minimal Rp1, durasi dalam hari, dan status aktif.
 - Migration menyediakan pilihan awal 1 Tahun (365 hari), 9 Bulan (270 hari), 6 Bulan (180 hari), dan 3 Bulan (90 hari), dengan harga sementara Rp0 dan status nonaktif. Admin harus mengisi harga sebelum mengaktifkan paket. Paket dengan label yang sudah ada tidak ditimpa; rollback mempertahankan data paket.
 - Seeder data demo mempertahankan keempat paket bawaan tersebut saat membersihkan data demo, sehingga pilihan awal tidak hilang ketika database diseed ulang; hanya paket demo yang dihapus dan dibuat ulang.
@@ -294,23 +298,25 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Melihat daftar pengguna.
 - Melihat status verifikasi email.
-- Dashboard admin menjadi halaman utama setelah login dan hanya menampilkan data agregat: jumlah pengguna, jumlah akun premium aktif, serta jumlah pembayaran yang menunggu verifikasi.
+- Dashboard admin menjadi halaman utama setelah login dan hanya menampilkan data agregat: jumlah pengguna, jumlah akun premium aktif, jumlah pembayaran yang menunggu verifikasi, serta statistik trial (trial aktif, trial berakhir minggu ini, total trial, jumlah konversi, dan persentase konversi).
 - Daftar pengguna tidak menampilkan jumlah kas, transaksi, atau utang-piutang dan tidak menyediakan aksi impersonasi.
 - Navigasi admin difokuskan pada dashboard, pengguna, operasional langganan, dan Setting. Menu transaksi, pencarian transaksi, laporan, kas, dompet, kategori, utang, piutang, dan Akun Saya disembunyikan untuk admin.
 - Admin dapat membuat, mengubah, dan menghapus pengguna serta mengatur tipe akun dan masa aktif.
 - Submenu **Harga Emas** (`/admin/pengaturan/setting`) pada halaman Setting khusus admin menyediakan form pengaturan harga emas. Nilai default ditampilkan sebagai placeholder; kosongkan kolom dan simpan untuk kembali memakai default.
+- Submenu **Pengaturan Trial** pada halaman Setting khusus admin menyediakan saklar program trial dan durasi 1-90 hari (default 30). Mematikan saklar hanya menutup pendaftaran baru tanpa mengganggu trial berjalan.
+- Dashboard admin menampilkan statistik trial: trial aktif, trial berakhir minggu ini, total trial, jumlah konversi, dan persentase konversi. Resource baca-saja **Trial Premium** pada grup Langganan menampilkan pengguna, email, tanggal mulai/berakhir, status, dan konversi beserta filter status serta aksi Batalkan untuk trial aktif.
 
 ### 12. Fitur pendukung
 
 - Tombol aksi pada kartu daftar Kas, Dompet, dan Langganan turun ke baris berikutnya ketika ruang sempit, termasuk saat subnavigasi Setting terbuka, sehingga tetap berada di dalam kartu.
 
-- Menu **Setting** (/admin/pengaturan) menggantikan grup Pengaturan pada navbar dan menggunakan Filament Cluster untuk membuka halaman pertama yang dapat diakses dengan subnavigasi bawaan pada setiap halaman anggota. URL halaman anggota memakai awalan `/admin/pengaturan/`, dan breadcrumb Setting kembali ke halaman pertama yang tersedia. Reguler dan Premium melihat Kas, Dompet, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya; admin melihat Pengguna dan Harga Emas. Submenu mengikuti otorisasi halaman tujuan. Audit saldo dan riwayatnya tetap diakses dari Dompet.
+- Menu **Setting** (/admin/pengaturan) menggantikan grup Pengaturan pada navbar dan menggunakan Filament Cluster untuk membuka halaman pertama yang dapat diakses dengan subnavigasi bawaan pada setiap halaman anggota. URL halaman anggota memakai awalan `/admin/pengaturan/`, dan breadcrumb Setting kembali ke halaman pertama yang tersedia. Reguler dan Premium melihat Kas, Dompet, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya; admin melihat Pengguna, Harga Emas, dan Trial Premium. Submenu mengikuti otorisasi halaman tujuan. Audit saldo dan riwayatnya tetap diakses dari Dompet.
 
 - Antarmuka berbahasa Indonesia.
-- Halaman publik `/` menampilkan landing page APKu dengan ringkasan fitur, perbandingan akun Reguler dan Premium, logo aplikasi, serta tautan ke registrasi, login, dan tutorial.
+- Halaman publik `/` menampilkan landing page APKu dengan ringkasan fitur, perbandingan akun Reguler dan Premium (termasuk penawaran Coba Premium gratis 30 hari untuk akun baru yang memenuhi syarat), logo aplikasi, serta tautan ke registrasi, login, dan tutorial.
 - Warna utama panel Filament dan halaman tutorial menggunakan palet teal yang sama dengan warna utama landing page. Brand di atas menu sidebar admin memakai logo wordmark dompet `logo-options/apku-dompet-wordmark.svg` yang sama dengan landing page, dengan favicon dompet `logo-options/apku-dompet.svg`.
 - Nominal rupiah ditampilkan tanpa digit desimal, termasuk total langganan, harga paket, audit saldo, dan harga beli emas. Perubahan format tampilan tidak mengubah nilai tersimpan atau presisi berat emas.
-- Halaman publik **Tutorial Penggunaan** di `/tutorial` dapat dibaca tanpa login, dengan 18 topik fitur pengguna non-admin (Reguler, Premium, dan kas bersama), langkah bernomor, contoh, serta catatan hak akses. Konten dikelola melalui `resources/content/tutorial.json` dan ditampilkan sebagai kartu responsif dengan dukungan tema gelap, daftar isi tanpa nomor topik, serta bab berdasarkan halaman fitur yang dapat dibuka dan ditutup sebagai accordion. Pencarian hanya menampilkan bab berisi hasil. Tautan tersedia pada halaman login dan navigasi pengguna non-admin, serta tombol berikon tanda tanya di sisi kanan topbar panel untuk pengguna yang sudah login, termasuk admin. Menu Tutorial Penggunaan pada sidebar membuka daftar tutorial di tab baru. Tombol tutorial di topbar membuka panduan di tab baru dan langsung menuju topik sesuai URL halaman pengguna saat diklik, termasuk halaman detail/tambah dan perpindahan navigasi panel; bab tujuan otomatis terbuka. Sidebar tutorial menampilkan posisi topik dari jumlah hasil yang ditampilkan dan penanda aktif yang mengikuti tautan topik serta scroll. Topik tujuan ditandai secara visual; halaman tanpa pemetaan membuka daftar tutorial.
+- Halaman publik **Tutorial Penggunaan** di `/tutorial` dapat dibaca tanpa login, dengan 19 topik fitur pengguna non-admin (Reguler, Premium, kas bersama, dan trial Premium), langkah bernomor, contoh, serta catatan hak akses. Konten dikelola melalui `resources/content/tutorial.json` dan ditampilkan sebagai kartu responsif dengan dukungan tema gelap, daftar isi tanpa nomor topik, serta bab berdasarkan halaman fitur yang dapat dibuka dan ditutup sebagai accordion. Pencarian hanya menampilkan bab berisi hasil. Tautan tersedia pada halaman login dan navigasi pengguna non-admin, serta tombol berikon tanda tanya di sisi kanan topbar panel untuk pengguna yang sudah login, termasuk admin. Menu Tutorial Penggunaan pada sidebar membuka daftar tutorial di tab baru. Tombol tutorial di topbar membuka panduan di tab baru dan langsung menuju topik sesuai URL halaman pengguna saat diklik, termasuk halaman detail/tambah dan perpindahan navigasi panel; bab tujuan otomatis terbuka. Sidebar tutorial menampilkan posisi topik dari jumlah hasil yang ditampilkan dan penanda aktif yang mengikuti tautan topik serta scroll. Topik tujuan ditandai secara visual; halaman tanpa pemetaan membuka daftar tutorial.
 - Seluruh input pilihan kas dan dompet menggunakan dropdown tanpa pencarian, termasuk pilihan kas kolaborator dan tujuan pemindahan sebelum penghapusan.
 - Pencarian cepat menu melalui Spotlight.
 - Login cepat akun pengembangan pada lingkungan lokal. Saat `APP_DEMO=true`, akun admin tidak ditampilkan dalam pilihan login cepat.
@@ -397,10 +403,11 @@ Fitur berikut hanya tersedia untuk admin:
 - `langganans`: `id`, `kode_order` unik, `user_id` FK users cascade delete, `paket_langganan_id` FK nullable null on delete, `metode_pembayaran_id` FK nullable null on delete, `voucher_code_id` FK `voucher_codes` nullable null on delete, `label_paket`, `harga` unsigned, `durasi_hari` unsigned, `label_metode_pembayaran`, `detail_pembayaran` JSON, `kode_voucher` nullable, `persentase_diskon` unsigned tiny default 0, `nominal_diskon` unsigned default 0, `total_pembayaran` unsigned default 0, `status` string default menunggu pembayaran terindeks, `bukti_pembayaran_path` nullable, `tanggal_konfirmasi` nullable, `catatan_user`/`catatan_admin` text nullable, `diverifikasi_oleh` FK users nullable null on delete, `tanggal_verifikasi` nullable, `masa_aktif_mulai`/`masa_aktif_sampai` date nullable, `timestamps`, indeks `[user_id, created_at]`.
 - `vouchers`: `id`, `label`, `masa_aktif` date nullable terindeks, `jumlah_diskon` unsigned tiny (persen), `dapat_dipakai_berulang` boolean default false, `timestamps`.
 - `voucher_codes`: `id`, `voucher_id` FK `vouchers` cascade delete, `code` unik, `timestamps`.
+- `trial_premium`: `id`, `user_id` FK users nullable unik null on delete, `hp_normal(30)` unik, `email_normal(255)` unik, `mulai_pada` date, `berakhir_pada` date, `status(20)` default `aktif` terindeks (`aktif`/`berakhir`/`dikonversi`), `langganan_id` FK `langganans` nullable null on delete, `dikonversi_pada` nullable, `timestamps`, indeks `[status, berakhir_pada]`.
 
 #### Pengaturan dan tabel framework
 
-- `application_settings`: `key` string PK, `value` JSON, `timestamps`; dipakai untuk pengaturan global harga emas.
+- `application_settings`: `key` string PK, `value` JSON, `timestamps`; dipakai untuk pengaturan global harga emas dan trial (`trial`: `aktif` boolean default true, `durasi_hari` 1-90 default 30).
 - `cache`/`cache_locks`, `jobs`/`job_batches`/`failed_jobs`, `telescope_entries`/`telescope_entries_tags`/`telescope_monitoring` mengikuti bawaan Laravel/Telescope dan tidak menyimpan data bisnis.
 
 Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 5 September 2026. Struktur dokumentasi dipisahkan menjadi backend dan frontend pada 12 September 2026. Skema database ditambahkan pada 10 Oktober 2026.

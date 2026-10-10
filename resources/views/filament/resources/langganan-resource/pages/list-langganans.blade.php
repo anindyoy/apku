@@ -1,5 +1,8 @@
 <x-filament-panels::page>
     @vite('resources/css/filament-toolbar.css')
+    @if (! auth()->user()->isAdmin())
+        @include('filament.components.trial-premium-cta', ['info' => $this->infoTrialPremium()])
+    @endif
     @unless (auth()->user()->isAdmin())
         <style>
             .plan-comparison { --plan-border: #e5e7eb; --plan-muted: #4b5563; --plan-text: #111827; --plan-surface: #fff; --plan-accent: #fffbeb; color: var(--plan-text); }

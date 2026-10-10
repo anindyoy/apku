@@ -40,6 +40,9 @@ class SetujuiLangganan
             $sampai = $mulai->copy()->addDays($order->durasi_hari - 1);
 
             $user->update(['type' => 'premium', 'masa_aktif' => $sampai]);
+
+            // Sisa trial ikut ditambahkan lewat masa aktif di atas; tandai trial sebagai dikonversi.
+            app(MulaiTrialPremium::class)->tandaiDikonversi($user->id, $order->id);
             $order->update([
                 'status' => StatusLangganan::Disetujui,
                 'catatan_admin' => $catatan,

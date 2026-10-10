@@ -305,6 +305,26 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(Langganan::class);
     }
 
+    public function trialPremium(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TrialPremium::class);
+    }
+
+    // Trial yang masih berstatus aktif dan belum melewati tanggal berakhir.
+    public function trialPremiumAktif(): ?TrialPremium
+    {
+        $trial = $this->trialPremium;
+
+        return $trial !== null && $trial->masihAktif() ? $trial : null;
+    }
+
+    public function pernahBerlanggananDisetujui(): bool
+    {
+        return $this->langganans()
+            ->where('status', \App\Enums\StatusLangganan::Disetujui)
+            ->exists();
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

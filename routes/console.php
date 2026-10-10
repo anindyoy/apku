@@ -8,6 +8,11 @@ Schedule::call(fn (): int => Artisan::call('masa-aktif:kirim-pengingat'))
     ->dailyAt('08:00')
     ->withoutOverlapping();
 
+Schedule::call(fn (): int => Artisan::call('trial-premium:proses'))
+    ->name('trial-premium:proses')
+    ->dailyAt('08:15')
+    ->withoutOverlapping();
+
 Schedule::call(fn (): int => Artisan::call('harga-emas:pantau'))
     ->name('harga-emas:pantau')
     ->daily()

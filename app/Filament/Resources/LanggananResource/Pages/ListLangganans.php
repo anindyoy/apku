@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\LanggananResource\Pages;
 
+use App\Filament\Concerns\HasMulaiTrialPremiumAction;
 use App\Filament\Resources\LanggananResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListLangganans extends ListRecords
 {
+    use HasMulaiTrialPremiumAction;
+
     protected static string $resource = LanggananResource::class;
 
     protected string $view = 'filament.resources.langganan-resource.pages.list-langganans';

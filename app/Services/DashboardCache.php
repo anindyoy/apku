@@ -16,10 +16,11 @@ class DashboardCache
         'dompet' => ['sumber_dana'],
         'utang' => ['utang_piutang', 'utang_piutang_detail'],
         'piutang' => ['utang_piutang', 'utang_piutang_detail'],
-        'langganan' => ['users', 'langganans'],
+        // Trial memengaruhi status langganan pada dashboard user dan statistik admin.
+        'langganan' => ['users', 'langganans', 'trial_premium'],
         'settings' => ['users'],
         'transaksi' => ['transaksi', 'users', 'buku_kas', 'sumber_dana', 'kategori', 'share_buku'],
-        'admin' => ['users', 'langganans'],
+        'admin' => ['users', 'langganans', 'trial_premium'],
     ];
 
     public static function remember(string $section, int $userId, Closure $load): mixed

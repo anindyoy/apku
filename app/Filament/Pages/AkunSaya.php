@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Clusters\Pengaturan;
+use App\Filament\Concerns\HasMulaiTrialPremiumAction;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use BackedEnum;
 use Filament\Forms\Components\Select;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AkunSaya extends Page implements HasForms
 {
+    use HasMulaiTrialPremiumAction;
     use HidesFromAdminNavigation;
     use InteractsWithForms;
 

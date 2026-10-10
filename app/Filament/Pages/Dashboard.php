@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HasMulaiTrialPremiumAction;
 use App\Filament\Concerns\HasTambahTransaksiAction;
 use App\Filament\Resources\TransaksiResource;
 use App\Filament\Widgets\AdminOverview;
@@ -23,6 +24,7 @@ use Illuminate\Validation\Rule;
 
 class Dashboard extends BaseDashboard implements HasTable
 {
+    use HasMulaiTrialPremiumAction;
     use HasTambahTransaksiAction;
     use InteractsWithTable;
 
@@ -165,13 +167,25 @@ class Dashboard extends BaseDashboard implements HasTable
             'kas' => $user->buku_kas()->get(),
             'dompet' => $user->dompet()->get(),
             'utang', 'piutang' => $this->debtData($key),
-            'langganan' => [
-                'active' => $user->masaAktifBerlaku(),
-                'expires' => $user->masa_aktif?->translatedFormat('d F Y'),
-                'days' => $user->masaAktifBerlaku() ? (int) today()->diffInDays($user->masa_aktif) : 0,
-            ],
+            'langganan' => $this->langgananData($user),
             default => null,
         });
+    }
+
+    private function langgananData($user): array
+    {
+        $trial = $user->trialPremiumAktif();
+
+        return [
+            'active' => $user->masaAktifBerlaku(),
+            'expires' => $user->masa_aktif?->translatedFormat('d F Y'),
+            'days' => $user->masaAktifBerlaku() ? (int) today()->diffInDays($user->masa_aktif) : 0,
+            // Info trial untuk banner dan CTA di Blade.
+            'trial' => $trial ? [
+                'sisa' => $trial->sisaHari(),
+                'berakhir' => $trial->berakhir_pada?->translatedFormat('d F Y'),
+            ] : null,
+        ];
     }
 
     private function debtData(string $type): array

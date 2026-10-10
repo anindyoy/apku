@@ -124,7 +124,7 @@ it('tutorial sidebar mengikuti topik hash scroll dan hasil pencarian', function 
     $process->setInput($script)->run();
     expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
 
-    foreach (['' => 18, 'XLSX' => 2, 'tidakadatopik123' => 0] as $query => $count) {
+    foreach (['' => 19, 'XLSX' => 2, 'tidakadatopik123' => 0] as $query => $count) {
         $response = $this->get(route('tutorial', ['q' => $query]))->assertOk();
         $document = new DOMDocument;
         @$document->loadHTML($response->getContent());
@@ -230,11 +230,11 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
     expect($response->getContent())->toContain('--accent:#0f766e', 'background:#0f766e', '--accent:#5eead4');
     $topics = $response->viewData('topics');
 
-    expect($topics)->toHaveCount(18);
+    expect($topics)->toHaveCount(19);
     expect(array_column($topics, 'id'))->toBe([
         'akun', 'pengaturan-awal', 'dashboard', 'transaksi', 'transfer', 'pencarian',
         'import', 'kas', 'kolaborasi', 'kas-publik', 'dompet', 'audit-saldo',
-        'kategori', 'emas', 'laporan', 'utang-piutang', 'langganan', 'profil-notifikasi',
+        'kategori', 'emas', 'laporan', 'utang-piutang', 'langganan', 'trial-premium', 'profil-notifikasi',
     ]);
 
     $document = new DOMDocument;
@@ -278,7 +278,7 @@ it('tutorial mencari isi panduan tanpa membedakan kapital dan mengabaikan spasi 
 
     expect(array_column($response->viewData('topics'), 'id'))->toBe(['import', 'laporan']);
     expect($response->viewData('query'))->toBe('XLSX');
-    expect($response->viewData('total'))->toBe(18);
+    expect($response->viewData('total'))->toBe(19);
 });
 
 it('tutorial menampilkan kondisi kosong dan mengamankan teks pencarian', function () {
