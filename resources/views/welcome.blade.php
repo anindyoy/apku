@@ -16,6 +16,7 @@
             <div class="flex items-center gap-2 sm:gap-5">
                 <a href="#fitur" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 sm:inline">Fitur</a>
                 <a href="#akun" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 sm:inline">Pilihan akun</a>
+                <a href="#harga" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 sm:inline">Harga</a>
                 <a href="{{ route('tutorial') }}" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 md:inline">Tutorial</a>
                 <a href="{{ route('filament.admin.auth.login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">Masuk</a>
                 <a href="{{ route('filament.admin.auth.register') }}" class="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800">Daftar gratis</a>
@@ -57,7 +58,44 @@
                 @endforeach
             </div>
         </section>
-        <section id="akun" class="bg-white py-20"><div class="mx-auto max-w-7xl px-5 sm:px-8"><p class="text-sm font-bold uppercase tracking-widest text-teal-700">Pilihan akun</p><h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Mulai dari yang kamu butuhkan</h2><div class="mt-10 grid gap-6 md:grid-cols-2"><div class="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-9"><h3 class="text-2xl font-bold">Reguler</h3><p class="mt-2 text-slate-600">Fitur inti untuk mengatur keuangan pribadi.</p><ul class="mt-7 space-y-3 text-slate-700"><li>✓ Hingga 2 kas dan 2 sumber dana</li><li>✓ Transaksi, impor, laporan dan ekspor</li><li>✓ Audit saldo, emas, utang dan piutang</li><li>✓ Dapat menerima akses kas bersama</li></ul></div><div class="rounded-3xl border-2 border-teal-700 bg-teal-50 p-7 shadow-xl shadow-teal-900/10 sm:p-9"><span class="rounded-full bg-teal-700 px-3 py-1 text-xs font-bold text-white">LEBIH FLEKSIBEL</span><h3 class="mt-4 text-2xl font-bold">Premium aktif</h3><p class="mt-2 text-slate-600">Untuk kebutuhan kas dan kolaborasi yang berkembang. Tersedia Coba Premium gratis 30 hari untuk akun baru yang memenuhi syarat.</p><ul class="mt-7 space-y-3 text-slate-700"><li>✓ Semua fitur Reguler</li><li>✓ Coba Premium gratis 30 hari, sekali per akun</li><li>✓ Tambah kas dan sumber dana tanpa batas kuota Reguler</li><li>✓ Undang kolaborator sebagai Viewer atau Editor</li><li>✓ Buat tautan kas publik dengan akses lihat saja</li></ul></div></div><p class="mt-5 text-sm text-slate-500">Paket dan metode pembayaran Premium dapat dilihat setelah masuk ke aplikasi. Trial gratis dimulai dari Dashboard atau Langganan setelah email terverifikasi dan nomor HP terisi.</p></div></section>
+        <section id="akun" class="bg-white py-20"><div class="mx-auto max-w-7xl px-5 sm:px-8"><p class="text-sm font-bold uppercase tracking-widest text-teal-700">Pilihan akun</p><h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Mulai dari yang kamu butuhkan</h2><div class="mt-10 grid gap-6 md:grid-cols-2"><div class="rounded-3xl border border-slate-200 bg-slate-50 p-7 sm:p-9"><h3 class="text-2xl font-bold">Reguler</h3><p class="mt-2 text-slate-600">Fitur inti untuk mengatur keuangan pribadi.</p><ul class="mt-7 space-y-3 text-slate-700"><li>✓ Hingga 2 kas dan 2 sumber dana</li><li>✓ Transaksi, impor, laporan dan ekspor</li><li>✓ Audit saldo, emas, utang dan piutang</li><li>✓ Dapat menerima akses kas bersama</li></ul></div><div class="rounded-3xl border-2 border-teal-700 bg-teal-50 p-7 shadow-xl shadow-teal-900/10 sm:p-9"><span class="rounded-full bg-teal-700 px-3 py-1 text-xs font-bold text-white">LEBIH FLEKSIBEL</span><h3 class="mt-4 text-2xl font-bold">Premium aktif</h3><p class="mt-2 text-slate-600">Untuk kebutuhan kas dan kolaborasi yang berkembang. Tersedia Coba Premium gratis 30 hari untuk akun baru yang memenuhi syarat.</p><ul class="mt-7 space-y-3 text-slate-700"><li>✓ Semua fitur Reguler</li><li>✓ Coba Premium gratis 30 hari, sekali per akun</li><li>✓ Tambah kas dan sumber dana tanpa batas kuota Reguler</li><li>✓ Undang kolaborator sebagai Viewer atau Editor</li><li>✓ Buat tautan kas publik dengan akses lihat saja</li></ul></div></div><p class="mt-5 text-sm text-slate-500">Harga paket Premium terbaru tampil pada daftar di bawah dan diperbarui otomatis dari data admin. Metode pembayaran tersedia setelah masuk ke aplikasi. Trial gratis dimulai dari Dashboard atau Langganan setelah email terverifikasi dan nomor HP terisi.</p></div></section>
+        <section id="harga" class="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+            <div class="max-w-2xl"><p class="text-sm font-bold uppercase tracking-widest text-teal-700">Harga Premium</p><h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Pilih durasi sesuai kebutuhan</h2><p class="mt-4 text-slate-600">Semua paket membuka fitur Premium yang sama, hanya durasinya yang berbeda. Harga di bawah diambil langsung dari paket aktif di aplikasi.</p></div>
+            @php
+                // Daftar harga di halaman depan memakai data yang sama dengan halaman langganan.
+                $daftarHarga = $paketHemat ?? collect();
+            @endphp
+            @if ($daftarHarga->isNotEmpty())
+                <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-daftar-harga-paket>
+                    @foreach ($daftarHarga as $paket)
+                        @php
+                            // Komentar kode dalam Bahasa Indonesia.
+                            $adaHemat = ($paket['hemat_bulan'] ?? 0) > 0;
+                            $isTerbaik = (bool) ($paket['is_terbaik'] ?? false);
+                        @endphp
+                        <article class="relative flex flex-col rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg {{ $isTerbaik ? 'border-2 border-teal-700' : 'border border-slate-200' }}" data-harga-paket="{{ $paket['label'] }}">
+                            @if ($isTerbaik)
+                                <span class="absolute -top-3 left-6 rounded-full bg-amber-300 px-3 py-1 text-xs font-bold text-teal-950">Paling hemat</span>
+                            @endif
+                            <h3 class="text-xl font-bold">{{ $paket['label'] }}</h3>
+                            <p class="mt-3 text-3xl font-bold tracking-tight">Rp{{ number_format($paket['harga'], 0, ',', '.') }}</p>
+                            <p class="mt-1 text-sm text-slate-500">Rp{{ number_format(round($paket['per_bulan']), 0, ',', '.') }} / bulan</p>
+                            <p class="mt-3 min-h-[2.25rem] text-sm {{ $adaHemat ? 'font-semibold text-teal-700' : 'text-slate-500' }}">
+                                @if ($adaHemat)
+                                    Hemat Rp{{ number_format(round($paket['hemat_bulan']), 0, ',', '.') }} / bulan ({{ $paket['persen'] }}%)
+                                @else
+                                    Harga acuan per bulan
+                                @endif
+                            </p>
+                            <a href="{{ route('filament.admin.auth.register') }}" class="mt-6 rounded-xl px-5 py-3 text-center text-sm font-bold {{ $isTerbaik ? 'bg-teal-700 text-white hover:bg-teal-800' : 'border border-teal-700 text-teal-700 hover:bg-teal-700 hover:text-white' }}">Daftar untuk membeli</a>
+                        </article>
+                    @endforeach
+                </div>
+                <p class="mt-5 text-sm text-slate-500">Masuk ke aplikasi untuk memilih metode pembayaran, memakai voucher, dan menyelesaikan order. Total final dihitung ulang di server saat order dibuat.</p>
+            @else
+                <p class="mt-10 rounded-2xl border border-slate-200 bg-white p-6 text-slate-600" role="status">Belum ada paket Premium yang tersedia. Silakan daftar dahulu, harga terbaru akan tampil di halaman Langganan setelah masuk.</p>
+            @endif
+        </section>
         <section class="mx-auto max-w-7xl px-5 py-20 sm:px-8"><div class="rounded-3xl bg-teal-900 px-7 py-12 text-center text-white sm:px-12"><h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Siap merapikan catatan keuangan?</h2><p class="mx-auto mt-4 max-w-xl text-teal-100">Buat akun, atur kas dan sumber dana pertama, lalu mulai catat transaksi sehari-hari.</p><div class="mt-8 flex flex-wrap justify-center gap-3"><a href="{{ route('filament.admin.auth.register') }}" class="rounded-xl bg-amber-300 px-6 py-3 font-bold text-teal-950 hover:bg-amber-200">Buat akun gratis</a><a href="{{ route('tutorial') }}" class="rounded-xl border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10">Baca tutorial</a></div></div></section>
     </main>
     <footer class="border-t border-slate-200 bg-white"><div class="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-5 py-8 text-sm text-slate-600 sm:flex-row sm:items-center sm:px-8"><span>© {{ date('Y') }} APKu. Catat dan pantau keuangan pribadi.</span><div class="flex gap-5"><a href="{{ route('tutorial') }}" class="hover:text-teal-700">Tutorial</a><a href="{{ route('filament.admin.auth.login') }}" class="hover:text-teal-700">Masuk</a></div></div></footer>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KasPublikController;
 use App\Http\Controllers\LanggananInvoiceController;
 use App\Http\Controllers\TutorialController;
@@ -16,6 +17,4 @@ Route::get('/kas-publik/{token}', KasPublikController::class)
     ->middleware('throttle:60,1')
     ->name('kas.publik');
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', HomeController::class)->name('home');
