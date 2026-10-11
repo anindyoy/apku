@@ -124,7 +124,7 @@ class TransaksiResource extends Resource
             return ['label' => 'Transaksi audit saldo', 'description' => 'Transaksi penyesuaian audit saldo tidak dapat diubah atau dihapus langsung. Lakukan audit saldo baru untuk mengoreksi saldo.'];
         }
         if ($record->user_id !== $user->id) {
-            return ['label' => 'Hanya dapat dilihat', 'description' => 'Transaksi ini dicatat oleh pengguna lain. Hanya pencatat yang memiliki hak pengelolaan kas dan dompet yang dapat mengubah atau menghapusnya.'];
+            return ['label' => 'Hanya dapat dilihat', 'description' => 'Transaksi ini dicatat oleh pengguna lain. Hanya pencatat yang memiliki hak pengelolaan kas dan sumber dana yang dapat mengubah atau menghapusnya.'];
         }
         if (! $record->buku_kas || ! $user->dapatMengelolaTransaksiPada($record->buku_kas)) {
             return $record->buku_kas?->user_id === $user->id

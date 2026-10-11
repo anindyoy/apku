@@ -23,7 +23,7 @@ trait HasMulaiTrialPremiumAction
             ->visible(fn (): bool => auth()->check() && ! auth()->user()->isAdmin() && app(MulaiTrialPremium::class)->layak(auth()->user()))
             ->requiresConfirmation()
             ->modalHeading('Mulai coba gratis Premium?')
-            ->modalDescription('Anda mendapat akses Premium penuh selama '.$durasi.' hari sampai '.$berakhir.'. Termasuk kas dan dompet tanpa batas, kolaborasi kas, dan tautan kas publik. Catatan: kas dan dompet ke-3 dan seterusnya tidak dapat dikelola lagi setelah trial berakhir, tetapi datanya tetap tersimpan.')
+            ->modalDescription('Anda mendapat akses Premium penuh selama '.$durasi.' hari sampai '.$berakhir.'. Termasuk kas dan sumber dana tanpa batas, kolaborasi kas, dan tautan kas publik. Catatan: kas dan sumber dana ke-3 dan seterusnya tidak dapat dikelola lagi setelah trial berakhir, tetapi datanya tetap tersimpan.')
             ->modalSubmitActionLabel('Mulai trial')
             ->action(function (): void {
                 try {

@@ -243,7 +243,7 @@ class ListTransaksis extends ListRecords
                         Grid::make(['default' => 1, 'md' => 2])
                             ->schema([
                                 Toggle::make('pengaruhi_saldo')
-                                    ->label('Perbarui saldo kas dan dompet')
+                                    ->label('Perbarui saldo kas dan sumber dana')
                                     ->helperText('Matikan saat mengimpor riwayat lama agar saldo saat ini tidak berubah.')
                                     ->default(true),
                                 Toggle::make('buat_kategori_otomatis')

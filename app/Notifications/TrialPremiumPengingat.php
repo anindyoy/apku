@@ -28,14 +28,14 @@ class TrialPremiumPengingat extends Notification implements ShouldQueue
         $berakhir = $this->trial->berakhir_pada?->translatedFormat('d F Y') ?? '-';
 
         $pesan = $this->sisaHari <= 1
-            ? 'Coba gratis Premium Anda berakhir besok ('.$berakhir.'). Berlangganan sekarang agar kas dan dompet tambahan tetap dapat dikelola.'
+            ? 'Coba gratis Premium Anda berakhir besok ('.$berakhir.'). Berlangganan sekarang agar kas dan sumber dana tambahan tetap dapat dikelola.'
             : 'Coba gratis Premium Anda tersisa '.$this->sisaHari.' hari (berakhir '.$berakhir.'). Pertimbangkan berlangganan agar akses Premium tetap berlanjut.';
 
         return (new MailMessage)
             ->subject('Trial Premium APKu tersisa '.$this->sisaHari.' hari')
             ->greeting('Halo '.$notifiable->name.',')
             ->line($pesan)
-            ->line('Setelah trial berakhir, kas dan dompet ke-3 dan seterusnya hanya dapat dilihat, tidak dapat diubah, sampai Anda berlangganan.')
+            ->line('Setelah trial berakhir, kas dan sumber dana ke-3 dan seterusnya hanya dapat dilihat, tidak dapat diubah, sampai Anda berlangganan.')
             ->action('Lihat Paket Langganan', url('/admin/langganans'));
     }
 

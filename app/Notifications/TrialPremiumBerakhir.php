@@ -33,7 +33,7 @@ class TrialPremiumBerakhir extends Notification implements ShouldQueue
             ->subject('Trial Premium APKu telah berakhir')
             ->greeting('Halo '.$notifiable->name.',')
             ->line('Coba gratis Premium Anda telah berakhir. Akun Anda kembali menjadi Reguler.'.$tambahan.' Data Anda tetap tersimpan dan tidak ada yang dihapus.')
-            ->line('Berlangganan Premium untuk membuka kembali kas dan dompet tambahan serta fitur kolaborasi.')
+            ->line('Berlangganan Premium untuk membuka kembali kas dan sumber dana tambahan serta fitur kolaborasi.')
             ->action('Lihat Paket Langganan', url('/admin/langganans'));
     }
 
