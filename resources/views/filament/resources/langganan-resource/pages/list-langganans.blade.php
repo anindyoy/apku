@@ -2,6 +2,7 @@
     @vite('resources/css/filament-toolbar.css')
     @if (! auth()->user()->isAdmin())
         @include('filament.components.trial-premium-cta', ['info' => $this->infoTrialPremium()])
+        @livewire('pilih-paket-langganan')
     @endif
     @unless (auth()->user()->isAdmin())
         <style>
