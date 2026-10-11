@@ -44,7 +44,7 @@ class TrialPremiumPengingat extends Notification implements ShouldQueue
         return [
             'format' => 'filament',
             'title' => 'Trial Premium tersisa '.$this->sisaHari.' hari',
-            'body' => 'Trial berakhir pada '.($this->trial->berakhir_pada?->toDateString() ?? '-').'. Berlangganan agar kas/dompet tambahan tetap dapat dikelola.',
+            'body' => 'Trial berakhir pada '.($this->trial->berakhir_pada?->toDateString() ?? '-').'. Berlangganan agar kas/sumber dana tambahan tetap dapat dikelola.',
             'status' => $this->sisaHari <= 1 ? 'danger' : 'warning',
             'duration' => 'persistent',
             'actions' => [],

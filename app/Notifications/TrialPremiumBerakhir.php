@@ -26,7 +26,7 @@ class TrialPremiumBerakhir extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $tambahan = $this->jumlahTerkunci > 0
-            ? ' Sebanyak '.$this->jumlahTerkunci.' kas/dompet tambahan kini hanya dapat dilihat.'
+            ? ' Sebanyak '.$this->jumlahTerkunci.' kas/sumber dana tambahan kini hanya dapat dilihat.'
             : '';
 
         return (new MailMessage)
@@ -42,7 +42,7 @@ class TrialPremiumBerakhir extends Notification implements ShouldQueue
         return [
             'format' => 'filament',
             'title' => 'Trial Premium berakhir',
-            'body' => 'Akun kembali Reguler. Berlangganan untuk membuka kembali kas/dompet tambahan.',
+            'body' => 'Akun kembali Reguler. Berlangganan untuk membuka kembali kas/sumber dana tambahan.',
             'status' => 'info',
             'duration' => 'persistent',
             'actions' => [],

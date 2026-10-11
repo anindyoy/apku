@@ -15,5 +15,5 @@
     role="status"
 >
     Trial Premium · {{ $teksSisa }} · sampai {{ $trial['berakhir'] ?? '-' }}.
-    Kas/dompet ke-3 dan seterusnya terkunci setelah trial berakhir, datanya tetap tersimpan.
+    Kas/sumber dana ke-3 dan seterusnya terkunci setelah trial berakhir, datanya tetap tersimpan.
 </div>

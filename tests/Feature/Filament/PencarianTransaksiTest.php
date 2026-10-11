@@ -92,7 +92,7 @@ test('warna teks hasil pencarian mengikuti tipe transaksi seperti daftar transak
 
     $komponen
         ->assertTableColumnExists('tanggal', fn ($kolom): bool => $kolom->getDescriptionBelow() === null, $transaksi)
-        ->assertTableColumnExists('buku_kas.nama_buku', fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Dompet: '.$transaksi->labelDompetUntuk($user), $transaksi)
+        ->assertTableColumnExists('buku_kas.nama_buku', fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Sumber dana: '.$transaksi->labelDompetUntuk($user), $transaksi)
         ->assertTableColumnExists('kategori', fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Deskripsi: Transfer untuk pengujian warna', $transaksi);
 })->group('filament', 'pencarian-transaksi');
 
@@ -232,7 +232,7 @@ test('pencarian global tetap menampilkan nama dompet yang sudah dihapus', functi
         ->assertCanSeeTableRecords([$transaksi])
         ->assertTableColumnExists(
             'buku_kas.nama_buku',
-            fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Dompet: Dompet Lama',
+            fn ($kolom): bool => $kolom->getDescriptionBelow() === 'Sumber dana: Dompet Lama',
             $transaksi,
         );
 })->group('filament', 'pencarian-transaksi');

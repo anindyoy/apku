@@ -36,7 +36,8 @@
     </table>
 
     <table class="details">
-        <thead><tr><th>Tanggal</th><th>Kas</th><th>Dompet</th><th>Jenis</th><th>Kategori</th><th>Deskripsi</th><th class="number">Nominal</th></tr></thead>
+        {{-- Teks UI memakai sumber dana; relasi labelDompetUntuk dipertahankan untuk kompatibilitas. --}}
+        <thead><tr><th>Tanggal</th><th>Kas</th><th>Sumber Dana</th><th>Jenis</th><th>Kategori</th><th>Deskripsi</th><th class="number">Nominal</th></tr></thead>
         <tbody>
             @forelse ($laporan['transaksi'] as $transaksi)
                 <tr>

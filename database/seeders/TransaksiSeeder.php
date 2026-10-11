@@ -43,7 +43,8 @@ class TransaksiSeeder extends Seeder
                 'jenis' => 'tunai',
                 'saldo' => 0,
                 'is_default' => true,
-                'description' => 'Dompet tunai utama',
+                // Kolom nama_dompet dipertahankan; teks UI memakai sumber dana.
+                'description' => 'Sumber dana tunai utama',
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);

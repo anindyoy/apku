@@ -48,7 +48,8 @@ class Transaksi extends Model
 
             $sumberDana = SumberDana::withoutGlobalScopes()->firstOrCreate(
                 ['user_id' => $transaksi->user_id, 'nama_dompet' => 'Cash'],
-                ['saldo' => 0, 'is_default' => true, 'jenis' => 'tunai', 'description' => 'Dompet tunai utama']
+                // Kolom nama_dompet dipertahankan; teks description tampil di UI sehingga memakai sumber dana.
+                ['saldo' => 0, 'is_default' => true, 'jenis' => 'tunai', 'description' => 'Sumber dana tunai utama']
             );
 
             $transaksi->sumber_dana_id = $sumberDana->id;

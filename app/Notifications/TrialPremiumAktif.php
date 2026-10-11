@@ -40,7 +40,7 @@ class TrialPremiumAktif extends Notification implements ShouldQueue
         return [
             'format' => 'filament',
             'title' => 'Coba gratis Premium aktif',
-            'body' => 'Trial Premium aktif sampai '.$berakhir.'. Kas/dompet ke-3+ terkunci setelah trial berakhir.',
+            'body' => 'Trial Premium aktif sampai '.$berakhir.'. Kas/sumber dana ke-3+ terkunci setelah trial berakhir.',
             'status' => 'success',
             'duration' => 'persistent',
             'actions' => [],

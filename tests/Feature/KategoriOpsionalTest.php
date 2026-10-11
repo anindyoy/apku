@@ -166,7 +166,7 @@ test('laporan dan ekspor menampilkan baris tanpa kategori beserta persentasenya'
         ->and(view('laporan.pdf', [
             'laporan' => $laporan,
             'namaBuku' => 'Semua Kas',
-            'namaDompet' => 'Semua Dompet',
+            'namaDompet' => 'Semua Sumber Dana',
             'tipePeriode' => 'Bulanan',
         ])->render())->toContain('Tanpa kategori');
 })->group('kategori-opsional');

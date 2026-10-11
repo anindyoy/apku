@@ -132,7 +132,7 @@ class TransaksiResource extends Resource
                 : ['label' => 'Akses kas terbatas', 'description' => 'Hak pengelolaan kas bersama tidak tersedia. Periksa masa akses dan peran Editor dengan pemilik kas, serta status akses kas milik pemiliknya.'];
         }
         if (! $record->dompet || ! $user->dapatMengelolaTransaksiPadaDompet($record->dompet)) {
-            return ['label' => 'Dompet tidak aktif', 'description' => 'Dompet transaksi ini tidak dapat dikelola. Akun Reguler dapat mengelola dompet utama dan satu dompet tambahan gratis. Periksa kepemilikan dompet dan masa aktif Premium Anda.'];
+            return ['label' => 'Sumber dana tidak aktif', 'description' => 'Sumber dana transaksi ini tidak dapat dikelola. Akun Reguler dapat mengelola sumber dana utama dan satu sumber dana tambahan gratis. Periksa kepemilikan sumber dana dan masa aktif Premium Anda.'];
         }
 
         return null;
@@ -179,7 +179,7 @@ class TransaksiResource extends Resource
             TextColumn::make('buku_kas.nama_buku')
                 ->visibleFrom('md')
                 ->label('Kas')
-                ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
+                ->description(fn (Transaksi $record): string => 'Sumber dana: '.$record->labelDompetUntuk(auth()->user()))
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('kategori')
@@ -210,7 +210,7 @@ class TransaksiResource extends Resource
                     }
 
                     if (filled($livewire->filterDompet ?? null)) {
-                        $saldo[] = 'Saldo dompet: Rp '.number_format((float) $record->saldo_dompet, 0, ',', '.');
+                        $saldo[] = 'Saldo sumber dana: Rp '.number_format((float) $record->saldo_dompet, 0, ',', '.');
                     }
 
                     return filled($saldo) ? implode(' · ', $saldo) : null;
@@ -232,10 +232,10 @@ class TransaksiResource extends Resource
     {
         $label = match ($transaksi->jenis) {
             'Transfer Pemasukan' => $transaksi->tipe_transfer === 'dompet'
-                ? 'Transfer masuk dompet'
+                ? 'Transfer masuk sumber dana'
                 : 'Transfer dari '.($transaksi->asal_buku_tabungan?->nama_buku ?? '-'),
             'Transfer Pengeluaran' => $transaksi->tipe_transfer === 'dompet'
-                ? 'Transfer keluar dompet'
+                ? 'Transfer keluar sumber dana'
                 : 'Transfer ke '.($transaksi->tujuan_buku_tabungan?->nama_buku ?? '-'),
             default => $transaksi->kategori?->nama
                 ?? ($transaksi->audit_saldo_dompet_detail_id ? 'Audit Saldo' : null),

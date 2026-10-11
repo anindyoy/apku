@@ -418,7 +418,7 @@ test('template xlsx mencantumkan opsi kas dan kategori milik pengguna setelah ko
 
     expect($rows[0])->toBe([
         'tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi',
-        '', 'Opsi Buku Kas', 'Opsi Dompet', 'Opsi Kategori Pemasukan', 'Opsi Kategori Pengeluaran',
+        '', 'Opsi Buku Kas', 'Opsi Sumber Dana', 'Opsi Kategori Pemasukan', 'Opsi Kategori Pengeluaran',
     ])
         ->and($rows[1][7])->toBe('')
         ->and(array_column(array_slice($rows, 1), 8))->toContain('Kas Utama', $kasTambahan->nama_buku)
@@ -429,7 +429,7 @@ test('template xlsx mencantumkan opsi kas dan kategori milik pengguna setelah ko
         ->and(collect(array_slice($rows, 1, 3))->every(fn (array $row): bool => in_array($row[3], array_column(array_slice($rows, 1), 9), true)))->toBeTrue()
         ->and(array_column(array_slice($rows, 1, 3), 6))->toBe(['Gaji bulan berjalan', '', 'Belanja kebutuhan'])
         ->and(collect($rows)->flatten()->all())->not->toContain('Kas Orang Lain', 'Kategori Orang Lain')
-        ->and($header)->toHaveKeys(['tanggal', 'deskripsi', 'opsi_buku_kas', 'opsi_dompet', 'opsi_kategori_pemasukan', 'opsi_kategori_pengeluaran'])
+        ->and($header)->toHaveKeys(['tanggal', 'deskripsi', 'opsi_buku_kas', 'opsi_sumber_dana', 'opsi_kategori_pemasukan', 'opsi_kategori_pengeluaran'])
         ->and($header)->not->toHaveKey('')
         ->and($hasil['jumlah_baris'])->toBe(3)
         ->and($hasil['errors'])->toBe([]);

@@ -1,135 +1,299 @@
 [
-  {
-    "id": "akun", "page": "Mulai menggunakan APKu", "category": "Mulai di sini", "title": "Daftar, masuk, dan pemulihan akun",
-    "intro": "Gunakan akun pribadi untuk menyimpan catatan keuangan Anda. Tombol dan aksen utama halaman tutorial serta panel setelah masuk berwarna teal seperti pada halaman utama APKu.",
-    "steps": ["Buka halaman utama APKu di /, pilih Daftar gratis atau Mulai gratis, lalu lengkapi formulir registrasi. Di aplikasi production, selesaikan juga verifikasi keamanan yang muncul.", "Buka email verifikasi berbahasa Indonesia dan pilih Verifikasi Alamat Email. Jika belum diterima, periksa folder spam atau kirim ulang melalui halaman verifikasi.", "Pilih Masuk di halaman utama, gunakan email dan password, kemudian selesaikan pengaturan awal jika diminta.", "Jika lupa kata sandi, pilih tautan lupa kata sandi pada halaman masuk, masukkan alamat email, lalu pilih Atur Ulang Kata Sandi pada email yang dikirim. Setelah mengganti kata sandi, masuk kembali."],
-    "example": "Daftar menggunakan email yang aktif agar tautan verifikasi dan pemulihan password dapat diterima.",
-    "note": "Simpan kata sandi dengan aman. Pesan validasi formulir dan status autentikasi ditampilkan dalam bahasa Indonesia. Tutorial ini dapat dibuka tanpa akun, sedangkan data keuangan pribadi memerlukan login."
-  },
-  {
-    "id": "pengaturan-awal", "page": "Mulai menggunakan APKu", "category": "Mulai di sini", "title": "Pengaturan awal: kas, sumber dana, dan saldo",
-    "intro": "Kas menunjukkan pengelompokan uang, sedangkan sumber dana menunjukkan tempat uang disimpan. Nominal rupiah di aplikasi ditampilkan tanpa digit desimal, misalnya Rp25.000; berat emas tetap dapat memiliki angka desimal.",
-    "steps": ["Ikuti wizard pengguna baru untuk membuat kas utama dan deskripsinya.", "Buat sumber dana utama sesuai tempat penyimpanan uang Anda.", "Masukkan saldo awal sesuai uang yang tersedia agar pencatatan dimulai dari kondisi yang benar.", "Tambahkan kategori pemasukan dan pengeluaran yang sering dipakai, lalu selesaikan wizard. Kategori ini langsung terhubung ke kas utama."],
-    "example": "Kas: Keuangan Rumah Tangga. Sumber dana: Rekening Bank. Saldo awal: Rp1.000.000. Kategori: Gaji dan Belanja.",
-    "note": "Saldo awal langsung memperbarui saldo kas dan sumber dana setelah disimpan. Kas dan sumber dana adalah dua sudut pandang atas uang yang sama. Jangan menjumlahkan total saldo kas dan total saldo sumber dana sebagai total kekayaan."
-  },
-  {
-    "id": "dashboard", "page": "Dashboard", "category": "Ringkasan", "title": "Membaca dan mengatur dashboard",
-    "intro": "Dashboard merangkum kas dan dompet dalam satu tab, utang dan piutang dalam satu tab, serta langganan dan lima transaksi terbaru dalam tab terpisah. Secara default, tab Transaksi tampil pertama dan langsung dibuka. Hanya isi tab aktif yang terlihat. Tabel transaksi memakai jarak atas dan bawah yang ringkas agar lebih banyak informasi terlihat.",
-    "steps": ["Buka Dashboard setelah login untuk memeriksa saldo serta ringkasan keuangan.", "Pilih tab Kas & Dompet atau Utang & Piutang untuk melihat kedua ringkasan sekaligus; gunakan Kelola pada bagian yang sesuai untuk membuka daftarnya. Pada tab transaksi, periksa ringkasan jenis, nominal, kategori, dan tanggal di layar mobile, lalu gunakan Tambah atau Lihat lengkap.", "Buka Atur dashboard untuk menampilkan atau menyembunyikan bagian individual dan mengubah urutannya dengan geser atau tombol urutan. Bagian kas/dompet serta utang/piutang akan berbagi tab saat keduanya ditampilkan.", "Pilih tab untuk berpindah bagian; di ponsel tab tersusun dua kolom sehingga tidak perlu digeser ke samping. Saat fokus berada di tab, gunakan panah kiri/kanan atau Home/End. Gunakan Ubah atau Hapus pada transaksi jika aksi tersedia."],
-    "example": "Gunakan tombol Kelola Dompet pada tab Kas & Dompet untuk langsung membuka daftar dompet.",
-    "note": "Pengaturan tampilan dan urutan disimpan per akun. Urutan yang sudah Anda atur tetap berlaku, dan tab pertama yang tampil akan dibuka saat halaman dimuat atau pengaturan diubah. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi audit saldo."
-  },
-  {
-    "id": "transaksi", "page": "Transaksi", "category": "Pencatatan", "title": "Mencatat pemasukan dan pengeluaran",
-    "intro": "Catat uang masuk dan keluar dengan kas, dompet, serta kategori yang sesuai. Pada layar desktop, baca tabel dari kolom Tipe (ikon jenis transaksi), Tanggal, Kas, Kategori, lalu Nominal. Susunan ini juga berlaku pada Pencarian Transaksi dan transaksi terbaru di Dashboard; ringkasan Transaksi digunakan pada layar kecil.",
-    "steps": ["Buka Transaksi atau gunakan Tambah pada dashboard, lalu buka Tambah transaksi.", "Pilih pemasukan atau pengeluaran. Pilihan jenis transaksi tersusun grid dua kolom pada semua ukuran layar, termasuk mobile, tanpa perlu menggeser ke samping. Form transaksi tersusun satu kolom pada layar sempit dan dua kolom pada layar lebar. Tunggu formulir selesai menyesuaikan jenis transaksi.", "Isi tanggal, kas, dompet, nominal, dan deskripsi, kemudian simpan. Kategori bersifat opsional: pilihan kategori mengikuti kas yang dipilih, dan boleh dibiarkan Tanpa kategori agar pencatatan lebih cepat. Gunakan tombol tambah pada pilihan Kategori untuk membuka form kategori yang sama seperti di Setting: isi nama, tipe, dan kas yang terhubung. Kas yang sedang dipilih otomatis dicentang; kategori baru tetap mengikuti aturan tipe kategori. Pengguna Premium aktif dapat membuka form kas atau dompet dari tombol tambah pada pilihan masing-masing. Isi nama, saldo awal, dan deskripsi kas; untuk kas, tentukan juga apakah semua kategori milik Anda dihubungkan. Form dompet mencakup nama, saldo, dan deskripsi. Jika kas diganti, kategori yang tidak terhubung ke kas baru dikosongkan. Gunakan Tambah yang lain untuk mencatat secara berurutan.", "Periksa hasil di daftar. Pada layar mobile, lihat jenis, nominal, kategori, dan tanggal; buka Ubah untuk melihat rincian lain jika aksi tersedia. Form Ubah tersusun dua kolom pada layar lebar dan satu kolom pada layar sempit; input nominal diawali Rp. Ubah kas atau dompet jika perlu; pilihan ketiga dan seterusnya tidak dapat dipilih tanpa Premium aktif. Gunakan Hapus jika transaksi memang perlu dihapus, lalu periksa kembali saldo."],
-    "example": "Catat belanja Rp75.000 sebagai pengeluaran, pilih kas Rumah Tangga, dompet Tunai, kategori Belanja, dan deskripsi Belanja mingguan.",
-    "note": "Pemasukan ditandai hijau dan pengeluaran merah. Keterangan Dicatat oleh di bawah tanggal hanya muncul jika kas sedang atau pernah dikolaborasikan dengan akun lain, termasuk setelah akses kedaluwarsa atau dicabut. Tautan kas publik saja tidak memunculkan keterangan ini. Aturan yang sama berlaku pada daftar Transaksi, Pencarian Transaksi, dan Dashboard untuk akun Reguler maupun Premium. Aksi ubah/hapus mengikuti hak akses; transaksi audit saldo harus dikoreksi melalui audit baru. Setelah menghapus transaksi lama, saldo pada baris transaksi sesudahnya ikut diperbarui menurut tanggal."
-  },
-  {
-    "id": "transfer", "page": "Transaksi", "category": "Pencatatan", "title": "Transfer antar-kas dan antar-dompet",
-    "intro": "Gunakan jenis transfer untuk memindahkan saldo sesuai tujuan pemindahannya.",
-    "steps": ["Buka Tambah transaksi, lalu pilih transfer kas atau transfer dompet.", "Untuk transfer kas, tentukan kas asal dan kas tujuan. Dompet pencatatan dipilih otomatis oleh aplikasi.", "Untuk transfer dompet, tentukan dompet asal dan tujuan. Kas pencatatan dipilih otomatis oleh aplikasi.", "Lengkapi tanggal, nominal, dan deskripsi yang tersedia, simpan, kemudian periksa saldo asal serta tujuan.", "Untuk memperbaiki transfer, buka Ubah pada salah satu baris pasangan. Pilih kas asal dan tujuan serta dompet pada transfer kas, atau kas serta dompet asal dan tujuan pada transfer dompet. Simpan dan periksa kembali saldo kedua sisi."],
-    "example": "Memindahkan uang dari rekening bank ke uang tunai dicatat sebagai transfer dompet. Mengalokasikan uang dari kas Harian ke kas Liburan menggunakan transfer kas.",
-    "note": "Transfer kas ditandai biru dan transfer dompet kuning. Transfer pada kas bersama hanya tersedia bagi pemilik kas."
-  },
-  {
-    "id": "pencarian", "page": "Transaksi", "category": "Pencatatan", "title": "Filter dan pencarian transaksi",
-    "intro": "Temukan catatan lama melalui filter periode atau pencarian transaksi global.",
-    "steps": ["Di daftar Transaksi, buka Filter transaksi yang awalnya tertutup, lalu pilih bulan, tahun, kas, atau dompet pada deretan kontrol filter. Panel dan kontrol filter menyesuaikan tema terang atau gelap agar teks, ikon, dan batas kontrol tetap mudah dibedakan. Panah di dalam pilihan membuka daftar opsi; tombol di kiri dan kanan periode berpindah ke bulan sebelum atau sesudahnya. Gunakan Reset filter untuk kembali ke pilihan awal.", "Gunakan pencarian deskripsi untuk menemukan catatan pada daftar transaksi.", "Buka Pencarian Transaksi untuk mencari berdasarkan deskripsi, kategori, kas, dompet, jenis transaksi, atau nominal; persempit dengan filter yang tersedia. Di layar mobile, hasil memakai ringkasan jenis, nominal, kategori, dan tanggal.", "Periksa detail hasil, lalu gunakan Ubah atau Hapus jika Anda memiliki hak pengelolaan."],
-    "example": "Pilih dompet Rekening Bank dan bulan yang diinginkan untuk menelusuri pembayaran, atau cari kata listrik pada pencarian global.",
-    "note": "Saldo berjalan tampil ketika filter kas atau dompet aktif pada daftar transaksi. Informasi dompet anggota lain pada kas bersama disamarkan."
-  },
-  {
-    "id": "import", "page": "Transaksi", "category": "Pencatatan", "title": "Import transaksi dari CSV atau Excel",
-    "intro": "Masukkan banyak pemasukan dan pengeluaran sekaligus melalui file CSV atau XLSX.",
-    "steps": ["Buka Transaksi, pilih Import Transaksi, lalu unduh contoh template XLSX dari modal import; template berisi tiga baris transaksi dengan deskripsi terisi maupun kosong dan tanggal tanpa waktu. Nilai buku kas dan dompet pada contoh sesuai opsi milik Anda. Di sisi kanan data transaksi, template mencantumkan buku kas, dompet, dan kategori pemasukan/pengeluaran milik Anda, dipisahkan oleh satu kolom kosong; daftar ini hanya referensi dan tidak dihitung sebagai baris transaksi.", "Unggah file CSV atau XLSX di modal import. Isi kolom tanggal dengan format YYYY-MM-DD, misalnya 2026-09-15; waktu boleh ditambahkan dengan format YYYY-MM-DD HH:mm, misalnya 2026-09-15 14:30. Tanggal tanpa waktu dicatat pukul 00:00. Jika nilai kas atau dompet pada baris kosong, import memakai kas atau dompet default Anda. Petakan header file jika nama kolom berbeda; pilihan pemetaan tersusun dalam tiga kolom di layar lebar.", "Pilih Perbarui saldo kas dan dompet. Matikan pilihan ini saat mengimpor transaksi lama yang sudah tercermin dalam saldo saat ini; transaksi tetap tersimpan dalam riwayat dan laporan.", "Periksa pratinjau: jumlah baris, total pemasukan/pengeluaran, dan kesalahan. Jika beberapa baris memiliki format tanggal salah, contoh format yang benar tampil sekali sebelum daftar masalah. Unduh laporan error XLSX bila tersedia, perbaiki file, lalu unggah ulang.", "Kolom kategori boleh kosong atau tidak dipetakan; barisnya diimpor tanpa kategori. Kategori dicari pada kas di baris yang sama. Jika ada kategori baru atau kategori yang belum terhubung ke kas tersebut, tinjau daftarnya dan aktifkan Buat kategori yang belum tersedia sebelum menyimpan import; kategori dibuat atau dihubungkan ke kas pada baris transaksinya. Pilihan ini ditampilkan berdampingan dengan Perbarui saldo kas dan dompet pada layar lebar.", "Di halaman Transaksi, buka menu aksi lalu pilih Riwayat Import untuk memantau status, progres, atau pesan kegagalan. Untuk membatalkan, gunakan aksi pembatalan pada batch yang masih lengkap."],
-    "example": "Pindahkan 200 transaksi bulanan dari spreadsheet: cocokkan kolom tanggal dan nominal, periksa total pratinjau, lalu simpan.",
-    "note": "Maksimal 10 MB dan 10.000 baris. Hingga 1.000 baris diproses langsung; selebihnya melalui antrean. Transfer belum didukung. File yang sama tidak dapat diimpor dua kali kecuali batch telah dibatalkan. Pembatalan menghapus seluruh transaksi batch dan memulihkan dampak saldo bila opsi pembaruan saldo diaktifkan. Import kas bersama hanya untuk pemilik."
-  },
-  {
-    "id": "kas", "page": "Kas", "category": "Pengelolaan uang", "title": "Mengelola kas",
-    "intro": "Pisahkan pencatatan menurut kebutuhan, misalnya pribadi, rumah tangga, atau usaha.",
-    "steps": ["Buka Setting > Kas dan gunakan aksi tambah untuk membuat kas dengan nama serta deskripsi yang mudah dikenali.", "Buka menu Aksi pada card kas untuk mengubah data atau menjadikannya kas utama/default.", "Periksa label Akses, Kepemilikan, Saldo, dan Jumlah transaksi pada card. Jumlah produk emas ditampilkan hanya jika kas memiliki produk emas. Perubahan kas dan saldo diperbarui pada daftar setelah disimpan.", "Saat menambah kas, pilihan Pakai semua kategori saya di kas ini aktif secara default; matikan jika kas memerlukan daftar kategori sendiri.", "Untuk menghapus kas kosong, gunakan Hapus. Jika masih berisi transaksi atau emas, ikuti alur pemindahan ke kas lain milik Anda. Kategori yang belum terhubung ke kas tujuan ditampilkan satu per satu: pilih kategori penggantinya di kas tujuan, atau biarkan kosong agar transaksinya menjadi tanpa kategori."],
-    "example": "Buat kas Liburan untuk memisahkan alokasi liburan dari kas kebutuhan harian.",
-    "note": "Daftar Kas dan modal tambah menampilkan sisa slot atau batas kuota Reguler dalam panel padat berisi satu kalimat, misalnya: Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi kas. Saat penuh, pesan menjelaskan bahwa Anda tidak bisa menambah kas lagi karena kuota sudah terpenuhi. Latar kuning berarti tersisa 1 slot, sedangkan latar merah berarti kuota sudah penuh. Reguler mendapat maksimal 2 kas: kas utama dan satu tambahan gratis. Kas bersama tidak dihitung dalam kuota ini. Saat kuota penuh, keterangan batas tercapai muncul dan aksi tambah disembunyikan; aktifkan Premium untuk menambah kas. Premium aktif memiliki slot tidak terbatas dan tidak menampilkan pesan kuota. Setelah Premium berakhir, batas Reguler berlaku kembali. Transaksi pada kas terbatas tidak dapat diubah atau dihapus."
-  },
-  {
-    "id": "dompet", "page": "Sumber Dana", "category": "Pengelolaan uang", "title": "Mengelola sumber dana",
-    "intro": "Sumber dana merepresentasikan uang tunai, rekening bank, atau tempat penyimpanan uang lainnya.",
-    "steps": ["Buka Setting > Sumber Dana, tambahkan sumber dana, lalu isi nama dan deskripsi sesuai tempat penyimpanan uang.", "Gunakan aksi ubah untuk memperbarui informasi, atau jadikan sumber dana yang paling sering digunakan sebagai default.", "Periksa label Saldo, Default, Status, Jenis, dan Deskripsi pada card sumber dana sebelum mencatat transaksi. Perubahan sumber dana dan saldo diperbarui pada daftar setelah disimpan.", "Saat menghapus sumber dana, ikuti alur pemindahan saldo ke sumber dana lain dan periksa kembali hasilnya."],
-    "example": "Gunakan sumber dana Tunai dan Rekening Bank untuk mengetahui di mana uang Anda berada.",
-    "note": "Kisi kartu Sumber Dana minimal dua dan maksimal tiga kolom: jika ada satu atau dua sumber dana, tampil dua kolom; jika ada tiga atau lebih, tampil tiga kolom pada layar lebar. Tombol aksi pada kartu Sumber Dana turun ke baris berikutnya saat ruang sempit agar tetap berada di dalam kartu. Daftar Sumber Dana dan modal tambah menampilkan sisa slot atau batas kuota Reguler dalam panel padat berisi satu kalimat, misalnya: Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi sumber dana. Saat penuh, pesan menjelaskan bahwa Anda tidak bisa menambah sumber dana lagi karena kuota sudah terpenuhi. Latar kuning berarti tersisa 1 slot, sedangkan latar merah berarti kuota sudah penuh. Reguler mendapat maksimal 2 sumber dana: sumber dana utama dan satu tambahan gratis. Saat kuota penuh, keterangan batas tercapai muncul dan aksi tambah disembunyikan; aktifkan Premium untuk menambah sumber dana. Premium aktif memiliki slot tidak terbatas dan tidak menampilkan pesan kuota. Setelah Premium berakhir, batas Reguler berlaku kembali. Sumber dana yang dihapus tidak mengisi kuota, tetapi namanya tetap tersedia pada riwayat transaksi dan laporan."
-  },
-  {
-    "id": "audit-saldo", "page": "Sumber Dana", "category": "Pengelolaan uang", "title": "Audit dan penyesuaian saldo sumber dana",
-    "intro": "Cocokkan saldo aplikasi dengan saldo riil dari uang tunai atau rekening Anda.",
-    "steps": ["Periksa uang tunai dan saldo rekening di luar aplikasi terlebih dahulu.", "Buka Setting > Sumber Dana lalu klik Audit saldo pada kartu sumber dana yang ingin diperiksa. Audit dari kartu hanya mencakup sumber dana tersebut; pilih kas tempat sumber dana itu memiliki transaksi. Untuk mengaudit beberapa sumber dana sekaligus, gunakan Audit saldo pada header halaman dan pilih satu kas. Untuk melihat riwayat, klik Riwayat audit pada halaman Sumber Dana atau Tambah audit dari daftar riwayat. Kas utama dipilih secara default pada audit header. Catatan audit boleh dikosongkan.", "Penghitung uang kas hanya ditampilkan pada sumber dana berjenis Tunai. Input pecahan uang kertas tersusun dua kolom pada layar lebar. Masukkan jumlah lembar atau keping setiap pecahan; toggle Uang Logam nonaktif secara default dan dapat diaktifkan untuk menampilkan pecahan koin. Total otomatis mengisi saldo riil; total kas dan tombol Ulangi tampil dua kolom pada layar lebar. Sumber dana non-Tunai hanya menerima saldo riil manual. Catatan dompet tidak tersedia pada form audit.", "Tinjau selisih, simpan audit, lalu periksa riwayat audit dan transaksi penyesuaian. Jika saldo berubah selama proses, ulangi berdasarkan saldo terbaru."],
-    "example": "Saldo aplikasi Rp100.000 dan uang tunai sebenarnya Rp95.000 menghasilkan pengeluaran penyesuaian Rp5.000 yang tampil dengan label Audit Saldo.",
-    "note": "Penghitung menyediakan pecahan kertas Rp100.000, Rp50.000, Rp20.000, Rp10.000, Rp5.000, Rp2.000, Rp1.000 serta logam Rp1.000, Rp500, Rp200, dan Rp100, dan hanya tersedia untuk sumber dana berjenis Tunai. Selisih positif menjadi pemasukan, selisih negatif menjadi pengeluaran. Tanpa selisih, audit tetap tercatat tanpa transaksi baru. Transaksi penyesuaian tidak dapat diubah/dihapus langsung; lakukan audit baru untuk koreksi."
-  },
-  {
-    "id": "kategori", "page": "Kategori", "category": "Pengelolaan uang", "title": "Mengelola kategori transaksi",
-    "intro": "Kategori mengelompokkan pemasukan dan pengeluaran agar laporan mudah dipahami. Kategori bersifat opsional dan terikat pada kas: sebuah kategori hanya dapat dipilih pada kas yang terhubung dengannya, dan satu kategori dapat dipakai di beberapa kas milik pemilik yang sama.",
-    "steps": ["Buka Setting > Kategori untuk melihat tabel kategori berisi nama, tipe, dan kas yang terhubung. Jumlah transaksi ditampilkan di bawah nama kategori, misalnya 4 transaksi. Gunakan filter Kas atau Tipe untuk mempersempit daftar.", "Pilih Tambah kategori, isi nama, pilih tipe Pemasukan, Pengeluaran, atau Semua (muncul untuk kedua jenis transaksi), lalu centang kas yang memakainya. Tipe default mengikuti pengaturan tampilan. Saat mencatat transaksi, akun Reguler maupun Premium juga dapat membuat kategori langsung dari pilihan Kategori; kategori tersebut otomatis terhubung ke kas yang dipilih.", "Pilih kategori tersebut ketika mencatat transaksi pada kas yang terhubung, atau biarkan transaksi tanpa kategori.", "Gunakan Ubah untuk mengganti nama, tipe, atau kas yang terhubung. Kas yang transaksinya masih memakai kategori tidak dapat dilepas lewat Ubah; gunakan Lepas dari kas dan centang pilihan kosongkan agar transaksi di kas itu menjadi tanpa kategori.", "Gunakan Hapus untuk membuang kategori. Jika masih dipakai transaksi, pilih kategori pengganti atau biarkan kosong agar transaksinya menjadi tanpa kategori, kemudian periksa pengelompokan pada laporan."],
-    "example": "Gunakan Gaji dan Bonus untuk pemasukan; gunakan Belanja, Transportasi, dan Tagihan untuk pengeluaran; gunakan tipe Semua untuk kategori seperti Transfer yang berlaku pada keduanya.",
-    "note": "Gunakan penamaan yang konsisten agar transaksi serupa tidak tersebar di banyak kategori. Pada kas bersama, Editor dapat menambah, mengubah, melepas, dan menghapus kategori kas tersebut; kategori yang dibuat Editor tetap menjadi milik pemilik kas. Kategori yang juga terhubung ke kas lain di luar akses Editor hanya dapat dikelola pemilik. Viewer hanya melihat. Transaksi tanpa kategori tampil sebagai Tanpa kategori pada laporan. Tombol Pengaturan tampilan mengatur apakah dropdown kategori pada transaksi dipisah sesuai tipe atau menampilkan semua kategori; kategori bertipe Semua selalu tetap terlihat walau dropdown dipisah, dan data kategori tidak berubah saat pengaturan ini dialihkan."
-  },
-  {
-    "id": "kolaborasi", "page": "Kas", "category": "Kolaborasi", "title": "Berbagi kas dengan Viewer atau Editor",
-    "intro": "Pemilik Premium aktif dapat memberikan akses kas kepada pengguna APKu lain. Daftar kolaborator ditampilkan sebagai card: satu kolom di ponsel, dua di layar sedang, dan tiga di layar lebar. Setiap card memuat kas, kolaborator, hak akses, status, serta tanggal Mulai dan Berlaku hingga.",
-    "steps": ["Buka Setting > Kolaborator Kas, pilih tambah, lalu pilih kas milik Anda.", "Isi email pengguna yang sudah terdaftar dan terverifikasi. Tinggalkan input untuk memeriksa status email.", "Pilih Viewer untuk melihat atau Editor untuk ikut mencatat. Tentukan Mulai Berlaku dan, bila diperlukan, Berakhir Pada setelah tanggal mulai, lalu simpan.", "Kolaborator masuk dengan akunnya sendiri untuk mengakses kas bersama. Pemilik dapat mengubah peran atau mencabut akses melalui aksi pada card kolaborator."],
-    "example": "Berikan peran Editor kepada pasangan agar bisa mencatat belanja rumah tangga, atau Viewer kepada anggota yang hanya perlu melihat laporan.",
-    "note": "Editor memakai dompet sendiri dan kategori milik kas bersama, dapat mengelola kategori kas tersebut, serta hanya dapat mengubah/menghapus transaksi buatannya. Viewer hanya melihat transaksi dan laporan. Kas bersama tidak mengurangi kuota kas kolaborator. Pembuatan kolaborasi memerlukan Premium aktif; kolaborasi yang sudah ada tetap dapat dikelola atau dicabut pemilik."
-  },
-  {
-    "id": "kas-publik", "page": "Kas", "category": "Kolaborasi", "title": "Membagikan dan membaca link kas publik",
-    "intro": "Bagikan kas dalam mode hanya lihat kepada orang yang tidak memiliki akun APKu.",
-    "steps": ["Sebagai pemilik Premium aktif, buka Setting > Kolaborator Kas lalu pilih tambah, pilih kas, dan kosongkan email untuk membuat akses publik.", "Atur tanggal mulai serta tanggal berakhir bila diperlukan, lalu simpan. Akses publik selalu Viewer.", "Gunakan Salin link pada card kolaborator publik, lalu bagikan kepada penerima yang Anda tuju.", "Penerima membuka link tanpa login untuk melihat saldo dan transaksi. Di layar mobile, tiap transaksi tampil sebagai ringkasan jenis, nominal, kategori, tanggal, dan deskripsi jika ada. Pilih bulan atau cari deskripsi, kategori, maupun jenis transaksi; pindah halaman untuk melihat hasil lainnya.", "Cabut akses dari daftar kolaborator ketika link tidak diperlukan lagi."],
-    "example": "Bagikan catatan kas kegiatan kepada peserta selama periode kegiatan berlangsung.",
-    "note": "Siapa pun yang memiliki link dapat melihat kas selama akses berlaku. Nama dompet dan identitas pengguna disembunyikan. Pencarian mencakup seluruh tanggal, sedangkan ringkasan total tetap mengikuti bulan terpilih. Hapus pencarian untuk kembali ke filter bulan. Pencabutan langsung menonaktifkan link."
-  },
-  {
-    "id": "emas", "page": "Tabungan Emas", "category": "Pengelolaan uang", "title": "Tabungan emas dan estimasi nilainya",
-    "intro": "Catat tabungan emas logam mulia pada kas dan periksa estimasi nilainya. Di mobile, daftar tampil sebagai kartu berisi label emas, berat, harga beli, keterangan, dan tanggal Dibeli pada; tombol aksi tersedia sesuai hak akses. Di desktop, daftar tetap berupa tabel. Keduanya dikelompokkan berdasarkan kas dengan total berat per kas.",
-    "steps": ["Buka Setting > Tabungan Emas, tambah catatan, pilih kas, isi berat gram dan label emas, misalnya Emas Antam.", "Isi Dibeli pada tanpa memilih tanggal di masa depan. Harga beli dan keterangan dapat diisi jika diperlukan, lalu simpan.", "Gunakan aksi ubah untuk memperbarui informasi. Untuk tabungan yang beratnya masih nol, pemilik dapat memakai Saldo awal.", "Dari kas, buka aksi cek nilai emas. Periksa total nilai kas, saldo rupiah, berat emas, harga, dan estimasi untung/rugi.", "Periksa sumber dan waktu harga. Ambil harga buyback yang tersedia atau simpan harga manual untuk kas terkait jika diperlukan."],
-    "example": "Masukkan berat 0,5 gram dan label Emas Antam untuk mencatat kepemilikan setengah gram.",
-    "note": "Berat mendukung empat desimal dan desimal koma. Pembuatan mencatat berat sebagai saldo awal tanpa modal. Tombol Beli emas, Jual emas, dan Histori belum tersedia pada halaman. Estimasi harga tidak membuat transaksi; saat layanan harga gagal, aplikasi dapat memakai snapshot terakhir."
-  },
-  {
-    "id": "laporan", "page": "Laporan", "category": "Ringkasan", "title": "Membaca dan mengekspor laporan",
-    "intro": "Grup menu Laporan berada tepat di bawah grup Utang Piutang pada navigasi. Lihat arus uang pada periode tertentu dan simpan laporan dalam PDF atau Excel.",
-    "steps": ["Buka Laporan. Halaman dan filter tampil lebih dahulu, lalu data dimuat otomatis dengan indikator Memuat laporan... hingga selesai. Kemudian pilih harian, bulanan, tahunan, atau rentang tanggal khusus.", "Tentukan filter kas dan dompet sesuai kebutuhan. Gunakan navigasi untuk berpindah periode dan tunggu pemrosesan selesai.", "Baca saldo awal, pemasukan, pengeluaran, akumulasi, dan saldo akhir, lalu periksa rincian transaksi.", "Buka tab kategori untuk melihat pengelompokan pemasukan/pengeluaran dan persentasenya. Buka kelompok kategori untuk membaca rinciannya.", "Gunakan ekspor PDF untuk laporan lanskap atau Excel untuk file XLSX sesuai periode dan filter yang dipilih."],
-    "example": "Pilih laporan bulanan dan kas Rumah Tangga untuk meninjau kategori pengeluaran terbesar bulan ini.",
-    "note": "Periksa filter sebelum mengekspor. Dompet anggota lain pada kas bersama disamarkan, termasuk dalam hasil ekspor."
-  },
-  {
-    "id": "utang-piutang", "page": "Utang dan Piutang", "category": "Pencatatan", "title": "Mencatat utang dan piutang",
-    "intro": "Utang adalah kewajiban Anda kepada pihak lain; piutang adalah uang yang perlu dibayar pihak lain kepada Anda. Pada mobile, daftar tampil sebagai kartu dengan padding atas dan bawah yang rapat, berisi status, tanggal, pembaruan terakhir, pihak terkait, jatuh tempo jika tersedia, deskripsi, dan nominal tersisa. Gunakan tombol Detail atau Hapus pada kartu. Pada desktop, daftar tetap berupa tabel.",
-    "steps": ["Buka menu Utang atau Piutang sesuai jenis catatan, lalu pilih tambah.", "Isi nama pihak terkait, nominal awal, tanggal pencatatan, dan tanggal jatuh tempo jika diperlukan.", "Buka Detail untuk mencatat penambahan nominal atau pembayaran. Isi nominal, tanggal, serta deskripsi yang tersedia.", "Periksa riwayat dan saldo tersisa untuk mengetahui status selesai atau belum selesai. Gunakan pencarian nama untuk menemukan pihak tertentu.", "Jika terdapat kesalahan, gunakan aksi ubah/hapus pada catatan atau riwayat yang sesuai dan periksa kembali sisa nominal."],
-    "example": "Piutang Rp500.000 kepada Budi dengan pembayaran Rp200.000 menyisakan Rp300.000 yang belum diterima.",
-    "note": "Pilih menu yang tepat sebelum mencatat agar utang dan piutang tidak tertukar. Periksa riwayat pembayaran sebelum menghapus catatan."
-  },
-  {
-    "id": "langganan", "page": "Langganan Premium", "category": "Akun", "title": "Premium, voucher, dan bukti pembayaran",
-      "intro": "Bandingkan manfaat akun dan ajukan langganan melalui pembayaran manual yang tersedia. Setelah order disimpan, invoice dibuka otomatis di tab baru; bila tab diblokir, gunakan tombol Lihat invoice pada notifikasi atau kartu order. Riwayat ditampilkan sebagai dua kartu per baris dengan isi setiap kartu juga dua kolom (daftar dan isi kartu menjadi satu kolom di ponsel), berisi kode dan tanggal order, paket dan harga, total pembayaran, voucher (jika terisi), diskon, detail pembayaran, status, masa aktif, serta catatan admin. Gunakan pencarian atau filter status untuk menemukan order dan tombol aksi pada kartu untuk mengelolanya.",
-    "steps": ["Buka Langganan Premium pada grup Langganan di bagian paling bawah navigasi, setelah menu Setting, dan baca tabel perbandingan Fitur, Free (Reguler), dan Premium. Tabel memiliki lebar terbatas; ceklis menandakan fitur tersedia dan silang menandakan tidak tersedia. Baris Jumlah kas dan Jumlah Dompet menunjukkan Maksimal 2 untuk Free serta Tidak terbatas untuk Premium aktif. Bandingkan 9 fitur: jumlah kas, jumlah dompet, import transaksi, laporan/ekspor, utang/piutang, audit saldo, tabungan emas, pembuatan kolaborasi kas, dan pembuatan link kas publik. Baca catatan hak akses dan kondisi setelah Premium berakhir di bawah tabel.", "Buat order, pilih paket dan metode pembayaran, lalu masukkan kode voucher jika ada. Periksa diskon dan total pembayaran sebelum melanjutkan. Setelah disimpan, invoice order terbuka otomatis di tab baru; jika tidak terbuka, pilih Lihat invoice pada notifikasi sukses atau pada kartu order.", "Ikuti instruksi tujuan pembayaran pada invoice atau order, lalu lakukan pembayaran sesuai total yang tercantum. Nomor tujuan tampil besar dan tebal; gunakan tombol Salin bila tersedia. Simpan atau cetak invoice bila diperlukan.", "Gunakan Konfirmasi pembayaran untuk mengunggah bukti JPG, JPEG, PNG, atau PDF maksimal 3 MB, dan tambahkan catatan jika diperlukan.", "Pantau status order dan notifikasi. Jika ditolak, baca catatan admin dan gunakan Kirim ulang bukti setelah diperbaiki. Gunakan Batalkan jika tersedia untuk order yang tidak dilanjutkan."],
-    "example": "Masukkan voucher sebelum membuat order dan bayar sesuai total setelah diskon yang tercatat pada order tersebut.",
-    "note": "Reguler mencakup kas utama + 1 kas tambahan gratis dan dompet utama + 1 dompet tambahan gratis (masing-masing 2). Premium aktif memungkinkan penambahan kas/dompet serta pembuatan kolaborasi privat atau link kas publik. Setelah Premium berakhir, batas Reguler kembali berlaku dan kolaborasi baru tidak dapat dibuat; kolaborasi lama tetap dapat dikelola atau dicabut pemilik. Kedua akun dapat menerima akses sebagai Viewer atau Editor tanpa mengurangi kuota kas sendiri, sesuai peran dan masa akses. Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik. Aktivasi menunggu persetujuan pembayaran; perpanjangan mempertahankan sisa masa aktif. Order tidak kedaluwarsa otomatis. Ketentuan masa berlaku dan pemakaian ulang voucher mengikuti kode yang digunakan."
-  },
-  {
-    "id": "trial-premium", "page": "Langganan Premium", "category": "Akun", "title": "Coba gratis Premium 30 hari",
-    "intro": "Akun baru yang belum pernah memiliki masa aktif dapat mencoba Premium gratis selama 30 hari dari Dashboard atau Langganan Premium. Trial hanya sekali per akun, nomor HP, dan email, serta memerlukan email terverifikasi dan nomor HP terisi.",
-    "steps": ["Buka Dashboard atau Langganan Premium dan cari kartu Coba Premium gratis 30 hari. Jika belum memenuhi syarat, ikuti arahan pada kartu: verifikasi email atau isi nomor HP di Setting > Akun Saya.", "Pilih Mulai coba gratis, baca manfaat, durasi, tanggal berakhir, dan peringatan kas atau dompet tambahan akan terkunci setelah trial pada modal konfirmasi, lalu konfirmasi.", "Setelah aktif, periksa banner Trial Premium berisi sisa hari di Dashboard dan badge Trial pada nama pengguna. Mendekati akhir, banner berubah kuning pada H-7 dan merah pada H-1 bersama email pengingat.", "Beli paket kapan saja bila ingin lanjut berbayar. Setelah admin menyetujui order, sisa trial ditambahkan ke masa aktif paket dan status trial menjadi dikonversi.", "Jika trial berakhir tanpa perpanjangan, akun kembali Reguler dan kas atau dompet ketiga dan seterusnya terkunci tetapi tetap terlihat. Baca email penutup untuk jumlah yang terkunci dan ajakan berlangganan."],
-    "example": "Akun baru dengan email terverifikasi dan nomor HP 08123456789 memulai trial dari Dashboard dan menerima tanggal berakhir 30 hari kemudian.",
-    "note": "Trial berlaku 30 hari inklusif (hari ini + 29). Satu akun, satu nomor HP ternormalisasi, dan satu email ternormalisasi hanya dapat trial sekali, termasuk catatan akun yang sudah dihapus. Admin dapat mematikan pendaftaran baru atau mengubah durasi 1-90 hari tanpa mengganggu trial berjalan, serta membatalkan trial mencurigakan. Selama trial, pengingat bawaan H-30 dilewati dan diganti pengingat khusus H-7 dan H-1."
-  },
-  {
-    "id": "profil-notifikasi", "page": "Akun Saya", "category": "Akun", "title": "Profil, notifikasi, dan navigasi cepat",
-    "intro": "Menu Setting membuka halaman pertama yang dapat diakses dengan submenu Kas, Dompet, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya untuk akun Reguler maupun Premium. Submenu tetap tersedia pada setiap halaman Setting; pilih submenu untuk berpindah halaman; batas kuota dan hak akses kas bersama tetap berlaku.",
-    "steps": ["Buka Setting > Akun Saya untuk memperbarui nama, nomor HP, dan penggunaan aplikasi, kemudian simpan perubahan. Email akun ditampilkan tetapi tidak dapat diubah dari halaman ini.", "Gunakan bagian perubahan password bila perlu mengganti password akun.", "Periksa tipe akun dan masa aktif Premium pada akun atau dashboard. Nama tipe akun ditampilkan dengan huruf awal kapital. Tanggal masa aktif ditampilkan dalam format tahun-bulan-tanggal (YYYY-MM-DD).", "Buka notifikasi dalam aplikasi untuk membaca pembaruan terkait pembayaran dan status yang tersedia.", "Gunakan Spotlight untuk mencari menu berdasarkan namanya, lalu pilih hasil yang sesuai. Klik tombol berikon tanda tanya di sisi kanan topbar untuk membuka panduan di tab baru, langsung pada topik yang sesuai dengan halaman saat ini. Misalnya, dari Dompet Anda langsung menuju panduan dompet. Halaman tanpa topik khusus membuka daftar tutorial. Klik Tutorial Penggunaan pada sidebar untuk membuka daftar tutorial di tab baru. Daftar isi dikelompokkan berdasarkan halaman fitur, seperti Transaksi, Kas, dan Dompet, tanpa nomor pada judul topik. Pilih judul bab pada isi panduan untuk membuka atau menutup topiknya. Tautan langsung ke suatu topik otomatis membuka bab terkait. Sidebar tutorial menampilkan posisi Topik X dari Y yang ditampilkan dan menandai topik yang sedang dibaca."],
-    "example": "Cari Laporan melalui Spotlight ketika ingin langsung memeriksa ringkasan bulanan.",
-    "note": "Akun Reguler atau Premium yang kedaluwarsa memiliki pembatasan pengelolaan kas dan dompet tambahan. Periksa penanda akses dan status langganan jika suatu aksi tidak tersedia."
-  }
+    {
+        "id": "akun",
+        "page": "Mulai menggunakan APKu",
+        "category": "Mulai di sini",
+        "title": "Daftar, masuk, dan pemulihan akun",
+        "intro": "Gunakan akun pribadi untuk menyimpan catatan keuangan Anda. Tombol dan aksen utama halaman tutorial serta panel setelah masuk berwarna teal seperti pada halaman utama APKu.",
+        "steps": [
+            "Buka halaman utama APKu di /, pilih Daftar gratis atau Mulai gratis, lalu lengkapi formulir registrasi. Di aplikasi production, selesaikan juga verifikasi keamanan yang muncul.",
+            "Buka email verifikasi berbahasa Indonesia dan pilih Verifikasi Alamat Email. Jika belum diterima, periksa folder spam atau kirim ulang melalui halaman verifikasi.",
+            "Pilih Masuk di halaman utama, gunakan email dan password, kemudian selesaikan pengaturan awal jika diminta.",
+            "Jika lupa kata sandi, pilih tautan lupa kata sandi pada halaman masuk, masukkan alamat email, lalu pilih Atur Ulang Kata Sandi pada email yang dikirim. Setelah mengganti kata sandi, masuk kembali."
+        ],
+        "example": "Daftar menggunakan email yang aktif agar tautan verifikasi dan pemulihan password dapat diterima.",
+        "note": "Simpan kata sandi dengan aman. Pesan validasi formulir dan status autentikasi ditampilkan dalam bahasa Indonesia. Tutorial ini dapat dibuka tanpa akun, sedangkan data keuangan pribadi memerlukan login."
+    },
+    {
+        "id": "pengaturan-awal",
+        "page": "Mulai menggunakan APKu",
+        "category": "Mulai di sini",
+        "title": "Pengaturan awal: kas, sumber dana, dan saldo",
+        "intro": "Kas menunjukkan pengelompokan uang, sedangkan sumber dana menunjukkan tempat uang disimpan. Nominal rupiah di aplikasi ditampilkan tanpa digit desimal, misalnya Rp25.000; berat emas tetap dapat memiliki angka desimal.",
+        "steps": [
+            "Ikuti wizard pengguna baru untuk membuat kas utama dan deskripsinya.",
+            "Buat sumber dana utama sesuai tempat penyimpanan uang Anda.",
+            "Masukkan saldo awal sesuai uang yang tersedia agar pencatatan dimulai dari kondisi yang benar.",
+            "Tambahkan kategori pemasukan dan pengeluaran yang sering dipakai, lalu selesaikan wizard. Kategori ini langsung terhubung ke kas utama."
+        ],
+        "example": "Kas: Keuangan Rumah Tangga. Sumber dana: Rekening Bank. Saldo awal: Rp1.000.000. Kategori: Gaji dan Belanja.",
+        "note": "Saldo awal langsung memperbarui saldo kas dan sumber dana setelah disimpan. Kas dan sumber dana adalah dua sudut pandang atas uang yang sama. Jangan menjumlahkan total saldo kas dan total saldo sumber dana sebagai total kekayaan."
+    },
+    {
+        "id": "dashboard",
+        "page": "Dashboard",
+        "category": "Ringkasan",
+        "title": "Membaca dan mengatur dashboard",
+        "intro": "Dashboard merangkum kas dan sumber dana dalam satu tab, utang dan piutang dalam satu tab, serta langganan dan lima transaksi terbaru dalam tab terpisah. Secara default, tab Transaksi tampil pertama dan langsung dibuka. Hanya isi tab aktif yang terlihat. Tabel transaksi memakai jarak atas dan bawah yang ringkas agar lebih banyak informasi terlihat.",
+        "steps": [
+            "Buka Dashboard setelah login untuk memeriksa saldo serta ringkasan keuangan.",
+            "Pilih tab Kas & Sumber Dana atau Utang & Piutang untuk melihat kedua ringkasan sekaligus; gunakan Kelola pada bagian yang sesuai untuk membuka daftarnya. Pada tab transaksi, periksa ringkasan jenis, nominal, kategori, dan tanggal di layar mobile, lalu gunakan Tambah atau Lihat lengkap.",
+            "Buka Atur dashboard untuk menampilkan atau menyembunyikan bagian individual dan mengubah urutannya dengan geser atau tombol urutan. Bagian kas/sumber dana serta utang/piutang akan berbagi tab saat keduanya ditampilkan.",
+            "Pilih tab untuk berpindah bagian; di ponsel tab tersusun dua kolom sehingga tidak perlu digeser ke samping. Saat fokus berada di tab, gunakan panah kiri/kanan atau Home/End. Gunakan Ubah atau Hapus pada transaksi jika aksi tersedia."
+        ],
+        "example": "Gunakan tombol Kelola Sumber Dana pada tab Kas & Sumber Dana untuk langsung membuka daftar sumber dana.",
+        "note": "Pengaturan tampilan dan urutan disimpan per akun. Urutan yang sudah Anda atur tetap berlaku, dan tab pertama yang tampil akan dibuka saat halaman dimuat atau pengaturan diubah. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi audit saldo."
+    },
+    {
+        "id": "transaksi",
+        "page": "Transaksi",
+        "category": "Pencatatan",
+        "title": "Mencatat pemasukan dan pengeluaran",
+        "intro": "Catat uang masuk dan keluar dengan kas, sumber dana, serta kategori yang sesuai. Pada layar desktop, baca tabel dari kolom Tipe (ikon jenis transaksi), Tanggal, Kas, Kategori, lalu Nominal. Susunan ini juga berlaku pada Pencarian Transaksi dan transaksi terbaru di Dashboard; ringkasan Transaksi digunakan pada layar kecil.",
+        "steps": [
+            "Buka Transaksi atau gunakan Tambah pada dashboard, lalu buka Tambah transaksi.",
+            "Pilih pemasukan atau pengeluaran. Pilihan jenis transaksi tersusun grid dua kolom pada semua ukuran layar, termasuk mobile, tanpa perlu menggeser ke samping. Form transaksi tersusun satu kolom pada layar sempit dan dua kolom pada layar lebar. Tunggu formulir selesai menyesuaikan jenis transaksi.",
+            "Isi tanggal, kas, sumber dana, nominal, dan deskripsi, kemudian simpan. Kategori bersifat opsional: pilihan kategori mengikuti kas yang dipilih, dan boleh dibiarkan Tanpa kategori agar pencatatan lebih cepat. Gunakan tombol tambah pada pilihan Kategori untuk membuka form kategori yang sama seperti di Setting: isi nama, tipe, dan kas yang terhubung. Kas yang sedang dipilih otomatis dicentang; kategori baru tetap mengikuti aturan tipe kategori. Pengguna Premium aktif dapat membuka form kas atau sumber dana dari tombol tambah pada pilihan masing-masing. Isi nama, saldo awal, dan deskripsi kas; untuk kas, tentukan juga apakah semua kategori milik Anda dihubungkan. Form sumber dana mencakup nama, saldo, dan deskripsi. Jika kas diganti, kategori yang tidak terhubung ke kas baru dikosongkan. Gunakan Tambah yang lain untuk mencatat secara berurutan.",
+            "Periksa hasil di daftar. Pada layar mobile, lihat jenis, nominal, kategori, dan tanggal; buka Ubah untuk melihat rincian lain jika aksi tersedia. Form Ubah tersusun dua kolom pada layar lebar dan satu kolom pada layar sempit; input nominal diawali Rp. Ubah kas atau sumber dana jika perlu; pilihan ketiga dan seterusnya tidak dapat dipilih tanpa Premium aktif. Gunakan Hapus jika transaksi memang perlu dihapus, lalu periksa kembali saldo."
+        ],
+        "example": "Catat belanja Rp75.000 sebagai pengeluaran, pilih kas Rumah Tangga, sumber dana Tunai, kategori Belanja, dan deskripsi Belanja mingguan.",
+        "note": "Pemasukan ditandai hijau dan pengeluaran merah. Keterangan Dicatat oleh di bawah tanggal hanya muncul jika kas sedang atau pernah dikolaborasikan dengan akun lain, termasuk setelah akses kedaluwarsa atau dicabut. Tautan kas publik saja tidak memunculkan keterangan ini. Aturan yang sama berlaku pada daftar Transaksi, Pencarian Transaksi, dan Dashboard untuk akun Reguler maupun Premium. Aksi ubah/hapus mengikuti hak akses; transaksi audit saldo harus dikoreksi melalui audit baru. Setelah menghapus transaksi lama, saldo pada baris transaksi sesudahnya ikut diperbarui menurut tanggal."
+    },
+    {
+        "id": "transfer",
+        "page": "Transaksi",
+        "category": "Pencatatan",
+        "title": "Transfer antar-kas dan antar-sumber dana",
+        "intro": "Gunakan jenis transfer untuk memindahkan saldo sesuai tujuan pemindahannya.",
+        "steps": [
+            "Buka Tambah transaksi, lalu pilih transfer kas atau transfer sumber dana.",
+            "Untuk transfer kas, tentukan kas asal dan kas tujuan. Sumber dana pencatatan dipilih otomatis oleh aplikasi.",
+            "Untuk transfer sumber dana, tentukan sumber dana asal dan tujuan. Kas pencatatan dipilih otomatis oleh aplikasi.",
+            "Lengkapi tanggal, nominal, dan deskripsi yang tersedia, simpan, kemudian periksa saldo asal serta tujuan.",
+            "Untuk memperbaiki transfer, buka Ubah pada salah satu baris pasangan. Pilih kas asal dan tujuan serta sumber dana pada transfer kas, atau kas serta sumber dana asal dan tujuan pada transfer sumber dana. Simpan dan periksa kembali saldo kedua sisi."
+        ],
+        "example": "Memindahkan uang dari rekening bank ke uang tunai dicatat sebagai transfer sumber dana. Mengalokasikan uang dari kas Harian ke kas Liburan menggunakan transfer kas.",
+        "note": "Transfer kas ditandai biru dan transfer sumber dana kuning. Transfer pada kas bersama hanya tersedia bagi pemilik kas."
+    },
+    {
+        "id": "pencarian",
+        "page": "Transaksi",
+        "category": "Pencatatan",
+        "title": "Filter dan pencarian transaksi",
+        "intro": "Temukan catatan lama melalui filter periode atau pencarian transaksi global.",
+        "steps": [
+            "Di daftar Transaksi, buka Filter transaksi yang awalnya tertutup, lalu pilih bulan, tahun, kas, atau sumber dana pada deretan kontrol filter. Panel dan kontrol filter menyesuaikan tema terang atau gelap agar teks, ikon, dan batas kontrol tetap mudah dibedakan. Panah di dalam pilihan membuka daftar opsi; tombol di kiri dan kanan periode berpindah ke bulan sebelum atau sesudahnya. Gunakan Reset filter untuk kembali ke pilihan awal.",
+            "Gunakan pencarian deskripsi untuk menemukan catatan pada daftar transaksi.",
+            "Buka Pencarian Transaksi untuk mencari berdasarkan deskripsi, kategori, kas, sumber dana, jenis transaksi, atau nominal; persempit dengan filter yang tersedia. Di layar mobile, hasil memakai ringkasan jenis, nominal, kategori, dan tanggal.",
+            "Periksa detail hasil, lalu gunakan Ubah atau Hapus jika Anda memiliki hak pengelolaan."
+        ],
+        "example": "Pilih sumber dana Rekening Bank dan bulan yang diinginkan untuk menelusuri pembayaran, atau cari kata listrik pada pencarian global.",
+        "note": "Saldo berjalan tampil ketika filter kas atau sumber dana aktif pada daftar transaksi. Informasi sumber dana anggota lain pada kas bersama disamarkan."
+    },
+    {
+        "id": "import",
+        "page": "Transaksi",
+        "category": "Pencatatan",
+        "title": "Import transaksi dari CSV atau Excel",
+        "intro": "Masukkan banyak pemasukan dan pengeluaran sekaligus melalui file CSV atau XLSX.",
+        "steps": [
+            "Buka Transaksi, pilih Import Transaksi, lalu unduh contoh template XLSX dari modal import; template berisi tiga baris transaksi dengan deskripsi terisi maupun kosong dan tanggal tanpa waktu. Nilai buku kas dan sumber dana pada contoh sesuai opsi milik Anda. Di sisi kanan data transaksi, template mencantumkan buku kas, sumber dana, dan kategori pemasukan/pengeluaran milik Anda, dipisahkan oleh satu kolom kosong; daftar ini hanya referensi dan tidak dihitung sebagai baris transaksi.",
+            "Unggah file CSV atau XLSX di modal import. Isi kolom tanggal dengan format YYYY-MM-DD, misalnya 2026-09-15; waktu boleh ditambahkan dengan format YYYY-MM-DD HH:mm, misalnya 2026-09-15 14:30. Tanggal tanpa waktu dicatat pukul 00:00. Jika nilai kas atau sumber dana pada baris kosong, import memakai kas atau sumber dana default Anda. Petakan header file jika nama kolom berbeda; pilihan pemetaan tersusun dalam tiga kolom di layar lebar.",
+            "Pilih Perbarui saldo kas dan sumber dana. Matikan pilihan ini saat mengimpor transaksi lama yang sudah tercermin dalam saldo saat ini; transaksi tetap tersimpan dalam riwayat dan laporan.",
+            "Periksa pratinjau: jumlah baris, total pemasukan/pengeluaran, dan kesalahan. Jika beberapa baris memiliki format tanggal salah, contoh format yang benar tampil sekali sebelum daftar masalah. Unduh laporan error XLSX bila tersedia, perbaiki file, lalu unggah ulang.",
+            "Kolom kategori boleh kosong atau tidak dipetakan; barisnya diimpor tanpa kategori. Kategori dicari pada kas di baris yang sama. Jika ada kategori baru atau kategori yang belum terhubung ke kas tersebut, tinjau daftarnya dan aktifkan Buat kategori yang belum tersedia sebelum menyimpan import; kategori dibuat atau dihubungkan ke kas pada baris transaksinya. Pilihan ini ditampilkan berdampingan dengan Perbarui saldo kas dan sumber dana pada layar lebar.",
+            "Di halaman Transaksi, buka menu aksi lalu pilih Riwayat Import untuk memantau status, progres, atau pesan kegagalan. Untuk membatalkan, gunakan aksi pembatalan pada batch yang masih lengkap."
+        ],
+        "example": "Pindahkan 200 transaksi bulanan dari spreadsheet: cocokkan kolom tanggal dan nominal, periksa total pratinjau, lalu simpan.",
+        "note": "Maksimal 10 MB dan 10.000 baris. Hingga 1.000 baris diproses langsung; selebihnya melalui antrean. Transfer belum didukung. File yang sama tidak dapat diimpor dua kali kecuali batch telah dibatalkan. Pembatalan menghapus seluruh transaksi batch dan memulihkan dampak saldo bila opsi pembaruan saldo diaktifkan. Import kas bersama hanya untuk pemilik."
+    },
+    {
+        "id": "kas",
+        "page": "Kas",
+        "category": "Pengelolaan uang",
+        "title": "Mengelola kas",
+        "intro": "Pisahkan pencatatan menurut kebutuhan, misalnya pribadi, rumah tangga, atau usaha.",
+        "steps": [
+            "Buka Setting > Kas dan gunakan aksi tambah untuk membuat kas dengan nama serta deskripsi yang mudah dikenali.",
+            "Buka menu Aksi pada card kas untuk mengubah data atau menjadikannya kas utama/default.",
+            "Periksa label Akses, Kepemilikan, Saldo, dan Jumlah transaksi pada card. Jumlah produk emas ditampilkan hanya jika kas memiliki produk emas. Perubahan kas dan saldo diperbarui pada daftar setelah disimpan.",
+            "Saat menambah kas, pilihan Pakai semua kategori saya di kas ini aktif secara default; matikan jika kas memerlukan daftar kategori sendiri.",
+            "Untuk menghapus kas kosong, gunakan Hapus. Jika masih berisi transaksi atau emas, ikuti alur pemindahan ke kas lain milik Anda. Kategori yang belum terhubung ke kas tujuan ditampilkan satu per satu: pilih kategori penggantinya di kas tujuan, atau biarkan kosong agar transaksinya menjadi tanpa kategori."
+        ],
+        "example": "Buat kas Liburan untuk memisahkan alokasi liburan dari kas kebutuhan harian.",
+        "note": "Daftar Kas dan modal tambah menampilkan sisa slot atau batas kuota Reguler dalam panel padat berisi satu kalimat, misalnya: Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi kas. Saat penuh, pesan menjelaskan bahwa Anda tidak bisa menambah kas lagi karena kuota sudah terpenuhi. Latar kuning berarti tersisa 1 slot, sedangkan latar merah berarti kuota sudah penuh. Reguler mendapat maksimal 2 kas: kas utama dan satu tambahan gratis. Kas bersama tidak dihitung dalam kuota ini. Saat kuota penuh, keterangan batas tercapai muncul dan aksi tambah disembunyikan; aktifkan Premium untuk menambah kas. Premium aktif memiliki slot tidak terbatas dan tidak menampilkan pesan kuota. Setelah Premium berakhir, batas Reguler berlaku kembali. Transaksi pada kas terbatas tidak dapat diubah atau dihapus."
+    },
+    {
+        "id": "dompet",
+        "page": "Sumber Dana",
+        "category": "Pengelolaan uang",
+        "title": "Mengelola sumber dana",
+        "intro": "Sumber dana merepresentasikan uang tunai, rekening bank, atau tempat penyimpanan uang lainnya.",
+        "steps": [
+            "Buka Setting > Sumber Dana, tambahkan sumber dana, lalu isi nama dan deskripsi sesuai tempat penyimpanan uang.",
+            "Gunakan aksi ubah untuk memperbarui informasi, atau jadikan sumber dana yang paling sering digunakan sebagai default.",
+            "Periksa label Saldo, Default, Status, Jenis, dan Deskripsi pada card sumber dana sebelum mencatat transaksi. Perubahan sumber dana dan saldo diperbarui pada daftar setelah disimpan.",
+            "Saat menghapus sumber dana, ikuti alur pemindahan saldo ke sumber dana lain dan periksa kembali hasilnya."
+        ],
+        "example": "Gunakan sumber dana Tunai dan Rekening Bank untuk mengetahui di mana uang Anda berada.",
+        "note": "Kisi kartu Sumber dana minimal dua dan maksimal tiga kolom: jika ada satu atau dua sumber dana, tampil dua kolom; jika ada tiga atau lebih, tampil tiga kolom pada layar lebar. Tombol aksi pada kartu Sumber dana turun ke baris berikutnya saat ruang sempit agar tetap berada di dalam kartu. Daftar Sumber dana dan modal tambah menampilkan sisa slot atau batas kuota Reguler dalam panel padat berisi satu kalimat, misalnya: Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi sumber dana. Saat penuh, pesan menjelaskan bahwa Anda tidak bisa menambah sumber dana lagi karena kuota sudah terpenuhi. Latar kuning berarti tersisa 1 slot, sedangkan latar merah berarti kuota sudah penuh. Reguler mendapat maksimal 2 sumber dana: sumber dana utama dan satu tambahan gratis. Saat kuota penuh, keterangan batas tercapai muncul dan aksi tambah disembunyikan; aktifkan Premium untuk menambah sumber dana. Premium aktif memiliki slot tidak terbatas dan tidak menampilkan pesan kuota. Setelah Premium berakhir, batas Reguler berlaku kembali. Sumber dana yang dihapus tidak mengisi kuota, tetapi namanya tetap tersedia pada riwayat transaksi dan laporan."
+    },
+    {
+        "id": "audit-saldo",
+        "page": "Sumber Dana",
+        "category": "Pengelolaan uang",
+        "title": "Audit dan penyesuaian saldo sumber dana",
+        "intro": "Cocokkan saldo aplikasi dengan saldo riil dari uang tunai atau rekening Anda.",
+        "steps": [
+            "Periksa uang tunai dan saldo rekening di luar aplikasi terlebih dahulu.",
+            "Buka Setting > Sumber Dana lalu klik Audit saldo pada kartu sumber dana yang ingin diperiksa. Audit dari kartu hanya mencakup sumber dana tersebut; pilih kas tempat sumber dana itu memiliki transaksi. Untuk mengaudit beberapa sumber dana sekaligus, gunakan Audit saldo pada header halaman dan pilih satu kas. Untuk melihat riwayat, klik Riwayat audit pada halaman Sumber dana atau Tambah audit dari daftar riwayat. Kas utama dipilih secara default pada audit header. Catatan audit boleh dikosongkan.",
+            "Penghitung uang kas hanya ditampilkan pada sumber dana berjenis Tunai. Input pecahan uang kertas tersusun dua kolom pada layar lebar. Masukkan jumlah lembar atau keping setiap pecahan; toggle Uang Logam nonaktif secara default dan dapat diaktifkan untuk menampilkan pecahan koin. Total otomatis mengisi saldo riil; total kas dan tombol Ulangi tampil dua kolom pada layar lebar. Sumber dana non-Tunai hanya menerima saldo riil manual. Catatan sumber dana tidak tersedia pada form audit.",
+            "Tinjau selisih, simpan audit, lalu periksa riwayat audit dan transaksi penyesuaian. Jika saldo berubah selama proses, ulangi berdasarkan saldo terbaru."
+        ],
+        "example": "Saldo aplikasi Rp100.000 dan uang tunai sebenarnya Rp95.000 menghasilkan pengeluaran penyesuaian Rp5.000 yang tampil dengan label Audit Saldo.",
+        "note": "Penghitung menyediakan pecahan kertas Rp100.000, Rp50.000, Rp20.000, Rp10.000, Rp5.000, Rp2.000, Rp1.000 serta logam Rp1.000, Rp500, Rp200, dan Rp100, dan hanya tersedia untuk sumber dana berjenis Tunai. Selisih positif menjadi pemasukan, selisih negatif menjadi pengeluaran. Tanpa selisih, audit tetap tercatat tanpa transaksi baru. Transaksi penyesuaian tidak dapat diubah/dihapus langsung; lakukan audit baru untuk koreksi."
+    },
+    {
+        "id": "kategori",
+        "page": "Kategori",
+        "category": "Pengelolaan uang",
+        "title": "Mengelola kategori transaksi",
+        "intro": "Kategori mengelompokkan pemasukan dan pengeluaran agar laporan mudah dipahami. Kategori bersifat opsional dan terikat pada kas: sebuah kategori hanya dapat dipilih pada kas yang terhubung dengannya, dan satu kategori dapat dipakai di beberapa kas milik pemilik yang sama.",
+        "steps": [
+            "Buka Setting > Kategori untuk melihat tabel kategori berisi nama, tipe, dan kas yang terhubung. Jumlah transaksi ditampilkan di bawah nama kategori, misalnya 4 transaksi. Gunakan filter Kas atau Tipe untuk mempersempit daftar.",
+            "Pilih Tambah kategori, isi nama, pilih tipe Pemasukan, Pengeluaran, atau Semua (muncul untuk kedua jenis transaksi), lalu centang kas yang memakainya. Tipe default mengikuti pengaturan tampilan. Saat mencatat transaksi, akun Reguler maupun Premium juga dapat membuat kategori langsung dari pilihan Kategori; kategori tersebut otomatis terhubung ke kas yang dipilih.",
+            "Pilih kategori tersebut ketika mencatat transaksi pada kas yang terhubung, atau biarkan transaksi tanpa kategori.",
+            "Gunakan Ubah untuk mengganti nama, tipe, atau kas yang terhubung. Kas yang transaksinya masih memakai kategori tidak dapat dilepas lewat Ubah; gunakan Lepas dari kas dan centang pilihan kosongkan agar transaksi di kas itu menjadi tanpa kategori.",
+            "Gunakan Hapus untuk membuang kategori. Jika masih dipakai transaksi, pilih kategori pengganti atau biarkan kosong agar transaksinya menjadi tanpa kategori, kemudian periksa pengelompokan pada laporan."
+        ],
+        "example": "Gunakan Gaji dan Bonus untuk pemasukan; gunakan Belanja, Transportasi, dan Tagihan untuk pengeluaran; gunakan tipe Semua untuk kategori seperti Transfer yang berlaku pada keduanya.",
+        "note": "Gunakan penamaan yang konsisten agar transaksi serupa tidak tersebar di banyak kategori. Pada kas bersama, Editor dapat menambah, mengubah, melepas, dan menghapus kategori kas tersebut; kategori yang dibuat Editor tetap menjadi milik pemilik kas. Kategori yang juga terhubung ke kas lain di luar akses Editor hanya dapat dikelola pemilik. Viewer hanya melihat. Transaksi tanpa kategori tampil sebagai Tanpa kategori pada laporan. Tombol Pengaturan tampilan mengatur apakah dropdown kategori pada transaksi dipisah sesuai tipe atau menampilkan semua kategori; kategori bertipe Semua selalu tetap terlihat walau dropdown dipisah, dan data kategori tidak berubah saat pengaturan ini dialihkan."
+    },
+    {
+        "id": "kolaborasi",
+        "page": "Kas",
+        "category": "Kolaborasi",
+        "title": "Berbagi kas dengan Viewer atau Editor",
+        "intro": "Pemilik Premium aktif dapat memberikan akses kas kepada pengguna APKu lain. Daftar kolaborator ditampilkan sebagai card: satu kolom di ponsel, dua di layar sedang, dan tiga di layar lebar. Setiap card memuat kas, kolaborator, hak akses, status, serta tanggal Mulai dan Berlaku hingga.",
+        "steps": [
+            "Buka Setting > Kolaborator Kas, pilih tambah, lalu pilih kas milik Anda.",
+            "Isi email pengguna yang sudah terdaftar dan terverifikasi. Tinggalkan input untuk memeriksa status email.",
+            "Pilih Viewer untuk melihat atau Editor untuk ikut mencatat. Tentukan Mulai Berlaku dan, bila diperlukan, Berakhir Pada setelah tanggal mulai, lalu simpan.",
+            "Kolaborator masuk dengan akunnya sendiri untuk mengakses kas bersama. Pemilik dapat mengubah peran atau mencabut akses melalui aksi pada card kolaborator."
+        ],
+        "example": "Berikan peran Editor kepada pasangan agar bisa mencatat belanja rumah tangga, atau Viewer kepada anggota yang hanya perlu melihat laporan.",
+        "note": "Editor memakai sumber dana sendiri dan kategori milik kas bersama, dapat mengelola kategori kas tersebut, serta hanya dapat mengubah/menghapus transaksi buatannya. Viewer hanya melihat transaksi dan laporan. Kas bersama tidak mengurangi kuota kas kolaborator. Pembuatan kolaborasi memerlukan Premium aktif; kolaborasi yang sudah ada tetap dapat dikelola atau dicabut pemilik."
+    },
+    {
+        "id": "kas-publik",
+        "page": "Kas",
+        "category": "Kolaborasi",
+        "title": "Membagikan dan membaca link kas publik",
+        "intro": "Bagikan kas dalam mode hanya lihat kepada orang yang tidak memiliki akun APKu.",
+        "steps": [
+            "Sebagai pemilik Premium aktif, buka Setting > Kolaborator Kas lalu pilih tambah, pilih kas, dan kosongkan email untuk membuat akses publik.",
+            "Atur tanggal mulai serta tanggal berakhir bila diperlukan, lalu simpan. Akses publik selalu Viewer.",
+            "Gunakan Salin link pada card kolaborator publik, lalu bagikan kepada penerima yang Anda tuju.",
+            "Penerima membuka link tanpa login untuk melihat saldo dan transaksi. Di layar mobile, tiap transaksi tampil sebagai ringkasan jenis, nominal, kategori, tanggal, dan deskripsi jika ada. Pilih bulan atau cari deskripsi, kategori, maupun jenis transaksi; pindah halaman untuk melihat hasil lainnya.",
+            "Cabut akses dari daftar kolaborator ketika link tidak diperlukan lagi."
+        ],
+        "example": "Bagikan catatan kas kegiatan kepada peserta selama periode kegiatan berlangsung.",
+        "note": "Siapa pun yang memiliki link dapat melihat kas selama akses berlaku. Nama sumber dana dan identitas pengguna disembunyikan. Pencarian mencakup seluruh tanggal, sedangkan ringkasan total tetap mengikuti bulan terpilih. Hapus pencarian untuk kembali ke filter bulan. Pencabutan langsung menonaktifkan link."
+    },
+    {
+        "id": "emas",
+        "page": "Tabungan Emas",
+        "category": "Pengelolaan uang",
+        "title": "Tabungan emas dan estimasi nilainya",
+        "intro": "Catat tabungan emas logam mulia pada kas dan periksa estimasi nilainya. Di mobile, daftar tampil sebagai kartu berisi label emas, berat, harga beli, keterangan, dan tanggal Dibeli pada; tombol aksi tersedia sesuai hak akses. Di desktop, daftar tetap berupa tabel. Keduanya dikelompokkan berdasarkan kas dengan total berat per kas.",
+        "steps": [
+            "Buka Setting > Tabungan Emas, tambah catatan, pilih kas, isi berat gram dan label emas, misalnya Emas Antam.",
+            "Isi Dibeli pada tanpa memilih tanggal di masa depan. Harga beli dan keterangan dapat diisi jika diperlukan, lalu simpan.",
+            "Gunakan aksi ubah untuk memperbarui informasi. Untuk tabungan yang beratnya masih nol, pemilik dapat memakai Saldo awal.",
+            "Dari kas, buka aksi cek nilai emas. Periksa total nilai kas, saldo rupiah, berat emas, harga, dan estimasi untung/rugi.",
+            "Periksa sumber dan waktu harga. Ambil harga buyback yang tersedia atau simpan harga manual untuk kas terkait jika diperlukan."
+        ],
+        "example": "Masukkan berat 0,5 gram dan label Emas Antam untuk mencatat kepemilikan setengah gram.",
+        "note": "Berat mendukung empat desimal dan desimal koma. Pembuatan mencatat berat sebagai saldo awal tanpa modal. Tombol Beli emas, Jual emas, dan Histori belum tersedia pada halaman. Estimasi harga tidak membuat transaksi; saat layanan harga gagal, aplikasi dapat memakai snapshot terakhir."
+    },
+    {
+        "id": "laporan",
+        "page": "Laporan",
+        "category": "Ringkasan",
+        "title": "Membaca dan mengekspor laporan",
+        "intro": "Grup menu Laporan berada tepat di bawah grup Utang Piutang pada navigasi. Lihat arus uang pada periode tertentu dan simpan laporan dalam PDF atau Excel.",
+        "steps": [
+            "Buka Laporan. Halaman dan filter tampil lebih dahulu, lalu data dimuat otomatis dengan indikator Memuat laporan... hingga selesai. Kemudian pilih harian, bulanan, tahunan, atau rentang tanggal khusus.",
+            "Tentukan filter kas dan sumber dana sesuai kebutuhan. Gunakan navigasi untuk berpindah periode dan tunggu pemrosesan selesai.",
+            "Baca saldo awal, pemasukan, pengeluaran, akumulasi, dan saldo akhir, lalu periksa rincian transaksi.",
+            "Buka tab kategori untuk melihat pengelompokan pemasukan/pengeluaran dan persentasenya. Buka kelompok kategori untuk membaca rinciannya.",
+            "Gunakan ekspor PDF untuk laporan lanskap atau Excel untuk file XLSX sesuai periode dan filter yang dipilih."
+        ],
+        "example": "Pilih laporan bulanan dan kas Rumah Tangga untuk meninjau kategori pengeluaran terbesar bulan ini.",
+        "note": "Periksa filter sebelum mengekspor. Sumber dana anggota lain pada kas bersama disamarkan, termasuk dalam hasil ekspor."
+    },
+    {
+        "id": "utang-piutang",
+        "page": "Utang dan Piutang",
+        "category": "Pencatatan",
+        "title": "Mencatat utang dan piutang",
+        "intro": "Utang adalah kewajiban Anda kepada pihak lain; piutang adalah uang yang perlu dibayar pihak lain kepada Anda. Pada mobile, daftar tampil sebagai kartu dengan padding atas dan bawah yang rapat, berisi status, tanggal, pembaruan terakhir, pihak terkait, jatuh tempo jika tersedia, deskripsi, dan nominal tersisa. Gunakan tombol Detail atau Hapus pada kartu. Pada desktop, daftar tetap berupa tabel.",
+        "steps": [
+            "Buka menu Utang atau Piutang sesuai jenis catatan, lalu pilih tambah.",
+            "Isi nama pihak terkait, nominal awal, tanggal pencatatan, dan tanggal jatuh tempo jika diperlukan.",
+            "Buka Detail untuk mencatat penambahan nominal atau pembayaran. Isi nominal, tanggal, serta deskripsi yang tersedia.",
+            "Periksa riwayat dan saldo tersisa untuk mengetahui status selesai atau belum selesai. Gunakan pencarian nama untuk menemukan pihak tertentu.",
+            "Jika terdapat kesalahan, gunakan aksi ubah/hapus pada catatan atau riwayat yang sesuai dan periksa kembali sisa nominal."
+        ],
+        "example": "Piutang Rp500.000 kepada Budi dengan pembayaran Rp200.000 menyisakan Rp300.000 yang belum diterima.",
+        "note": "Pilih menu yang tepat sebelum mencatat agar utang dan piutang tidak tertukar. Periksa riwayat pembayaran sebelum menghapus catatan."
+    },
+    {
+        "id": "langganan",
+        "page": "Langganan Premium",
+        "category": "Akun",
+        "title": "Premium, voucher, dan bukti pembayaran",
+        "intro": "Bandingkan manfaat akun dan ajukan langganan melalui pembayaran manual yang tersedia. Setelah order disimpan, invoice dibuka otomatis di tab baru; bila tab diblokir, gunakan tombol Lihat invoice pada notifikasi atau kartu order. Riwayat ditampilkan sebagai dua kartu per baris dengan isi setiap kartu juga dua kolom (daftar dan isi kartu menjadi satu kolom di ponsel), berisi kode dan tanggal order, paket dan harga, total pembayaran, voucher (jika terisi), diskon, detail pembayaran, status, masa aktif, serta catatan admin. Gunakan pencarian atau filter status untuk menemukan order dan tombol aksi pada kartu untuk mengelolanya.",
+        "steps": [
+            "Buka Langganan Premium pada grup Langganan di bagian paling bawah navigasi, setelah menu Setting, dan baca tabel perbandingan Fitur, Free (Reguler), dan Premium. Tabel memiliki lebar terbatas; ceklis menandakan fitur tersedia dan silang menandakan tidak tersedia. Baris Jumlah kas dan Jumlah Sumber Dana menunjukkan Maksimal 2 untuk Free serta Tidak terbatas untuk Premium aktif. Bandingkan 9 fitur: jumlah kas, jumlah sumber dana, import transaksi, laporan/ekspor, utang/piutang, audit saldo, tabungan emas, pembuatan kolaborasi kas, dan pembuatan link kas publik. Baca catatan hak akses dan kondisi setelah Premium berakhir di bawah tabel.",
+            "Buat order, pilih paket dan metode pembayaran, lalu masukkan kode voucher jika ada. Periksa diskon dan total pembayaran sebelum melanjutkan. Setelah disimpan, invoice order terbuka otomatis di tab baru; jika tidak terbuka, pilih Lihat invoice pada notifikasi sukses atau pada kartu order.",
+            "Ikuti instruksi tujuan pembayaran pada invoice atau order, lalu lakukan pembayaran sesuai total yang tercantum. Nomor tujuan tampil besar dan tebal; gunakan tombol Salin bila tersedia. Simpan atau cetak invoice bila diperlukan.",
+            "Gunakan Konfirmasi pembayaran untuk mengunggah bukti JPG, JPEG, PNG, atau PDF maksimal 3 MB, dan tambahkan catatan jika diperlukan.",
+            "Pantau status order dan notifikasi. Jika ditolak, baca catatan admin dan gunakan Kirim ulang bukti setelah diperbaiki. Gunakan Batalkan jika tersedia untuk order yang tidak dilanjutkan."
+        ],
+        "example": "Masukkan voucher sebelum membuat order dan bayar sesuai total setelah diskon yang tercatat pada order tersebut.",
+        "note": "Reguler mencakup kas utama + 1 kas tambahan gratis dan sumber dana utama + 1 sumber dana tambahan gratis (masing-masing 2). Premium aktif memungkinkan penambahan kas/sumber dana serta pembuatan kolaborasi privat atau link kas publik. Setelah Premium berakhir, batas Reguler kembali berlaku dan kolaborasi baru tidak dapat dibuat; kolaborasi lama tetap dapat dikelola atau dicabut pemilik. Kedua akun dapat menerima akses sebagai Viewer atau Editor tanpa mengurangi kuota kas sendiri, sesuai peran dan masa akses. Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik. Aktivasi menunggu persetujuan pembayaran; perpanjangan mempertahankan sisa masa aktif. Order tidak kedaluwarsa otomatis. Ketentuan masa berlaku dan pemakaian ulang voucher mengikuti kode yang digunakan."
+    },
+    {
+        "id": "trial-premium",
+        "page": "Langganan Premium",
+        "category": "Akun",
+        "title": "Coba gratis Premium 30 hari",
+        "intro": "Akun baru yang belum pernah memiliki masa aktif dapat mencoba Premium gratis selama 30 hari dari Dashboard atau Langganan Premium. Trial hanya sekali per akun, nomor HP, dan email, serta memerlukan email terverifikasi dan nomor HP terisi.",
+        "steps": [
+            "Buka Dashboard dan cari banner ajakan Coba Premium gratis 30 hari di bagian atas halaman, atau buka Langganan Premium. Jika belum memenuhi syarat, ikuti arahan pada kartu: verifikasi email atau isi nomor HP di Setting > Akun Saya.",
+            "Pilih Mulai coba gratis, baca manfaat, durasi, tanggal berakhir, dan peringatan kas atau sumber dana tambahan akan terkunci setelah trial pada modal konfirmasi, lalu konfirmasi.",
+            "Setelah aktif, periksa banner Trial Premium berisi sisa hari di Dashboard dan badge Trial pada nama pengguna. Mendekati akhir, banner berubah kuning pada H-7 dan merah pada H-1 bersama email pengingat.",
+            "Beli paket kapan saja bila ingin lanjut berbayar. Setelah admin menyetujui order, sisa trial ditambahkan ke masa aktif paket dan status trial menjadi dikonversi.",
+            "Jika trial berakhir tanpa perpanjangan, akun kembali Reguler dan kas atau sumber dana ketiga dan seterusnya terkunci tetapi tetap terlihat. Baca email penutup untuk jumlah yang terkunci dan ajakan berlangganan."
+        ],
+        "example": "Akun baru dengan email terverifikasi dan nomor HP 08123456789 memulai trial dari Dashboard dan menerima tanggal berakhir 30 hari kemudian.",
+        "note": "Trial berlaku 30 hari inklusif (hari ini + 29). Satu akun, satu nomor HP ternormalisasi, dan satu email ternormalisasi hanya dapat trial sekali, termasuk catatan akun yang sudah dihapus. Admin dapat mematikan pendaftaran baru atau mengubah durasi 1-90 hari tanpa mengganggu trial berjalan, serta membatalkan trial mencurigakan. Selama trial, pengingat bawaan H-30 dilewati dan diganti pengingat khusus H-7 dan H-1."
+    },
+    {
+        "id": "profil-notifikasi",
+        "page": "Akun Saya",
+        "category": "Akun",
+        "title": "Profil, notifikasi, dan navigasi cepat",
+        "intro": "Menu Setting membuka halaman pertama yang dapat diakses dengan submenu Kas, Sumber dana, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya untuk akun Reguler maupun Premium. Submenu tetap tersedia pada setiap halaman Setting; pilih submenu untuk berpindah halaman; batas kuota dan hak akses kas bersama tetap berlaku.",
+        "steps": [
+            "Buka Setting > Akun Saya untuk memperbarui nama, nomor HP, dan penggunaan aplikasi, kemudian simpan perubahan. Email akun ditampilkan tetapi tidak dapat diubah dari halaman ini.",
+            "Gunakan bagian perubahan password bila perlu mengganti password akun.",
+            "Periksa tipe akun dan masa aktif Premium pada akun atau dashboard. Nama tipe akun ditampilkan dengan huruf awal kapital. Tanggal masa aktif ditampilkan dalam format tahun-bulan-tanggal (YYYY-MM-DD).",
+            "Buka notifikasi dalam aplikasi untuk membaca pembaruan terkait pembayaran dan status yang tersedia.",
+            "Gunakan Spotlight untuk mencari menu berdasarkan namanya, lalu pilih hasil yang sesuai. Klik tombol berikon tanda tanya di sisi kanan topbar untuk membuka panduan di tab baru, langsung pada topik yang sesuai dengan halaman saat ini. Misalnya, dari Sumber dana Anda langsung menuju panduan sumber dana. Halaman tanpa topik khusus membuka daftar tutorial. Klik Tutorial Penggunaan pada sidebar untuk membuka daftar tutorial di tab baru. Daftar isi dikelompokkan berdasarkan halaman fitur, seperti Transaksi, Kas, dan Sumber dana, tanpa nomor pada judul topik. Pilih judul bab pada isi panduan untuk membuka atau menutup topiknya. Tautan langsung ke suatu topik otomatis membuka bab terkait. Sidebar tutorial menampilkan posisi Topik X dari Y yang ditampilkan dan menandai topik yang sedang dibaca."
+        ],
+        "example": "Cari Laporan melalui Spotlight ketika ingin langsung memeriksa ringkasan bulanan.",
+        "note": "Akun Reguler atau Premium yang kedaluwarsa memiliki pembatasan pengelolaan kas dan sumber dana tambahan. Periksa penanda akses dan status langganan jika suatu aksi tidak tersedia."
+    }
 ]

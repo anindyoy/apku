@@ -9,6 +9,9 @@
         @endphp
         @if ($trialBanner)
             @include('filament.components.trial-premium-banner', ['trial' => $trialBanner])
+        @else
+            {{-- Banner ajakan di header agar akun layak langsung melihat CTA tanpa membuka tab Langganan. --}}
+            @include('filament.components.trial-premium-cta', ['info' => $infoTrialDashboard])
         @endif
         @php
             $sections = $this->visibleTabs();
@@ -106,9 +109,10 @@
                         </div>
                         {{ $this->table }}
                     @elseif (in_array($itemKey, ['kas', 'dompet']))
-                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total saldo {{ $itemKey }}</p>
+                        {{-- Kunci dompet dipertahankan; teks UI memakai sumber dana. --}}
+                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total saldo {{ $itemKey === 'dompet' ? 'sumber dana' : $itemKey }}</p>
                         <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $data->sum('saldo'), 0, ',', '.') }}</p>
-                        <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Tersebar di {{ $data->count() }} {{ $itemKey }}</p>
+                        <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Tersebar di {{ $data->count() }} {{ $itemKey === 'dompet' ? 'sumber dana' : $itemKey }}</p>
                         <dl class="dashboard-list mt-3">
                             @forelse ($data as $item)
                                 <div class="dashboard-row flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[color:var(--dash-line)] py-2 last:border-b-0 last:pb-0 [&_dt]:min-w-0 [&_dt]:flex-[1_1_7rem] [&_dt]:text-sm [&_dt]:font-medium [&_dt]:[overflow-wrap:anywhere] [&_dd]:max-w-full [&_dd]:text-sm [&_dd]:font-[650] [&_dd]:tabular-nums [&_dd]:[overflow-wrap:anywhere] [&_.dashboard-caption]:text-[.7rem] [&_.dashboard-caption]:font-normal">
@@ -116,7 +120,7 @@
                                     <dd>Rp {{ number_format((float) $item->saldo, 0, ',', '.') }}</dd>
                                 </div>
                             @empty
-                                <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $itemKey }}.</p>
+                                <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $itemKey === 'dompet' ? 'sumber dana' : $itemKey }}.</p>
                             @endforelse
                         </dl>
                     @elseif (in_array($itemKey, ['utang', 'piutang']))
@@ -144,16 +148,9 @@
                         @else
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Belum memiliki langganan premium aktif.</p>
                         @endif
-                        @if (($data['trial'] ?? null) && ! ($infoTrialDashboard['layak'] ?? false))
+                        {{-- Ajakan trial hanya tampil di header agar tidak ganda; tab cukup menampilkan sisa trial. --}}
+                        @if ($data['trial'] ?? null)
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Trial Premium: {{ ($data['trial']['sisa'] ?? 0) === 0 ? 'berakhir hari ini' : ($data['trial']['sisa'] ?? 0).' hari tersisa' }} sampai {{ $data['trial']['berakhir'] ?? '-' }}.</p>
-                        @elseif ($infoTrialDashboard['layak'] ?? false)
-                            <div class="mt-3 rounded-lg bg-[var(--dash-bg)] p-3" data-testid="trial-premium-cta">
-                                <p class="text-sm font-semibold">Coba Premium gratis {{ $infoTrialDashboard['durasi'] }} hari</p>
-                                <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Kas dan dompet tanpa batas, kolaborasi kas, dan tautan kas publik.</p>
-                                <div class="mt-2">{{ $this->mulaiTrialPremiumAction }}</div>
-                            </div>
-                        @elseif (! empty($infoTrialDashboard['alasan'] ?? null))
-                            <p class="dashboard-caption mt-2 text-xs leading-normal text-[color:var(--dash-muted)]" data-testid="trial-premium-guidance">{{ $infoTrialDashboard['alasan'] }}</p>
                         @endif
                                 @endif
                                 @if ($manageUrl)

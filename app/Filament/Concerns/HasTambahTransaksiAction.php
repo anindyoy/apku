@@ -252,7 +252,7 @@ trait HasTambahTransaksiAction
     private function selectDompetDenganOpsiTambah(Select $select): Select
     {
         return $select
-            ->createOptionModalHeading('Tambah dompet')
+            ->createOptionModalHeading('Tambah sumber dana')
             ->createOptionForm([
                 Grid::make(2)->schema(DompetFormSchema::fields()),
             ])
@@ -314,7 +314,7 @@ trait HasTambahTransaksiAction
                     'pemasukan' => 'Berhasil Catat Pemasukan',
                     'pengeluaran' => 'Berhasil Catat Pengeluaran',
                     'transfer_kas' => 'Berhasil Transfer Saldo',
-                    'transfer_dompet' => 'Saldo dompet berhasil dipindahkan',
+                    'transfer_dompet' => 'Saldo sumber dana berhasil dipindahkan',
                 })->success()->send();
 
                 if ($arguments['another'] ?? false) {
@@ -364,7 +364,7 @@ trait HasTambahTransaksiAction
                                 'pemasukan' => 'Pemasukan',
                                 'pengeluaran' => 'Pengeluaran',
                                 'transfer_kas' => 'Transfer kas',
-                                'transfer_dompet' => 'Transfer dompet',
+                                'transfer_dompet' => 'Transfer sumber dana',
                             ])
                             ->afterStateUpdated(function (string $state, Set $set): void {
                                 if ($state === 'transfer_dompet') {
@@ -428,7 +428,7 @@ trait HasTambahTransaksiAction
                             ->hidden(fn (Get $get): bool => $get('jenis_form') === 'transfer_dompet'),
                         $this->selectDompetDenganOpsiTambah(
                             Select::make('dompet_id')
-                                ->label(fn (Get $get): string => str_starts_with((string) $get('jenis_form'), 'transfer_') ? 'Dompet asal' : 'Dompet')
+                                ->label(fn (Get $get): string => str_starts_with((string) $get('jenis_form'), 'transfer_') ? 'Sumber dana asal' : 'Sumber dana')
                                 ->options(fn (Get $get): array => $get('jenis_form') === 'transfer_dompet'
                                     ? Transaksi::opsiDompetSumberTransfer()
                                     : Transaksi::opsiDompetYangDapatDikelola()))
@@ -446,7 +446,7 @@ trait HasTambahTransaksiAction
                             ->visible(fn (Get $get): bool => $get('jenis_form') === 'transfer_kas'),
                         $this->selectDompetDenganOpsiTambah(
                             Select::make('dompet_id_tujuan')
-                                ->label('Dompet tujuan')
+                                ->label('Sumber dana tujuan')
                                 ->options(fn (): array => Transaksi::opsiDompetYangDapatDikelola()))
                             ->different(fn (Get $get): string => $get('jenis_form') === 'transfer_dompet'
                                 ? 'dompet_id'

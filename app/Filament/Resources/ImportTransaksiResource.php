@@ -88,7 +88,8 @@ class ImportTransaksiResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading('Batalkan seluruh transaksi dari import ini?')
                     ->modalDescription(fn (ImportTransaksi $record): string => $record->pengaruhi_saldo
-                        ? 'Seluruh transaksi dalam batch akan dihapus dan dampak saldo kas serta dompet akan dipulihkan.'
+                        // Teks modal memakai sumber dana agar konsisten di UI.
+                        ? 'Seluruh transaksi dalam batch akan dihapus dan dampak saldo kas serta sumber dana akan dipulihkan.'
                         : 'Seluruh transaksi dalam batch akan dihapus. Saldo kas dan sumber dana tetap sama.')
                     ->visible(fn (ImportTransaksi $record): bool => $record->status === 'berhasil')
                     ->action(function (ImportTransaksi $record): void {

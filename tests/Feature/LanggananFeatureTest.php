@@ -261,7 +261,7 @@ test('tabel perbandingan akun langganan sesuai batasan dan tersembunyi bagi admi
         expect($xpath->query('.//tbody/tr', $table))->toHaveCount(9);
         expect($table->textContent)->not->toContain(
             'Kategori pemasukan dan pengeluaran',
-            'Transfer antar-kas dan antar-dompet',
+            'Transfer antar-kas dan antar-sumber dana',
             'Pencatatan pemasukan dan pengeluaran',
             'Menerima akses kas bersama',
             'Mengelola atau mencabut kolaborasi milik sendiri yang sudah ada',

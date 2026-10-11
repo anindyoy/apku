@@ -46,7 +46,8 @@ class PastikanAkunKeuanganDefault
                     'jenis' => 'tunai',
                     'saldo' => (int) BukuKas::withoutGlobalScopes()->where('user_id', $user->id)->sum('saldo'),
                     'is_default' => true,
-                    'description' => 'Dompet tunai utama',
+                    // Kolom nama_dompet dipertahankan; teks UI memakai sumber dana.
+                    'description' => 'Sumber dana tunai utama',
                 ]);
             } elseif ($sumberDana->trashed()) {
                 $sumberDana->restore();

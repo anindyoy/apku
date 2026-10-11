@@ -59,11 +59,11 @@ class Onboarding extends Page implements HasForms
                         ->schema([
                             TextInput::make('nama_buku')
                                 ->label('Label kas utama')
-                                ->placeholder('Contoh: Dompet Harian atau Rekening Usaha')
+                                ->placeholder('Contoh: Keuangan Harian atau Rekening Usaha')
                                 ->required()
                                 ->maxLength(50),
                             TextInput::make('nama_dompet')
-                                ->label('Label dompet utama')
+                                ->label('Label sumber dana utama')
                                 ->required()
                                 ->maxLength(50)
                                 ->placeholder('Contoh: Tunai, BCA, DANA'),
@@ -140,7 +140,8 @@ class Onboarding extends Page implements HasForms
                 'jenis' => 'tunai',
                 'saldo' => 0,
                 'is_default' => true,
-                'description' => 'Dompet utama',
+                // Komentar kode boleh menyebut istilah lama; teks UI memakai sumber dana.
+                'description' => 'Sumber dana utama',
             ]);
 
             app(TransaksiService::class)->buatSaldoAwal(

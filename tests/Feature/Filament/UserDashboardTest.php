@@ -90,7 +90,7 @@ test('dashboard user mempertahankan bagian lain saat satu bagian tab gabungan di
     $page->call('saveSettings', $sections)->assertHasNoErrors();
 
     expect(array_column($page->instance()->visibleTabs(), null, 'key'))->toMatchArray([
-        'kas-dompet' => ['key' => 'kas-dompet', 'label' => 'Kas & Dompet', 'sections' => ['kas']],
+        'kas-dompet' => ['key' => 'kas-dompet', 'label' => 'Kas & Sumber Dana', 'sections' => ['kas']],
         'utang-piutang' => ['key' => 'utang-piutang', 'label' => 'Utang & Piutang', 'sections' => ['utang']],
     ]);
 });
@@ -367,7 +367,7 @@ test('informasi akses transaksi membedakan alasan dan hilang saat akses aktif', 
     $record->setRelation('buku_kas', $kas)->setRelation('dompet', $dompet);
     expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record))->toBeNull();
     $user->masa_aktif = null;
-    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Dompet tidak aktif');
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Sumber dana tidak aktif');
     $record->user_id = $user->id + 100;
     expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Hanya dapat dilihat');
     $record->audit_saldo_dompet_detail_id = 123;

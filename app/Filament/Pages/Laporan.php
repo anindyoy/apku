@@ -295,7 +295,7 @@ class Laporan extends Page
                 ? 'Semua Kas'
                 : BukuKas::findOrFail($this->bukuKasId)->nama_buku,
             'namaDompet' => $this->dompetId === 'semua'
-                ? 'Semua Dompet'
+                ? 'Semua Sumber Dana'
                 : Dompet::withTrashed()->findOrFail($this->dompetId)->nama_dompet,
             'tipePeriode' => Str::headline($this->periode),
         ];
@@ -308,7 +308,8 @@ class Laporan extends Page
         $baris = [
             ['LAPORAN KAS'],
             ['Kas', $data['namaBuku']],
-            ['Dompet', $data['namaDompet']],
+            // Label ekspor memakai sumber dana; kunci namaDompet dipertahankan untuk kompatibilitas.
+            ['Sumber Dana', $data['namaDompet']],
             ['Tipe Periode', $data['tipePeriode']],
             ['Periode', $laporan['label']],
             [],
@@ -320,7 +321,7 @@ class Laporan extends Page
             ['Saldo Akhir', $laporan['saldoAkhir']],
             [],
             ['RINCIAN TRANSAKSI'],
-            ['Tanggal', 'Kas', 'Dompet', 'Jenis', 'Kategori', 'Deskripsi', 'Nominal'],
+            ['Tanggal', 'Kas', 'Sumber Dana', 'Jenis', 'Kategori', 'Deskripsi', 'Nominal'],
         ];
 
         foreach ($laporan['transaksi'] as $transaksi) {

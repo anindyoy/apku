@@ -116,7 +116,8 @@ class UserTransactionSeeder extends Seeder
 
         $dompet = Dompet::withoutGlobalScopes()->firstOrCreate(
             ['user_id' => $user->id, 'nama_dompet' => 'Cash'],
-            ['saldo' => 0, 'is_default' => true, 'description' => 'Dompet tunai utama']
+            // Kolom nama_dompet dipertahankan; teks UI memakai sumber dana.
+            ['saldo' => 0, 'is_default' => true, 'description' => 'Sumber dana tunai utama']
         );
 
         // --- 2. Pastikan user punya Kategori ---

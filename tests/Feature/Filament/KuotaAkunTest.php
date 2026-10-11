@@ -11,6 +11,8 @@ use Livewire\Livewire;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 test('kuota akun ditampilkan pada daftar dan modal sesuai jumlah dan masa aktif', function (string $jenis, string $status, int $jumlah) {
+    // Label UI memakai sumber dana; parameter uji dompet dipertahankan untuk kompatibilitas.
+    $label = $jenis === 'kas' ? 'kas' : 'sumber dana';
     $user = User::factory()->create([
         'role' => $status === 'admin' ? 'admin' : 'reguler',
         'masa_aktif' => match ($status) {
@@ -36,13 +38,13 @@ test('kuota akun ditampilkan pada daftar dan modal sesuai jumlah dan masa aktif'
 
     $tanpaBatas = in_array($status, ['premium', 'admin']);
     if ($status === 'admin') {
-        expect($teks)->toContain(ucfirst($jenis).' '.$jumlah, 'kuota Admin tidak terbatas.', 'data-kuota-status="normal"', 'bg-gray-100')
+        expect($teks)->toContain(ucfirst($label).' '.$jumlah, 'kuota Admin tidak terbatas.', 'data-kuota-status="normal"', 'bg-gray-100')
             ->not->toContain('bg-red-100', 'bg-yellow-100');
     } elseif ($status !== 'premium') {
         $pesan = match (true) {
-            $jumlah >= 2 => 'Sebagai pengguna reguler, Anda tidak bisa menambah '.$jenis.' lagi karena kuota sudah terpenuhi.',
-            $jumlah === 1 => 'Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi '.$jenis.'.',
-            default => 'Sebagai pengguna reguler, Anda bisa menambah hingga dua '.$jenis.'.',
+            $jumlah >= 2 => 'Sebagai pengguna reguler, Anda tidak bisa menambah '.$label.' lagi karena kuota sudah terpenuhi.',
+            $jumlah === 1 => 'Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi '.$label.'.',
+            default => 'Sebagai pengguna reguler, Anda bisa menambah hingga dua '.$label.'.',
         };
         expect(trim(strip_tags($teks)))->toBe($pesan);
         $warna = $jumlah >= 2 ? 'red' : ($jumlah === 1 ? 'yellow' : 'gray');
@@ -70,7 +72,7 @@ test('kuota akun ditampilkan pada daftar dan modal sesuai jumlah dan masa aktif'
     ['admin', 3],
 ]);
 
-test('kuota akun mengabaikan kas bersama dan dompet yang sudah dihapus', function () {
+test('kuota akun mengabaikan kas bersama dan sumber dana yang sudah dihapus', function () {
     $user = User::factory()->create(['role' => 'reguler', 'masa_aktif' => null]);
     BukuKas::factory()->create(['user_id' => $user->id]);
     $kasBersama = BukuKas::factory()->create(['user_id' => User::factory()->create()->id]);
@@ -80,10 +82,13 @@ test('kuota akun mengabaikan kas bersama dan dompet yang sudah dihapus', functio
     $this->actingAs($user);
 
     expect(KuotaAkun::kas($user)->toHtml())->toContain('Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi kas.', 'bg-yellow-100')
-        ->and(KuotaAkun::dompet($user)->toHtml())->toContain('Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi dompet.', 'bg-yellow-100');
+        // Teks UI memakai sumber dana; nama method dompet dipertahankan untuk kompatibilitas.
+        ->and(KuotaAkun::dompet($user)->toHtml())->toContain('Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi sumber dana.', 'bg-yellow-100');
 });
 
 test('kuota akun diperbarui setelah penambahan melalui modal', function (string $jenis) {
+    // Label UI memakai sumber dana; parameter uji dompet dipertahankan untuk kompatibilitas.
+    $label = $jenis === 'kas' ? 'kas' : 'sumber dana';
     $user = User::factory()->create(['role' => 'reguler', 'masa_aktif' => null]);
     BukuKas::factory()->create(['user_id' => $user->id, 'is_default' => true]);
     Dompet::factory()->create(['user_id' => $user->id, 'is_default' => true]);
@@ -94,5 +99,5 @@ test('kuota akun diperbarui setelah penambahan melalui modal', function (string 
         ->assertHasNoActionErrors()
         ->assertActionHidden('create');
 
-    expect($component->instance()->getSubheading()->toHtml())->toContain('Sebagai pengguna reguler, Anda tidak bisa menambah '.$jenis.' lagi karena kuota sudah terpenuhi.', 'bg-red-100');
+    expect($component->instance()->getSubheading()->toHtml())->toContain('Sebagai pengguna reguler, Anda tidak bisa menambah '.$label.' lagi karena kuota sudah terpenuhi.', 'bg-red-100');
 })->with(['kas', 'dompet']);

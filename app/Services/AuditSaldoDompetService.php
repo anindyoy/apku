@@ -42,7 +42,7 @@ class AuditSaldoDompetService
         }
 
         if ($rincian === []) {
-            throw ValidationException::withMessages(['rincian' => 'Minimal satu dompet harus diaudit.']);
+            throw ValidationException::withMessages(['rincian' => 'Minimal satu sumber dana harus diaudit.']);
         }
 
         $proses = function () use ($user, $bukuKas, $tanggal, $catatan, $rincian): AuditSaldoDompet {
@@ -145,8 +145,8 @@ class AuditSaldoDompetService
                     'tanggal' => $tanggal ?? now(),
                     'nominal' => abs($selisihAkhir),
                     'deskripsi' => filled($catatan)
-                        ? 'Penyesuaian saldo dompet: '.trim($catatan)
-                        : 'Penyesuaian saldo dompet',
+                        ? 'Penyesuaian saldo sumber dana: '.trim($catatan)
+                        : 'Penyesuaian saldo sumber dana',
                 ], $jenis);
 
                 Transaksi::withoutEvents(fn () => $transaksi->update([

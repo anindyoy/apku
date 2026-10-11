@@ -72,7 +72,7 @@ test('tabel transaksi merangkum pencatat dan dompet pada deskripsi kolom', funct
 
     expect($html)
         ->not->toContain('Dicatat oleh:')
-        ->toContain('Dompet: '.$transaksi->labelDompetUntuk($user));
+        ->toContain('Sumber dana: '.$transaksi->labelDompetUntuk($user));
 })
     ->group('filament', 'transaksi', 'ringkasan-kolom');
 

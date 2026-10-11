@@ -89,7 +89,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->label('Kas')
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Transaksi $record): string => 'Dompet: '.$record->labelDompetUntuk(auth()->user()))
+                    ->description(fn (Transaksi $record): string => 'Sumber dana: '.$record->labelDompetUntuk(auth()->user()))
                     ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
                 TextColumn::make('kategori')
@@ -137,7 +137,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->preload(),
 
                 SelectFilter::make('dompet_id')
-                    ->label('Dompet')
+                    ->label('Sumber dana')
                     ->options(fn (): array => OpsiSelectCache::ingat('dompet', fn (): array => Dompet::query()
                         ->pluck('nama_dompet', 'id')
                         ->all(), auth()->id(), 'aktif'))

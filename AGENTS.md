@@ -34,6 +34,13 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 
 - Setiap catatan atau komentar pada kode, baik satu baris maupun blok, harus ditulis dalam Bahasa Indonesia.
 
+## Istilah Sumber Dana
+
+- Entitas untuk pengguna adalah Sumber Dana, bukan Dompet. Jangan menulis kata `dompet`/`Dompet` pada teks yang terlihat pengguna; ubah menjadi `sumber dana`/`Sumber Dana` dengan kapitalisasi mengikuti konteks kalimat.
+- Cakupan UI yang wajib memakai Sumber Dana: label, judul, heading, placeholder, description, helperText, pesan validasi yang tampil, notifikasi, teks Blade yang dirender, isi [`tutorial.json`](resources/content/tutorial.json) yang dibaca pengguna, serta `description` seed/factory yang tampil pada kolom Deskripsi.
+- Pengecualian teknis yang boleh tetap memakai `dompet` karena tidak tampil sebagai label entitas: nama kolom `nama_dompet`, kunci `dompet_id`/`dompet_id_tujuan`, tabel `audit_saldo_dompet`, slug/route lama `dompet`, kunci cache lama, `HEADER` impor `dompet` agar file lama terbaca, id topik tutorial `dompet`, path aset logo `apku-dompet.svg`, serta `dompet_digital` pada metode pembayaran admin yang merupakan konsep berbeda sesuai [`PLAN_SUMBER_DANA.md`](docs/PLAN_SUMBER_DANA.md).
+- Sebelum menyelesaikan pekerjaan yang menyentuh istilah ini, telusuri `dompet` pada `app`, `resources/views`, `resources/content`, `lang`, dan `database/seeders`, lalu pastikan sisa yang tampil ke pengguna hanya pengecualian di atas. Selaraskan seed, ekspektasi test UI, [`tutorial.json`](resources/content/tutorial.json), dan [`FITUR_APLIKASI.md`](FITUR_APLIKASI.md) dalam pekerjaan yang sama.
+
 ## Styling CSS
 
 - Gunakan class Tailwind CSS dan komponen Flowbite untuk styling CSS pada file Blade atau view.

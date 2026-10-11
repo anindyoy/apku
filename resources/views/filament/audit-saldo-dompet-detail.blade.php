@@ -8,7 +8,7 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b text-left">
-                    <th class="py-2">Dompet</th>
+                    <th class="py-2">Sumber dana</th>
                     <th class="py-2 text-right">Saldo aplikasi</th>
                     <th class="py-2 text-right">Saldo riil</th>
                     <th class="py-2 text-right">Selisih</th>
@@ -17,8 +17,9 @@
             </thead>
             <tbody>
                 @foreach ($audit->detail as $detail)
+                    {{-- Kolom audit memakai nama_sumber_dana; teks UI memakai sumber dana. --}}
                     <tr class="border-b">
-                        <td class="py-2">{{ $detail->nama_dompet }}</td>
+                        <td class="py-2">{{ $detail->nama_sumber_dana ?? $detail->nama_dompet ?? '-' }}</td>
                         <td class="py-2 text-right">Rp {{ number_format($detail->saldo_aplikasi, 0, ',', '.') }}</td>
                         <td class="py-2 text-right">Rp {{ number_format($detail->saldo_riil, 0, ',', '.') }}</td>
                         <td class="py-2 text-right">Rp {{ number_format($detail->selisih, 0, ',', '.') }}</td>

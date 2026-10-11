@@ -34,23 +34,23 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Pada layar desktop, header dan isi tabel Transaksi, Pencarian Transaksi, serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Kas, Kategori, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.
 - Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, kategori, dan tanggal secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
 - Transfer saldo antar-kas.
-- Pemindahan saldo antar-dompet.
+- Pemindahan saldo antar-sumber dana.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
-- Modal import transaksi menyediakan unduhan contoh template XLSX sebelum pengguna mengunggah file. Template memuat tiga baris data transaksi dengan deskripsi terisi maupun kosong; nilai buku kas dan dompetnya sesuai opsi milik pengguna yang ditampilkan di kolom referensi setelah satu kolom pemisah, bersama kategori pemasukan/pengeluaran. Baris referensi tidak dihitung sebagai transaksi saat file diimpor.
+- Modal import transaksi menyediakan unduhan contoh template XLSX sebelum pengguna mengunggah file. Template memuat tiga baris data transaksi dengan deskripsi terisi maupun kosong; nilai buku kas dan sumber dananya sesuai opsi milik pengguna yang ditampilkan di kolom referensi setelah satu kolom pemisah, bersama kategori pemasukan/pengeluaran. Baris referensi tidak dihitung sebagai transaksi saat file diimpor.
 - Kolom kategori pada import bersifat opsional; nilai kosong diimpor sebagai transaksi tanpa kategori. Kategori dicari pada kas di baris yang sama. Kategori yang belum tersedia dapat dibuat otomatis, dan kategori yang belum terhubung dapat dihubungkan ke kas pada baris transaksinya, setelah konfirmasi pengguna. Perubahan ini ikut dibatalkan jika import transaksi gagal.
-- Seluruh baris import disimpan secara atomik. Pengguna dapat memilih apakah import memperbarui saldo kas dan dompet; pilihan aktif secara default. Riwayat yang diimpor tanpa dampak saldo tetap tampil sebagai transaksi dan tidak mengubah saldo saat diubah, dihapus, atau saat batch dibatalkan.
-- Import mengikuti kepemilikan dan hak pengelolaan kas, dompet, serta kategori pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
-- Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo kas serta dompet dipulihkan jika opsi pembaruan saldo diaktifkan.
+- Seluruh baris import disimpan secara atomik. Pengguna dapat memilih apakah import memperbarui saldo kas dan sumber dana; pilihan aktif secara default. Riwayat yang diimpor tanpa dampak saldo tetap tampil sebagai transaksi dan tidak mengubah saldo saat diubah, dihapus, atau saat batch dibatalkan.
+- Import mengikuti kepemilikan dan hak pengelolaan kas, sumber dana, serta kategori pengguna. File yang sama tidak dapat diimpor lebih dari sekali.
+- Batch import yang masih lengkap dapat dibatalkan secara atomik. Seluruh transaksi dalam batch dihapus dan dampaknya pada saldo kas serta sumber dana dipulihkan jika opsi pembaruan saldo diaktifkan.
 - File dari batch yang sudah dibatalkan dapat diimpor kembali tanpa membuat catatan batch duplikat.
 - File hingga 1.000 baris diproses langsung, sedangkan file 1.001–10.000 baris diproses melalui antrean privat.
 - File import dibatasi maksimal 10 MB dan berkas antrean dihapus dari penyimpanan privat setelah selesai atau gagal diproses.
 - Worker antrean memprioritaskan queue `import-transaksi`; batas retry disetel lebih panjang daripada batas waktu job agar batch yang masih berjalan tidak diproses ganda.
-- Import belum mendukung transfer saldo antar-kas atau pemindahan saldo antar-dompet.
+- Import belum mendukung transfer saldo antar-kas atau pemindahan saldo antar-sumber dana.
 - Beberapa pengguna dapat mencatat transaksi pada kas yang sama melalui peran Editor.
 - Setiap transaksi menyimpan identitas pengguna yang mencatatnya.
-- Editor menggunakan dompet miliknya sendiri dan kategori milik kas bersama, dapat mengelola kategori kas tersebut, serta hanya dapat mengubah atau menghapus transaksi buatannya.
-- Informasi dompet anggota lain disamarkan pada daftar transaksi, pencarian, laporan, dan hasil ekspor.
-- Transfer kas menentukan dompet pencatatan secara otomatis, sedangkan transfer dompet menentukan kas pencatatan secara otomatis. Transaksi pada kas terbatas tidak dapat diubah atau dihapus.
+- Editor menggunakan sumber dana miliknya sendiri dan kategori milik kas bersama, dapat mengelola kategori kas tersebut, serta hanya dapat mengubah atau menghapus transaksi buatannya.
+- Informasi sumber dana anggota lain disamarkan pada daftar transaksi, pencarian, laporan, dan hasil ekspor.
+- Transfer kas menentukan sumber dana pencatatan secara otomatis, sedangkan transfer sumber dana menentukan kas pencatatan secara otomatis. Transaksi pada kas terbatas tidak dapat diubah atau dihapus.
 - File import divalidasi sebelum disimpan.
 - Header file import dibaca otomatis dan mendukung pemetaan nama kolom yang berbeda ke kolom transaksi.
 
@@ -70,7 +70,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Kas bersama tidak dihitung sebagai kuota kas milik kolaborator.
 - Pemilik dapat mengubah peran atau mencabut akses kolaborator kapan saja.
 - Satu kas dapat memiliki beberapa tabungan emas logam mulia dengan label emas (contoh: Emas Antam), tanpa atribut kadar. Berat mendukung maksimal empat angka desimal dan saat pembuatan dicatat sebagai saldo awal tanpa modal. Saldo awal dapat dicatat oleh pemilik untuk tabungan yang beratnya masih nol.
-- Layanan internal pembelian dan penjualan emas beserta riwayatnya tetap tersedia; pembelian mengurangi saldo rupiah kas dan dompet, sedangkan penjualan menambah saldo rupiah secara atomik.
+- Layanan internal pembelian dan penjualan emas beserta riwayatnya tetap tersedia; pembelian mengurangi saldo rupiah kas dan sumber dana, sedangkan penjualan menambah saldo rupiah secara atomik.
 - Modal emas mencakup harga dasar, biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
 - Pengguna dapat mengambil harga buyback emas dari endpoint publik, menggunakan snapshot terakhir ketika layanan gagal, atau menyimpan harga manual privat untuk kas terkait.
 - Admin dapat mengubah URL API, URL sumber, timeout (1–60 detik), dan durasi cache harga emas (1–168 jam) melalui Setting. Nilai disimpan di database dan berlaku global; kolom kosong mengikuti default `services.harga_emas`. Perubahan pengaturan membatalkan cache harga terkait dan digunakan pada permintaan berikutnya.
@@ -80,23 +80,23 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Tanggal pembelian tabungan emas menggunakan `created_at` dan tidak boleh di masa depan. Total gram per kas tetap menghitung seluruh tabungan dalam kas saat pencarian atau pergantian halaman.
 - Perhitungan nilai emas tidak mencatat perubahan harga sebagai transaksi.
 
-### 5. Dompet
+### 5. Sumber Dana
 
-- Membuat dan mengubah dompet sebagai representasi tempat penyimpanan uang, misalnya kas tunai atau rekening bank.
-- Menjadikan dompet tertentu sebagai dompet default.
-- Memindahkan saldo ke dompet lain sebelum menghapus dompet.
+- Membuat dan mengubah sumber dana sebagai representasi tempat penyimpanan uang, misalnya kas tunai atau rekening bank.
+- Menjadikan sumber dana tertentu sebagai sumber dana default.
+- Memindahkan saldo ke sumber dana lain sebelum menghapus sumber dana.
 - Audit baru dapat dibuat melalui tombol **Tambah audit** pada daftar Audit Saldo, tombol **Audit saldo** di setiap kartu Sumber Dana, atau tombol audit massal pada header halaman Sumber Dana. Audit dari kartu hanya mencakup sumber dana tersebut dan pilihan kas dibatasi pada kas yang memiliki transaksinya. Audit dari header memungkinkan memilih satu kas dan memeriksa semua sumber dana yang memiliki transaksi pada kas tersebut.
 - Audit menyimpan snapshot saldo aplikasi, saldo riil, selisih, tanggal, kas pencatatan, dan catatan audit opsional. Catatan lama pada rincian audit tetap dipertahankan.
 - Form audit menempatkan kas pencatatan, tanggal, dan catatan audit dalam grid tiga kolom pada layar lebar; catatan audit bersifat opsional.
-- Form audit tidak menyediakan input catatan dompet. Penghitung uang hanya tersedia pada dompet berjenis **Tunai**; input pecahan uang kertas tersusun dalam dua kolom pada layar lebar. Total kas dan tombol **Ulangi** berdampingan dalam dua kolom pada layar lebar. Toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil dompet jenis lain tetap dapat dimasukkan secara manual.
+- Form audit tidak menyediakan input catatan sumber dana. Penghitung uang hanya tersedia pada sumber dana berjenis **Tunai**; input pecahan uang kertas tersusun dalam dua kolom pada layar lebar. Total kas dan tombol **Ulangi** berdampingan dalam dua kolom pada layar lebar. Toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil sumber dana jenis lain tetap dapat dimasukkan secara manual.
 - Selisih positif audit dicatat sebagai pemasukan dan selisih negatif sebagai pengeluaran tanpa kategori pada kas yang dipilih. Transaksi ini dikenali dari relasinya ke audit dan tampil dengan label **Audit Saldo** pada daftar, laporan, dan ekspor.
-- Dompet tanpa selisih tetap tercatat dalam riwayat audit tanpa membuat transaksi penyesuaian.
+- Sumber dana tanpa selisih tetap tercatat dalam riwayat audit tanpa membuat transaksi penyesuaian.
 - Seluruh penyesuaian dalam satu audit disimpan secara atomik dan dibatalkan jika saldo berubah selama proses audit.
 - Transaksi penyesuaian saldo tidak dapat diubah atau dihapus langsung. Koreksi dilakukan melalui audit saldo baru agar jejak rekonsiliasi tetap terjaga.
 
 ### 6. Kategori transaksi
 
-- Menggunakan kategori sebagai klasifikasi transaksi yang opsional dan bahan ringkasan laporan. Transaksi tanpa kategori tampil sebagai **Tanpa kategori**; transfer kas dan transfer dompet selalu tanpa kategori.
+- Menggunakan kategori sebagai klasifikasi transaksi yang opsional dan bahan ringkasan laporan. Transaksi tanpa kategori tampil sebagai **Tanpa kategori**; transfer kas dan transfer sumber dana selalu tanpa kategori.
 - Kategori terikat pada kas melalui tabel `kategori_kas`: transaksi hanya dapat memakai kategori yang terhubung ke kasnya, dan satu kategori dapat dipakai di beberapa kas milik pemilik yang sama.
 - Kategori dimiliki pemilik kas (`user_id`) dan mencatat pembuatnya (`dibuat_oleh`). Pemilik dan Editor aktif dapat menambah, mengubah, melepas, dan menghapus kategori kas; Editor hanya dapat mengubah atau menghapus kategori yang seluruh kasnya dapat ia sunting. Viewer hanya melihat.
 - Opsi kategori pada form transaksi disimpan dalam cache per kas dan dibersihkan saat kategori atau hubungannya dengan kas berubah.
@@ -106,7 +106,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 
 - Ekspor laporan ke PDF berformat lanskap.
 - Ekspor laporan ke Excel (`.xlsx`).
-- Perhitungan laporan mengikuti periode harian, bulanan, tahunan, atau rentang tanggal khusus serta filter kas dan dompet. Data mencakup saldo awal, pemasukan, pengeluaran, akumulasi, saldo akhir, rincian transaksi, dan ringkasan per kategori beserta persentasenya.
+- Perhitungan laporan mengikuti periode harian, bulanan, tahunan, atau rentang tanggal khusus serta filter kas dan sumber dana. Data mencakup saldo awal, pemasukan, pengeluaran, akumulasi, saldo akhir, rincian transaksi, dan ringkasan per kategori beserta persentasenya.
 
 ### 8. Utang dan piutang
 
@@ -118,8 +118,8 @@ Aturan bisnis dan pemrosesan data aplikasi.
 ### 9. Hak akses dan tipe akun
 
 - Data pengguna biasa dibatasi otomatis agar hanya menampilkan data miliknya.
-- Akun reguler tetap dapat mengelola kas utama, satu kas tambahan gratis, dompet utama, dan satu dompet tambahan gratis.
-- Akun dengan masa aktif premium dapat membuat dan mengelola kas serta dompet tambahan.
+- Akun reguler tetap dapat mengelola kas utama, satu kas tambahan gratis, sumber dana utama, dan satu sumber dana tambahan gratis.
+- Akun dengan masa aktif premium dapat membuat dan mengelola kas serta sumber dana tambahan.
 - Admin memiliki akses lintas data untuk kebutuhan pemantauan dan administrasi.
 
 ### 10. Administrasi pengguna
@@ -138,8 +138,8 @@ Fitur berikut hanya tersedia untuk admin:
 ### 12. Langganan premium dan coba gratis
 
 - Akun baru Reguler yang belum pernah memiliki `masa_aktif` maupun langganan disetujui dapat memulai **Coba Premium gratis 30 hari** dari Dashboard atau halaman Langganan, sekali per akun, nomor HP ternormalisasi, dan email ternormalisasi. Syaratnya email terverifikasi, nomor HP terisi, dan saklar program `trial.aktif` menyala. Aktivasi memakai kunci baris user agar klik ganda atau permintaan paralel hanya membuat satu trial, lalu akun menjadi Premium dengan `masa_aktif` inklusif (hari ini + durasi - 1, default 30 hari). Catatan trial dipertahankan walau akun dihapus sehingga HP atau email yang sama tidak dapat dipakai ulang.
-- Kartu CTA hanya tampil bagi yang layak atau hampir layak; akun yang belum memenuhi syarat melihat arahan verifikasi email atau pengisian HP di Akun Saya. Modal konfirmasi menyebut manfaat, durasi, tanggal berakhir, serta peringatan kas/dompet tambahan akan terkunci setelah trial. Banner status tampil di Dashboard (kuning pada H-7, merah pada H-1) plus badge Trial pada nama pengguna, sedangkan Akun Saya menampilkan status dan tanggal berakhir trial.
-- Perintah harian `trial-premium:proses` (08:15 Asia/Jakarta) mengirim pengingat H-7 dan H-1 lalu menutup trial yang lewat `berakhir_pada` menjadi `berakhir`; akun kembali Reguler bila masa aktif tidak diperpanjang berbayar, tanpa menghapus data. Notifikasi H0, H-7, H-1, dan berakhir dikirim via email sekaligus dalam aplikasi, termasuk jumlah kas/dompet yang terkunci pada email penutup.
+- Kartu CTA hanya tampil bagi yang layak atau hampir layak; akun yang belum memenuhi syarat melihat arahan verifikasi email atau pengisian HP di Akun Saya. Modal konfirmasi menyebut manfaat, durasi, tanggal berakhir, serta peringatan kas/sumber dana tambahan akan terkunci setelah trial. Banner ajakan tampil di header Dashboard agar langsung terlihat tanpa membuka tab Langganan; banner status trial aktif tampil di Dashboard (kuning pada H-7, merah pada H-1) plus badge Trial pada nama pengguna, sedangkan Akun Saya menampilkan status dan tanggal berakhir trial.
+- Perintah harian `trial-premium:proses` (08:15 Asia/Jakarta) mengirim pengingat H-7 dan H-1 lalu menutup trial yang lewat `berakhir_pada` menjadi `berakhir`; akun kembali Reguler bila masa aktif tidak diperpanjang berbayar, tanpa menghapus data. Notifikasi H0, H-7, H-1, dan berakhir dikirim via email sekaligus dalam aplikasi, termasuk jumlah kas/sumber dana yang terkunci pada email penutup.
 - Persetujuan langganan saat trial aktif menandai trial sebagai `dikonversi` beserta `langganan_id` dan `dikonversi_pada`; sisa trial ikut ditambahkan ke masa aktif paket karena perhitungan mulai dari masa aktif yang masih berlaku. Admin dapat membatalkan trial aktif yang mencurigakan sehingga akses Premium dari trial langsung dicabut bila belum ada masa aktif berbayar.
 - Admin mengelola paket langganan yang terdiri dari label, harga minimal Rp1, durasi dalam hari, dan status aktif.
 - Migration menyediakan pilihan awal 1 Tahun (365 hari), 9 Bulan (270 hari), 6 Bulan (180 hari), dan 3 Bulan (90 hari), dengan harga sementara Rp0 dan status nonaktif. Admin harus mengisi harga sebelum mengaktifkan paket. Paket dengan label yang sudah ada tidak ditimpa; rollback mempertahankan data paket.
@@ -169,7 +169,7 @@ Hook Git yang diaktifkan melalui `core.hooksPath=.githooks` menjalankan `compose
 
 Seeder demo menyediakan 1–2 tabungan emas dengan saldo awal tanpa modal dan dua kolaborator kas aktif (Viewer dan Editor) untuk setiap pengguna non-admin. Setiap pengguna juga menerima akses ke dua kas pengguna lain.
 
-Transfer kas, pemindahan saldo dompet, dan import transaksi pada kas bersama hanya tersedia bagi pemilik kas pada versi awal fitur kolaborasi.
+Transfer kas, pemindahan saldo sumber dana, dan import transaksi pada kas bersama hanya tersedia bagi pemilik kas pada versi awal fitur kolaborasi.
 
 ## Frontend
 
@@ -187,30 +187,30 @@ Tampilan dan alur interaksi pengguna aplikasi.
 Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utama. Proses ini mencakup:
 
 - Pembuatan kas utama beserta deskripsinya.
-- Pembuatan dompet utama.
+- Pembuatan sumber dana utama.
 - Pencatatan saldo awal.
 - Pembuatan kategori pemasukan yang sering digunakan.
 - Pembuatan kategori pengeluaran yang sering digunakan.
 
 ### 3. Pengelolaan transaksi
 
-- Menentukan tanggal, kas, dompet, nominal, dan deskripsi transaksi. Kategori opsional; pilihannya mengikuti kas yang dipilih dan dikosongkan jika tidak terhubung ke kas baru.
+- Menentukan tanggal, kas, sumber dana, nominal, dan deskripsi transaksi. Kategori opsional; pilihannya mengikuti kas yang dipilih dan dikosongkan jika tidak terhubung ke kas baru.
 - Mencatat beberapa transaksi berurutan melalui aksi **Tambah yang lain**.
 - Tombol **Tambah transaksi** tetap tersedia selama pengguna memiliki kas yang dapat dikelola, termasuk ketika daftar difilter ke kas terbatas. Pilihan kas di modal hanya memuat kas yang dapat dikelola; aksi ubah dan hapus tidak tersedia untuk transaksi pada kas terbatas.
-- Pemasukan, pengeluaran, transfer kas, dan transfer dompet dicatat melalui satu modal **Tambah transaksi**; jenis transaksi menentukan field serta warna form. Form tersusun satu kolom pada layar sempit dan dua kolom pada layar lebar; pilihan jenis transaksi tetap memakai grid dua kolom pada semua ukuran layar, termasuk mobile agar tidak meluap ke samping. Seluruh input dan tombol submit dinonaktifkan sementara ketika perubahan jenis sedang diproses. Transfer kas hanya meminta kas asal dan tujuan, sedangkan transfer dompet hanya meminta dompet asal dan tujuan.
+- Pemasukan, pengeluaran, transfer kas, dan transfer sumber dana dicatat melalui satu modal **Tambah transaksi**; jenis transaksi menentukan field serta warna form. Form tersusun satu kolom pada layar sempit dan dua kolom pada layar lebar; pilihan jenis transaksi tetap memakai grid dua kolom pada semua ukuran layar, termasuk mobile agar tidak meluap ke samping. Seluruh input dan tombol submit dinonaktifkan sementara ketika perubahan jenis sedang diproses. Transfer kas hanya meminta kas asal dan tujuan, sedangkan transfer sumber dana hanya meminta sumber dana asal dan tujuan.
 - Modal **Ubah transaksi** pada daftar transaksi, dashboard, dan pencarian memakai dua kolom pada layar yang cukup lebar serta satu kolom pada layar sempit. Deskripsi menggunakan lebar penuh, dan input nominal menampilkan prefix **Rp** seperti form Tambah.
-- Pada modal **Ubah transaksi**, kas dan dompet dapat diganti. Transfer kas menampilkan kas asal, kas tujuan, dan dompet; transfer dompet menampilkan kas, dompet asal, dan dompet tujuan. Perubahan memperbarui pasangan transfer dan saldo terkait secara atomik. Kas dan dompet ketiga dan seterusnya tetap terlihat tetapi tidak dapat dipilih saat masa Premium tidak berlaku; aturan hak akses juga diperiksa saat penyimpanan.
-- Menampilkan saldo berjalan untuk kas atau dompet yang sedang dipilih.
-- Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer dompet berwarna kuning.
+- Pada modal **Ubah transaksi**, kas dan sumber dana dapat diganti. Transfer kas menampilkan kas asal, kas tujuan, dan sumber dana; transfer sumber dana menampilkan kas, sumber dana asal, dan sumber dana tujuan. Perubahan memperbarui pasangan transfer dan saldo terkait secara atomik. Kas dan sumber dana ketiga dan seterusnya tetap terlihat tetapi tidak dapat dipilih saat masa Premium tidak berlaku; aturan hak akses juga diperiksa saat penyimpanan.
+- Menampilkan saldo berjalan untuk kas atau sumber dana yang sedang dipilih.
+- Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer sumber dana berwarna kuning.
 - Nama kategori pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
-- Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal hanya pada kas yang sedang atau pernah dikolaborasikan dengan akun lain (termasuk setelah kedaluwarsa atau dicabut, tidak termasuk tautan publik), sedangkan dompet ditampilkan di bawah kas. Saat filter kas atau dompet aktif, saldo berjalan ditampilkan di bawah nominal.
-- Filter transaksi berdasarkan bulan, tahun, kas, dan dompet; kontrol menggunakan latar, teks, ikon, dan batas yang kontras pada tema terang maupun gelap. Pilihan bulan dan tahun dibuat lebih ringkas, chevron filter lebih jelas, dan tombol reset sejajar di kanan ketika ruang tersedia.
+- Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal hanya pada kas yang sedang atau pernah dikolaborasikan dengan akun lain (termasuk setelah kedaluwarsa atau dicabut, tidak termasuk tautan publik), sedangkan sumber dana ditampilkan di bawah kas. Saat filter kas atau sumber dana aktif, saldo berjalan ditampilkan di bawah nominal.
+- Filter transaksi berdasarkan bulan, tahun, kas, dan sumber dana; kontrol menggunakan latar, teks, ikon, dan batas yang kontras pada tema terang maupun gelap. Pilihan bulan dan tahun dibuat lebih ringkas, chevron filter lebih jelas, dan tombol reset sejajar di kanan ketika ruang tersedia.
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data; baris contohnya memakai tanggal `YYYY-MM-DD` tanpa waktu.
-- Form import menyediakan pilihan **Perbarui saldo kas dan dompet** yang aktif secara default. Pilihan dapat dimatikan untuk riwayat lama agar saldo saat ini tidak berubah. Pilihan ini dan **Buat kategori yang belum tersedia** tampil dalam dua kolom pada layar lebar.
+- Form import menyediakan pilihan **Perbarui saldo kas dan sumber dana** yang aktif secara default. Pilihan dapat dimatikan untuk riwayat lama agar saldo saat ini tidak berubah. Pilihan ini dan **Buat kategori yang belum tersedia** tampil dalam dua kolom pada layar lebar.
 - Pratinjau import sebelum disimpan menampilkan jumlah baris, kesalahan, serta total pemasukan dan pengeluaran. Tanggal import menerima `YYYY-MM-DD` atau `YYYY-MM-DD HH:mm`; waktu yang tidak diisi menjadi `00:00`. Jika beberapa baris memiliki format tanggal salah, contoh kedua format ditampilkan sekali sebelum daftar masalah.
-- Nilai kas atau dompet yang kosong pada baris import memakai kas atau dompet default pengguna yang dapat dikelola.
+- Nilai kas atau sumber dana yang kosong pada baris import memakai kas atau sumber dana default pengguna yang dapat dikelola.
 - Pengguna dapat mengunduh laporan error XLSX yang memuat nomor baris, data asli, dan alasan kegagalan untuk membantu memperbaiki file import.
 - Pengguna dapat memetakan header file ke kolom transaksi dan melihat saran untuk nama kolom umum dalam Bahasa Indonesia dan Inggris.
 - Pemetaan kolom pada modal import tersusun dalam tiga kolom di layar lebar dan menyesuaikan jumlah kolom pada layar lebih kecil.
@@ -221,9 +221,9 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 4. Pencarian transaksi global
 
-- Mencari transaksi berdasarkan deskripsi, kategori, kas, dompet, tipe transaksi, nominal, atau pengguna.
-- Memfilter hasil berdasarkan jenis transaksi, kas, dan dompet.
-- Hasil pencarian memakai lima kolom dan format yang sama seperti daftar transaksi: pencatat berada di bawah tanggal hanya untuk kas dengan riwayat kolaborasi akun lain, dompet di bawah kas, serta deskripsi di bawah kategori.
+- Mencari transaksi berdasarkan deskripsi, kategori, kas, sumber dana, tipe transaksi, nominal, atau pengguna.
+- Memfilter hasil berdasarkan jenis transaksi, kas, dan sumber dana.
+- Hasil pencarian memakai lima kolom dan format yang sama seperti daftar transaksi: pencatat berada di bawah tanggal hanya untuk kas dengan riwayat kolaborasi akun lain, sumber dana di bawah kas, serta deskripsi di bawah kategori.
 - Menampilkan tipe transaksi dan warna teks hasil sesuai tipe tersebut dengan pola yang sama seperti daftar transaksi.
 - Pengguna dapat mengubah atau menghapus transaksi yang dapat dikelolanya langsung dari hasil pencarian.
 - Menampilkan pengguna pemilik transaksi khusus untuk admin.
@@ -234,7 +234,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Daftar kas menggunakan card Filament responsif yang menampilkan nama dan deskripsi kas, akses dan kepemilikan, serta saldo dan jumlah transaksi dengan label yang jelas. Jumlah produk emas hanya tampil jika lebih dari nol. Data setiap halaman, pencarian, dan urutan list disimpan dalam cache hingga tiga hari dan diperbarui saat kas, transaksi, tabungan emas, atau akses bersama berubah. Pencarian tetap mencakup nama dan deskripsi kas; tanggal dibuat dan diperbarui tersedia sebagai kolom opsional.
 - Aksi pada card `/admin/buku-kas` dikelompokkan dalam menu **Aksi**, dengan pilihan yang mengikuti hak akses dan kondisi kas.
 - Daftar **Kolaborator Kas** tersedia di `/admin/pengaturan/kolaborator-kas` sebagai card responsif: satu kolom di ponsel, dua di layar sedang, dan tiga di layar lebar. Setiap card menampilkan kas, nama dan email kolaborator atau penanda publik, hak akses, status, serta tanggal **Mulai** dan **Berlaku hingga**. Form tambah dan ubah kolaborator dibuka melalui modal; akses dapat dicabut melalui aksi pada card atau pilihan massal.
-- Daftar kolaborator menyediakan tombol **Salin link** pada setiap kolaborator publik, dengan notifikasi keberhasilan atau kegagalan penyalinan, tanpa kolom URL terpisah. Tanggal mulai dan berakhir pada card ditampilkan tanpa jam. Halaman publik menampilkan saldo kas, transaksi berhalaman dengan ringkasan padat pada layar mobile, filter bulan, pencarian berdasarkan deskripsi/kategori/jenis transaksi, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama dompet dan identitas pengguna tidak ditampilkan. Saat kata pencarian diisi, pencarian mencakup seluruh tanggal pada kas tersebut tanpa dibatasi bulan terpilih dan tetap dipertahankan saat berpindah halaman. Menghapus pencarian mengembalikan filter bulan; ringkasan total bulanan tetap mengikuti bulan terpilih.
+- Daftar kolaborator menyediakan tombol **Salin link** pada setiap kolaborator publik, dengan notifikasi keberhasilan atau kegagalan penyalinan, tanpa kolom URL terpisah. Tanggal mulai dan berakhir pada card ditampilkan tanpa jam. Halaman publik menampilkan saldo kas, transaksi berhalaman dengan ringkasan padat pada layar mobile, filter bulan, pencarian berdasarkan deskripsi/kategori/jenis transaksi, serta total pemasukan dan pengeluaran bulan tersebut (termasuk transfer), tanpa aksi perubahan data. Nama sumber dana dan identitas pengguna tidak ditampilkan. Saat kata pencarian diisi, pencarian mencakup seluruh tanggal pada kas tersebut tanpa dibatasi bulan terpilih dan tetap dipertahankan saat berpindah halaman. Menghapus pencarian mengembalikan filter bulan; ringkasan total bulanan tetap mengikuti bulan terpilih.
 - Daftar tabungan emas dikelompokkan berdasarkan kas dengan total gram seluruh tabungan pada setiap grup, tanpa kolom Kas terpisah. Di mobile, setiap tabungan tampil sebagai kartu bertumpuk dengan label emas, berat, harga beli, keterangan, tanggal **Dibeli pada**, dan aksi sesuai hak akses; di desktop tetap berupa tabel. Tanggal pembelian dapat diisi saat membuat dan mengubah tabungan, dengan nilai awal waktu sekarang. Harga beli dan keterangan opsional. Berat ditampilkan tanpa nol desimal berlebih, misalnya `1` atau `0,5` gram; total modal tidak ditampilkan pada daftar.
 - Aksi Beli emas, Jual emas, dan Histori tidak tersedia pada halaman tabungan emas.
 - Aksi cek nilai emas menampilkan total nilai kas dalam ringkasan beraksen emas, kartu nilai emas dan saldo rupiah, rincian berat/harga/modal, serta estimasi untung/rugi berwarna sesuai hasil. Modal responsif mendukung mode gelap dan menampilkan status sumber harga serta waktu berlakunya. Label sumber harga API menjadi tautan ke URL sumber dari Setting, dengan default `services.harga_emas.source` (`HARGA_EMAS_SOURCE`), dan dibuka di tab baru; sumber manual tetap berupa teks.
@@ -242,16 +242,16 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 - Halaman kas menyediakan pembuatan, perubahan, pemilihan kas utama/default, dan penghapusan kas; kas berisi transaksi atau emas menyediakan alur pemindahan sebelum penghapusan.
 - Daftar kas dan modal tambah menjelaskan sisa slot atau batas kuota kas untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap. Kas bersama tidak mengisi kuota. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif tidak menampilkan pesan kuota dan memiliki slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
 
-### 6. Dompet
+### 6. Sumber Dana
 
-- Daftar dompet menggunakan card Filament responsif yang menampilkan saldo, status akses, deskripsi, dan status dompet default dengan label yang jelas. Kisi menampilkan minimal dua kolom dan maksimal tiga: satu atau dua sumber dana memakai dua kolom, sedangkan tiga atau lebih memakai tiga kolom pada layar lebar. Data setiap halaman, pencarian, dan urutan list disimpan dalam cache hingga tiga hari dan diperbarui saat data dompet berubah.
-- Tetap menampilkan nama dompet yang sudah dihapus pada riwayat transaksi dan laporan.
-- Pengguna dapat mengaudit saldo seluruh dompet yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
-- Halaman dompet menyediakan pembuatan, perubahan, pemilihan dompet default, serta pemindahan saldo sebelum penghapusan.
-- Daftar dompet dan modal tambah menjelaskan sisa slot atau batas kuota dompet untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif tidak menampilkan pesan kuota dan memiliki slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
-- Form audit saldo memilih kas utama secara default (atau kas terkait pada audit per kartu) dan menyediakan saldo riil, tanggal, kas pencatatan, serta catatan umum opsional. Pilihan kas menyaring rincian ke dompet yang memiliki transaksi pada kas terpilih. Kas pencatatan, tanggal, dan catatan audit tersusun dalam grid tiga kolom pada layar lebar; input catatan dompet tidak ditampilkan.
-- Form audit hanya menyediakan penghitung uang kertas dan logam pada dompet berjenis **Tunai**; input pecahan uang kertas tersusun dalam dua kolom pada layar lebar. Total kas dan tombol **Ulangi** berdampingan dalam dua kolom pada layar lebar. Toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil dompet jenis lain tetap dapat dimasukkan secara manual.
-- Audit Saldo tidak ditampilkan pada navbar. Akses audit tersedia melalui tombol **Audit saldo** dan **Riwayat audit** pada halaman Dompet; daftar riwayat tetap menyediakan tombol **Tambah audit**.
+- Daftar sumber dana menggunakan card Filament responsif yang menampilkan saldo, status akses, deskripsi, dan status sumber dana default dengan label yang jelas. Kisi menampilkan minimal dua kolom dan maksimal tiga: satu atau dua sumber dana memakai dua kolom, sedangkan tiga atau lebih memakai tiga kolom pada layar lebar. Data setiap halaman, pencarian, dan urutan list disimpan dalam cache hingga tiga hari dan diperbarui saat data sumber dana berubah.
+- Tetap menampilkan nama sumber dana yang sudah dihapus pada riwayat transaksi dan laporan.
+- Pengguna dapat mengaudit saldo seluruh sumber dana yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
+- Halaman sumber dana menyediakan pembuatan, perubahan, pemilihan sumber dana default, serta pemindahan saldo sebelum penghapusan.
+- Daftar sumber dana dan modal tambah menjelaskan sisa slot atau batas kuota sumber dana untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif tidak menampilkan pesan kuota dan memiliki slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
+- Form audit saldo memilih kas utama secara default (atau kas terkait pada audit per kartu) dan menyediakan saldo riil, tanggal, kas pencatatan, serta catatan umum opsional. Pilihan kas menyaring rincian ke sumber dana yang memiliki transaksi pada kas terpilih. Kas pencatatan, tanggal, dan catatan audit tersusun dalam grid tiga kolom pada layar lebar; input catatan sumber dana tidak ditampilkan.
+- Form audit hanya menyediakan penghitung uang kertas dan logam pada sumber dana berjenis **Tunai**; input pecahan uang kertas tersusun dalam dua kolom pada layar lebar. Total kas dan tombol **Ulangi** berdampingan dalam dua kolom pada layar lebar. Toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil sumber dana jenis lain tetap dapat dimasukkan secara manual.
+- Audit Saldo tidak ditampilkan pada navbar. Akses audit tersedia melalui tombol **Audit saldo** dan **Riwayat audit** pada halaman Sumber Dana; daftar riwayat tetap menyediakan tombol **Tambah audit**.
 
 ### 7. Kategori transaksi
 
@@ -268,7 +268,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 - Grup menu **Laporan** berada tepat di bawah grup **Utang Piutang** pada navigasi.
 - Laporan harian, bulanan, tahunan, atau rentang tanggal khusus.
-- Filter laporan berdasarkan kas dan dompet.
+- Filter laporan berdasarkan kas dan sumber dana.
 - Ringkasan saldo awal, total pemasukan, total pengeluaran, akumulasi, dan saldo akhir.
 - Ringkasan pemasukan dan pengeluaran per kategori beserta persentasenya, termasuk baris **Tanpa kategori** pada ringkasan, rincian, PDF, dan Excel.
 - Tab kategori yang mengelompokkan rincian transaksi pemasukan dan pengeluaran berdasarkan kategori dalam daftar yang dapat dibuka dan ditutup, dengan rincian tertutup secara default.
@@ -289,7 +289,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 
 ### 10. Hak akses dan tipe akun
 
-- Status akses dompet ditampilkan sebagai **Aktif** atau **Terbatas**.
+- Status akses sumber dana ditampilkan sebagai **Aktif** atau **Terbatas**.
 - Menu data keuangan pribadi disembunyikan dari navigasi admin agar paparan data diminimalkan; rincian navigasi tersedia pada bagian Administrasi pengguna.
 
 ### 11. Administrasi pengguna
@@ -300,7 +300,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Melihat status verifikasi email.
 - Dashboard admin menjadi halaman utama setelah login dan hanya menampilkan data agregat: jumlah pengguna, jumlah akun premium aktif, jumlah pembayaran yang menunggu verifikasi, serta statistik trial (trial aktif, trial berakhir minggu ini, total trial, jumlah konversi, dan persentase konversi).
 - Daftar pengguna tidak menampilkan jumlah kas, transaksi, atau utang-piutang dan tidak menyediakan aksi impersonasi.
-- Navigasi admin difokuskan pada dashboard, pengguna, operasional langganan, dan Setting. Menu transaksi, pencarian transaksi, laporan, kas, dompet, kategori, utang, piutang, dan Akun Saya disembunyikan untuk admin.
+- Navigasi admin difokuskan pada dashboard, pengguna, operasional langganan, dan Setting. Menu transaksi, pencarian transaksi, laporan, kas, sumber dana, kategori, utang, piutang, dan Akun Saya disembunyikan untuk admin.
 - Admin dapat membuat, mengubah, dan menghapus pengguna serta mengatur tipe akun dan masa aktif.
 - Submenu **Harga Emas** (`/admin/pengaturan/setting`) pada halaman Setting khusus admin menyediakan form pengaturan harga emas. Nilai default ditampilkan sebagai placeholder; kosongkan kolom dan simpan untuk kembali memakai default.
 - Submenu **Pengaturan Trial** pada halaman Setting khusus admin menyediakan saklar program trial dan durasi 1-90 hari (default 30). Mematikan saklar hanya menutup pendaftaran baru tanpa mengganggu trial berjalan.
@@ -308,16 +308,16 @@ Fitur berikut hanya tersedia untuk admin:
 
 ### 12. Fitur pendukung
 
-- Tombol aksi pada kartu daftar Kas, Dompet, dan Langganan turun ke baris berikutnya ketika ruang sempit, termasuk saat subnavigasi Setting terbuka, sehingga tetap berada di dalam kartu.
+- Tombol aksi pada kartu daftar Kas, Sumber Dana, dan Langganan turun ke baris berikutnya ketika ruang sempit, termasuk saat subnavigasi Setting terbuka, sehingga tetap berada di dalam kartu.
 
-- Menu **Setting** (/admin/pengaturan) menggantikan grup Pengaturan pada navbar dan menggunakan Filament Cluster untuk membuka halaman pertama yang dapat diakses dengan subnavigasi bawaan pada setiap halaman anggota. URL halaman anggota memakai awalan `/admin/pengaturan/`, dan breadcrumb Setting kembali ke halaman pertama yang tersedia. Reguler dan Premium melihat Kas, Dompet, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya; admin melihat Pengguna, Harga Emas, dan Trial Premium. Submenu mengikuti otorisasi halaman tujuan. Audit saldo dan riwayatnya tetap diakses dari Dompet.
+- Menu **Setting** (/admin/pengaturan) menggantikan grup Pengaturan pada navbar dan menggunakan Filament Cluster untuk membuka halaman pertama yang dapat diakses dengan subnavigasi bawaan pada setiap halaman anggota. URL halaman anggota memakai awalan `/admin/pengaturan/`, dan breadcrumb Setting kembali ke halaman pertama yang tersedia. Reguler dan Premium melihat Kas, Sumber Dana, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya; admin melihat Pengguna, Harga Emas, dan Trial Premium. Submenu mengikuti otorisasi halaman tujuan. Audit saldo dan riwayatnya tetap diakses dari Sumber Dana.
 
 - Antarmuka berbahasa Indonesia.
 - Halaman publik `/` menampilkan landing page APKu dengan ringkasan fitur, perbandingan akun Reguler dan Premium (termasuk penawaran Coba Premium gratis 30 hari untuk akun baru yang memenuhi syarat), logo aplikasi, serta tautan ke registrasi, login, dan tutorial.
 - Warna utama panel Filament dan halaman tutorial menggunakan palet teal yang sama dengan warna utama landing page. Brand di atas menu sidebar admin memakai logo wordmark dompet `logo-options/apku-dompet-wordmark.svg` yang sama dengan landing page, dengan favicon dompet `logo-options/apku-dompet.svg`.
 - Nominal rupiah ditampilkan tanpa digit desimal, termasuk total langganan, harga paket, audit saldo, dan harga beli emas. Perubahan format tampilan tidak mengubah nilai tersimpan atau presisi berat emas.
 - Halaman publik **Tutorial Penggunaan** di `/tutorial` dapat dibaca tanpa login, dengan 19 topik fitur pengguna non-admin (Reguler, Premium, kas bersama, dan trial Premium), langkah bernomor, contoh, serta catatan hak akses. Konten dikelola melalui `resources/content/tutorial.json` dan ditampilkan sebagai kartu responsif dengan dukungan tema gelap, daftar isi tanpa nomor topik, serta bab berdasarkan halaman fitur yang dapat dibuka dan ditutup sebagai accordion. Pencarian hanya menampilkan bab berisi hasil. Tautan tersedia pada halaman login dan navigasi pengguna non-admin, serta tombol berikon tanda tanya di sisi kanan topbar panel untuk pengguna yang sudah login, termasuk admin. Menu Tutorial Penggunaan pada sidebar membuka daftar tutorial di tab baru. Tombol tutorial di topbar membuka panduan di tab baru dan langsung menuju topik sesuai URL halaman pengguna saat diklik, termasuk halaman detail/tambah dan perpindahan navigasi panel; bab tujuan otomatis terbuka. Sidebar tutorial menampilkan posisi topik dari jumlah hasil yang ditampilkan dan penanda aktif yang mengikuti tautan topik serta scroll. Topik tujuan ditandai secara visual; halaman tanpa pemetaan membuka daftar tutorial.
-- Seluruh input pilihan kas dan dompet menggunakan dropdown tanpa pencarian, termasuk pilihan kas kolaborator dan tujuan pemindahan sebelum penghapusan.
+- Seluruh input pilihan kas dan sumber dana menggunakan dropdown tanpa pencarian, termasuk pilihan kas kolaborator dan tujuan pemindahan sebelum penghapusan.
 - Pencarian cepat menu melalui Spotlight.
 - Login cepat akun pengembangan pada lingkungan lokal. Saat `APP_DEMO=true`, akun admin tidak ditampilkan dalam pilihan login cepat.
 
@@ -325,7 +325,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Grup menu **Langganan** berada paling bawah pada navigasi, setelah menu **Setting**.
 
-- User dapat membandingkan benefit akun Reguler dan Premium melalui tabel responsif dengan kolom Fitur, Free (Reguler), dan Premium di atas daftar kartu langganan, dengan aksen Premium dan dukungan mode gelap. Baris Jumlah kas dan Jumlah Dompet menampilkan Maksimal 2 untuk Free dan Tidak terbatas untuk Premium aktif. Lebar bagian perbandingan dibatasi maksimal 52rem; status ditampilkan sebagai ceklis hijau atau silang merah dengan label aksesibel, sedangkan kuota dan ketentuan tetap berupa teks. Tabel mencakup 9 fitur: jumlah kas, jumlah dompet, import transaksi, laporan/ekspor, utang/piutang, audit saldo, tabungan emas, pembuatan kolaborasi kas, dan pembuatan link kas publik. Reguler mencakup kas utama + 1 kas tambahan gratis dan dompet utama + 1 dompet tambahan gratis; Premium aktif membuka penambahan kas/dompet serta pembuatan kolaborasi privat atau link publik. Tabel dan catatan hak akses menjelaskan bahwa kolaborasi lama tetap dapat dikelola/dicabut pemilik, kedua akun dapat menerima akses kas bersama tanpa mengurangi kuota kas sendiri, dan setelah Premium berakhir batas Reguler kembali berlaku. Akses pencatatan Editor mengikuti ketersediaan pengelolaan kas oleh pemilik. Laporan, ekspor, serta utang/piutang tersedia untuk kedua akun.
+- User dapat membandingkan benefit akun Reguler dan Premium melalui tabel responsif dengan kolom Fitur, Free (Reguler), dan Premium di atas daftar kartu langganan, dengan aksen Premium dan dukungan mode gelap. Baris Jumlah kas dan Jumlah Sumber Dana menampilkan Maksimal 2 untuk Free dan Tidak terbatas untuk Premium aktif. Lebar bagian perbandingan dibatasi maksimal 52rem; status ditampilkan sebagai ceklis hijau atau silang merah dengan label aksesibel, sedangkan kuota dan ketentuan tetap berupa teks. Tabel mencakup 9 fitur: jumlah kas, jumlah sumber dana, import transaksi, laporan/ekspor, utang/piutang, audit saldo, tabungan emas, pembuatan kolaborasi kas, dan pembuatan link kas publik. Reguler mencakup kas utama + 1 kas tambahan gratis dan sumber dana utama + 1 sumber dana tambahan gratis; Premium aktif membuka penambahan kas/sumber dana serta pembuatan kolaborasi privat atau link publik. Tabel dan catatan hak akses menjelaskan bahwa kolaborasi lama tetap dapat dikelola/dicabut pemilik, kedua akun dapat menerima akses kas bersama tanpa mengurangi kuota kas sendiri, dan setelah Premium berakhir batas Reguler kembali berlaku. Akses pencatatan Editor mengikuti ketersediaan pengelolaan kas oleh pemilik. Laporan, ekspor, serta utang/piutang tersedia untuk kedua akun.
 - Form pengiriman bukti pembayaran mendukung JPG, JPEG, PNG, atau PDF dengan ukuran maksimal 3 MB.
 - User dan admin menerima notifikasi dalam aplikasi saat pembayaran dikonfirmasi, disetujui, atau ditolak sesuai perannya.
 - Pengguna dapat membuat order dengan memilih paket dan metode pembayaran yang tersedia serta memasukkan kode voucher. Setelah order disimpan, invoice dibuka otomatis di tab baru; notifikasi sukses menyediakan tombol Lihat invoice bila tab otomatis diblokir peramban. Nomor tujuan pada invoice tampil besar, tebal, dan dapat disalin lewat tombol Salin.
@@ -339,15 +339,15 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Dashboard menjadi halaman utama pengguna biasa setelah login dan onboarding.
 - Data kartu, lima transaksi terbaru, pengaturan tampilan, dan ringkasan admin menggunakan cache 30 menit yang dipisahkan per pengguna. Perubahan tabel model terkait membatalkan cache bagian yang bergantung padanya, termasuk query massal atau penulisan tanpa event model. Invalidasi berlaku untuk seluruh pengguna pada bagian terkait; data di dalam transaksi database dibaca langsung dan invalidasi diulang setelah commit. Status langganan diperbarui saat berganti tanggal.
-- Dashboard menggunakan tab berikon bergaya Flowbite untuk Kas & Dompet, Utang & Piutang, Langganan, dan Transaksi. Tab tersusun dua kolom pada layar mobile tanpa perlu digeser ke samping, dan tetap satu baris pada layar lebar. Tab gabungan menampilkan kedua ringkasan berdampingan pada layar lebar dan bertumpuk pada layar sempit. Hanya panel tab aktif yang terlihat dengan lebar penuh. Tampilan panel dan padding vertikal tabel tetap padat; transaksi mobile tetap berupa ringkasan satu kolom.
-- Menampilkan seluruh kas dan dompet milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Panel juga menampilkan total saldo dan jumlah kas atau dompet, dengan ikon pada tab dan dukungan tema gelap.
+- Dashboard menggunakan tab berikon bergaya Flowbite untuk Kas & Sumber Dana, Utang & Piutang, Langganan, dan Transaksi. Tab tersusun dua kolom pada layar mobile tanpa perlu digeser ke samping, dan tetap satu baris pada layar lebar. Tab gabungan menampilkan kedua ringkasan berdampingan pada layar lebar dan bertumpuk pada layar sempit. Hanya panel tab aktif yang terlihat dengan lebar penuh. Tampilan panel dan padding vertikal tabel tetap padat; transaksi mobile tetap berupa ringkasan satu kolom.
+- Menampilkan seluruh kas dan sumber dana milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Panel juga menampilkan total saldo dan jumlah kas atau sumber dana, dengan ikon pada tab dan dukungan tema gelap.
 - Menampilkan total sisa utang dan piutang setelah pembayaran, masing-masing disertai tiga catatan dengan pembaruan terbaru.
 - Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.
-- Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat (hanya kas dengan riwayat kolaborasi akun lain), kas dan dompet, kategori dan deskripsi, serta nominal.
-- Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian individual serta mengubah urutannya dengan geser atau tombol urutan. Kas/dompet dan utang/piutang menjadi satu tab jika keduanya ditampilkan; tab gabungan tetap tersedia saat hanya salah satu bagiannya ditampilkan. Secara default, tab Transaksi muncul dan dibuka pertama; urutan yang telah diatur pengguna tetap dipakai.
-- Baris transaksi yang tidak dapat dikelola menampilkan aksi informasi berwarna kuning, misalnya **Kas tidak aktif**, **Dompet tidak aktif**, atau **Transaksi audit saldo**. Klik penanda untuk membaca alasan dan langkah yang dapat dilakukan; aturan ubah/hapus tetap berlaku. Penanda tersedia di dashboard dan daftar transaksi.
+- Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat (hanya kas dengan riwayat kolaborasi akun lain), kas dan sumber dana, kategori dan deskripsi, serta nominal.
+- Melalui **Atur dashboard**, pengguna dapat menampilkan atau menyembunyikan setiap bagian individual serta mengubah urutannya dengan geser atau tombol urutan. Kas/sumber dana dan utang/piutang menjadi satu tab jika keduanya ditampilkan; tab gabungan tetap tersedia saat hanya salah satu bagiannya ditampilkan. Secara default, tab Transaksi muncul dan dibuka pertama; urutan yang telah diatur pengguna tetap dipakai.
+- Baris transaksi yang tidak dapat dikelola menampilkan aksi informasi berwarna kuning, misalnya **Kas tidak aktif**, **Sumber dana tidak aktif**, atau **Transaksi audit saldo**. Klik penanda untuk membaca alasan dan langkah yang dapat dilakukan; aturan ubah/hapus tetap berlaku. Penanda tersedia di dashboard dan daftar transaksi.
 - Baris tabel transaksi dashboard menyediakan aksi **Ubah** dan **Hapus** yang sama dengan daftar transaksi, sesuai hak pengelolaan pengguna. Aksi tersebut tidak tersedia untuk transaksi audit saldo.
-- Bagian kas, dompet, utang, piutang, dan langganan menyediakan tombol **Kelola** yang membuka daftar resource masing-masing, termasuk ketika belum memiliki data. Tombol kas dan dompet berada pada tab **Kas & Dompet**; tombol utang dan piutang berada pada tab **Utang & Piutang**.
+- Bagian kas, sumber dana, utang, piutang, dan langganan menyediakan tombol **Kelola** yang membuka daftar resource masing-masing, termasuk ketika belum memiliki data. Tombol kas dan sumber dana berada pada tab **Kas & Sumber Dana**; tombol utang dan piutang berada pada tab **Utang & Piutang**.
 - Kartu transaksi menyediakan tombol rata kanan di atas tabel: **Tambah** untuk membuka modal pencatatan yang sama dengan daftar transaksi (mengikuti hak akses kas), dan **Lihat lengkap** untuk menuju daftar transaksi.
 - Pilih tab untuk berpindah panel. Navigasi keyboard mendukung panah kiri/kanan serta Home/End, dengan penanda tab aktif dan relasi aksesibel antara tab dan panel. Perubahan data atau aksi Livewire mempertahankan tab aktif selama pengaturan urutan/visibilitas tidak berubah.
 - Dashboard admin tetap hanya berisi statistik agregat administrasi.
@@ -364,7 +364,7 @@ Fitur berikut hanya tersedia untuk admin:
 - `sessions`: `id` string PK, `user_id` FK users nullable cascade delete, `ip_address(45)` nullable, `user_agent` text nullable, `payload` longText, `last_activity` integer terindeks.
 - `notifications`: `id` UUID PK, `type`, `notifiable_type` + `notifiable_id` (morph), `data` text, `read_at` nullable, `timestamps`.
 
-#### Kas, kolaborasi, dan dompet
+#### Kas, kolaborasi, dan sumber dana
 
 - `buku_kas`: `id`, `user_id` FK users cascade delete, `nama_buku`, `saldo` integer, `is_default` boolean default false, `goal` integer nullable, `tanggal_goal` date nullable, `description(200)` nullable, `pernah_dikolaborasikan` boolean default false, `timestamps`, unik `[user_id, nama_buku]`.
 - `share_buku`: `id`, `buku_kas_id` FK `buku_kas` cascade delete, `user_id` FK users nullable cascade delete (kosong untuk link publik), `privilege` enum `viewer`/`editor`, `berlaku_mulai` datetime nullable, `berlaku_sampai` datetime nullable, `invited_by_user_id` FK users nullable null on delete, `public_token(64)` nullable unik, `timestamps`, unik `[buku_kas_id, user_id]`, indeks `[user_id, berlaku_mulai, berlaku_sampai]`.

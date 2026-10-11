@@ -182,7 +182,7 @@ test('pengguna dapat menjalankan audit dari halaman dompet atau daftar audit dan
         ->assertCanSeeTableRecords(AuditSaldoDompet::all());
 
     expect(AuditSaldoDompet::firstOrFail()->catatan)->toBeNull()
-        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->firstOrFail()->deskripsi)->toBe('Penyesuaian saldo dompet')
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->firstOrFail()->deskripsi)->toBe('Penyesuaian saldo sumber dana')
         ->and($tunai->fresh()->saldo)->toBe(490000)
         ->and($bukuKas->fresh()->saldo)->toBe(990000);
 })->with([

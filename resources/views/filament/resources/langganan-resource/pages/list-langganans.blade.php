@@ -39,7 +39,8 @@
                     Bandingkan akun Free dan Premium
                 </x-slot>
 
-                <p class="plan-description">Free adalah akun Reguler gratis untuk pencatatan keuangan harian. Pilih Premium jika Anda memerlukan lebih banyak kas, dompet, dan fasilitas berbagi kas.</p>
+                {{-- Teks UI memakai sumber dana agar konsisten di seluruh aplikasi. --}}
+                <p class="plan-description">Free adalah akun Reguler gratis untuk pencatatan keuangan harian. Pilih Premium jika Anda memerlukan lebih banyak kas, sumber dana, dan fasilitas berbagi kas.</p>
                 <div class="plan-table-wrap">
                     <table data-testid="plan-comparison" aria-describedby="plan-access-notes">
                         <caption>Perbandingan fitur APKu</caption>
@@ -47,7 +48,7 @@
                         <tbody>
                             <tr><th scope="row">Jumlah kas</th><td>Maksimal 2</td><td>Tidak terbatas</td></tr>
                             <tr><th scope="row">Jumlah Sumber Dana</th><td>Maksimal 2</td><td>Tidak terbatas</td></tr>
-                            @foreach (['Import transaksi CSV / XLSX', 'Laporan dan ekspor PDF / Excel', 'Utang dan piutang', 'Audit saldo dompet', 'Tabungan emas dan estimasi nilai'] as $fitur)
+                            @foreach (['Import transaksi CSV / XLSX', 'Laporan dan ekspor PDF / Excel', 'Utang dan piutang', 'Audit saldo sumber dana', 'Tabungan emas dan estimasi nilai'] as $fitur)
                                 <tr><th scope="row">{{ $fitur }}</th>
                                     <td><span class="plan-status" role="img" aria-label="Tersedia"><x-heroicon-o-check aria-hidden="true" /></span></td>
                                     <td><span class="plan-status" role="img" aria-label="Tersedia"><x-heroicon-o-check aria-hidden="true" /></span></td>
@@ -59,9 +60,9 @@
                     </table>
                 </div>
                 <ul class="plan-notes" id="plan-access-notes">
-                    <li>Pencatatan, transfer, import, dan audit mengikuti hak akses serta kas dan dompet yang dapat dikelola. Import dan transfer pada kas bersama hanya tersedia bagi pemilik kas.</li>
-                    <li>Kas bersama tidak mengurangi kuota kas sendiri. Viewer hanya melihat; Editor memakai dompet sendiri dan kategori kas bersama serta hanya dapat mengubah atau menghapus transaksi buatannya. Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik.</li>
-                    <li>Saat Premium berakhir, pengelolaan kas dan dompet kembali mengikuti kuota Reguler, dan pembuatan kolaborasi baru tidak tersedia. Kolaborasi yang sudah ada tetap dapat dikelola atau dicabut pemilik.</li>
+                    <li>Pencatatan, transfer, import, dan audit mengikuti hak akses serta kas dan sumber dana yang dapat dikelola. Import dan transfer pada kas bersama hanya tersedia bagi pemilik kas.</li>
+                    <li>Kas bersama tidak mengurangi kuota kas sendiri. Viewer hanya melihat; Editor memakai sumber dana sendiri dan kategori kas bersama serta hanya dapat mengubah atau menghapus transaksi buatannya. Editor hanya dapat mencatat pada kas yang masih dapat dikelola pemilik.</li>
+                    <li>Saat Premium berakhir, pengelolaan kas dan sumber dana kembali mengikuti kuota Reguler, dan pembuatan kolaborasi baru tidak tersedia. Kolaborasi yang sudah ada tetap dapat dikelola atau dicabut pemilik.</li>
                     <li>Harga dan masa aktif Premium mengikuti paket yang dipilih saat membuat order. Aktivasi dilakukan setelah pembayaran disetujui admin.</li>
                 </ul>
             </x-filament::section>

@@ -107,7 +107,7 @@ test('trial aktivasi mengatur masa aktif dan membuka fitur premium', function ()
         ->and($user->fresh()->type)->toBe('premium')
         ->and($user->fresh()->masa_aktif->toDateString())->toBe($berakhir)
         ->and($user->fresh()->masaAktifBerlaku())->toBeTrue()
-        // Kuota Reguler 2 kas dan 2 dompet terbuka selama trial.
+        // Kuota Reguler 2 kas dan 2 sumber dana terbuka selama trial.
         ->and($user->fresh()->dapatMembuatBukuKas())->toBeTrue()
         ->and($user->fresh()->dapatMembuatSumberDana())->toBeTrue();
 
@@ -243,6 +243,27 @@ test('trial statistik admin dan pembatalan berjalan benar', function () {
     $komponen = Livewire::actingAs($admin)->test(AdminOverview::class)->assertSuccessful();
     $html = $komponen->html();
     expect($html)->toContain('Trial aktif', 'Total trial', 'Konversi');
+
+    // Header Dashboard menampilkan ajakan sekali di atas tab, tanpa duplikasi di tab Langganan.
+    $calonHeader = buatCalonTrial(['hp' => '081999000333', 'email' => 'header-cta@example.com']);
+    $htmlHeader = Livewire::actingAs($calonHeader)->test(\App\Filament\Pages\Dashboard::class)->assertSuccessful()->html();
+    $dokumen = new DOMDocument;
+    @$dokumen->loadHTML('<?xml encoding="utf-8" ?>'.$htmlHeader);
+    $pencari = new DOMXPath($dokumen);
+    $ajakan = $pencari->query('//*[@data-testid="trial-premium-cta"]');
+    expect($ajakan->length)->toBe(1);
+    $tab = $pencari->query('//div[contains(@class,"dashboard-tabs")]')->item(0);
+    $posisiAjakan = strpos($htmlHeader, 'data-testid="trial-premium-cta"');
+    $posisiTab = strpos($htmlHeader, 'dashboard-tabs');
+    expect($posisiAjakan)->toBeLessThan($posisiTab)
+        ->and($pencari->query('.//*[@data-testid="trial-premium-cta"]', $tab)->length)->toBe(0);
+    expect($htmlHeader)->not->toContain('data-testid="trial-premium-banner"');
+
+    // Akun trial aktif melihat banner status di header, bukan ajakan.
+    $trialHeader = app(MulaiTrialPremium::class)->handle($calonHeader);
+    $htmlTrial = Livewire::actingAs($calonHeader->fresh())->test(\App\Filament\Pages\Dashboard::class)->assertSuccessful()->html();
+    expect($htmlTrial)->toContain('data-testid="trial-premium-banner"')
+        ->and(substr_count($htmlTrial, 'data-testid="trial-premium-cta"'))->toBe(0);
 
     // Pembatalan admin mencabut akses premium dari trial yang masih aktif.
     $targetBatal = $aktif->fresh()->trialPremium;

@@ -29,7 +29,7 @@ test('tutorial kolaborator menjelaskan kartu dan aksi link publik', function () 
 test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
     expect($topik['transaksi']['intro'])->toContain('Tipe (ikon jenis transaksi), Tanggal, Kas, Kategori, lalu Nominal', 'Pencarian Transaksi', 'Dashboard', 'layar kecil');
-    expect(implode(' ', $topik['transaksi']['steps']))->toContain('form kategori yang sama seperti di Setting', 'Pengguna Premium aktif dapat membuka form kas atau dompet');
+    expect(implode(' ', $topik['transaksi']['steps']))->toContain('form kategori yang sama seperti di Setting', 'Pengguna Premium aktif dapat membuka form kas atau sumber dana');
     expect(implode(' ', $topik['kategori']['steps']))->toContain('akun Reguler maupun Premium juga dapat membuat kategori langsung');
     expect($topik['transaksi']['note'])->toContain('Dicatat oleh', 'pernah dikolaborasikan dengan akun lain', 'kedaluwarsa atau dicabut', 'Tautan kas publik');
 });
@@ -37,7 +37,7 @@ test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', funct
 test('tutorial audit menjelaskan penghitung pecahan uang', function () {
     $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 
-    expect(implode(' ', $topics['audit-saldo']['steps']))->toContain('Audit saldo pada kartu sumber dana', 'Audit dari kartu hanya mencakup sumber dana tersebut', 'hanya ditampilkan pada sumber dana berjenis Tunai', 'dua kolom pada layar lebar', 'kas tempat sumber dana itu memiliki transaksi', 'Catatan audit boleh dikosongkan', 'Catatan dompet tidak tersedia pada form audit', 'total kas dan tombol Ulangi tampil dua kolom', 'Ulangi')
+    expect(implode(' ', $topics['audit-saldo']['steps']))->toContain('Audit saldo pada kartu sumber dana', 'Audit dari kartu hanya mencakup sumber dana tersebut', 'hanya ditampilkan pada sumber dana berjenis Tunai', 'dua kolom pada layar lebar', 'kas tempat sumber dana itu memiliki transaksi', 'Catatan audit boleh dikosongkan', 'Catatan sumber dana tidak tersedia pada form audit', 'total kas dan tombol Ulangi tampil dua kolom', 'Ulangi')
         ->and($topics['audit-saldo']['note'])->toContain('Rp100.000', 'Rp500');
 });
 
@@ -55,7 +55,7 @@ test('tutorial langganan menjelaskan tombol salin nomor tujuan', function () {
     expect(implode(' ', $topik['langganan']['steps']))->toContain('tombol Salin');
 });
 
-test('tutorial kuota kas dan dompet menjelaskan batas serta masa aktif premium', function () {
+test('tutorial kuota kas dan sumber dana menjelaskan batas serta masa aktif premium', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 
     foreach (['kas', 'dompet'] as $id) {

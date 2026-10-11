@@ -32,7 +32,8 @@ class ImportTransaksiService
 
     private const HEADER = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi'];
 
-    private const HEADER_OPSI_TEMPLATE = ['Opsi Buku Kas', 'Opsi Dompet', 'Opsi Kategori Pemasukan', 'Opsi Kategori Pengeluaran'];
+    // Teks template yang terlihat pengguna memakai sumber dana; kunci HEADER tetap dompet agar file lama terbaca.
+    private const HEADER_OPSI_TEMPLATE = ['Opsi Buku Kas', 'Opsi Sumber Dana', 'Opsi Kategori Pemasukan', 'Opsi Kategori Pengeluaran'];
 
     private const KOLOM_WAJIB = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'nominal'];
 
@@ -687,7 +688,8 @@ class ImportTransaksiService
         }
 
         if ($sumberDana === null) {
-            $errors[] = "Baris {$nomorBaris}, kolom dompet: sumber dana aktif tidak ditemukan atau tidak dapat dikelola.";
+            // Pesan validasi tampil ke pengguna sehingga memakai istilah sumber dana.
+            $errors[] = "Baris {$nomorBaris}, kolom sumber dana: sumber dana aktif tidak ditemukan atau tidak dapat dikelola.";
         }
 
         $kategoriDapatDibuat = $buatKategoriOtomatis

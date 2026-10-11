@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Panduan penggunaan APKu: mulai dari pengaturan akun, transaksi, kas dan dompet hingga laporan dan langganan premium.">
+    <meta name="description" content="Panduan penggunaan APKu: mulai dari pengaturan akun, transaksi, kas dan sumber dana hingga laporan dan langganan premium.">
     <title>Tutorial Penggunaan · APKu</title>
     <style>
         :root { color-scheme: light dark; --bg:#f7f8fa; --card:#fff; --text:#202b39; --muted:#526174; --line:#dde3ea; --accent:#0f766e; --soft:#f0fdfa; font-family:system-ui,sans-serif; color:var(--text); background:var(--bg); }

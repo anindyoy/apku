@@ -23,7 +23,8 @@ class SumberDanaFormSchema
                         ->where('user_id', auth()->id())
                         ->ignore($record?->id),
                 ])
-                ->placeholder('Contoh: Dompet Fisik, BCA, DANA, ShopeePay'),
+                // Komentar kode boleh menyebut nama kolom; placeholder UI memakai sumber dana.
+                ->placeholder('Contoh: Tunai Fisik, BCA, DANA, ShopeePay'),
 
             Select::make('jenis')
                 ->label('Jenis')

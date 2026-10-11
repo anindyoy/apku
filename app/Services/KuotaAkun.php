@@ -15,7 +15,8 @@ class KuotaAkun
 
     public static function dompet(User $user): Htmlable
     {
-        return self::ringkasan($user, 'dompet', $user->dompet()->count());
+        // Teks UI memakai sumber dana; nama method dipertahankan untuk kompatibilitas.
+        return self::ringkasan($user, 'sumber dana', $user->dompet()->count());
     }
 
     public static function sumberDana(User $user): Htmlable

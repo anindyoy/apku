@@ -216,7 +216,7 @@ class ListTransaksis extends ListRecords
                                     ->live()
                                     ->afterStateUpdated(fn (Get $get, Set $set): mixed => $this->perbaruiPratinjauImport($get('file'), $get('pemetaan') ?? [], (bool) $get('buat_kategori_otomatis'), $set)),
                                 Select::make('pemetaan.dompet')
-                                    ->label('Kolom dompet')
+                                    ->label('Kolom sumber dana')
                                     ->options(fn (Get $get): array => $get('header_options') ?? [])
                                     ->required()
                                     ->live()
