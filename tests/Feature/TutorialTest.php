@@ -55,6 +55,14 @@ test('tutorial langganan menjelaskan tombol salin nomor tujuan', function () {
     expect(implode(' ', $topik['langganan']['steps']))->toContain('tombol Salin');
 });
 
+test('tutorial trial hanya menampilkan ajakan kepada pengguna yang memenuhi syarat', function () {
+    $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+
+    expect(implode(' ', $topik['trial-premium']['steps']))
+        ->toContain('Ajakan trial hanya ditampilkan kepada pengguna yang memenuhi syarat')
+        ->not->toContain('arahan pada kartu');
+});
+
 test('tutorial kuota kas dan sumber dana menjelaskan batas serta masa aktif premium', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 

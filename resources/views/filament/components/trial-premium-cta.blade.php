@@ -15,6 +15,4 @@
         <p class="mt-1 text-xs leading-normal text-slate-500 [&:is(.dark_*)]:text-slate-400">Kas dan sumber dana tanpa batas, kolaborasi kas, dan tautan kas publik. Kas/sumber dana ke-3+ terkunci setelah trial berakhir, datanya tetap tersimpan.</p>
         <div class="mt-2">{{ $this->mulaiTrialPremiumAction }}</div>
     </div>
-@elseif (! empty($info['alasan'] ?? null))
-    <p class="mb-4 text-xs leading-normal text-slate-500 [&:is(.dark_*)]:text-slate-400" data-testid="trial-premium-guidance">{{ $info['alasan'] }}</p>
 @endif

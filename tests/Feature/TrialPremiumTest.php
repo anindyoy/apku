@@ -2,6 +2,8 @@
 
 use App\Enums\StatusLangganan;
 use App\Enums\StatusTrialPremium;
+use App\Filament\Pages\AkunSaya;
+use App\Filament\Resources\LanggananResource\Pages\ListLangganans;
 use App\Filament\Widgets\AdminOverview;
 use App\Models\ApplicationSetting;
 use App\Models\Langganan;
@@ -112,6 +114,25 @@ test('trial aktivasi mengatur masa aktif dan membuka fitur premium', function ()
         ->and($user->fresh()->dapatMembuatSumberDana())->toBeTrue();
 
     Notification::assertSentTo($user, \App\Notifications\TrialPremiumAktif::class);
+})->group('trial');
+
+test('informasi untuk memulai trial hanya tampil bagi pengguna yang layak', function () {
+    ApplicationSetting::updateOrCreate(['key' => 'trial'], ['value' => ['aktif' => true, 'durasi_hari' => 30]]);
+    $user = buatCalonTrial([
+        'email' => 'belum-verifikasi@example.com',
+        'email_verified_at' => null,
+    ]);
+
+    $dashboard = Livewire::actingAs($user)->test(\App\Filament\Pages\Dashboard::class)->assertSuccessful();
+    $akun = Livewire::actingAs($user)->test(AkunSaya::class)->assertSuccessful();
+    $langganan = Livewire::actingAs($user)->test(ListLangganans::class)->assertSuccessful();
+
+    foreach ([$dashboard, $akun, $langganan] as $halaman) {
+        expect($halaman->html())
+            ->not->toContain('data-testid="trial-premium-cta"')
+            ->not->toContain('data-testid="trial-premium-guidance"')
+            ->not->toContain('Verifikasi email terlebih dahulu');
+    }
 })->group('trial');
 
 test('trial penutupan mengubah status akses reguler tanpa menghapus data', function () {

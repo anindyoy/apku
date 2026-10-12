@@ -43,14 +43,13 @@ trait HasMulaiTrialPremiumAction
         $user = auth()->user();
 
         if (! $user || $user->isAdmin()) {
-            return ['layak' => false, 'alasan' => null, 'trial' => null, 'durasi' => app(PengaturanTrial::class)->durasiHari()];
+            return ['layak' => false, 'trial' => null, 'durasi' => app(PengaturanTrial::class)->durasiHari()];
         }
 
         $layanan = app(MulaiTrialPremium::class);
 
         return [
             'layak' => $layanan->layak($user),
-            'alasan' => $layanan->alasanTidakLayak($user),
             'trial' => $user->trialPremiumAktif(),
             'durasi' => app(PengaturanTrial::class)->durasiHari(),
         ];
