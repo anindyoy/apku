@@ -93,7 +93,7 @@
                         <ul class="mt-7 space-y-3 text-slate-700">
                             <li>✓ Hingga 2 kas dan 2 sumber dana</li>
                             <li>✓ Transaksi, impor, laporan dan ekspor</li>
-                            <li>✓ Cocokkan saldo, emas, utang dan piutang</li>
+                            <li>✓ Cocokkan saldo, catat emas, catat utang dan piutang</li>
                             <li>✓ Dapat menerima akses kas bersama</li>
                         </ul>
                     </div>
