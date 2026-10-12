@@ -191,10 +191,10 @@
                                             <span class="rounded-full bg-teal-100 px-2 py-0.5 text-[11px] font-bold leading-4 text-teal-800">Diskon {{ $paket['persen'] }}%</span>
                                         @endif
                                     </span>
-                                    <span class="block text-xs text-slate-500 sm:hidden">Rp{{ number_format(round($paket['per_bulan'])) }} / bulan</span>
+                                    <span class="block text-xs text-slate-500 sm:hidden">Rp{{ number_format(round($paket['per_bulan']), 0, ',', '.') }} / bulan</span>
                                 </span>
-                                <span class="hidden w-28 text-right text-sm text-slate-500 sm:block">Rp{{ number_format(round($paket['per_bulan'])) }}</span>
-                                <span class="w-28 text-right text-lg font-bold tracking-tight">Rp{{ number_format($paket['harga']) }}</span>
+                                <span class="hidden w-28 text-right text-sm text-slate-500 sm:block">Rp{{ number_format(round($paket['per_bulan']), 0, ',', '.') }}</span>
+                                <span class="w-28 text-right text-lg font-bold tracking-tight">Rp{{ number_format($paket['harga'], 0, ',', '.') }}</span>
                             </label>
                         @endforeach
 
@@ -209,11 +209,11 @@
                                     <p class="text-xs font-bold uppercase tracking-widest text-teal-200">Paket terpilih</p>
                                     <p class="mt-0.5 flex flex-wrap items-baseline gap-x-2">
                                         <span class="text-lg font-bold">{{ $paket['label'] }}</span>
-                                        <span class="text-2xl font-bold tracking-tight text-amber-300">Rp{{ number_format($paket['harga']) }}</span>
+                                        <span class="text-2xl font-bold tracking-tight text-amber-300">Rp{{ number_format($paket['harga'], 0, ',', '.') }}</span>
                                     </p>
                                     <p class="text-xs {{ $adaHemat ? 'font-semibold text-amber-200' : 'text-teal-100' }}">
                                         @if ($adaHemat)
-                                            Hemat Rp{{ number_format(round($paket['hemat_bulan'])) }} / bulan (diskon {{ $paket['persen'] }}%) dibanding paket 1 bulan
+                                            Hemat Rp{{ number_format(round($paket['hemat_bulan']), 0, ',', '.') }} / bulan (diskon {{ $paket['persen'] }}%) dibanding paket 1 bulan
                                         @else
                                             Harga acuan per bulan
                                         @endif

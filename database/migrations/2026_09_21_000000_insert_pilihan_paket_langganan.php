@@ -8,14 +8,14 @@ return new class extends Migration
     public function up(): void
     {
         DB::transaction(function (): void {
-            // Harga dasar Rp20.000 per 30 hari; tingkatan hemat 0%/5%/10%/15%/20% dari acuan 1 Bulan.
+            // Harga dasar Rp20.000 per 30 hari; tingkatan hemat 20%/15%/10%/5%/0% dari acuan 1 Bulan.
             $paketAwal = [
                 // Label => [durasi_hari, harga].
-                '1 Tahun' => [365, 180000], // diskon 25%, ~15.000/bulan
-                '9 Bulan' => [270, 150000], // diskon ~16,7%, ~16.667/bulan
-                '6 Bulan' => [180, 105000], // diskon 12,5%, 17.500/bulan
-                '3 Bulan' => [90, 55000],   // diskon ~8,3%, ~18.333/bulan
-                '1 Bulan' => [30, 20000],   // harga normal
+                '1 Tahun' => [365, 192000], // hemat 20%, Rp16.000/bulan
+                '9 Bulan' => [270, 153000], // hemat 15%, Rp17.000/bulan
+                '6 Bulan' => [180, 108000], // hemat 10%, Rp18.000/bulan
+                '3 Bulan' => [90, 57000], // hemat 5%, Rp19.000/bulan
+                '1 Bulan' => [30, 20000], // harga acuan
             ];
 
             foreach ($paketAwal as $label => [$durasi, $harga]) {
