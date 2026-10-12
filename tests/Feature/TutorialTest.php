@@ -256,13 +256,19 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
         expect($topic['note'])->not->toBeEmpty();
         expect(count($topic['steps']))->toBeGreaterThanOrEqual(3);
         expect($xpath->query('//article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
-        expect($xpath->query('//a[@href="#'.$topic['id'].'"]'))->toHaveCount(1);
+        // Hanya hitung tautan daftar isi yang terpilih, abaikan tautan pager Sebelumnya/Berikutnya.
+        expect($xpath->query('//a[@data-topic-link and @href="#'.$topic['id'].'"]'))->toHaveCount(1);
         expect($xpath->query('//article[@id="'.$topic['id'].'"]/ol/li'))->toHaveCount(count($topic['steps']));
-        expect($xpath->query('//main/details[@data-tutorial-chapter]/summary[text()="'.$topic['page'].'"]/../article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
+        // Pastikan artikel hanya muncul pada bab halamannya yang terpilih.
+        expect($xpath->query('//main/section[@class="chapter"]/h2[text()="'.$topic['page'].'"]/../article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
     }
-    expect($xpath->query('//aside/nav/div[@class="page-group"]'))->toHaveCount(count($response->viewData('groups')));
-    expect($xpath->query('//main/details[@data-tutorial-chapter]'))->toHaveCount(count($response->viewData('groups')));
-    expect($xpath->query('//main/details[@data-tutorial-chapter and @open]'))->toHaveCount(1);
+    // Pastikan pager hanya menautkan ke topik yang sedang ditampilkan.
+    $idTampil = array_column($topics, 'id');
+    foreach ($xpath->query('//nav[@aria-label="Navigasi topik"]/a') as $tautanPager) {
+        expect($idTampil)->toContain(ltrim($tautanPager->getAttribute('href'), '#'));
+    }
+    expect($xpath->query('//aside//div[@class="nav-group"]'))->toHaveCount(count($response->viewData('groups')));
+    expect($xpath->query('//main/section[@class="chapter"]'))->toHaveCount(count($response->viewData('groups')));
     $this->assertGuest();
 });
 
@@ -276,9 +282,12 @@ it('tutorial mengelompokkan topik menurut halaman fitur dan menyembunyikan kelom
     $document = new DOMDocument;
     @$document->loadHTML($response->getContent());
     $xpath = new DOMXPath($document);
-    expect($xpath->query('//aside/nav/div[@class="page-group"]'))->toHaveCount(3);
-    expect($xpath->query('//main/details[@data-tutorial-chapter]'))->toHaveCount(3);
-    expect($xpath->query('//aside/nav//a[@data-topic-link]'))->toHaveCount(4);
+    expect($xpath->query('//aside//div[@class="nav-group"]'))->toHaveCount(3);
+    expect($xpath->query('//main/section[@class="chapter"]'))->toHaveCount(3);
+    // Hanya hitung tautan daftar isi yang terpilih di dalam sidebar (aside > details > nav).
+    expect($xpath->query('//aside//a[@data-topic-link]'))->toHaveCount(4);
+    // Pastikan hanya topik terpilih yang dirender sebagai artikel.
+    expect($xpath->query('//main//article'))->toHaveCount(4);
 });
 
 it('tutorial mencari isi panduan tanpa membedakan kapital dan mengabaikan spasi tepi', function () {
