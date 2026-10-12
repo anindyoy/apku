@@ -9,7 +9,7 @@ use App\Notifications\TrialPremiumAktif;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-// Layanan aktivasi coba gratis Premium 30 hari (sekali per akun/HP/email).
+ // Layanan aktivasi coba gratis Premium mengikuti durasi setting (sekali per akun/HP/email).
 class MulaiTrialPremium
 {
     public function __construct(private readonly PengaturanTrial $pengaturan) {}
@@ -90,7 +90,7 @@ class MulaiTrialPremium
 
             $durasi = $this->pengaturan->durasiHari();
             $mulai = today();
-            // Durasi inklusif mengikuti pola persetujuan langganan (30 hari = hari ini + 29).
+            // Durasi inklusif mengikuti pola persetujuan langganan (mis. 30 hari = hari ini + 29).
             $berakhir = $mulai->copy()->addDays($durasi - 1);
 
             $hpNormal = NormalisasiKontak::hp($segar->getAttribute('hp'));

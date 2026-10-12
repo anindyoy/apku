@@ -27,7 +27,7 @@
     </header>
     <main id="konten">
         <section class="bg-gradient-to-br from-teal-950 via-teal-900 to-emerald-800 text-white">
-            <div class="mx-auto grid max-w-7xl items-center gap-14 px-5 py-20 sm:px-8 lg:grid-cols-2 lg:py-28">
+            <div class="mx-auto grid max-w-7xl items-center gap-14 px-5 py-10 sm:px-8 lg:grid-cols-2 lg:py-28">
                 <div>
                     <span class="inline-flex rounded-full border border-teal-300/30 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-teal-100">KEUANGAN PRIBADI JADI LEBIH JELAS</span>
                     <h1 class="mt-7 max-w-xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">Catat uangmu.<br><span class="text-amber-300">Pahami arahnya.</span></h1>
@@ -38,7 +38,7 @@
                                 aria-hidden="true">→</span></a>
                         <a href="{{ route('tutorial') }}" class="rounded-xl border border-white/40 px-6 py-3.5 font-semibold text-white hover:bg-white/10">Lihat cara penggunaan</a>
                     </div>
-                    <p class="mt-5 text-sm text-teal-100">Akun Reguler dapat memakai fitur inti dengan hingga 2 kas dan 2 sumber dana. Akun baru yang memenuhi syarat dapat Coba Premium gratis 30 hari.
+                    <p class="mt-5 text-sm text-teal-100">Akun Reguler dapat memakai fitur inti dengan hingga 2 kas dan 2 sumber dana. Akun baru yang memenuhi syarat dapat Coba Premium gratis {{ $trialDurasi ?? 30 }} hari.
                     </p>
                 </div>
                 <div class="mx-auto w-full max-w-lg rounded-3xl border border-white/20 bg-white p-5 text-slate-900 shadow-2xl sm:p-7" aria-label="Ilustrasi ringkasan keuangan APKu">
@@ -66,7 +66,7 @@
                 </div>
             </div>
         </section>
-        <section id="fitur" class="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+        <section id="fitur" class="mx-auto max-w-7xl px-5 py-10 sm:px-8">
             <div class="max-w-2xl">
                 <p class="text-sm font-bold uppercase tracking-widest text-teal-700">Fitur APKu</p>
                 <h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Dari catatan harian sampai gambaran besar</h2>
@@ -82,7 +82,7 @@
                 @endforeach
             </div>
         </section>
-        <section id="akun" class="bg-white py-20">
+        <section id="akun" class="bg-white py-10">
             <div class="mx-auto max-w-7xl px-5 sm:px-8">
                 <p class="text-sm font-bold uppercase tracking-widest text-teal-700">Pilihan akun</p>
                 <h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Mulai dari yang kamu butuhkan</h2>
@@ -100,21 +100,34 @@
                     <div class="rounded-3xl border-2 border-teal-700 bg-teal-50 p-7 shadow-xl shadow-teal-900/10 sm:p-9"><span
                             class="rounded-full bg-teal-700 px-3 py-1 text-xs font-bold text-white">LEBIH FLEKSIBEL</span>
                         <h3 class="mt-4 text-2xl font-bold">Premium aktif</h3>
-                        <p class="mt-2 text-slate-600">Untuk kebutuhan kas dan kolaborasi yang berkembang. Tersedia Coba Premium gratis 30 hari untuk akun baru yang memenuhi syarat.</p>
+                        <p class="mt-2 text-slate-600">Untuk kebutuhan kas dan kolaborasi yang berkembang. Tersedia Coba Premium gratis {{ $trialDurasi ?? 30 }} hari untuk akun baru yang memenuhi syarat.</p>
                         <ul class="mt-7 space-y-3 text-slate-700">
                             <li>✓ Semua fitur Reguler</li>
-                            <li>✓ Coba Premium gratis 30 hari, sekali per akun</li>
+                            <li>✓ Coba Premium gratis {{ $trialDurasi ?? 30 }} hari, sekali per akun</li>
                             <li>✓ Tambah kas dan sumber dana tanpa batas kuota Reguler</li>
                             <li>✓ Undang kolaborator sebagai Viewer atau Editor</li>
                             <li>✓ Buat tautan kas publik dengan akses lihat saja</li>
                         </ul>
+                        @if ($trialAktif ?? true)
+                            <div class="mt-7 flex flex-wrap items-center gap-3">
+                                <a href="{{ auth()->check() ? \App\Filament\Resources\LanggananResource::getUrl('index') : route('filament.admin.auth.register') }}"
+                                    data-coba-premium class="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">Coba Premium gratis {{ $trialDurasi ?? 30 }} hari</a>
+                            </div>
+                            <p class="mt-3 text-xs leading-relaxed text-slate-500">
+                                @auth
+                                    Buka halaman Langganan lalu pilih Mulai coba gratis pada kartu trial. Trial sekali per akun, nomor HP, dan email.
+                                @else
+                                    Daftar lalu verifikasi email dan isi nomor HP untuk memulai trial dari Dashboard atau Langganan. Trial sekali per akun, nomor HP, dan email.
+                                @endauth
+                            </p>
+                        @endif
                     </div>
                 </div>
                 <p class="mt-5 text-sm text-slate-500">Harga paket Premium terbaru tampil pada daftar di bawah dan diperbarui otomatis dari data admin. Metode pembayaran tersedia setelah masuk ke
                     aplikasi. Trial gratis dimulai dari Dashboard atau Langganan setelah email terverifikasi dan nomor HP terisi.</p>
             </div>
         </section>
-        <section id="harga" class="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+        <section id="harga" class="mx-auto max-w-7xl px-5 py-10 sm:px-8">
             <div class="max-w-2xl">
                 <p class="text-sm font-bold uppercase tracking-widest text-teal-700">Harga Premium</p>
                 <h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Pilih durasi sesuai kebutuhan</h2>
@@ -250,13 +263,13 @@
                     tampil di halaman Langganan setelah masuk.</p>
             @endif
         </section>
-        <section class="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+        <section class="mx-auto max-w-7xl px-5 py-10 sm:px-8">
             <div class="rounded-3xl bg-teal-900 px-7 py-12 text-center text-white sm:px-12">
                 <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Siap merapikan catatan keuangan?</h2>
                 <p class="mx-auto mt-4 max-w-xl text-teal-100">Buat akun, atur kas dan sumber dana pertama, lalu mulai catat transaksi sehari-hari.</p>
                 <div class="mt-8 flex flex-wrap justify-center gap-3"><a href="{{ route('filament.admin.auth.register') }}"
                         class="rounded-xl bg-amber-300 px-6 py-3 font-bold text-teal-950 hover:bg-amber-200">Buat akun gratis</a><a href="{{ route('tutorial') }}"
-                        class="rounded-xl border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10">Baca tutorial</a></div>
+                        class="rounded-xl border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10">Lihat tutorial</a></div>
             </div>
         </section>
     </main>

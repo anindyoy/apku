@@ -268,17 +268,17 @@
         "id": "trial-premium",
         "page": "Langganan Premium",
         "category": "Akun",
-        "title": "Coba gratis Premium 30 hari",
-        "intro": "Akun baru yang belum pernah memiliki masa aktif dapat mencoba Premium gratis selama 30 hari dari Dashboard atau Langganan Premium. Trial hanya sekali per akun, nomor HP, dan email, serta memerlukan email terverifikasi dan nomor HP terisi.",
+        "title": "Coba gratis Premium",
+        "intro": "Akun baru yang belum pernah memiliki masa aktif dapat mencoba Premium gratis mengikuti durasi pada pengaturan trial (bawaan 30 hari, batas 1-90 hari) dari tombol pada kartu Premium di halaman utama, Dashboard, atau Langganan Premium. Trial hanya sekali per akun, nomor HP, dan email, serta memerlukan email terverifikasi dan nomor HP terisi.",
         "steps": [
-            "Buka Dashboard dan cari banner ajakan Coba Premium gratis 30 hari di bagian atas halaman, atau buka Langganan Premium. Jika belum memenuhi syarat, ikuti arahan pada kartu: verifikasi email atau isi nomor HP di Setting > Akun Saya.",
+            "Pada halaman utama, cari tombol Coba Premium gratis pada kartu Premium yang menampilkan durasi aktif; tombol disembunyikan bila program trial sedang nonaktif. Tamu diarahkan ke registrasi lalu memulai trial setelah verifikasi email dan pengisian nomor HP, sedangkan pengguna yang sudah masuk diarahkan ke Langganan Premium. Pilihan lain: buka Dashboard dan cari banner ajakan pada bagian atas halaman, atau buka Langganan Premium. Jika belum memenuhi syarat, ikuti arahan pada kartu: verifikasi email atau isi nomor HP di Setting > Akun Saya.",
             "Pilih Mulai coba gratis, baca manfaat, durasi, tanggal berakhir, dan peringatan kas atau sumber dana tambahan akan terkunci setelah trial pada modal konfirmasi, lalu konfirmasi.",
             "Setelah aktif, periksa banner Trial Premium berisi sisa hari di Dashboard dan badge Trial pada nama pengguna. Mendekati akhir, banner berubah kuning pada H-7 dan merah pada H-1 bersama email pengingat.",
             "Beli paket kapan saja bila ingin lanjut berbayar. Setelah admin menyetujui order, sisa trial ditambahkan ke masa aktif paket dan status trial menjadi dikonversi.",
             "Jika trial berakhir tanpa perpanjangan, akun kembali Reguler dan kas atau sumber dana ketiga dan seterusnya terkunci tetapi tetap terlihat. Baca email penutup untuk jumlah yang terkunci dan ajakan berlangganan."
         ],
-        "example": "Akun baru dengan email terverifikasi dan nomor HP 08123456789 memulai trial dari Dashboard dan menerima tanggal berakhir 30 hari kemudian.",
-        "note": "Trial berlaku 30 hari inklusif (hari ini + 29). Satu akun, satu nomor HP ternormalisasi, dan satu email ternormalisasi hanya dapat trial sekali, termasuk catatan akun yang sudah dihapus. Admin dapat mematikan pendaftaran baru atau mengubah durasi 1-90 hari tanpa mengganggu trial berjalan, serta membatalkan trial mencurigakan. Selama trial, pengingat bawaan H-30 dilewati dan diganti pengingat khusus H-7 dan H-1."
+        "example": "Akun baru dengan email terverifikasi dan nomor HP 08123456789 memulai trial dari Dashboard dan menerima tanggal berakhir mengikuti durasi trial yang sedang aktif.",
+        "note": "Trial berlaku inklusif mengikuti durasi setting (tanggal berakhir = hari ini + durasi - 1). Satu akun, satu nomor HP ternormalisasi, dan satu email ternormalisasi hanya dapat trial sekali, termasuk catatan akun yang sudah dihapus. Admin dapat mematikan pendaftaran baru atau mengubah durasi 1-90 hari tanpa mengganggu trial berjalan, serta membatalkan trial mencurigakan. Selama trial, pengingat bawaan H-30 dilewati dan diganti pengingat khusus H-7 dan H-1."
     },
     {
         "id": "profil-notifikasi",
