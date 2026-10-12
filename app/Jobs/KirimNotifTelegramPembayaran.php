@@ -92,11 +92,16 @@ class KirimNotifTelegramPembayaran implements ShouldQueue
      */
     protected function buatLinkAdmin(Langganan $langganan): string
     {
-        // Gunakan cadangan: halaman daftar langganan dengan filter status menunggu verifikasi
-        // Prioritas: tautan langsung ke order dapat ditambahkan jika route tersedia
-        $routeCadangan = route('filament.admin.langganans.index') . '?status=' . StatusLangganan::MenungguVerifikasi->value;
+        // Gunakan halaman daftar langganan dengan filter status menunggu verifikasi.
+        // Jika route Filament belum terdaftar (misal konteks antrean), pakai URL admin.
+        try {
+            // Nama route Filament memakai segmen resources.
+            $dasar = route('filament.admin.resources.langganans.index');
+        } catch (\Throwable) {
+            $dasar = rtrim((string) config('app.url'), '/').'/admin/langganans';
+        }
 
-        return $routeCadangan;
+        return $dasar.'?status='.StatusLangganan::MenungguVerifikasi->value;
     }
 
     /**

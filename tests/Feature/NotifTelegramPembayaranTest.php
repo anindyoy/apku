@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Jobs\KirimNotifTelegramPembayaran;
 
 test('mengirim bukti memasukkan job ke antrean', function () {
+    Queue::fake();
     Http::fake(['api.telegram.org/*' => Http::response(['ok' => true])]);
 
     $user = User::factory()->create(['role' => 'admin']);
@@ -31,7 +32,7 @@ test('mengirim bukti memasukkan job ke antrean', function () {
     );
 
     // Pastikan langganan status berubah menjadi MenungguVerifikasi
-    $this->assertEquals(StatusLangganan::MenungguVerifikasi->value, $result->status);
+    $this->assertEquals(StatusLangganan::MenungguVerifikasi, $result->status);
 
     // Pastikan job Telegram dispatch antrean (dengan Queue::fake)
     Queue::assertPushed(KirimNotifTelegramPembayaran::class, function ($job) use ($langganan) {
@@ -146,7 +147,7 @@ test('Telegram gagal tidak membatalkan penyimpanan bukti', function () {
     );
 
     // Pastikan langganan tetap tersimpan dengan status MenungguVerifikasi
-    $this->assertEquals(StatusLangganan::MenungguVerifikasi->value, $langganan->fresh->status);
+    $this->assertEquals(StatusLangganan::MenungguVerifikasi, $langganan->fresh()->status);
 });
 
 test('bukti dikirim ulang memakai label "Bukti ulang"', function () {

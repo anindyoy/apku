@@ -10,7 +10,6 @@ use App\Notifications\PembayaranLanggananDikonfirmasi;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Queue;
 
 class KonfirmasiPembayaranLangganan
 {
@@ -24,8 +23,11 @@ class KonfirmasiPembayaranLangganan
             throw ValidationException::withMessages(['bukti_pembayaran_path' => 'Pembayaran pada order ini tidak dapat dikonfirmasi.']);
         }
 
-        // Gunakan DB transaction untuk memastikan job Telegram.dispatch setelah commit
-        return DB::transaction(function () use ($user, $langganan, $path, $catatan) {
+        // Gunakan DB transaction agar penyimpanan bukti dan notifikasi admin konsisten.
+        // Job Telegram dikirim setelah commit agar tidak terkirim saat transaksi dibatalkan.
+        $langgananId = $langganan->id;
+
+        $hasil = DB::transaction(function () use ($user, $langganan, $path, $catatan) {
             // Simpan data bukti pembayaran
             $langganan->update([
                 'bukti_pembayaran_path' => $path,
@@ -38,13 +40,15 @@ class KonfirmasiPembayaranLangganan
             // Kirim notifikasi ke admin via database
             User::admin()->each(fn (User $admin) => $admin->notify(new PembayaranLanggananDikonfirmasi($langganan)));
 
-            // Dispatch job notifikasi Telegram setelah commit transaksi
-            // Gunakan dispatch dan pastikan setelah commit
-            Queue::afterCommit(function () use ($langganan) {
-                dispatch(new KirimNotifTelegramPembayaran($langganan->id, false));
-            });
-
             return $langganan->refresh();
         });
+
+        // Daftarkan pengiriman job setelah commit; di dalam test yang memakai transaksi
+        // pembungkus, callback dijalankan setelah transaksi dalam ini commit.
+        DB::afterCommit(function () use ($langgananId) {
+            dispatch(new KirimNotifTelegramPembayaran($langgananId, false));
+        });
+
+        return $hasil;
     }
 }
