@@ -29,6 +29,7 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 - Perintah `php artisan test` di lokal wajib selalu memakai kombinasi `--filter` dan `--parallel`, misalnya `php artisan test --filter="NamaTest" --parallel`. Jangan menjalankannya tanpa `--parallel`, dan jangan memakai `--tia` untuk run terfilter karena TIA tidak berlaku pada partial run.
 - Jika tidak ada filter yang dapat ditentukan, jangan jalankan `php artisan test` di lokal sama sekali. Full test suite hanya dijalankan di GitHub Actions.
 - Hindari penggunaan helper assertSee pada testing, karena kalau eror sulit dicek masalahnya.
+- Class seeder pada [`database/seeders`](database/seeders) dikecualikan dari kewajiban testing; jangan membuat file test khusus seeder dan jangan menjalankan testing untuk class seeder.
 
 ## Komentar Kode
 
