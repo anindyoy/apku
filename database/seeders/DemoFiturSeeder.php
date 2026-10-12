@@ -23,11 +23,6 @@ use Illuminate\Support\Str;
 class DemoFiturSeeder extends Seeder
 {
     /**
-     * Label paket bawaan dari migration insert_pilihan_paket_langganan yang wajib dipertahankan.
-     */
-    private const PAKET_BAWAAN = ['1 Tahun', '9 Bulan', '6 Bulan', '3 Bulan'];
-
-    /**
      * Melengkapi data contoh untuk fitur yang belum dicakup seeder utama.
      */
     public function run(): void
@@ -54,8 +49,7 @@ class DemoFiturSeeder extends Seeder
         DB::table('voucher_codes')->delete();
         DB::table('vouchers')->delete();
         DB::table('metode_pembayarans')->delete();
-        // Pertahankan paket bawaan migration agar pilihan awal tidak ikut terhapus saat data demo dibersihkan.
-        DB::table('paket_langganans')->whereNotIn('label', self::PAKET_BAWAAN)->delete();
+        // Paket langganan tidak dihapus karena datanya berasal dari migration.
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
@@ -157,24 +151,9 @@ class DemoFiturSeeder extends Seeder
 
     private function buatDataLangganan(User $admin, $users): void
     {
-        $bulanan = PaketLangganan::create([
-            'label' => 'Premium 30 Hari',
-            'harga' => 25000,
-            'durasi_hari' => 30,
-            'is_active' => true,
-        ]);
-        $tahunan = PaketLangganan::create([
-            'label' => 'Premium 1 Tahun',
-            'harga' => 250000,
-            'durasi_hari' => 365,
-            'is_active' => true,
-        ]);
-        PaketLangganan::create([
-            'label' => 'Premium 90 Hari (Arsip)',
-            'harga' => 70000,
-            'durasi_hari' => 90,
-            'is_active' => false,
-        ]);
+        // Paket langganan sudah diisi migration, seeder hanya memakai ulang datanya.
+        $paketPendek = PaketLangganan::where('label', '3 Bulan')->firstOrFail();
+        $paketPanjang = PaketLangganan::where('label', '1 Tahun')->firstOrFail();
 
         $bank = MetodePembayaran::create([
             'label' => 'Transfer Bank BCA',
@@ -225,7 +204,7 @@ class DemoFiturSeeder extends Seeder
 
         foreach ($statuses as $index => $status) {
             $user = $users[$index % $users->count()];
-            $paket = $index % 2 === 0 ? $bulanan : $tahunan;
+            $paket = $index % 2 === 0 ? $paketPendek : $paketPanjang;
             $metode = $index % 2 === 0 ? $bank : $ewallet;
             $diskon = $index === 0 ? (int) round($paket->harga * 0.2) : 0;
             $sudahDikonfirmasi = in_array($status, [StatusLangganan::MenungguVerifikasi, StatusLangganan::Disetujui, StatusLangganan::Ditolak], true);
