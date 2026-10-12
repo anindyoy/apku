@@ -15,7 +15,7 @@ class ListAuditSaldoDompet extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            $this->auditSaldoAction()->label('Tambah audit')->icon('heroicon-o-plus'),
+            $this->auditSaldoAction()->label('Tambah pencocokan')->icon('heroicon-o-plus'),
         ];
     }
 }

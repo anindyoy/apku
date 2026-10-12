@@ -58,13 +58,13 @@ function buatDataAuditSaldo(): array
     return compact('user', 'bukuKas', 'tunai', 'bank');
 }
 
-test('audit saldo tidak terdaftar di navigasi untuk semua peran', function (string $role) {
+test('pencocokan saldo tidak terdaftar di navigasi untuk semua peran', function (string $role) {
     $this->actingAs(User::factory()->create(['role' => $role]));
 
     expect(AuditSaldoDompetResource::shouldRegisterNavigation())->toBeFalse();
 })->with(['reguler', 'premium', 'admin']);
 
-test('audit saldo membuat transaksi penyesuaian per sumber dana dan menyimpan snapshot', function () {
+test('pencocokan saldo membuat transaksi penyesuaian per sumber dana dan menyimpan snapshot', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
 
     $audit = app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Rekonsiliasi bulanan', [
@@ -81,9 +81,9 @@ test('audit saldo membuat transaksi penyesuaian per sumber dana dan menyimpan sn
         ->and($bukuKas->fresh()->saldo)->toBe(1050000)
         ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(2)
         ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->whereNotNull('kategori_id')->count())->toBe(0)
-        ->and(Kategori::withoutGlobalScopes()->where('nama', 'Audit Saldo')->count())->toBe(0)
+        ->and(Kategori::withoutGlobalScopes()->where('nama', 'Penyesuaian Saldo')->count())->toBe(0)
         ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->get()
-            ->map(fn (Transaksi $transaksi): string => $transaksi->namaKategoriLaporan())->unique()->all())->toBe(['Audit Saldo']);
+            ->map(fn (Transaksi $transaksi): string => $transaksi->namaKategoriLaporan())->unique()->all())->toBe(['Penyesuaian Saldo']);
 });
 
 test('audit tanpa selisih tetap menyimpan snapshot tanpa transaksi', function () {

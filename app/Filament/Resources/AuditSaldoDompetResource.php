@@ -21,9 +21,9 @@ class AuditSaldoDompetResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
 
-    protected static ?string $navigationLabel = 'Audit Saldo';
+    protected static ?string $navigationLabel = 'Cocokkan Saldo';
 
-    protected static ?string $slug = 'audit-saldo-dompet';
+    protected static ?string $slug = 'cocokkan-saldo';
 
     protected static ?int $navigationSort = 3;
 
@@ -46,7 +46,7 @@ class AuditSaldoDompetResource extends Resource
                 Action::make('detail')
                     ->label('Detail')
                     ->icon('heroicon-o-eye')
-                    ->modalHeading('Detail audit saldo')
+                    ->modalHeading('Detail pencocokan saldo')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Tutup')
                     ->modalContent(fn (AuditSaldoDompet $record) => view('filament.audit-saldo-dompet-detail', [

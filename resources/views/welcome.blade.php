@@ -73,7 +73,7 @@
                 <p class="mt-4 text-slate-600">Bangun kebiasaan mencatat, lalu gunakan datanya untuk mengambil keputusan dengan lebih yakin.</p>
             </div>
             <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                @foreach ([['01', 'Transaksi lengkap', 'Catat pemasukan, pengeluaran, transfer antar-kas dan pemindahan antar-sumber dana. Cari, filter, atau impor transaksi dari CSV dan XLSX.'], ['02', 'Kas & sumber dana', 'Atur kelompok keuangan dan tempat penyimpanan uang, pilih yang utama, serta cocokkan saldo melalui audit sumber dana.'], ['03', 'Laporan siap pakai', 'Lihat ringkasan dan rincian menurut periode, kas, atau sumber dana. Ekspor laporan ke PDF maupun Excel.'], ['04', 'Utang & piutang', 'Pantau nominal, pihak terkait, jatuh tempo, penambahan, pembayaran, dan riwayatnya.'], ['05', 'Tabungan emas', 'Catat berat emas per kas dan lihat estimasi nilai berdasarkan harga buyback terakhir.'], ['06', 'Kas bersama', 'Dengan Premium aktif, undang Viewer atau Editor ke kas, atau bagikan tautan publik dengan akses lihat saja.']] as [$number, $title, $description])
+                @foreach ([['01', 'Transaksi lengkap', 'Catat pemasukan, pengeluaran, transfer antar-kas dan pemindahan antar-sumber dana. Cari, filter, atau impor transaksi dari CSV dan XLSX.'], ['02', 'Kas & sumber dana', 'Atur kelompok keuangan dan tempat penyimpanan uang, pilih yang utama, serta cocokkan saldo dengan kondisi uang sebenarnya.'], ['03', 'Laporan siap pakai', 'Lihat ringkasan dan rincian menurut periode, kas, atau sumber dana. Ekspor laporan ke PDF maupun Excel.'], ['04', 'Utang & piutang', 'Pantau nominal, pihak terkait, jatuh tempo, penambahan, pembayaran, dan riwayatnya.'], ['05', 'Tabungan emas', 'Catat berat emas per kas dan lihat estimasi nilai berdasarkan harga buyback terakhir.'], ['06', 'Kas bersama', 'Dengan Premium aktif, undang Viewer atau Editor ke kas, atau bagikan tautan publik dengan akses lihat saja.']] as [$number, $title, $description])
                     <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><span
                             class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-sm font-bold text-teal-700">{{ $number }}</span>
                         <h3 class="mt-5 text-xl font-bold">{{ $title }}</h3>
@@ -93,7 +93,7 @@
                         <ul class="mt-7 space-y-3 text-slate-700">
                             <li>✓ Hingga 2 kas dan 2 sumber dana</li>
                             <li>✓ Transaksi, impor, laporan dan ekspor</li>
-                            <li>✓ Audit saldo, emas, utang dan piutang</li>
+                            <li>✓ Cocokkan saldo, emas, utang dan piutang</li>
                             <li>✓ Dapat menerima akses kas bersama</li>
                         </ul>
                     </div>

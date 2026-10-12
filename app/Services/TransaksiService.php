@@ -192,7 +192,7 @@ class TransaksiService
 
         if ($transaksi->audit_saldo_dompet_detail_id) {
             throw ValidationException::withMessages([
-                'transaksi' => 'Transaksi penyesuaian saldo tidak dapat diubah. Lakukan audit saldo baru.',
+                'transaksi' => 'Transaksi penyesuaian saldo tidak dapat diubah. Lakukan pencocokan saldo baru.',
             ]);
         }
 
@@ -236,7 +236,7 @@ class TransaksiService
 
         if ($transaksi->audit_saldo_dompet_detail_id) {
             throw ValidationException::withMessages([
-                'transaksi' => 'Transaksi penyesuaian saldo tidak dapat dihapus. Lakukan audit saldo baru.',
+                'transaksi' => 'Transaksi penyesuaian saldo tidak dapat dihapus. Lakukan pencocokan saldo baru.',
             ]);
         }
 

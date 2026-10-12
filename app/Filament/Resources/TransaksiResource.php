@@ -121,7 +121,7 @@ class TransaksiResource extends Resource
             return null;
         }
         if (filled($record->audit_saldo_dompet_detail_id)) {
-            return ['label' => 'Transaksi audit saldo', 'description' => 'Transaksi penyesuaian audit saldo tidak dapat diubah atau dihapus langsung. Lakukan audit saldo baru untuk mengoreksi saldo.'];
+            return ['label' => 'Transaksi penyesuaian saldo', 'description' => 'Transaksi penyesuaian saldo tidak dapat diubah atau dihapus langsung. Lakukan pencocokan saldo baru untuk mengoreksi saldo.'];
         }
         if ($record->user_id !== $user->id) {
             return ['label' => 'Hanya dapat dilihat', 'description' => 'Transaksi ini dicatat oleh pengguna lain. Hanya pencatat yang memiliki hak pengelolaan kas dan sumber dana yang dapat mengubah atau menghapusnya.'];
@@ -238,7 +238,7 @@ class TransaksiResource extends Resource
                 ? 'Transfer keluar sumber dana'
                 : 'Transfer ke '.($transaksi->tujuan_buku_tabungan?->nama_buku ?? '-'),
             default => $transaksi->kategori?->nama
-                ?? ($transaksi->audit_saldo_dompet_detail_id ? 'Audit Saldo' : null),
+                ?? ($transaksi->audit_saldo_dompet_detail_id ? 'Penyesuaian Saldo' : null),
         };
 
         return filled($label) ? Str::ucfirst($label) : null;

@@ -42,6 +42,12 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 - Pengecualian teknis yang boleh tetap memakai `dompet` karena tidak tampil sebagai label entitas: nama kolom `nama_dompet`, kunci `dompet_id`/`dompet_id_tujuan`, tabel `audit_saldo_dompet`, slug/route lama `dompet`, kunci cache lama, `HEADER` impor `dompet` agar file lama terbaca, id topik tutorial `dompet`, path aset logo `apku-dompet.svg`, serta `dompet_digital` pada metode pembayaran admin yang merupakan konsep berbeda sesuai [`PLAN_SUMBER_DANA.md`](docs/PLAN_SUMBER_DANA.md).
 - Sebelum menyelesaikan pekerjaan yang menyentuh istilah ini, telusuri `dompet` pada `app`, `resources/views`, `resources/content`, `lang`, dan `database/seeders`, lalu pastikan sisa yang tampil ke pengguna hanya pengecualian di atas. Selaraskan seed, ekspektasi test UI, [`tutorial.json`](resources/content/tutorial.json), dan [`FITUR_APLIKASI.md`](FITUR_APLIKASI.md) dalam pekerjaan yang sama.
 
+## Istilah Cocokkan Saldo
+
+- Teks yang terlihat pengguna memakai **Cocokkan Saldo** untuk fitur dan **Penyesuaian Saldo** untuk label transaksi, bukan "audit".
+- Pengecualian teknis yang boleh tetap memakai "audit" karena tidak tampil sebagai label: nama tabel, kolom, kunci, class, route/slug lama, dan kunci cache.
+- Sebelum menyelesaikan pekerjaan yang menyentuh istilah ini, telusuri `audit` pada `app`, `resources/views`, `resources/content`, `lang`, dan `database/seeders`, lalu pastikan sisa yang tampil ke pengguna hanya pengecualian di atas.
+
 ## Styling CSS
 
 - Gunakan class Tailwind CSS dan komponen Flowbite untuk styling CSS pada file Blade atau view.

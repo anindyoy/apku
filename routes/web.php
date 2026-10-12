@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/tutorial', TutorialController::class)->name('tutorial');
 
+Route::permanentRedirect('/admin/audit-saldo-dompet', '/admin/cocokkan-saldo');
+Route::permanentRedirect('/admin/riwayat-pencocokan', '/admin/cocokkan-saldo');
+
 Route::get('/beli/{paket}', BeliPaketController::class)
     ->whereNumber('paket')
     ->middleware('throttle:60,1')

@@ -371,7 +371,7 @@ test('informasi akses transaksi membedakan alasan dan hilang saat akses aktif', 
     $record->user_id = $user->id + 100;
     expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Hanya dapat dilihat');
     $record->audit_saldo_dompet_detail_id = 123;
-    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Transaksi audit saldo');
+    expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record)['label'])->toBe('Transaksi penyesuaian saldo');
     $record->audit_saldo_dompet_detail_id = null;
     $record->user_id = $user->id;
     $record->setRelation('buku_kas', null);

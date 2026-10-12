@@ -128,7 +128,7 @@ class Transaksi extends Model
         }
 
         return $this->kategori?->nama
-            ?? ($this->audit_saldo_dompet_detail_id ? 'Audit Saldo' : 'Tanpa kategori');
+            ?? ($this->audit_saldo_dompet_detail_id ? 'Penyesuaian Saldo' : 'Tanpa kategori');
     }
 
     public function import_transaksi()

@@ -47,7 +47,7 @@ class ListDompet extends ListRecords
         return [
             $this->auditSaldoAction(),
             Action::make('riwayatAudit')
-                ->label('Riwayat audit')
+                ->label('Riwayat pencocokan')
                 ->icon('heroicon-o-clock')
                 ->url(AuditSaldoDompetResource::getUrl()),
             CreateAction::make()

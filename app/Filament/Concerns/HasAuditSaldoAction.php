@@ -44,10 +44,10 @@ trait HasAuditSaldoAction
     protected function auditSaldoAction(): Action
     {
         return Action::make('auditSaldo')
-            ->label('Audit saldo')
+            ->label('Cocokkan saldo')
             ->icon('heroicon-o-clipboard-document-check')
             ->modalHeading('Cocokkan saldo aplikasi dengan saldo riil')
-            ->modalDescription('Masukkan saldo riil setiap sumber dana. Selisih akan dicatat sebagai transaksi penyesuaian Audit Saldo.')
+            ->modalDescription('Masukkan saldo riil setiap sumber dana. Selisih akan dicatat sebagai transaksi penyesuaian saldo.')
             ->form([
                 Grid::make(['default' => 1, 'lg' => 3])
                     ->schema([
@@ -68,8 +68,8 @@ trait HasAuditSaldoAction
                             ->maxDate(now())
                             ->required(),
                         Textarea::make('catatan')
-                            ->label('Catatan audit')
-                            ->placeholder('Contoh: Rekonsiliasi saldo September 2026')
+                            ->label('Catatan pencocokan')
+                            ->placeholder('Contoh: Pencocokan saldo September 2026')
                             ->nullable()
                             ->maxLength(1000),
                     ]),
@@ -141,7 +141,7 @@ trait HasAuditSaldoAction
 
                     if ($dompetIds->count() !== 1 || $dompetIds->first() !== $record->id) {
                         throw ValidationException::withMessages([
-                            'rincian' => 'Audit dari daftar sumber dana hanya dapat memproses sumber dana terpilih.',
+                            'rincian' => 'Pencocokan dari daftar sumber dana hanya dapat memproses sumber dana terpilih.',
                         ]);
                     }
                 }
@@ -176,7 +176,7 @@ trait HasAuditSaldoAction
                 );
 
                 Notification::make()
-                    ->title('Audit saldo berhasil disimpan')
+                    ->title('Cocokkan saldo berhasil disimpan')
                     ->success()
                     ->send();
             });
