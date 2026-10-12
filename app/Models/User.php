@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -34,6 +35,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'type',
         'masa_aktif',
         'email_verified_at',
+        'paket_langganan_dipilih_id',
     ];
 
     /**
@@ -64,6 +66,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'password' => 'hashed',
             'dashboard_settings' => 'array',
             'pisahkan_tipe_kategori' => 'boolean',
+            'paket_langganan_dipilih_id' => 'integer',
         ];
     }
 
@@ -303,6 +306,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function langganans(): HasMany
     {
         return $this->hasMany(Langganan::class);
+    }
+
+    // Pilihan paket dari landing page yang terbawa melewati registrasi dan onboarding.
+    public function paketDipilih(): BelongsTo
+    {
+        return $this->belongsTo(PaketLangganan::class, 'paket_langganan_dipilih_id');
     }
 
     public function trialPremium(): \Illuminate\Database\Eloquent\Relations\HasOne

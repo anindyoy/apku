@@ -2,8 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\LanggananResource;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\PaketLangganan;
 use App\Services\KategoriService;
 use App\Services\TransaksiService;
 use BackedEnum;
@@ -37,7 +39,7 @@ class Onboarding extends Page implements HasForms
     public function mount(): void
     {
         if (auth()->user()->buku_kas()->exists() && auth()->user()->dompet()->exists()) {
-            $this->redirect(filament()->getUrl(), navigate: true);
+            $this->redirect($this->tujuanSetelahOnboarding(), navigate: true);
 
             return;
         }
@@ -173,6 +175,20 @@ class Onboarding extends Page implements HasForms
             ->success()
             ->send();
 
-        $this->redirect(filament()->getUrl(), navigate: true);
+        $this->redirect($this->tujuanSetelahOnboarding(), navigate: true);
+    }
+
+    // Setelah onboarding, pengguna dengan paket tersimpan langsung tiba di Langganan dengan modal terbuka.
+    protected function tujuanSetelahOnboarding(): string
+    {
+        $pengguna = auth()->user();
+        $paketId = $pengguna?->paket_langganan_dipilih_id;
+
+        // Paket bisa dinonaktifkan admin selama onboarding; dalam hal ini pakai tujuan default.
+        if (is_numeric($paketId) && PaketLangganan::query()->where('is_active', true)->whereKey((int) $paketId)->exists()) {
+            return LanggananResource::getUrl('index', ['paket' => (int) $paketId]);
+        }
+
+        return filament()->getUrl();
     }
 }

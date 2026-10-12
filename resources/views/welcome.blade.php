@@ -120,6 +120,9 @@
                 <h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Pilih durasi sesuai kebutuhan</h2>
                 <p class="mt-4 text-slate-600">Semua paket membuka fitur Premium yang sama, hanya durasinya yang berbeda. Harga di bawah diambil langsung dari paket aktif di aplikasi.</p>
             </div>
+            @if (session('paket_gagal'))
+                <p class="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm font-semibold text-amber-900" role="alert">{{ session('paket_gagal') }}</p>
+            @endif
             @php
                 // Daftar harga di halaman depan memakai data yang sama dengan halaman langganan.
                 $daftarHarga = $paketHemat ?? collect();
@@ -216,8 +219,8 @@
                                         @endif
                                     </p>
                                 </div>
-                                <a href="{{ route('filament.admin.auth.register') }}"
-                                    class="shrink-0 rounded-xl bg-amber-300 px-5 py-2.5 text-center text-sm font-bold text-teal-950 hover:bg-amber-200">Daftar untuk membeli</a>
+                                <a href="{{ route('beli-paket', $paket['id']) }}" data-beli-paket="{{ $paket['id'] }}"
+                                    class="shrink-0 rounded-xl bg-amber-300 px-5 py-2.5 text-center text-sm font-bold text-teal-950 hover:bg-amber-200">@auth Beli paket @else Daftar untuk membeli @endauth</a>
                             </div>
                         @endforeach
                     </div>
@@ -233,8 +236,13 @@
                                 <li class="flex gap-2"><span class="font-bold text-teal-700" aria-hidden="true">✓</span> Tautan kas publik dengan akses lihat saja</li>
                             </ul>
                         </div>
-                        <p class="px-1 text-xs leading-relaxed text-slate-500">Masuk ke aplikasi untuk memilih metode pembayaran, memakai voucher, dan menyelesaikan order. Total final dihitung ulang
-                            di server saat order dibuat.</p>
+                        @auth
+                            <p class="px-1 text-xs leading-relaxed text-slate-500">Pilih paket lalu selesaikan order di halaman Langganan untuk memilih metode pembayaran dan memakai voucher. Total final dihitung ulang
+                                di server saat order dibuat.</p>
+                        @else
+                            <p class="px-1 text-xs leading-relaxed text-slate-500">Daftar lalu masuk ke aplikasi untuk memilih metode pembayaran, memakai voucher, dan menyelesaikan order. Total final dihitung ulang
+                                di server saat order dibuat.</p>
+                        @endauth
                     </div>
                 </div>
             @else

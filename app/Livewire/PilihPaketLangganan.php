@@ -41,6 +41,52 @@ class PilihPaketLangganan extends Component
     // Status modal konfirmasi.
     public bool $modalTerbuka = false;
 
+    public function mount(): void
+    {
+        // Membuka modal otomatis saat paket terbawa dari landing page (query) atau kolom users.
+        $pengguna = auth()->user();
+
+        if (! $pengguna || $pengguna->isAdmin()) {
+            return;
+        }
+
+        $paketId = request()->query('paket');
+
+        // Tanpa parameter (mis. kembali setelah menutup tab), pakai pilihan tersimpan di kolom users.
+        if (! is_numeric($paketId)) {
+            $paketId = $pengguna->paket_langganan_dipilih_id;
+        }
+
+        if (! is_numeric($paketId)) {
+            return;
+        }
+
+        $paketAktif = PaketLangganan::query()->where('is_active', true)->find((int) $paketId);
+
+        if (! $paketAktif) {
+            // Bersihkan pilihan basi agar modal tidak muncul di kunjungan berikut.
+            if ((int) $pengguna->paket_langganan_dipilih_id === (int) $paketId) {
+                $pengguna->forceFill(['paket_langganan_dipilih_id' => null])->save();
+            }
+
+            Notification::make()
+                ->title('Paket tidak tersedia')
+                ->body('Paket tersebut sudah dinonaktifkan. Pilih paket lain yang masih aktif.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        // Memakai alur yang sama dengan tombol Beli paket agar ringkasan dan validasi tetap konsisten.
+        $this->pilihPaket($paketAktif->id);
+
+        // Dibersihkan saat modal terbuka agar tidak muncul berulang pada kunjungan berikutnya.
+        if ($pengguna->paket_langganan_dipilih_id) {
+            $pengguna->forceFill(['paket_langganan_dipilih_id' => null])->save();
+        }
+    }
+
     // Membuka modal untuk paket tertentu dan mereset status voucher.
     public function pilihPaket(int $id): void
     {
