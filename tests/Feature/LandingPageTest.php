@@ -24,20 +24,20 @@ it('menampilkan harga paket aktif di halaman depan dengan hemat per bulan', func
     \App\Models\Voucher::query()->delete();
     PaketLangganan::query()->delete();
 
-    $tigaBulan = PaketLangganan::factory()->create(['label' => 'Landing 3 Bulan', 'harga' => 63000, 'durasi_hari' => 90, 'is_active' => true]);
-    $satuTahun = PaketLangganan::factory()->create(['label' => 'Landing 1 Tahun', 'harga' => 199000, 'durasi_hari' => 365, 'is_active' => true]);
+    $satuBulan = PaketLangganan::factory()->create(['label' => 'Landing 1 Bulan', 'harga' => 20000, 'durasi_hari' => 30, 'is_active' => true]);
+    $satuTahun = PaketLangganan::factory()->create(['label' => 'Landing 1 Tahun', 'harga' => 192000, 'durasi_hari' => 365, 'is_active' => true]);
     $arsip = PaketLangganan::factory()->create(['label' => 'Landing Arsip', 'harga' => 10000, 'durasi_hari' => 30, 'is_active' => false]);
 
     $html = $this->get('/')->assertOk()->getContent();
 
     // Paket aktif tampil dengan harga dan hitungan per bulan, paket nonaktif disembunyikan.
-    expect($html)->toContain('Harga Premium', 'data-daftar-harga-paket', $tigaBulan->label, $satuTahun->label);
-    expect($html)->toContain('Rp63.000', 'Rp199.000');
+    expect($html)->toContain('Harga Premium', 'data-daftar-harga-paket', $satuBulan->label, $satuTahun->label);
+    expect($html)->toContain('Rp20.000', 'Rp192.000');
     expect($html)->toContain('/ bulan', 'Paling hemat');
     expect($html)->not->toContain($arsip->label);
 
-    // Urutan terpanjang dulu: 1 tahun muncul sebelum 3 bulan.
-    expect(strpos($html, 'Landing 1 Tahun') < strpos($html, 'Landing 3 Bulan'))->toBeTrue();
+    // Urutan terpanjang dulu: 1 tahun muncul sebelum 1 bulan.
+    expect(strpos($html, 'Landing 1 Tahun') < strpos($html, 'Landing 1 Bulan'))->toBeTrue();
 });
 
 it('menampilkan pesan saat belum ada paket aktif di halaman depan', function () {

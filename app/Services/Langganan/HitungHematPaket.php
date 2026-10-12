@@ -40,12 +40,15 @@ class HitungHematPaket
             $perBulan = (float) ($i['harga'] / $i['bulan']);
             $coret = (float) ($acuanPerBulan * $i['bulan']);
 
+            // Tambah epsilon kecil agar persen pas (mis. 20%) tidak turun 1 karena galat floating.
+            $persen = $coret > 0 ? (int) floor((1 - $i['harga'] / $coret) * 100 + 1e-9) : 0;
+
             return $i + [
                 'per_bulan' => $perBulan,
                 'harga_coret' => $coret,
                 'hemat_bulan' => (float) max(0, $acuanPerBulan - $perBulan),
                 'hemat_total' => (float) max(0, $coret - $i['harga']),
-                'persen' => $coret > 0 ? (int) floor((1 - $i['harga'] / $coret) * 100) : 0,
+                'persen' => $persen,
                 'is_acuan' => $i['id'] === $acuan['id'],
             ];
         });

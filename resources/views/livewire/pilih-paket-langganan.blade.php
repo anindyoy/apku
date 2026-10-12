@@ -38,7 +38,7 @@
                 </div>
             @endif
             @if ($adaPaket)
-                <div class="grid grid-cols-1 min-[481px]:grid-cols-2 lg:grid-cols-4 gap-5" data-grid-paket>
+                <div class="grid grid-cols-1 min-[481px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5" data-grid-paket>
                     @foreach ($paketHemat as $paket)
                         @include('livewire.pilih-paket-langganan.kartu', ['paket' => $paket])
                     @endforeach

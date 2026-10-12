@@ -24,17 +24,18 @@ function bersihkanDataPaketUntukUji(): void
 test('grid hanya menampilkan paket aktif dengan sorotan paling hemat dan kelas responsif', function () {
     bersihkanDataPaketUntukUji();
     $user = User::factory()->create(['role' => 'user']);
-    $tigaBulan = PaketLangganan::factory()->create(['label' => 'Paket 3 Bulan', 'harga' => 63000, 'durasi_hari' => 90, 'is_active' => true]);
-    $enamBulan = PaketLangganan::factory()->create(['label' => 'Paket 6 Bulan', 'harga' => 126000, 'durasi_hari' => 180, 'is_active' => true]);
-    $sembilanBulan = PaketLangganan::factory()->create(['label' => 'Paket 9 Bulan', 'harga' => 169000, 'durasi_hari' => 270, 'is_active' => true]);
-    $satuTahun = PaketLangganan::factory()->create(['label' => 'Paket 1 Tahun', 'harga' => 199000, 'durasi_hari' => 365, 'is_active' => true]);
+    $satuBulan = PaketLangganan::factory()->create(['label' => 'Paket 1 Bulan', 'harga' => 20000, 'durasi_hari' => 30, 'is_active' => true]);
+    $tigaBulan = PaketLangganan::factory()->create(['label' => 'Paket 3 Bulan', 'harga' => 57000, 'durasi_hari' => 90, 'is_active' => true]);
+    $enamBulan = PaketLangganan::factory()->create(['label' => 'Paket 6 Bulan', 'harga' => 108000, 'durasi_hari' => 180, 'is_active' => true]);
+    $sembilanBulan = PaketLangganan::factory()->create(['label' => 'Paket 9 Bulan', 'harga' => 153000, 'durasi_hari' => 270, 'is_active' => true]);
+    $satuTahun = PaketLangganan::factory()->create(['label' => 'Paket 1 Tahun', 'harga' => 192000, 'durasi_hari' => 365, 'is_active' => true]);
     $arsip = PaketLangganan::factory()->create(['label' => 'Paket Arsip', 'harga' => 10000, 'durasi_hari' => 30, 'is_active' => false]);
     MetodePembayaran::factory()->create(['is_active' => true]);
 
     $html = Livewire::actingAs($user)->test(PilihPaketLangganan::class)->assertSuccessful()->html();
 
     // Paket aktif tampil, paket arsip tidak tampil.
-    foreach ([$tigaBulan, $enamBulan, $sembilanBulan, $satuTahun] as $paket) {
+    foreach ([$satuBulan, $tigaBulan, $enamBulan, $sembilanBulan, $satuTahun] as $paket) {
         expect($html)->toContain($paket->label);
     }
     expect($html)->not->toContain($arsip->label);
@@ -47,7 +48,8 @@ test('grid hanya menampilkan paket aktif dengan sorotan paling hemat dan kelas r
     expect($html)->toContain('data-grid-paket')
         ->and($html)->toContain('grid-cols-1')
         ->and($html)->toContain('min-[481px]:grid-cols-2')
-        ->and($html)->toContain('lg:grid-cols-4');
+        ->and($html)->toContain('lg:grid-cols-3')
+        ->and($html)->toContain('xl:grid-cols-5');
 
     // Tombol beli memakai penanda anti order ganda.
     expect($html)->toContain('data-paket-beli="'.$satuTahun->id.'"')
@@ -66,8 +68,8 @@ test('state kosong menampilkan pesan belum ada paket', function () {
 test('memilih paket membuka modal dengan ringkasan benar dan metode bawaan', function () {
     bersihkanDataPaketUntukUji();
     $user = User::factory()->create(['role' => 'user']);
-    PaketLangganan::factory()->create(['label' => 'Paket 3 Bulan', 'harga' => 63000, 'durasi_hari' => 90, 'is_active' => true]);
-    $satuTahun = PaketLangganan::factory()->create(['label' => 'Paket 1 Tahun', 'harga' => 199000, 'durasi_hari' => 365, 'is_active' => true]);
+    PaketLangganan::factory()->create(['label' => 'Paket 1 Bulan', 'harga' => 20000, 'durasi_hari' => 30, 'is_active' => true]);
+    $satuTahun = PaketLangganan::factory()->create(['label' => 'Paket 1 Tahun', 'harga' => 192000, 'durasi_hari' => 365, 'is_active' => true]);
     $metode = MetodePembayaran::factory()->create(['label' => 'Transfer Bank', 'is_active' => true]);
 
     $komponen = Livewire::actingAs($user)->test(PilihPaketLangganan::class)
@@ -82,7 +84,7 @@ test('memilih paket membuka modal dengan ringkasan benar dan metode bawaan', fun
         ->and($html)->toContain('role="dialog"')
         ->and($html)->toContain('Konfirmasi order')
         ->and($html)->toContain('Paket 1 Tahun')
-        ->and($html)->toContain('Rp199.000')
+        ->and($html)->toContain('Rp192.000')
         ->and($html)->toContain('Total bayar')
         ->and($html)->toContain('data-ringkasan')
         ->and($html)->toContain('Membuat order...');
@@ -166,7 +168,7 @@ test('mengubah kode voucher mereset diskon basi agar ringkasan tidak keliru', fu
 test('order paket menyimpan snapshot dan total dihitung server walau klien dimanipulasi', function () {
     bersihkanDataPaketUntukUji();
     $user = User::factory()->create(['role' => 'user']);
-    $paket = PaketLangganan::factory()->create(['label' => 'Paket 1 Tahun', 'harga' => 199000, 'durasi_hari' => 365, 'is_active' => true]);
+    $paket = PaketLangganan::factory()->create(['label' => 'Paket 1 Tahun', 'harga' => 192000, 'durasi_hari' => 365, 'is_active' => true]);
     $metode = MetodePembayaran::factory()->create(['label' => 'Transfer Bank', 'nama_penyedia' => 'Bank Uji', 'nomor_tujuan' => '998877', 'is_active' => true]);
     $voucher = Voucher::factory()->create(['jumlah_diskon' => 20, 'masa_aktif' => today()->addMonth(), 'dapat_dipakai_berulang' => true]);
     $kode = VoucherCode::factory()->create(['voucher_id' => $voucher->id, 'code' => 'SERVER20UJI']);
@@ -185,14 +187,14 @@ test('order paket menyimpan snapshot dan total dihitung server walau klien diman
     $order = Langganan::query()->where('user_id', $user->id)->latest('id')->first();
     expect($order)->not->toBeNull()
         ->and($order->label_paket)->toBe('Paket 1 Tahun')
-        ->and($order->harga)->toBe(199000)
+        ->and($order->harga)->toBe(192000)
         ->and($order->durasi_hari)->toBe(365)
         ->and($order->label_metode_pembayaran)->toBe('Transfer Bank')
         ->and($order->detail_pembayaran['nomor_tujuan'])->toBe('998877')
         ->and($order->kode_voucher)->toBe('SERVER20UJI')
         ->and($order->persentase_diskon)->toBe(20)
-        ->and($order->nominal_diskon)->toBe(39800)
-        ->and($order->total_pembayaran)->toBe(159200)
+        ->and($order->nominal_diskon)->toBe(38400)
+        ->and($order->total_pembayaran)->toBe(153600)
         ->and($order->status)->toBe(StatusLangganan::MenungguPembayaran);
 
     // State direset sehingga panggilan ganda tidak membuat order kedua.

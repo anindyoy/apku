@@ -127,7 +127,7 @@ Panel Filament memakai CSS terkompilasi sendiri, sehingga class Tailwind di view
 
 **Tahap 1: Fondasi**
 - [ ] Audit repo (bagian 3) dan catat nama class/route nyata.
-- [ ] Tulis `HitungHematPaket` dan tes unit (data uji: 3 bln Rp63.000, 6 bln Rp126.000, 9 bln Rp169.000, 1 thn Rp199.000).
+- [ ] Tulis `HitungHematPaket` dan tes unit (data uji: 1 bln Rp20.000, 3 bln Rp57.000, 6 bln Rp108.000, 9 bln Rp153.000, 1 thn Rp192.000).
 
 **Tahap 2: Tampilan**
 - [ ] Siapkan theme Filament dan konfigurasi Tailwind.
@@ -140,7 +140,7 @@ Panel Filament memakai CSS terkompilasi sendiri, sehingga class Tailwind di view
 - [ ] `buatOrder()` memanggil alur order yang ada, lalu buka invoice.
 
 **Tahap 4: Kualitas**
-- [ ] Mode gelap, responsif (1/2/4 kolom), fokus keyboard, `Esc` menutup modal, fokus kembali ke tombol Beli.
+- [ ] Mode gelap, responsif (1/2/3/5 kolom), fokus keyboard, `Esc` menutup modal, fokus kembali ke tombol Beli.
 - [ ] Tombol dinonaktifkan saat proses (`wire:loading`) untuk mencegah order ganda.
 - [ ] Tes fitur (bagian 7).
 
@@ -167,8 +167,8 @@ Panel Filament memakai CSS terkompilasi sendiri, sehingga class Tailwind di view
 ## 7. Rencana pengujian (Pest)
 
 **Unit: `HitungHematPaket`**
-- Data contoh menghasilkan: 1 tahun hemat Rp4.417/bulan (21%), 9 bulan hemat Rp2.222/bulan (10%), 3 bulan sebagai acuan.
-- Paket 6 bulan tanpa hemat; tidak disorot.
+- Data contoh menghasilkan: 1 tahun hemat Rp4.000/bulan (20%), 9 bulan hemat Rp3.000/bulan (15%), 6 bulan hemat Rp2.000/bulan (10%), 3 bulan hemat Rp1.000/bulan (5%), 1 bulan sebagai acuan.
+- Paket 1 tahun disorot sebagai paling hemat; paket lain tidak disorot.
 - Hanya satu paket, daftar kosong, dan harga sama semua.
 - Hanya satu paket yang `is_terbaik`; urutan paket durasi terpanjang dulu.
 
