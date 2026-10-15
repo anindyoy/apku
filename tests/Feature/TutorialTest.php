@@ -81,48 +81,115 @@ it('tutorial sidebar mengikuti topik hash scroll dan hasil pencarian', function 
     import assert from 'node:assert/strict';
     import { initTutorialSidebar } from './public/js/tutorial-sidebar.js';
     const events = {};
-    let tops = [0, 500, 1000];
-    const chapters = [{ open: true }, { open: true }, { open: false }];
-    const links = ['akun', 'dompet', 'laporan'].map((id, i) => ({
-        hash: `#${id}`, attrs: {},
-        setAttribute(name, value) { this.attrs[name] = value; },
-        removeAttribute(name) { delete this.attrs[name]; },
-        addEventListener(name, callback) { this[name] = callback; },
-        getBoundingClientRect: () => ({ top: i * 100, bottom: i * 100 + 40 }),
-    }));
+    const sections = [{ hidden: false }, { hidden: false }, { hidden: false }];
+    const links = ['akun', 'dompet', 'laporan'].map((id, i) => {
+        const link = {
+            hash: `#${id}`, textContent: id.toUpperCase(), attrs: {},
+            setAttribute(name, value) { this.attrs[name] = value; },
+            removeAttribute(name) { delete this.attrs[name]; },
+            addEventListener(name, callback) { this[name] = callback; },
+            click() { this.click?.(); },
+            getBoundingClientRect: () => ({ top: i * 100, bottom: i * 100 + 40 }),
+        };
+        return link;
+    });
+    const subHeadings = {
+        'laporan-langkah': { id: 'laporan-langkah' },
+        'laporan-contoh': { id: 'laporan-contoh' },
+    };
     const articles = Object.fromEntries(links.map((link, i) => [link.hash.slice(1), {
-        closest: () => chapters[i],
-        getBoundingClientRect: () => ({ top: tops[i] }),
+        id: link.hash.slice(1),
+        hidden: false,
+        closest: selector => selector === 'section' ? sections[i] : (selector === 'article[id]' ? articles[link.hash.slice(1)] : null),
+        scrollIntoView() { this.scrolled = true; },
     }]));
     const position = { textContent: '' };
-    const sidebar = { querySelectorAll: () => links, scrollHeight: 400, clientHeight: 150, scrollTop: 0, getBoundingClientRect: () => ({ top: 0, bottom: 150 }) };
-    const doc = { querySelector: selector => selector === '[data-tutorial-sidebar]' ? sidebar : position, getElementById: id => articles[id] };
-    const win = { location: { hash: '#laporan' }, addEventListener: (name, fn) => { events[name] = fn; }, requestAnimationFrame: fn => fn() };
+    const mobileNav = { open: true };
+    const sidebar = {
+        querySelector: selector => selector === '[data-mobile-nav]' ? mobileNav : null,
+        querySelectorAll: () => links,
+        scrollHeight: 400, clientHeight: 150, scrollTop: 0,
+        getBoundingClientRect: () => ({ top: 0, bottom: 150 }),
+    };
+    const tocLinks = {
+        laporan: [
+            { hash: '#laporan-langkah', attrs: {}, setAttribute(n, v) { this.attrs[n] = v; }, removeAttribute(n) { delete this.attrs[n]; } },
+            { hash: '#laporan-contoh', attrs: {}, setAttribute(n, v) { this.attrs[n] = v; }, removeAttribute(n) { delete this.attrs[n]; } },
+        ],
+        dompet: [
+            { hash: '#dompet-langkah', attrs: {}, setAttribute(n, v) { this.attrs[n] = v; }, removeAttribute(n) { delete this.attrs[n]; } },
+        ],
+    };
+    const tocLists = [
+        { getAttribute: () => 'dompet', hidden: true, querySelectorAll: () => tocLinks.dompet, addEventListener: () => {} },
+        { getAttribute: () => 'laporan', hidden: true, querySelectorAll: () => tocLinks.laporan, addEventListener: () => {} },
+    ];
+    const tocRoot = { hidden: true };
+    const doc = {
+        title: 'APKu',
+        querySelector: selector => {
+            if (selector === '[data-tutorial-sidebar]') return sidebar;
+            if (selector === '[data-topic-position]') return position;
+            if (selector === '[data-toc]') return tocRoot;
+            return null;
+        },
+        querySelectorAll: selector => selector === '[data-toc-for]' ? tocLists : [],
+        getElementById: id => articles[id] ?? subHeadings[id] ?? null,
+    };
+    let spyCallback = null;
+    let observed = [];
+    class FakeIntersectionObserver {
+        constructor(callback) { spyCallback = callback; }
+        observe(target) { observed.push(target); }
+        disconnect() { observed = []; }
+    }
+    const win = {
+        location: { hash: '#laporan' },
+        addEventListener: (name, fn) => { events[name] = fn; },
+        matchMedia: () => ({ matches: false }),
+        IntersectionObserver: FakeIntersectionObserver,
+    };
     initTutorialSidebar(doc, win);
-    assert.equal(chapters[2].open, true);
+    assert.equal(articles.laporan.hidden, false);
+    assert.equal(articles.dompet.hidden, true);
+    assert.equal(sections[2].hidden, false);
+    assert.equal(sections[1].hidden, true);
     assert.equal(position.textContent, 'Topik 3 dari 3 yang ditampilkan');
     assert.equal(links[2].attrs['aria-current'], 'location');
     assert.ok(sidebar.scrollTop > 0);
+    assert.equal(doc.title, 'LAPORAN · APKu');
+    assert.equal(tocRoot.hidden, false);
+    assert.equal(tocLists[1].hidden, false);
+    assert.equal(tocLists[0].hidden, true);
+    assert.equal(tocLinks.laporan[0].attrs['aria-current'], 'location');
+
+    // Scroll spy mengamati sub-bagian di dalam artikel laporan
+    assert.equal(observed.length, 2);
+    spyCallback([{ isIntersecting: true, target: subHeadings['laporan-contoh'] }]);
+    assert.equal(tocLinks.laporan[1].attrs['aria-current'], 'location');
+    assert.equal(tocLinks.laporan[0].attrs['aria-current'], undefined);
+
+    // Di mobile, klik tautan menutup navigasi lipat
+    links[1].click();
+    assert.equal(mobileNav.open, false);
+
+    // Navigasi hashchange ke topik dompet
     win.location.hash = '#dompet';
     events.hashchange();
+    assert.equal(articles.dompet.hidden, false);
+    assert.equal(articles.laporan.hidden, true);
+    assert.equal(position.textContent, 'Topik 2 dari 3 yang ditampilkan');
     assert.equal(links[1].attrs['aria-current'], 'location');
     assert.equal(links[2].attrs['aria-current'], undefined);
-    chapters[1].open = false;
-    links[1].click();
-    assert.equal(chapters[1].open, true);
-    tops = [-500, -20, 450];
-    events.scroll();
-    assert.equal(position.textContent, 'Topik 2 dari 3 yang ditampilkan');
-    tops = [-1000, -500, 50];
-    events.scroll();
-    assert.equal(links[2].attrs['aria-current'], 'location');
-    tops = [400, 900, 1400];
-    win.location.hash = '#atas';
-    events.hashchange();
-    assert.equal(position.textContent, 'Topik 1 dari 3 yang ditampilkan');
+    assert.equal(tocLists[0].hidden, false);
+    assert.equal(tocLists[1].hidden, true);
+
+    // Filter pencarian dengan 1 hasil
     sidebar.querySelectorAll = () => [links[1]];
     initTutorialSidebar(doc, win);
     assert.equal(position.textContent, 'Topik 1 dari 1 yang ditampilkan');
+
+    // Filter pencarian dengan 0 hasil
     sidebar.querySelectorAll = () => [];
     position.textContent = '0 topik ditampilkan';
     initTutorialSidebar(doc, win);

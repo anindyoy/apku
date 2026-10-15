@@ -15,7 +15,7 @@ export function initTutorialSidebar(doc, win) {
 
     // Di layar kecil, daftar isi berupa menu yang dilipat; tutup setelah topik dipilih
     // agar konten langsung terlihat.
-    const mobileNav = sidebar.querySelector('[data-mobile-nav]');
+    const mobileNav = sidebar.querySelector?.('[data-mobile-nav]') ?? null;
     const isDesktop = () => win.matchMedia?.('(min-width:1024px)').matches ?? true;
     entries.forEach(({ link }) => {
         link.addEventListener?.('click', () => {
@@ -24,8 +24,8 @@ export function initTutorialSidebar(doc, win) {
     });
 
     // Kolom kanan "Di halaman ini": hanya daftar milik topik yang sedang tampil.
-    const tocRoot = doc.querySelector('[data-toc]');
-    const tocLists = Array.from(doc.querySelectorAll('[data-toc-for]'));
+    const tocRoot = doc.querySelector?.('[data-toc]') ?? null;
+    const tocLists = Array.from(doc.querySelectorAll?.('[data-toc-for]') ?? []);
     const markToc = (list, link) => {
         list.querySelectorAll('a').forEach(a => {
             if (a === link) a.setAttribute('aria-current', 'location');
