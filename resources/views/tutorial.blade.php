@@ -5,10 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Panduan penggunaan APKu: mulai dari pengaturan akun, transaksi, kas dan sumber dana hingga laporan dan langganan premium.">
     <title>Tutorial Penggunaan · APKu</title>
+    {{-- Terapkan tema sebelum render untuk menghindari kedipan (flash) --}}
+    <script>
+        (function () {
+            const saved = localStorage.getItem('apku-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+            const dark = saved === 'dark' || (!saved && prefersDark);
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        })();
+    </script>
     <style>
-        /* ---------- Token warna (tidak berubah) ---------- */
+        /* ---------- Token warna ---------- */
         :root { color-scheme: light dark; --bg:#f7f8fa; --card:#fff; --text:#202b39; --muted:#526174; --line:#dde3ea; --accent:#0f766e; --soft:#f0fdfa; --nav-h:64px; font-family:system-ui,sans-serif; color:var(--text); background:var(--bg); }
-        @media(prefers-color-scheme:dark) { :root { --bg:#141b24; --card:#1d2733; --text:#edf0f5; --muted:#b6c2d1; --line:#354254; --accent:#5eead4; --soft:#123b3a; } }
+        /* Mode gelap otomatis (sistem) */
+        @media(prefers-color-scheme:dark) { :root:not([data-theme="light"]) { --bg:#141b24; --card:#1d2733; --text:#edf0f5; --muted:#b6c2d1; --line:#354254; --accent:#5eead4; --soft:#123b3a; } }
+        /* Mode gelap manual (data-theme="dark") */
+        [data-theme="dark"] { --bg:#141b24; --card:#1d2733; --text:#edf0f5; --muted:#b6c2d1; --line:#354254; --accent:#5eead4; --soft:#123b3a; color-scheme: dark; }
+        /* Mode terang manual (data-theme="light") */
+        [data-theme="light"] { --bg:#f7f8fa; --card:#fff; --text:#202b39; --muted:#526174; --line:#dde3ea; --accent:#0f766e; --soft:#f0fdfa; color-scheme: light; }
 
         /* ---------- Dasar ---------- */
         * { box-sizing:border-box; }
@@ -35,6 +49,8 @@
         .button { display:inline-block; border:1px solid var(--line); border-radius:10px; padding:9px 16px; background:var(--card); color:var(--text); font:inherit; font-size:14px; cursor:pointer; text-decoration:none; white-space:nowrap; }
         .button:hover { border-color:var(--accent); }
         .primary { background:#0f766e; color:#fff; border-color:#0f766e; }
+        .theme-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:0; padding:9px 14px; }
+        .theme-toggle svg { flex-shrink:0; }
         .form-error { margin:0 0 16px; padding:10px 14px; border-radius:10px; background:var(--soft); border:1px solid var(--accent); font-size:14px; }
 
         /* ---------- Layout 3 kolom ---------- */
@@ -93,6 +109,18 @@
 
         footer { margin-top:56px; padding:28px 0; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
 
+        /* ---------- Tombol tema ---------- */
+        /* Default (light): tampilkan ikon bulan, sembunyikan matahari */
+        .icon-sun { display:none; }
+        .icon-moon { display:block; }
+        /* Dark mode: tampilkan ikon matahari, sembunyikan bulan */
+        [data-theme="dark"] .icon-sun { display:block; }
+        [data-theme="dark"] .icon-moon { display:none; }
+        @media(prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) .icon-sun { display:block; }
+            :root:not([data-theme="light"]) .icon-moon { display:none; }
+        }
+
         /* ---------- Responsif ---------- */
         @media(max-width:1279px) { .layout { grid-template-columns:16rem minmax(0,1fr); gap:40px; } .toc { display:none; } }
         @media(max-width:1023px) {
@@ -134,6 +162,16 @@
                 <button class="button primary" type="submit">Cari</button>
             </div>
         </form>
+        <button class="button theme-toggle" id="theme-toggle" type="button" aria-label="Ganti tema tampilan" title="Ganti tema terang/gelap">
+            {{-- Ikon matahari (tampil saat mode gelap, klik untuk ke terang) --}}
+            <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            </svg>
+            {{-- Ikon bulan (tampil saat mode terang, klik untuk ke gelap) --}}
+            <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </button>
         <a class="button open-app" href="{{ url('/admin') }}">Buka aplikasi &rarr;</a>
     </div>
 </header>
@@ -237,5 +275,31 @@
 </div>
 
 <script type="module" src="{{ asset('js/tutorial-sidebar.js') }}"></script>
+<script>
+    // Logika toggle tema terang/gelap dengan penyimpanan preferensi ke localStorage
+    (function () {
+        const KEY = 'apku-theme';
+        const html = document.documentElement;
+        const btn = document.getElementById('theme-toggle');
+        if (!btn) return;
+
+        const applyTheme = (theme) => {
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem(KEY, theme);
+            btn.setAttribute('aria-label', theme === 'dark' ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
+            btn.setAttribute('title', theme === 'dark' ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
+        };
+
+        btn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // Perbarui label tombol sesuai tema yang sudah diterapkan saat muat halaman
+        const initial = html.getAttribute('data-theme') ?? 'light';
+        btn.setAttribute('aria-label', initial === 'dark' ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
+        btn.setAttribute('title', initial === 'dark' ? 'Ganti ke mode terang' : 'Ganti ke mode gelap');
+    })();
+</script>
 </body>
 </html>
