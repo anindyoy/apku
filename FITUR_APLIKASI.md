@@ -21,6 +21,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 
 ### 2. Onboarding pengguna baru
 
+- Pengaturan awal hanya dapat diakses setelah alamat email pengguna terverifikasi; pengguna baru yang belum verifikasi email diarahkan ke prompt verifikasi email terlebih dahulu tanpa dialihkan paksa ke onboarding.
 - Pengaturan awal mencakup pembuatan kas utama beserta deskripsi, sumber dana utama, saldo awal, serta kategori pemasukan dan pengeluaran yang sering digunakan.
 - Setelah wizard selesai, pengguna dengan `paket_langganan_dipilih_id` yang masih aktif diarahkan ke halaman Langganan dengan modal Konfirmasi order terbuka (`Langganan?paket={id}`); tanpa pilihan valid, tujuan default dasbor dipakai. Paket yang dinonaktifkan selama onboarding diabaikan tanpa menggagalkan onboarding.
 

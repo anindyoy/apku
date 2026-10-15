@@ -162,3 +162,33 @@ test('service default memulihkan dompet cash yang terhapus', function () {
         ->and($hasil['dompet']->is_default)->toBeTrue()
         ->and($user->dompet()->count())->toBe(1);
 });
+
+test('pengguna belum verifikasi email diarahkan ke prompt verifikasi tanpa redirect loop ke onboarding', function () {
+    $user = User::factory()->unverified()->create();
+
+    $response = $this->actingAs($user)->get('/admin');
+
+    $response->assertRedirect(route('filament.admin.auth.email-verification.prompt'));
+
+    // Memastikan saat mengakses prompt verifikasi email tidak dilempar kembali ke onboarding.
+    $promptResponse = $this->actingAs($user)->get(route('filament.admin.auth.email-verification.prompt'));
+    $promptResponse->assertSuccessful();
+});
+
+test('pengguna belum verifikasi email yang mengakses onboarding diarahkan ke prompt verifikasi', function () {
+    $user = User::factory()->unverified()->create();
+
+    $response = $this->actingAs($user)->get(Onboarding::getUrl());
+
+    $response->assertRedirect(route('filament.admin.auth.email-verification.prompt'));
+});
+
+test('pengguna diarahkan ke onboarding setelah email terverifikasi', function () {
+    $user = User::factory()->unverified()->create();
+
+    $user->markEmailAsVerified();
+
+    $response = $this->actingAs($user)->get('/admin');
+
+    $response->assertRedirect(Onboarding::getUrl());
+});

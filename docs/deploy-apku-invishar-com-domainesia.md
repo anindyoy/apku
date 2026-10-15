@@ -132,8 +132,13 @@ FILESYSTEM_DISK=local
 LOG_CHANNEL=stack
 LOG_LEVEL=error
 
-MAIL_MAILER=log
-MAIL_FROM_ADDRESS="noreply@invishar.com"
+MAIL_MAILER=smtp
+MAIL_HOST=mail.invishar.com
+MAIL_PORT=465
+MAIL_USERNAME=apku@invishar.com
+MAIL_PASSWORD=isi_password_email
+MAIL_ENCRYPTION=ssl
+MAIL_FROM_ADDRESS="apku@invishar.com"
 MAIL_FROM_NAME="APKu"
 
 ADMIN_PASSWORD=isi_password_admin_awal_yang_kuat
@@ -163,6 +168,14 @@ Atau validasi ketat memakai script rilis proyek:
 Script tersebut menolak jalan jika `APP_ENV` bukan `production`, `APP_DEBUG` bukan `false`, atau `vendor/` dan `manifest.json` belum siap. Lihat [`scripts/release-optimize.php`](../scripts/release-optimize.php:1).
 
 Catatan admin awal: migrasi `2026_09_05_000002_create_admin_user.php` memakai `ADMIN_PASSWORD`. Jika user admin sudah ada, ganti manual via tinker atau panel admin, jangan re-seed demo (`DemoFiturSeeder`, `TransaksiSeeder`, dll hanya untuk lokal).
+
+### Pengaturan Email Server cPanel Domainesia
+Hosting 4.0 Domainesia sudah dilengkapi email server bawaan (cPanel Mail / Webmail):
+1. Buka cPanel > **Email Accounts** > **+ Create**.
+2. Buat email pengirim, misal `noreply@invishar.com` (atau `noreply@apku.invishar.com` jika subdomain sudah di-assign) dan set password.
+3. Di cPanel > **Email Deliverability**, pastikan status SPF dan DKIM berstatus **Valid** (klik **Install Suggested Record** jika belum valid).
+4. Catat host SMTP dari menu **Connect Devices** (biasanya `mail.invishar.com` atau hostname server Domainesia seperti `nebula.domainesia.com`).
+5. Sesuaikan nilai `MAIL_*` di `.env` seperti pada contoh konfigurasi di atas.
 
 ## 7. SSL dan Force HTTPS
 
