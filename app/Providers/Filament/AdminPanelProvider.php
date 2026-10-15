@@ -73,6 +73,8 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(false),
             ])
             ->registration(Register::class)
+            ->emailVerification()
+            ->passwordReset()
             ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
