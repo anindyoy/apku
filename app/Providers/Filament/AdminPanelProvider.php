@@ -27,6 +27,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
 use pxlrbt\FilamentSpotlight\SpotlightPlugin;
 
 class AdminPanelProvider extends PanelProvider
@@ -71,10 +72,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Langganan')
                     ->collapsed(false),
             ])
-            ->profile()
             ->registration(Register::class)
-            ->emailVerification()
-            ->passwordReset()
             ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
@@ -85,6 +83,18 @@ class AdminPanelProvider extends PanelProvider
                 fn (): View => view('filament.components.topbar-tutorial'),
             )
             ->plugins([
+                // Breezy menggantikan built-in profile, password reset, 2FA, dan manajemen sesi.
+                // 2FA diwajibkan khusus untuk role admin.
+                BreezyCore::make()
+                    ->myProfile(
+                        shouldRegisterUserMenu: true,
+                        shouldRegisterNavigation: false,
+                        hasAvatars: false,
+                    )
+                    ->enableTwoFactorAuthentication(
+                        // 2FA diwajibkan hanya di production untuk mencegah gangguan saat development.
+                        force: fn (): bool => app()->isProduction() && auth()->check() && auth()->user()->isAdmin(),
+                    ),
                 SpotlightPlugin::make(),
                 FilamentDeveloperLoginsPlugin::make()
                     ->enabled(app()->environment('local'))
