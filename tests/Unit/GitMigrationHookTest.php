@@ -10,8 +10,8 @@ it('runs migration and composer hooks after pulling relevant changes only', func
     $checkout = $directory.'/checkout';
     $filesystem->makeDirectory($upstream.'/database/migrations', 0755, true);
     $filesystem->makeDirectory($directory.'/bin');
-    file_put_contents($directory.'/bin/composer2', "#!/bin/sh\nprintf '%s\\n' \"\$*\" >> composer-calls.txt\nprintf 'composer\\n' >> events.txt\nexit $composerExitCode\n");
-    chmod($directory.'/bin/composer2', 0755);
+    file_put_contents($directory.'/bin/composer', "#!/bin/sh\nprintf '%s\\n' \"\$*\" >> composer-calls.txt\nprintf 'composer\\n' >> events.txt\nexit $composerExitCode\n");
+    chmod($directory.'/bin/composer', 0755);
     $run = function (array $command, string $cwd) use ($directory) {
         $process = new Process($command, $cwd, ['PATH' => $directory.'/bin'.PATH_SEPARATOR.getenv('PATH')]);
         $process->mustRun();
@@ -65,7 +65,7 @@ it('runs migration and composer hooks after pulling relevant changes only', func
         $git($upstream, ['add', '.']);
         $git($upstream, ['commit', '-m', 'Remote change']);
         $output = $git($checkout, ['pull', $mode === 'rebase' ? '--rebase' : '--no-rebase']);
-        $shouldMigrate = in_array($change, ['added', 'combined'], true) && $composerExitCode === 0;
+        $shouldMigrate = in_array($change, ['added', 'modified', 'deleted', 'combined'], true) && $composerExitCode === 0;
         expect(file_exists($checkout.'/calls.json'))->toBe($shouldMigrate);
         expect(file_exists($checkout.'/composer-calls.txt'))->toBe($composerChanged);
         if ($composerChanged) {
@@ -77,13 +77,13 @@ it('runs migration and composer hooks after pulling relevant changes only', func
         if ($shouldMigrate) {
             expect(json_decode(file_get_contents($checkout.'/calls.json'), true))
                 ->toBe(['artisan', 'migrate', '--force', '--no-interaction']);
-            expect($output)->toContain('Migration baru ditemukan');
+            expect($output)->toContain('File migration berubah');
             if ($exitCode === 0) {
                 expect($output)->toContain('Migrasi selesai');
             } else {
                 expect($output)->toContain('Migrasi gagal. Perubahan Git sudah diterapkan');
             }
-            expect(substr_count($output, 'Migration baru ditemukan'))->toBe(1);
+            expect(substr_count($output, 'File migration berubah'))->toBe(1);
             unlink($checkout.'/calls.json');
         }
         if ($composerChanged) {
