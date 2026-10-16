@@ -13,6 +13,7 @@ use Illuminate\Support\HtmlString;
 
 /**
  * @property-read Action $logoutAction
+ * @property-read Action $resendNotificationAction
  */
 class EmailVerificationPrompt extends BaseEmailVerificationPrompt
 {
@@ -31,9 +32,10 @@ class EmailVerificationPrompt extends BaseEmailVerificationPrompt
 
         $komponenEkstra = [];
 
-        // Tombol bantuan WhatsApp admin hanya tampil jika nomor sudah diatur.
+        // Teks penanya kendala dan tombol bantuan WhatsApp admin hanya tampil jika nomor sudah diatur.
         if ($urlWa !== null) {
             $komponenEkstra[] = Text::make(new HtmlString(
+                'Ada masalah verifikasi email? ' .
                 '<a href="' . e($urlWa) . '" target="_blank" rel="noopener noreferrer" ' .
                 'class="text-sm text-primary-600 hover:underline">' .
                 '💬 Hubungi admin via WhatsApp' .

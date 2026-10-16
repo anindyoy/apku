@@ -105,7 +105,9 @@ test('halaman verifikasi email menampilkan tombol wa dengan email user jika nomo
 
     $response->assertSuccessful();
     $expectedUrl = app(PengaturanKontak::class)->urlWa('Halo Admin APKu, saya butuh bantuan verifikasi email akun saya (user.baru@example.com).');
-    expect($response->html())->toContain(htmlentities($expectedUrl));
+    expect($response->html())
+        ->toContain(htmlentities($expectedUrl))
+        ->and($response->html())->toContain('Ada masalah verifikasi email?');
 });
 
 test('halaman verifikasi email tidak menampilkan tombol wa jika nomor dikosongkan', function () {
@@ -116,7 +118,8 @@ test('halaman verifikasi email tidak menampilkan tombol wa jika nomor dikosongka
     $response = Livewire::actingAs($user)->test(EmailVerificationPrompt::class);
 
     $response->assertSuccessful();
-    expect(app(PengaturanKontak::class)->urlWa())->toBeNull();
+    expect(app(PengaturanKontak::class)->urlWa())->toBeNull()
+        ->and($response->html())->not->toContain('Ada masalah verifikasi email?');
 });
 
 test('aksi logout pada halaman verifikasi email mengeluarkan pengguna', function () {
