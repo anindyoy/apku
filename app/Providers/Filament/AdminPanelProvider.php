@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EmailVerificationPrompt;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\EnsureUserHasCompletedOnboarding;
@@ -74,7 +75,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->registration(Register::class)
             ->emailVerification()
-            ->passwordReset()
+            ->emailVerification(EmailVerificationPrompt::class)
             ->databaseNotifications()
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,

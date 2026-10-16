@@ -35,3 +35,63 @@ test('user resource dapat mengedit user (admin only)', function () {
     $this->assertEquals('Updated Name', $user->fresh()->name);
 })
     ->group('filament', 'user');
+
+test('admin dapat memverifikasi email pengguna yang belum terverifikasi dari tabel', function () {
+    $adminUser = createAdminUser();
+    $unverifiedUser = User::factory()->unverified()->create();
+
+    expect($unverifiedUser->hasVerifiedEmail())->toBeFalse();
+
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
+        ->assertTableActionVisible('verifikasiEmail', $unverifiedUser)
+        ->callTableAction('verifikasiEmail', $unverifiedUser)
+        ->assertHasNoErrors();
+
+    expect($unverifiedUser->fresh()->hasVerifiedEmail())->toBeTrue();
+})
+    ->group('filament', 'user');
+
+test('aksi verifikasi email disembunyikan untuk pengguna yang sudah terverifikasi', function () {
+    $adminUser = createAdminUser();
+    $verifiedUser = User::factory()->create();
+
+    expect($verifiedUser->hasVerifiedEmail())->toBeTrue();
+
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
+        ->assertTableActionHidden('verifikasiEmail', $verifiedUser);
+})
+    ->group('filament', 'user');
+
+test('admin dapat memverifikasi email pengguna secara massal', function () {
+    $adminUser = createAdminUser();
+    $unverifiedUsers = User::factory(3)->unverified()->create();
+
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
+        ->callTableBulkAction('verifikasiEmail', $unverifiedUsers)
+        ->assertHasNoErrors();
+
+    foreach ($unverifiedUsers as $user) {
+        expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
+    }
+})
+    ->group('filament', 'user');
+
+test('filter status verifikasi dapat memfilter pengguna terverifikasi dan belum terverifikasi', function () {
+    $adminUser = createAdminUser();
+    $unverifiedUser = User::factory()->unverified()->create();
+    $verifiedUser = User::factory()->create();
+
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
+        ->set('tableRecordsPerPage', 50)
+        ->filterTable('email_verified_at', false)
+        ->assertCanSeeTableRecords([$unverifiedUser])
+        ->assertCanNotSeeTableRecords([$verifiedUser])
+        ->filterTable('email_verified_at', true)
+        ->assertCanSeeTableRecords([$verifiedUser])
+        ->assertCanNotSeeTableRecords([$unverifiedUser]);
+})
+    ->group('filament', 'user');

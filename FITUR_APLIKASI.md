@@ -76,7 +76,8 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Layanan internal pembelian dan penjualan emas beserta riwayatnya tetap tersedia; pembelian mengurangi saldo rupiah kas dan sumber dana, sedangkan penjualan menambah saldo rupiah secara atomik.
 - Modal emas mencakup harga dasar, biaya cetak, premium pecahan, administrasi, dan biaya transaksi.
 - Pengguna dapat mengambil harga buyback emas dari endpoint publik, menggunakan snapshot terakhir ketika layanan gagal, atau menyimpan harga manual privat untuk kas terkait.
-- Admin dapat mengubah URL API, URL sumber, timeout (1–60 detik), dan durasi cache harga emas (1–168 jam) melalui Setting. Nilai disimpan di database dan berlaku global; kolom kosong mengikuti default `services.harga_emas`. Perubahan pengaturan membatalkan cache harga terkait dan digunakan pada permintaan berikutnya.
+- Admin dapat mengubah URL API, URL sumber, timeout (1–60 detik), dan durasi cache harga emas (1–168 jam) melalui halaman **Harga Emas** di cluster Pengaturan. Nilai disimpan di database dan berlaku global; kolom kosong mengikuti default `services.harga_emas`. Perubahan pengaturan membatalkan cache harga terkait dan digunakan pada permintaan berikutnya.
+- Admin dapat menyimpan nomor WhatsApp kontak admin (format internasional tanpa `+`, contoh: `628xxx`) melalui halaman **General Setting** di cluster Pengaturan. Nomor disimpan di `application_settings` (key `kontak`) dan ditampilkan sebagai tombol bantuan WA pada halaman verifikasi email. Jika nomor belum diisi, tombol WA tidak ditampilkan.
 - Kestabilan endpoint harga emas dipantau setiap hari oleh scheduler Laravel melalui command `harga-emas:pantau`, yang memvalidasi ketersediaan, waktu respons, struktur data, dan kesegaran harga buyback. Kegagalan pemantauan mengirim notifikasi melalui Telegram jika kredensial tersedia. Workflow GitHub Actions tetap dapat dijalankan manual untuk smoke test endpoint.
 - Setelah pemantauan berhasil, workflow menghapus run sukses sebelumnya agar daftar GitHub Actions tidak menumpuk. Run terbaru dan seluruh run gagal tetap disimpan; kegagalan pembersihan tidak menggagalkan hasil pemantauan.
 - Kas yang masih memiliki emas hanya dapat dihapus setelah tabungan emasnya ikut dipindahkan ke kas lain milik pengguna yang sama.
@@ -131,6 +132,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Membuat, mengubah, dan menghapus pengguna.
 - Mengatur tipe akun dan masa aktif.
+- Memverifikasi alamat email pengguna secara manual (individual maupun massal).
 
 ### 11. Fitur pendukung
 
@@ -185,6 +187,7 @@ Tampilan dan alur interaksi pengguna aplikasi.
 - Tampilan tipe akun dengan huruf awal kapital dan masa aktif akun premium dalam format tanggal tahun-bulan-tanggal (`YYYY-MM-DD`).
 - Notifikasi di dalam aplikasi.
 - Halaman registrasi dengan Cloudflare Turnstile Managed hanya di production, login, verifikasi email, lupa password, dan reset password.
+- Halaman verifikasi email (`/admin/email-verification/prompt`) menampilkan tautan **Kembali ke halaman utama**, tombol **Hubungi admin via WhatsApp** (hanya jika nomor WA admin sudah diatur di Setting, dengan pesan otomatis yang menyertakan email pendaftar agar mudah diperiksa), dan tombol **Keluar dari akun ini** agar pengguna yang salah memasukkan email saat registrasi tidak terjebak di halaman ini.
 
 ### 2. Onboarding pengguna baru
 
@@ -302,7 +305,7 @@ Pengguna baru diarahkan ke wizard pengaturan awal sebelum menggunakan fitur utam
 Fitur berikut hanya tersedia untuk admin:
 
 - Melihat daftar pengguna.
-- Melihat status verifikasi email.
+- Melihat status verifikasi email, menyaring daftar berdasarkan status verifikasi (Terverifikasi/Belum terverifikasi), serta memverifikasi email pengguna secara manual baik melalui aksi tabel per baris maupun aksi massal (bulk action).
 - Dashboard admin menjadi halaman utama setelah login dan hanya menampilkan data agregat: jumlah pengguna, jumlah akun premium aktif, jumlah pembayaran yang menunggu verifikasi, serta statistik trial (trial aktif, trial berakhir minggu ini, total trial, jumlah konversi, dan persentase konversi).
 - Daftar pengguna tidak menampilkan jumlah kas, transaksi, atau utang-piutang dan tidak menyediakan aksi impersonasi.
 - Navigasi admin difokuskan pada dashboard, pengguna, operasional langganan, dan Setting. Menu transaksi, pencarian transaksi, laporan, kas, sumber dana, kategori, utang, piutang, dan Akun Saya disembunyikan untuk admin.
@@ -315,7 +318,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 - Tombol aksi pada kartu daftar Kas, Sumber Dana, dan Langganan turun ke baris berikutnya ketika ruang sempit, termasuk saat subnavigasi Setting terbuka, sehingga tetap berada di dalam kartu.
 
-- Menu **Setting** (/admin/pengaturan) menggantikan grup Pengaturan pada navbar dan menggunakan Filament Cluster untuk membuka halaman pertama yang dapat diakses dengan subnavigasi bawaan pada setiap halaman anggota. URL halaman anggota memakai awalan `/admin/pengaturan/`, dan breadcrumb Setting kembali ke halaman pertama yang tersedia. Reguler dan Premium melihat Kas, Sumber Dana, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya; admin melihat Pengguna, Harga Emas, dan Trial Premium. Submenu mengikuti otorisasi halaman tujuan. Cocokkan Saldo dan riwayatnya tetap diakses dari Sumber Dana.
+- Menu **Setting** (/admin/pengaturan) menggantikan grup Pengaturan pada navbar dan menggunakan Filament Cluster untuk membuka halaman pertama yang dapat diakses dengan subnavigasi bawaan pada setiap halaman anggota. URL halaman anggota memakai awalan `/admin/pengaturan/`, dan breadcrumb Setting kembali ke halaman pertama yang tersedia. Reguler dan Premium melihat Kas, Sumber Dana, Kategori, Kolaborator Kas, Tabungan Emas, dan Akun Saya; admin melihat Pengguna, Harga Emas, Pengaturan Trial, dan General Setting. Submenu mengikuti otorisasi halaman tujuan. Cocokkan Saldo dan riwayatnya tetap diakses dari Sumber Dana.
 
 - Antarmuka berbahasa Indonesia.
 - Halaman publik `/` menampilkan landing page APKu dengan ringkasan fitur, perbandingan akun Reguler dan Premium (termasuk penawaran Coba Premium gratis mengikuti durasi setting dengan tombol dinamis pada kartu Premium; tombol disembunyikan bila `trial.aktif` mati), daftar harga paket Premium aktif (label, harga, harga per bulan, teks hemat, dan penanda Paling hemat memakai perhitungan yang sama dengan halaman Langganan; saat kosong tampil pesan Belum ada paket Premium yang tersedia), logo aplikasi, serta tautan ke registrasi, login, dan tutorial. Route `/` memakai `HomeController` yang memuat paket aktif dari database beserta `trialDurasi` dan `trialAktif` dari setting trial. Setiap bar ringkasan paket menautkan ke `GET /beli/{paket}`; label tamu **Daftar untuk membeli** dan label pengguna login **Beli paket**, dengan pesan `paket_gagal` pada bagian harga bila paket tidak tersedia. Tombol `data-coba-premium` pada kartu Premium memakai durasi setting; tamu ke registrasi dan pengguna login ke halaman Langganan.
@@ -413,7 +416,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 #### Pengaturan dan tabel framework
 
-- `application_settings`: `key` string PK, `value` JSON, `timestamps`; dipakai untuk pengaturan global harga emas dan trial (`trial`: `aktif` boolean default true, `durasi_hari` 1-90 default 30).
+- `application_settings`: `key` string PK, `value` JSON, `timestamps`; dipakai untuk pengaturan global harga emas, trial, dan kontak admin. Key yang digunakan: `harga_emas` (override URL/source/timeout/cache), `trial` (`aktif` boolean default true, `durasi_hari` 1-90 default 30), dan `kontak` (`wa` nomor WhatsApp internasional tanpa `+`, default `628567851359` disisipkan via migration).
 - `cache`/`cache_locks`, `jobs`/`job_batches`/`failed_jobs`, `telescope_entries`/`telescope_entries_tags`/`telescope_monitoring` mengikuti bawaan Laravel/Telescope dan tidak menyimpan data bisnis.
 
 Rangkuman ini dibuat berdasarkan implementasi yang tersedia di source code proyek pada 5 September 2026. Struktur dokumentasi dipisahkan menjadi backend dan frontend pada 12 September 2026. Skema database ditambahkan pada 10 Oktober 2026.

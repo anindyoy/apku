@@ -8,15 +8,20 @@ use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserResource extends Resource
 {
@@ -66,7 +71,8 @@ class UserResource extends Resource
 
                 TextColumn::make('email_verified_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->placeholder('Belum verifikasi'),
 
                 TextColumn::make('type')
                     ->description(fn ($record) => $record->masa_aktif ? ('Masa aktif: '.$record->masa_aktif) : null),
@@ -82,13 +88,53 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TernaryFilter::make('email_verified_at')
+                    ->label('Status verifikasi')
+                    ->nullable()
+                    ->placeholder('Semua')
+                    ->trueLabel('Terverifikasi')
+                    ->falseLabel('Belum terverifikasi'),
             ])
             ->actions([
+                // Aksi bagi admin untuk memverifikasi akun pengguna secara manual.
+                Action::make('verifikasiEmail')
+                    ->label('Verifikasi')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->visible(fn (User $record): bool => ! $record->hasVerifiedEmail())
+                    ->requiresConfirmation()
+                    ->modalHeading('Verifikasi email pengguna')
+                    ->modalDescription(fn (User $record): string => "Tandai email {$record->getEmailForVerification()} sebagai terverifikasi?")
+                    ->modalSubmitActionLabel('Verifikasi')
+                    ->action(function (User $record): void {
+                        $record->markEmailAsVerified();
+
+                        Notification::make()
+                            ->title('Email pengguna berhasil diverifikasi')
+                            ->success()
+                            ->send();
+                    }),
                 EditAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
+                    BulkAction::make('verifikasiEmail')
+                        ->label('Verifikasi email terpilih')
+                        ->icon('heroicon-o-check-badge')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalHeading('Verifikasi email pengguna terpilih')
+                        ->modalDescription('Tandai semua email pengguna yang dipilih sebagai terverifikasi?')
+                        ->modalSubmitActionLabel('Verifikasi')
+                        ->action(function (Collection $records): void {
+                            $records->each(fn (User $user) => $user->hasVerifiedEmail() || $user->markEmailAsVerified());
+
+                            Notification::make()
+                                ->title('Email pengguna terpilih berhasil diverifikasi')
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make(),
                 ]),
             ]);

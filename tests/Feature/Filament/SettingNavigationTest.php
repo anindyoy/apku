@@ -13,9 +13,9 @@ test('setting menampilkan submenu sesuai peran dan menyederhanakan navbar', func
 
     $menus = app(Pengaturan::class)->getCachedSubNavigation();
     $menus = collect($menus)->flatMap(fn ($group) => $group->getItems())->values();
-    // Admin melihat submenu Pengaturan Trial untuk saklar dan durasi coba gratis.
+    // Admin melihat submenu Pengaturan Trial untuk saklar dan durasi coba gratis, serta General Setting untuk kontak.
     $expected = $role === 'admin'
-        ? ['Pengguna', 'Harga Emas', 'Pengaturan Trial']
+        ? ['Pengguna', 'Harga Emas', 'Pengaturan Trial', 'General Setting']
         : ['Kas', 'Sumber Dana', 'Kategori', 'Kolaborator Kas', 'Tabungan Emas', 'Akun Saya'];
     expect($menus->map(fn ($item) => $item->getLabel())->all())->toEqualCanonicalizing($expected);
     $this->get(Pengaturan::getUrl())->assertRedirect($menus->first()->getUrl());
