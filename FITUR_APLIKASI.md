@@ -131,7 +131,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 Fitur berikut hanya tersedia untuk admin:
 
 - Membuat, mengubah, dan menghapus pengguna.
-- Mengatur tipe akun dan masa aktif.
+- Mengatur tipe akun dan masa aktif, dengan nilai tipe akun yang ditampilkan di UI (tabel dan form) disajikan menggunakan huruf kapital di awal.
 - Memverifikasi alamat email pengguna secara manual (individual maupun massal).
 
 ### 11. Fitur pendukung

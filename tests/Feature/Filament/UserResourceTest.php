@@ -36,6 +36,32 @@ test('user resource dapat mengedit user (admin only)', function () {
 })
     ->group('filament', 'user');
 
+test('tipe akun di tabel dan form user resource ditampilkan dengan huruf awal kapital', function () {
+    $adminUser = createAdminUser();
+    $premiumUser = User::factory()->create(['type' => 'premium']);
+    $regulerUser = User::factory()->create(['type' => 'reguler']);
+
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
+        ->assertSuccessful()
+        ->assertTableColumnFormattedStateSet('type', 'Premium', $premiumUser)
+        ->assertTableColumnFormattedStateSet('type', 'Reguler', $regulerUser);
+
+    $component = Livewire::actingAs($adminUser)
+        ->test(EditUser::class, ['record' => $premiumUser->id])
+        ->assertSuccessful();
+
+    expect($component->instance()->form->getComponent('type')->getState())->toBe('Premium');
+
+    $component->set('data.type', 'Reguler')
+        ->set('data.password', 'password')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($premiumUser->fresh()->type)->toBe('reguler');
+})
+    ->group('filament', 'user');
+
 test('admin dapat memverifikasi email pengguna yang belum terverifikasi dari tabel', function () {
     $adminUser = createAdminUser();
     $unverifiedUser = User::factory()->unverified()->create();

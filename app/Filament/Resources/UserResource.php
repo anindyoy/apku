@@ -57,6 +57,8 @@ class UserResource extends Resource
                     ->placeholder('Minimal 8 karakter'),
                 TextInput::make('type')
                     ->required()
+                    ->formatStateUsing(fn ($state) => filled($state) ? ucfirst($state) : null)
+                    ->dehydrateStateUsing(fn ($state) => filled($state) ? strtolower($state) : null)
                     ->placeholder('regular / premium / admin'),
             ]);
     }
@@ -75,6 +77,7 @@ class UserResource extends Resource
                     ->placeholder('Belum verifikasi'),
 
                 TextColumn::make('type')
+                    ->formatStateUsing(fn ($state) => filled($state) ? ucfirst($state) : null)
                     ->description(fn ($record) => $record->masa_aktif ? ('Masa aktif: '.$record->masa_aktif) : null),
 
                 TextColumn::make('created_at')
