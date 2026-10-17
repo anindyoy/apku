@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Filament\Forms\KomponenNominal;
 use App\Models\Scopes\UserScope;
 use App\Observers\UtangPiutangObserver;
 use Database\Factories\UtangPiutangFactory;
@@ -117,7 +118,13 @@ class UtangPiutang extends Model
     {
         return [
             TextInput::make('kepada')->required(),
-            TextInput::make('nominal')->required(),
+            KomponenNominal::terapkan(
+                TextInput::make('nominal')
+                    ->required()
+                    ->numeric()
+                    ->minValue(1)
+                    ->placeholder('Contoh: 50.000')
+            ),
 
             DateTimePicker::make('created_at')
                 ->default(now())

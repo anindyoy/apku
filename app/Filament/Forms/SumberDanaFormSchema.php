@@ -32,12 +32,12 @@ class SumberDanaFormSchema
                 ->default(JenisSumberDana::Tunai->value)
                 ->required(),
 
-            TextInput::make('saldo')
-                ->prefix('Rp')
-                ->numeric()
-                ->default(0)
-                ->disabled()
-                ->dehydrated(),
+            KomponenNominal::terapkan(
+                TextInput::make('saldo')
+                    ->default(0)
+                    ->disabled()
+                    ->dehydrated()
+            ),
 
             TextInput::make('description')
                 ->label('Deskripsi')

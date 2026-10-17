@@ -23,11 +23,12 @@ class BukuKasFormSchema
                 ->maxLength(50)
                 ->placeholder('Contoh: Kas Pribadi, Kas Rumah Tangga, Kas Usaha'),
 
-            TextInput::make('saldo')
-                ->prefix('Rp')
-                ->required()
-                ->numeric()
-                ->placeholder('Contoh: 500000'),
+            KomponenNominal::terapkan(
+                TextInput::make('saldo')
+                    ->required()
+                    ->numeric()
+                    ->placeholder('Contoh: 500.000')
+            ),
 
             TextInput::make('description')
                 ->maxLength(200)

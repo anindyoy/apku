@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\KomponenNominal;
 use App\Filament\Resources\PaketLanggananResource\Pages\ListPaketLangganans;
 use App\Models\PaketLangganan;
 use BackedEnum;
@@ -39,13 +40,14 @@ class PaketLanggananResource extends Resource
                 ->required()
                 ->maxLength(255)
                 ->placeholder('Contoh: Bulanan, Tahunan, Lifetime'),
-            TextInput::make('harga')
-                ->label('Harga')
-                ->prefix('Rp')
-                ->numeric()
-                ->minValue(1)
-                ->required()
-                ->placeholder('Contoh: 50000'),
+            KomponenNominal::terapkan(
+                TextInput::make('harga')
+                    ->label('Harga')
+                    ->numeric()
+                    ->minValue(1)
+                    ->required()
+                    ->placeholder('Contoh: 50.000')
+            ),
             TextInput::make('durasi_hari')
                 ->label('Durasi')
                 ->suffix('hari')

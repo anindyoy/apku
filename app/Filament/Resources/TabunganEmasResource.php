@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Forms\KomponenNominal;
 use App\Filament\Resources\TabunganEmasResource\Pages\ListTabunganEmas;
 use App\Models\TabunganEmas;
 use App\Services\TabunganEmasService;
@@ -48,7 +49,15 @@ class TabunganEmasResource extends Resource
                 ->required(),
             static::inputBerat()->disabled(fn (?TabunganEmas $record): bool => filled($record)),
             TextInput::make('label')->label('Label emas')->placeholder('Emas Antam')->required()->maxLength(100),
-            TextInput::make('harga_beli')->label('Harga beli')->prefix('Rp')->placeholder('Contoh: 1500000')->numeric()->integer()->minValue(0)->nullable(),
+            KomponenNominal::terapkan(
+                TextInput::make('harga_beli')
+                    ->label('Harga beli')
+                    ->placeholder('Contoh: 1.500.000')
+                    ->numeric()
+                    ->integer()
+                    ->minValue(0)
+                    ->nullable()
+            ),
             DateTimePicker::make('created_at')->label('Dibeli pada')->seconds(false)->default(now())->maxDate(now())->required(),
             Textarea::make('keterangan')->placeholder('Contoh: Disimpan di brankas')->nullable(),
         ]);
@@ -75,7 +84,15 @@ class TabunganEmasResource extends Resource
                     ->visible(fn (TabunganEmas $record): bool => $record->bukuKas->user_id === auth()->id() && (float) $record->berat_gram === 0.0)
                     ->form([
                         static::inputBerat(),
-                        TextInput::make('total_modal')->label('Total modal')->prefix('Rp')->numeric()->minValue(0)->default(0)->required()->placeholder('Contoh: 750000'),
+                        KomponenNominal::terapkan(
+                            TextInput::make('total_modal')
+                                ->label('Total modal')
+                                ->numeric()
+                                ->minValue(0)
+                                ->default(0)
+                                ->required()
+                                ->placeholder('Contoh: 750.000')
+                        ),
                         TextInput::make('catatan')->maxLength(255)->placeholder('Catatan pembelian (opsional)'),
                     ])
                     ->action(fn (TabunganEmas $record, array $data) => app(TabunganEmasService::class)->catatSaldoAwal(

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Concerns;
 
+use App\Filament\Forms\KomponenNominal;
 use App\Models\BukuKas;
 use App\Models\SumberDana;
 use App\Models\Transaksi;
@@ -86,18 +87,18 @@ trait HasAuditSaldoAction
                             ->label('Sumber dana')
                             ->disabled()
                             ->dehydrated(),
-                        TextInput::make('saldo_aplikasi')
-                            ->label('Saldo aplikasi')
-                            ->prefix('Rp')
-                            ->numeric()
-                            ->disabled()
-                            ->dehydrated(),
-                        TextInput::make('saldo_riil')
-                            ->label('Saldo riil')
-                            ->prefix('Rp')
-                            ->numeric()
-                            ->required()
-                            ->placeholder('Masukkan saldo aktual di sumber dana fisik')
+                        KomponenNominal::terapkan(
+                            TextInput::make('saldo_aplikasi')
+                                ->label('Saldo aplikasi')
+                                ->disabled()
+                                ->dehydrated()
+                        ),
+                        KomponenNominal::terapkan(
+                            TextInput::make('saldo_riil')
+                                ->label('Saldo riil')
+                                ->required()
+                                ->placeholder('Masukkan saldo aktual di sumber dana fisik')
+                        )
                             ->afterStateUpdated(function (mixed $state, Get $get, Set $set): mixed {
                                 if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
                                     return null;

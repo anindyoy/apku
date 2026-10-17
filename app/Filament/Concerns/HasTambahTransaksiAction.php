@@ -5,6 +5,7 @@ namespace App\Filament\Concerns;
 use App\Filament\Forms\BukuKasFormSchema;
 use App\Filament\Forms\DompetFormSchema;
 use App\Filament\Forms\KategoriFormSchema;
+use App\Filament\Forms\KomponenNominal;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Kategori;
@@ -471,7 +472,9 @@ trait HasTambahTransaksiAction
                             ->placeholder('Tanpa kategori')
                             ->visible(fn (Get $get): bool => in_array($get('jenis_form'), ['pemasukan', 'pengeluaran'], true)),
                         DateTimePicker::make('tanggal')->required()->seconds(false)->native(false)->maxDate(now()),
-                        TextInput::make('nominal')->required()->numeric()->minValue(1)->prefix('Rp')->placeholder('Contoh: 50000'),
+                        KomponenNominal::terapkan(
+                            TextInput::make('nominal')->required()->numeric()->minValue(1)->placeholder('Contoh: 50.000')
+                        ),
                         TextInput::make('deskripsi')->columnSpanFull()->placeholder('Catatan transaksi (opsional)'),
                     ]),
             ])

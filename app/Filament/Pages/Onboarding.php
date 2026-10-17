@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Forms\KomponenNominal;
 use App\Filament\Resources\LanggananResource;
 use App\Models\BukuKas;
 use App\Models\Dompet;
@@ -58,6 +59,7 @@ class Onboarding extends Page implements HasForms
                     Step::make('Kas Utama')
                         ->description('Atur kas pertama Anda')
                         ->icon('heroicon-o-book-open')
+                        ->columns(2)
                         ->schema([
                             TextInput::make('nama_buku')
                                 ->label('Label kas utama')
@@ -74,13 +76,14 @@ class Onboarding extends Page implements HasForms
                                 ->placeholder('Contoh: Catatan pemasukan dan pengeluaran sehari-hari')
                                 ->rows(3)
                                 ->maxLength(200),
-                            TextInput::make('saldo_awal')
-                                ->label('Saldo awal')
-                                ->placeholder('Contoh: 1000000')
-                                ->prefix('Rp')
-                                ->required()
-                                ->numeric()
-                                ->minValue(0),
+                            KomponenNominal::terapkan(
+                                TextInput::make('saldo_awal')
+                                    ->label('Saldo awal')
+                                    ->placeholder('Contoh: 1.000.000')
+                                    ->required()
+                                    ->numeric()
+                                    ->minValue(0)
+                            ),
                         ]),
                     Step::make('Kategori Pemasukan')
                         ->description('Tambahkan kategori yang sering digunakan')

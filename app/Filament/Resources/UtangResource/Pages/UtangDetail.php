@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UtangResource\Pages;
 
+use App\Filament\Forms\KomponenNominal;
 use App\Filament\Resources\UtangResource;
 use App\Filament\Widgets\UtangPiutangDetailOverview;
 use App\Models\UtangPiutang;
@@ -196,9 +197,13 @@ class UtangDetail extends Page implements HasTable
                         'deskripsi' => $record->deskripsi,
                     ])
                     ->form([
-                        TextInput::make('nominal')
-                            ->required()
-                            ->placeholder('Contoh: 500000'),
+                        KomponenNominal::terapkan(
+                            TextInput::make('nominal')
+                                ->required()
+                                ->numeric()
+                                ->minValue(1)
+                                ->placeholder('Contoh: 500.000')
+                        ),
 
                         DateTimePicker::make('created_at')
                             ->default(now())

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Filament\Forms\KomponenNominal;
 use App\Models\UtangPiutang;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
@@ -34,9 +35,13 @@ class UtangPiutangDetail extends Model
     public static function form()
     {
         return [
-            TextInput::make('nominal')
-                ->required()
-                ->numeric(),
+            KomponenNominal::terapkan(
+                TextInput::make('nominal')
+                    ->required()
+                    ->numeric()
+                    ->minValue(1)
+                    ->placeholder('Contoh: 50.000')
+            ),
 
             TextInput::make('deskripsi'),
 

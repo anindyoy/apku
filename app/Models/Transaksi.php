@@ -7,6 +7,7 @@ use App\Observers\TransaksiObserver;
 use App\Services\OpsiSelectCache;
 use Database\Factories\TransaksiFactory;
 use App\Models\SumberDana;
+use App\Filament\Forms\KomponenNominal;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -228,10 +229,13 @@ class Transaksi extends Model
                         ->displayFormat('d M Y, H:i')
                         ->maxDate(now()),
 
-                    TextInput::make('nominal')
-                        ->required()
-                        ->numeric()
-                        ->prefix('Rp'),
+                    KomponenNominal::terapkan(
+                        TextInput::make('nominal')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1)
+                            ->placeholder('Contoh: 50.000')
+                    ),
 
                     TextInput::make('deskripsi')
                         ->columnSpanFull(),

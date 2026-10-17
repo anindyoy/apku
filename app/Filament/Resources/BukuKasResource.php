@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Forms\BukuKasFormSchema;
+use App\Filament\Forms\KomponenNominal;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
@@ -138,13 +139,14 @@ class BukuKasResource extends Resource
                         ->visible(fn (BukuKas $record): bool => $record->tabunganEmas()->exists()
                             && auth()->user()->dapatMengelolaTransaksiPada($record))
                         ->form([
-                            TextInput::make('harga_per_gram')
-                                ->label('Harga buyback per gram')
-                                ->prefix('Rp')
-                                ->numeric()
-                                ->minValue(1)
-                                ->required()
-                                ->placeholder('Contoh: 1150000'),
+                            KomponenNominal::terapkan(
+                                TextInput::make('harga_per_gram')
+                                    ->label('Harga buyback per gram')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->required()
+                                    ->placeholder('Contoh: 1.150.000')
+                            ),
                         ])
                         ->action(fn (BukuKas $record, array $data) => app(HargaEmasService::class)->simpanManual(
                             $record,
