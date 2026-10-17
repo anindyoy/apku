@@ -27,3 +27,17 @@ Route::get('/kas-publik/{token}', KasPublikController::class)
     ->name('kas.publik');
 
 Route::get('/', HomeController::class)->name('home');
+
+if (app()->environment('local')) {
+    // Rute preview tampilan email verifikasi khusus di lingkungan lokal.
+    Route::get('/preview-email-verifikasi', function () {
+        $user = \App\Models\User::first() ?? new \App\Models\User(['name' => 'Budi Santoso']);
+        $url = url('/admin/email-verification/verify/1/sample-hash?expires=' . now()->addHour()->timestamp);
+
+        return view('emails.verifikasi-email', [
+            'url' => $url,
+            'user' => $user,
+            'nama' => $user->name ?? 'Pengguna APKu',
+        ]);
+    })->name('preview.email-verifikasi');
+}

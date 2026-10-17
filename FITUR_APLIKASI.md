@@ -13,7 +13,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Registrasi dan login pengguna, dengan verifikasi Cloudflare Turnstile Managed pada form dan validasi server hanya di environment production.
 - Verifikasi alamat email.
 - Lupa dan reset password.
-- Email verifikasi akun, email reset kata sandi, pesan validasi formulir, status autentikasi, dan navigasi halaman bawaan Laravel ditampilkan dalam bahasa Indonesia.
+- Email verifikasi akun, email reset kata sandi, pesan validasi formulir, status autentikasi, dan navigasi halaman bawaan Laravel ditampilkan dalam bahasa Indonesia. Tampilan email verifikasi akun menggunakan template HTML responsif dengan logo aplikasi APKu, aksen warna teal, sapaan nama penerima, tombol aksi verifikasi, catatan masa berlaku tautan 60 menit, tautan alternatif cadangan, dan versi teks polos (plain text).
 - Pengingat perpanjangan masa aktif pada H-30 dan H-7 sebelum masa aktif berakhir. Pengguna dengan trial Premium aktif dilewati dari pengingat bawaan dan memakai pengingat khusus trial H-7 serta H-1.
 - Akun admin awal dibuat saat migration menggunakan password dari `ADMIN_PASSWORD` pada environment.
 - Penyimpanan perubahan profil pengguna: nama, email, nomor HP, penggunaan aplikasi, dan password.
