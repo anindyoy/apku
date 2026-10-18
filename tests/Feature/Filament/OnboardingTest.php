@@ -61,15 +61,25 @@ test('pengguna baru dapat menyimpan pengaturan awal', function () {
     $this->assertDatabaseHas('kategori', ['user_id' => $user->id, 'tipe' => 'Pengeluaran', 'nama' => 'Belanja Stok']);
 });
 
-test('label default onboarding terisi tanpa mengisi kategori dengan placeholder', function () {
+test('label default onboarding terisi tanpa mengisi kategori dengan placeholder dan langsung memiliki satu item', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
 
-    Livewire::actingAs($user)
+    $test = Livewire::actingAs($user)
         ->test(Onboarding::class)
         ->assertSet('data.nama_buku', 'Kas Utama')
         ->assertSet('data.nama_dompet', 'Cash')
-        ->assertSet('data.kategori_pemasukan', fn (array $items) => collect($items)->pluck('nama')->filter()->isEmpty())
-        ->assertSet('data.kategori_pengeluaran', fn (array $items) => collect($items)->pluck('nama')->filter()->isEmpty());
+        ->assertSet('data.kategori_pemasukan', fn (array $items) => count($items) === 1 && collect($items)->pluck('nama')->filter()->isEmpty())
+        ->assertSet('data.kategori_pengeluaran', fn (array $items) => count($items) === 1 && collect($items)->pluck('nama')->filter()->isEmpty());
+
+    $form = $test->instance()->getForm('form');
+    foreach (['kategori_pemasukan', 'kategori_pengeluaran'] as $field) {
+        $repeater = $form->getComponent($field);
+        expect($repeater->isReorderable())->toBeFalse()
+            ->and($repeater->isDeletable())->toBeFalse();
+
+        $repeater->getAddAction()->call(['component' => $repeater]);
+        expect($repeater->isDeletable())->toBeTrue();
+    }
 });
 
 test('service default keuangan idempoten dan tidak mengubah nama default', function () {
@@ -191,4 +201,24 @@ test('pengguna diarahkan ke onboarding setelah email terverifikasi', function ()
     $response = $this->actingAs($user)->get('/admin');
 
     $response->assertRedirect(Onboarding::getUrl());
+});
+
+test('halaman onboarding tidak menampilkan header label halaman', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    $component = Livewire::actingAs($user)->test(Onboarding::class);
+
+    expect($component->instance()->getHeading())->toBe('')
+        ->and($component->instance()->getBreadcrumbs())->toBeEmpty()
+        ->and($component->html())->not->toContain('fi-header-heading');
+});
+
+test('form onboarding hanya 1 halaman dan tidak menggunakan wizard', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    $component = Livewire::actingAs($user)->test(Onboarding::class);
+    $schemaComponents = $component->instance()->getForm('form')->getComponents();
+
+    expect(collect($schemaComponents)->first(fn ($c): bool => $c instanceof \Filament\Schemas\Components\Wizard))->toBeNull()
+        ->and($component->html())->not->toContain('fi-wi-step');
 });
