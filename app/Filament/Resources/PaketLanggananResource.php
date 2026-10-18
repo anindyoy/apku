@@ -43,7 +43,6 @@ class PaketLanggananResource extends Resource
             KomponenNominal::terapkan(
                 TextInput::make('harga')
                     ->label('Harga')
-                    ->numeric()
                     ->minValue(1)
                     ->required()
                     ->placeholder('Contoh: 50.000')

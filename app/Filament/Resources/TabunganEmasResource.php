@@ -53,8 +53,6 @@ class TabunganEmasResource extends Resource
                 TextInput::make('harga_beli')
                     ->label('Harga beli')
                     ->placeholder('Contoh: 1.500.000')
-                    ->numeric()
-                    ->integer()
                     ->minValue(0)
                     ->nullable()
             ),
@@ -87,7 +85,6 @@ class TabunganEmasResource extends Resource
                         KomponenNominal::terapkan(
                             TextInput::make('total_modal')
                                 ->label('Total modal')
-                                ->numeric()
                                 ->minValue(0)
                                 ->default(0)
                                 ->required()

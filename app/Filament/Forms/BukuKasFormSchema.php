@@ -26,7 +26,6 @@ class BukuKasFormSchema
             KomponenNominal::terapkan(
                 TextInput::make('saldo')
                     ->required()
-                    ->numeric()
                     ->placeholder('Contoh: 500.000')
             ),
 

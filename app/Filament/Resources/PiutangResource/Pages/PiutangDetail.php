@@ -177,7 +177,6 @@ class PiutangDetail extends Page implements HasTable
                         KomponenNominal::terapkan(
                             TextInput::make('nominal')
                                 ->required()
-                                ->numeric()
                                 ->minValue(1)
                                 ->placeholder('Contoh: 500.000')
                         ),

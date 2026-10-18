@@ -89,7 +89,6 @@ class Onboarding extends Page implements HasForms
                                 ->label('Saldo awal')
                                 ->placeholder('Contoh: 1.000.000')
                                 ->required()
-                                ->numeric()
                                 ->minValue(0)
                         ),
                     ]),

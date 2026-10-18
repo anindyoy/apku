@@ -142,7 +142,6 @@ class BukuKasResource extends Resource
                             KomponenNominal::terapkan(
                                 TextInput::make('harga_per_gram')
                                     ->label('Harga buyback per gram')
-                                    ->numeric()
                                     ->minValue(1)
                                     ->required()
                                     ->placeholder('Contoh: 1.150.000')

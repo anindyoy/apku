@@ -14,6 +14,8 @@ class KomponenNominal
     public static function terapkan(TextInput $input): TextInput
     {
         return $input
+            ->numeric(false)
+            ->rule('numeric')
             ->prefix('Rp')
             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
             ->stripCharacters('.')
@@ -28,7 +30,7 @@ class KomponenNominal
     public static function make(string $name = 'nominal'): TextInput
     {
         return static::terapkan(
-            TextInput::make($name)->numeric()
+            TextInput::make($name)
         );
     }
 

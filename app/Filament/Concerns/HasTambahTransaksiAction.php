@@ -473,7 +473,7 @@ trait HasTambahTransaksiAction
                             ->visible(fn (Get $get): bool => in_array($get('jenis_form'), ['pemasukan', 'pengeluaran'], true)),
                         DateTimePicker::make('tanggal')->required()->seconds(false)->native(false)->maxDate(now()),
                         KomponenNominal::terapkan(
-                            TextInput::make('nominal')->required()->numeric()->minValue(1)->placeholder('Contoh: 50.000')
+                            TextInput::make('nominal')->required()->minValue(1)->placeholder('Contoh: 50.000')
                         ),
                         TextInput::make('deskripsi')->columnSpanFull()->placeholder('Catatan transaksi (opsional)'),
                     ]),

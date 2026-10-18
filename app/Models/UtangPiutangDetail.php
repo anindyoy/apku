@@ -38,7 +38,6 @@ class UtangPiutangDetail extends Model
             KomponenNominal::terapkan(
                 TextInput::make('nominal')
                     ->required()
-                    ->numeric()
                     ->minValue(1)
                     ->placeholder('Contoh: 50.000')
             ),
