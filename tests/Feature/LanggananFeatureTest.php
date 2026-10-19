@@ -9,6 +9,7 @@ use App\Models\Langganan;
 use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
 use App\Models\User;
+use App\Models\Voucher;
 use App\Services\BuatOrderLangganan;
 use App\Services\KonfirmasiPembayaranLangganan;
 use App\Services\SetujuiLangganan;
@@ -381,8 +382,8 @@ test('submit order membuka invoice di tab baru dan memberi notifikasi cadangan',
         ->and($aksi['shouldOpenUrlInNewTab'] ?? false)->toBeTrue();
 })->group('langganan', 'langganan-invoice');
 
-test('admin dapat membuat order dengan label voucher berulang tanpa membuat kode di kelola kode', function () {
-    $admin = User::factory()->create(['role' => 'admin']);
+test('user dapat membuat order dengan label voucher berulang tanpa membuat kode di kelola kode', function () {
+    $user = User::factory()->create(['role' => 'user']);
     $paket = PaketLangganan::factory()->create(['harga' => 100000, 'is_active' => true]);
     $metode = MetodePembayaran::factory()->create(['label' => 'Transfer Bank', 'is_active' => true]);
     $voucher = Voucher::create([
@@ -394,7 +395,7 @@ test('admin dapat membuat order dengan label voucher berulang tanpa membuat kode
     $voucher->codes()->delete();
     Cache::clear();
 
-    Livewire::actingAs($admin)->test(CreateLangganan::class)
+    Livewire::actingAs($user)->test(CreateLangganan::class)
         ->assertSuccessful()
         ->set('data.paket_langganan_id', $paket->getKey())
         ->set('data.metode_pembayaran_id', $metode->getKey())
@@ -402,7 +403,7 @@ test('admin dapat membuat order dengan label voucher berulang tanpa membuat kode
         ->call('create')
         ->assertHasNoErrors();
 
-    $order = Langganan::query()->where('user_id', $admin->getKey())->latest('id')->first();
+    $order = Langganan::query()->where('user_id', $user->getKey())->latest('id')->first();
     expect($order)->not->toBeNull()
         ->and($order->kode_voucher)->toBe('PROMOADMIN')
         ->and($order->persentase_diskon)->toBe(25)

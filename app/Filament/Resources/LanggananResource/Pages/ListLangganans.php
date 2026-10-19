@@ -26,6 +26,8 @@ class ListLangganans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            // Aksi trial Premium di header agar user yang layak dapat memulai langsung di samping Buat order.
+            $this->mulaiTrialPremiumAction(),
             CreateAction::make()
                 ->label('Buat order')
                 ->visible(fn (): bool => ! auth()->user()->isAdmin()),

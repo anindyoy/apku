@@ -298,3 +298,33 @@ test('trial statistik admin dan pembatalan berjalan benar', function () {
     $layananAtur->simpan($admin, ['aktif' => true, 'durasi_hari' => 15]);
     expect($layananAtur->durasiHari())->toBe(15);
 })->group('trial');
+
+test('tombol trial premium tampil di header halaman langganan untuk user yang layak', function () {
+    ApplicationSetting::updateOrCreate(['key' => 'trial'], ['value' => ['aktif' => true, 'durasi_hari' => 30]]);
+    $user = buatCalonTrial(['hp' => '081299887766', 'email' => 'trial-header@example.com']);
+
+    // User yang layak melihat aksi trial premium di header halaman langganan.
+    $komponen = Livewire::actingAs($user)->test(ListLangganans::class)
+        ->assertSuccessful()
+        ->assertActionVisible('mulaiTrialPremium')
+        ->assertActionVisible('create');
+
+    // Menjalankan aksi dari header halaman langganan mengaktifkan trial.
+    $komponen->callAction('mulaiTrialPremium')->assertSuccessful();
+
+    $userSegar = $user->fresh();
+    expect($userSegar->type)->toBe('premium')
+        ->and($userSegar->masaAktifBerlaku())->toBeTrue()
+        ->and($userSegar->trialPremiumAktif())->not->toBeNull();
+
+    // Setelah aktif, tombol coba gratis tidak lagi tampil di header.
+    Livewire::actingAs($userSegar)->test(ListLangganans::class)
+        ->assertSuccessful()
+        ->assertActionHidden('mulaiTrialPremium');
+
+    // Pengguna tidak layak (misal admin) tidak melihat aksi trial di header.
+    $admin = User::factory()->create(['role' => 'admin']);
+    Livewire::actingAs($admin)->test(ListLangganans::class)
+        ->assertSuccessful()
+        ->assertActionHidden('mulaiTrialPremium');
+})->group('trial', 'langganan');
