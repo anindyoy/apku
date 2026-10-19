@@ -76,3 +76,33 @@ test('resource voucher dan kode voucher hanya dapat diakses admin', function () 
     $this->actingAs($user)->get(route('filament.admin.resources.vouchers.index'))->assertForbidden();
     $this->actingAs($admin)->get(route('filament.admin.resources.vouchers.index'))->assertSuccessful();
 })->group('voucher');
+
+test('voucher berulang otomatis membuat kode dari label saat disimpan', function () {
+    $voucher = Voucher::create([
+        'label' => 'DISKON20',
+        'jumlah_diskon' => 20,
+        'dapat_dipakai_berulang' => true,
+    ]);
+
+    expect($voucher->codes()->where('code', 'DISKON20')->exists())->toBeTrue();
+})->group('voucher');
+
+test('label voucher berulang dapat langsung dipakai order tanpa buat kode manual di modal kelola kode', function () {
+    $voucher = Voucher::create([
+        'label' => 'PROMOSPESIAL',
+        'jumlah_diskon' => 15,
+        'dapat_dipakai_berulang' => true,
+    ]);
+
+    // Hapus kode agar mensimulasikan data lama di production yang belum punya kode di tabel voucher_codes
+    $voucher->codes()->delete();
+    expect($voucher->codes()->count())->toBe(0);
+
+    // Pencarian untuk order harus otomatis mendeteksi dan membuat kodenya
+    $kodeModel = VoucherCode::temukanUntukOrder('promospesial');
+
+    expect($kodeModel)->not->toBeNull()
+        ->and($kodeModel->code)->toBe('PROMOSPESIAL')
+        ->and($kodeModel->voucher_id)->toBe($voucher->id)
+        ->and($voucher->codes()->count())->toBe(1);
+})->group('voucher');

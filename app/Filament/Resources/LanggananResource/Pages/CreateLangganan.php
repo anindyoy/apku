@@ -23,7 +23,7 @@ class CreateLangganan extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $voucherCode = filled($data['kode_voucher'] ?? null)
-            ? VoucherCode::query()->where('code', strtoupper(trim($data['kode_voucher'])))->first()
+            ? VoucherCode::temukanUntukOrder($data['kode_voucher'])
             : null;
 
         if (filled($data['kode_voucher'] ?? null) && $voucherCode === null) {

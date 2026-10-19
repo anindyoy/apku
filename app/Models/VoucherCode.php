@@ -30,4 +30,35 @@ class VoucherCode extends Model
     {
         return $this->hasMany(Langganan::class);
     }
+
+    // Mencari kode voucher untuk proses klaim/order langganan.
+    // Jika tidak ditemukan langsung di tabel voucher_codes, sistem akan memeriksa
+    // apakah ada voucher berulang dengan label yang sesuai lalu menyelaraskannya otomatis.
+    public static function temukanUntukOrder(?string $input): ?self
+    {
+        if (blank($input)) {
+            return null;
+        }
+
+        $kode = Str::upper(trim($input));
+
+        $kodeModel = static::query()->with('voucher')->where('code', $kode)->first();
+        if ($kodeModel !== null) {
+            return $kodeModel;
+        }
+
+        // Periksa voucher yang dapat dipakai berulang berdasarkan kesesuaian label.
+        $voucherBerulang = Voucher::query()
+            ->where('dapat_dipakai_berulang', true)
+            ->whereRaw('UPPER(TRIM(label)) = ?', [$kode])
+            ->first();
+
+        if ($voucherBerulang !== null) {
+            $voucherBerulang->sinkronkanKodeBerulang();
+
+            return static::query()->with('voucher')->where('code', $kode)->first();
+        }
+
+        return null;
+    }
 }

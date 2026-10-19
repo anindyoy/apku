@@ -245,3 +245,35 @@ test('kode voucher yang diketik salah saat order memberi galat tanpa membuat ord
 
     expect(Langganan::query()->where('user_id', $user->id)->count())->toBe(0);
 })->group('langganan');
+
+test('label voucher berulang dapat langsung diterapkan dan dibuatkan order pada modal pilih paket', function () {
+    bersihkanDataPaketUntukUji();
+    $user = User::factory()->create(['role' => 'user']);
+    $paket = PaketLangganan::factory()->create(['harga' => 100000, 'durasi_hari' => 30, 'is_active' => true]);
+    $metode = MetodePembayaran::factory()->create(['is_active' => true]);
+
+    $voucher = Voucher::create([
+        'label' => 'DISKONLANGSUNG',
+        'jumlah_diskon' => 20,
+        'dapat_dipakai_berulang' => true,
+    ]);
+    // Hapus kode yang otomatis dibuat untuk menguji fallback temukanUntukOrder
+    $voucher->codes()->delete();
+
+    Livewire::actingAs($user)->test(PilihPaketLangganan::class)
+        ->call('pilihPaket', $paket->id)
+        ->set('metodeId', $metode->id)
+        ->set('kodeVoucher', 'diskonlangsung')
+        ->call('terapkanVoucher')
+        ->assertSuccessful()
+        ->assertSet('voucherValid', true)
+        ->assertSet('voucherPersen', 20)
+        ->call('buatOrder')
+        ->assertHasNoErrors();
+
+    $order = Langganan::query()->where('user_id', $user->id)->first();
+    expect($order)->not->toBeNull()
+        ->and($order->kode_voucher)->toBe('DISKONLANGSUNG')
+        ->and($order->nominal_diskon)->toBe(20000)
+        ->and($order->total_pembayaran)->toBe(80000);
+})->group('langganan');

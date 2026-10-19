@@ -52,7 +52,7 @@ class VoucherResource extends Resource
                 ->placeholder('Contoh: 20'),
             Toggle::make('dapat_dipakai_berulang')
                 ->label('Dapat dipakai berulang')
-                ->helperText('Jika aktif, setiap kode dapat digunakan berkali-kali oleh siapa pun.'),
+                ->helperText('Jika aktif, label voucher otomatis menjadi kode yang dapat langsung dipakai berkali-kali tanpa perlu membuat kode manual di Kelola kode.'),
         ]);
     }
 

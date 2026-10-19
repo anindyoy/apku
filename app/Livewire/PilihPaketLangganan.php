@@ -141,7 +141,7 @@ class PilihPaketLangganan extends Component
             return;
         }
 
-        $kodeModel = VoucherCode::query()->with('voucher')->where('code', $kode)->first();
+        $kodeModel = VoucherCode::temukanUntukOrder($kode);
 
         if (! $kodeModel) {
             $this->voucherCodeId = null;
@@ -217,7 +217,7 @@ class PilihPaketLangganan extends Component
 
         $kodeModel = null;
         if (filled($this->kodeVoucher)) {
-            $kodeModel = VoucherCode::query()->with('voucher')->where('code', strtoupper(trim($this->kodeVoucher)))->first();
+            $kodeModel = VoucherCode::temukanUntukOrder($this->kodeVoucher);
 
             if (! $kodeModel) {
                 $this->voucherValid = false;

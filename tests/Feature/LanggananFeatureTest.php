@@ -381,6 +381,35 @@ test('submit order membuka invoice di tab baru dan memberi notifikasi cadangan',
         ->and($aksi['shouldOpenUrlInNewTab'] ?? false)->toBeTrue();
 })->group('langganan', 'langganan-invoice');
 
+test('admin dapat membuat order dengan label voucher berulang tanpa membuat kode di kelola kode', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $paket = PaketLangganan::factory()->create(['harga' => 100000, 'is_active' => true]);
+    $metode = MetodePembayaran::factory()->create(['label' => 'Transfer Bank', 'is_active' => true]);
+    $voucher = Voucher::create([
+        'label' => 'PROMOADMIN',
+        'jumlah_diskon' => 25,
+        'dapat_dipakai_berulang' => true,
+    ]);
+    // Hapus kode agar memastikan fallback temukanUntukOrder bekerja
+    $voucher->codes()->delete();
+    Cache::clear();
+
+    Livewire::actingAs($admin)->test(CreateLangganan::class)
+        ->assertSuccessful()
+        ->set('data.paket_langganan_id', $paket->getKey())
+        ->set('data.metode_pembayaran_id', $metode->getKey())
+        ->set('data.kode_voucher', 'promoadmin')
+        ->call('create')
+        ->assertHasNoErrors();
+
+    $order = Langganan::query()->where('user_id', $admin->getKey())->latest('id')->first();
+    expect($order)->not->toBeNull()
+        ->and($order->kode_voucher)->toBe('PROMOADMIN')
+        ->and($order->persentase_diskon)->toBe(25)
+        ->and($order->nominal_diskon)->toBe(25000)
+        ->and($order->total_pembayaran)->toBe(75000);
+})->group('langganan');
+
 test('invoice menyalin nomor tujuan lewat clipboard atau manual', function () {
     $script = <<<'JS'
     import assert from 'node:assert/strict';
