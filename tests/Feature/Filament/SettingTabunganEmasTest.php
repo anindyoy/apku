@@ -148,10 +148,16 @@ test('aksi dan indikator tabungan emas pada buku kas mengikuti status aktivasi f
     $page = Livewire::actingAs($user)->test(ListBukuKas::class)->assertSuccessful();
     $page->assertTableActionHidden('cekNilaiEmas', $kas)
         ->assertTableActionHidden('hargaEmasManual', $kas);
+    $recordNonaktif = $page->instance()->getTableRecords()->firstWhere('id', $kas->id);
+    expect($page->instance()->getTable()->getColumn('saldo')->record($recordNonaktif)->getDescriptionBelow())
+        ->toBe('Jumlah transaksi: 0');
 
     // Saat user aktif
     $user->forceFill(['tabungan_emas_aktif' => true])->save();
     $pageAktif = Livewire::actingAs($user)->test(ListBukuKas::class)->assertSuccessful();
     $pageAktif->assertTableActionVisible('cekNilaiEmas', $kas)
         ->assertTableActionVisible('hargaEmasManual', $kas);
+    $recordAktif = $pageAktif->instance()->getTableRecords()->firstWhere('id', $kas->id);
+    expect($pageAktif->instance()->getTable()->getColumn('saldo')->record($recordAktif)->getDescriptionBelow())
+        ->toBe('Jumlah transaksi: 0 · Produk emas: 1');
 });

@@ -10,6 +10,8 @@ use Livewire\Livewire;
 
 test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
     $user = createRegularUserWithBukuKas();
+    // Aktifkan fitur tabungan emas agar indikator produk emas ditampilkan pada kolom saldo.
+    $user->forceFill(['tabungan_emas_aktif' => true])->save();
     $kas = $user->buku_kas()->first();
     $kas->update(['description' => 'Dana perjalanan keluarga']);
     TabunganEmas::factory()->count(2)->create(['buku_kas_id' => $kas->id]);
@@ -37,6 +39,8 @@ test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
 
 test('card kas menyembunyikan informasi emas saat tidak ada produk', function () {
     $user = createRegularUserWithBukuKas();
+    // Pastikan fitur tabungan emas aktif namun kas belum memiliki produk emas.
+    $user->forceFill(['tabungan_emas_aktif' => true])->save();
     $kas = $user->buku_kas()->firstOrFail();
     $component = Livewire::actingAs($user)->test(ListBukuKas::class)->assertSuccessful();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $kas->id);
