@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\StatusLangganan;
+use App\Models\BukuKas;
 use App\Models\Langganan;
 use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
@@ -34,6 +35,7 @@ class DemoFiturSeeder extends Seeder
 
         $this->buatDompetDanTransfer($users);
         $this->buatTabunganEmasDanKolaboratorKas($users);
+        $this->buatKasTabungan($users);
         $this->buatDataLangganan($admin, $users);
         $this->buatNotifikasiPengingat($users);
     }
@@ -41,6 +43,10 @@ class DemoFiturSeeder extends Seeder
     public function bersihkanDataDemo(): void
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        $tabunganKasIds = DB::table('buku_kas')->where('is_tabungan', true)->pluck('id');
+        DB::table('transaksi')->whereIn('buku_kas_id', $tabunganKasIds)->delete();
+        DB::table('buku_kas')->whereIn('id', $tabunganKasIds)->delete();
+
         DB::table('notifications')->delete();
         DB::table('transaksi_emas')->delete();
         DB::table('tabungan_emas')->delete();
@@ -145,6 +151,66 @@ class DemoFiturSeeder extends Seeder
                     'berlaku_mulai' => now()->subDay(),
                     'berlaku_sampai' => null,
                 ]);
+            }
+        }
+    }
+
+    private function buatKasTabungan($users): void
+    {
+        // Menambahkan kas tabungan contoh dengan goal dan deadline untuk pengguna premium.
+        foreach ($users->filter(fn (User $user): bool => $user->masaAktifBerlaku()) as $user) {
+            $sumberDana = SumberDana::withoutGlobalScopes()
+                ->where('user_id', $user->id)
+                ->first();
+
+            // Kas Tabungan 1: Dana Darurat (berjalan)
+            $tabungan1 = BukuKas::create([
+                'user_id' => $user->id,
+                'nama_buku' => 'Tabungan Dana Darurat',
+                'saldo' => 0,
+                'is_default' => false,
+                'is_tabungan' => true,
+                'goal' => 20000000,
+                'tanggal_goal' => now()->addMonths(6)->toDateString(),
+            ]);
+
+            if ($sumberDana) {
+                Transaksi::withoutEvents(function () use ($user, $tabungan1, $sumberDana): void {
+                    Transaksi::create([
+                        'user_id' => $user->id,
+                        'buku_kas_id' => $tabungan1->id,
+                        'sumber_dana_id' => $sumberDana->id,
+                        'tanggal' => now()->subDays(15),
+                        'nominal' => 8000000,
+                        'jenis' => 'Pemasukan',
+                        'deskripsi' => 'Setoran awal dana darurat',
+                    ]);
+                });
+            }
+
+            // Kas Tabungan 2: Liburan (mendekati tenggat)
+            $tabungan2 = BukuKas::create([
+                'user_id' => $user->id,
+                'nama_buku' => 'Tabungan Liburan',
+                'saldo' => 0,
+                'is_default' => false,
+                'is_tabungan' => true,
+                'goal' => 5000000,
+                'tanggal_goal' => now()->addDays(7)->toDateString(),
+            ]);
+
+            if ($sumberDana) {
+                Transaksi::withoutEvents(function () use ($user, $tabungan2, $sumberDana): void {
+                    Transaksi::create([
+                        'user_id' => $user->id,
+                        'buku_kas_id' => $tabungan2->id,
+                        'sumber_dana_id' => $sumberDana->id,
+                        'tanggal' => now()->subDays(5),
+                        'nominal' => 4500000,
+                        'jenis' => 'Pemasukan',
+                        'deskripsi' => 'Cicilan tabungan liburan',
+                    ]);
+                });
             }
         }
     }

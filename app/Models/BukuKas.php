@@ -22,7 +22,27 @@ class BukuKas extends Model
 
     protected function casts(): array
     {
-        return ['is_default' => 'boolean', 'pernah_dikolaborasikan' => 'boolean'];
+        return [
+            'is_default' => 'boolean',
+            'is_tabungan' => 'boolean',
+            'pernah_dikolaborasikan' => 'boolean',
+            'goal' => 'integer',
+            'tanggal_goal' => 'date',
+        ];
+    }
+
+    /** Scope untuk mengurutkan kas biasa terlebih dahulu, kemudian kas tabungan, dan urut nama di setiap kelompok. */
+    public function scopeUrutanTabungan(Builder $query): Builder
+    {
+        return $query->reorder()
+            ->orderBy('is_tabungan')
+            ->orderBy('nama_buku');
+    }
+
+    /** Mendapatkan kalkulasi progres dan status tabungan. */
+    public function progresTabungan(?\Carbon\CarbonInterface $hariIni = null, ?bool $isPremium = null): \App\Support\ProgresTabungan
+    {
+        return \App\Support\ProgresTabungan::dari($this, $hariIni, $isPremium);
     }
 
     protected static function boot()

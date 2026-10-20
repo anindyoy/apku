@@ -131,6 +131,7 @@ class PencarianTransaksi extends Page implements HasTable
                 SelectFilter::make('buku_kas_id')
                     ->label('Kas')
                     ->options(fn (): array => OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+                        ->urutanTabungan()
                         ->pluck('nama_buku', 'id')
                         ->all(), auth()->id()))
                     ->searchable()

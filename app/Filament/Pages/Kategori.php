@@ -233,7 +233,7 @@ class Kategori extends Page implements HasTable
     {
         $user = auth()->user();
 
-        return BukuKas::query()->with('user:id,name')->get()
+        return BukuKas::query()->urutanTabungan()->with('user:id,name')->get()
             ->filter(fn (BukuKas $kas): bool => $user->dapatMengelolaKategoriPada($kas)
                 && ($kategori === null || $kas->user_id === $kategori->user_id))
             ->mapWithKeys(fn (BukuKas $kas): array => [

@@ -55,6 +55,7 @@ class ImportTransaksiService
             ->all();
         $bukuKas = BukuKas::query()
             ->where('user_id', $user->id)
+            ->urutanTabungan()
             ->get(['id', 'nama_buku']);
         $kategoriPemasukan = Kategori::withoutGlobalScopes()
             ->where('user_id', $user->id)

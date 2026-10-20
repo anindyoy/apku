@@ -60,6 +60,12 @@ Aturan bisnis dan pemrosesan data aplikasi.
 ### 4. Kas
 
 - Membuat, melihat, dan mengubah kas.
+- Tipe kas terdiri dari **Kas Biasa** (`is_tabungan = false`) dan **Kas Tabungan** (`is_tabungan = true`). Fitur Kas Tabungan hanya dapat dibuat atau diubah oleh pengguna dengan status akun Premium aktif (termasuk masa trial). Pengguna akun reguler atau yang masa aktifnya telah kedaluwarsa hanya dapat membuat atau memperbarui kas sebagai Kas Biasa.
+- Kas Tabungan mendukung penetapan target nominal tabungan (`goal`) minimal Rp 10.000 dan tenggat waktu pencapaian (`tanggal_goal`) pada hari ini atau di masa mendatang.
+- Pengguna dapat mengubah tipe kas sewaktu-waktu meskipun kas sudah memiliki transaksi. Saat Kas Tabungan diubah menjadi Kas Biasa, nilai target dan tenggat waktu tetap tersimpan di database tetapi disembunyikan dari form dan tampilan antarmuka.
+- Urutan tampilan kas memprioritaskan Kas Biasa terlebih dahulu, baru diikuti oleh Kas Tabungan; di masing-masing kelompok kas diurutkan berdasarkan abjad nama kas (`urutanTabungan`). Aturan urutan ini berlaku konsisten di daftar kas, dashboard, dan seluruh dropdown pilihan kas di aplikasi.
+- Pada daftar kas dan kartu kas di dashboard, Kas Tabungan menampilkan badge penanda, persentase pencapaian saldo terhadap target nominal, progres bar visual, serta status tenggat waktu (**Tercapai** jika saldo telah mencapai atau melampaui target, **Terlewat** jika melewati batas tanggal tenggat, **Mendekati** jika tersisa 14 hari atau kurang, atau **Berjalan** jika masih dalam periode normal dengan estimasi kebutuhan tabungan per bulan). Jika masa aktif Premium pengguna berakhir, progres tabungan tidak dihitung dan status tenggat tidak ditampilkan.
+- Pengguna dapat mengatur apakah saldo Kas Tabungan diikutsertakan dalam akumulasi Total Saldo Kas atau dipisahkan melalui aksi modal Pengaturan Tampilan di halaman Kas (`hitung_tabungan_di_total`, default aktif). Saat dinonaktifkan, label total saldo pada dashboard dan ringkasan transaksi beralih menjadi "Total saldo kas biasa" dan total saldo hanya menjumlahkan kas biasa milik pengguna.
 - Menentukan kas utama/default.
 - Menghapus kas kosong secara langsung.
 - Memindahkan seluruh transaksi dan saldo ke kas lain sebelum menghapus kas yang masih berisi transaksi.
@@ -352,7 +358,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Dashboard menjadi halaman utama pengguna biasa setelah login dan onboarding.
 - Data kartu, lima transaksi terbaru, pengaturan tampilan, dan ringkasan admin menggunakan cache 30 menit yang dipisahkan per pengguna. Perubahan tabel model terkait membatalkan cache bagian yang bergantung padanya, termasuk query massal atau penulisan tanpa event model. Invalidasi berlaku untuk seluruh pengguna pada bagian terkait; data di dalam transaksi database dibaca langsung dan invalidasi diulang setelah commit. Status langganan diperbarui saat berganti tanggal.
 - Dashboard menggunakan tab berikon bergaya Flowbite untuk Kas & Sumber Dana, Utang & Piutang, Langganan, dan Transaksi. Tab tersusun dua kolom pada layar mobile tanpa perlu digeser ke samping, dan tetap satu baris pada layar lebar. Tab gabungan menampilkan kedua ringkasan berdampingan pada layar lebar dan bertumpuk pada layar sempit. Hanya panel tab aktif yang terlihat dengan lebar penuh. Tampilan panel dan padding vertikal tabel tetap padat; transaksi mobile tetap berupa ringkasan satu kolom.
-- Menampilkan seluruh kas dan sumber dana milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Panel juga menampilkan total saldo dan jumlah kas atau sumber dana, dengan ikon pada tab dan dukungan tema gelap.
+- Menampilkan seluruh kas dan sumber dana milik pengguna beserta saldo masing-masing, termasuk yang akses pengelolaannya terbatas. Kartu kas tabungan menampilkan badge tipe, persentase capaian target nominal, dan status tenggat waktu. Panel juga menampilkan total saldo dan jumlah kas atau sumber dana; total saldo kas mengikuti pengaturan pengguna (`hitung_tabungan_di_total`) apakah menggabungkan kas tabungan atau hanya mengakumulasikan kas biasa ("Total saldo kas biasa"), dengan ikon pada tab dan dukungan tema gelap.
 - Menampilkan total sisa utang dan piutang setelah pembayaran, masing-masing disertai tiga catatan dengan pembaruan terbaru.
 - Menampilkan status langganan premium, tanggal akhir masa aktif, dan sisa hari; akun tanpa langganan atau kedaluwarsa ditampilkan sebagai Reguler.
 - Tabel menampilkan lima transaksi terbaru milik pengguna dengan definisi kolom yang sama dengan daftar transaksi: tipe, tanggal dan pencatat (hanya kas dengan riwayat kolaborasi akun lain), kas dan sumber dana, kategori dan deskripsi, serta nominal.
@@ -371,14 +377,14 @@ Fitur berikut hanya tersedia untuk admin:
 
 #### Akun dan sesi
 
-- `users`: `id`, `name`, `email` unik, `hp(100)` nullable, `penggunaan(100)` nullable, `email_verified_at` nullable, `provinsi(30)` nullable, `kota(30)` nullable, `masa_aktif` date nullable, `password`, `role(20)` default `user` (`user`, `admin`), `type` enum `reguler`/`premium` default `reguler`, `dashboard_settings` JSON nullable, `pisahkan_tipe_kategori` boolean default true, `paket_langganan_dipilih_id` FK `paket_langganans` nullable null on delete, `tabungan_emas_aktif` boolean default false, `rememberToken`, `timestamps`.
+- `users`: `id`, `name`, `email` unik, `hp(100)` nullable, `penggunaan(100)` nullable, `email_verified_at` nullable, `provinsi(30)` nullable, `kota(30)` nullable, `masa_aktif` date nullable, `password`, `role(20)` default `user` (`user`, `admin`), `type` enum `reguler`/`premium` default `reguler`, `dashboard_settings` JSON nullable, `pisahkan_tipe_kategori` boolean default true, `paket_langganan_dipilih_id` FK `paket_langganans` nullable null on delete, `tabungan_emas_aktif` boolean default false, `hitung_tabungan_di_total` boolean default true, `rememberToken`, `timestamps`.
 - `password_reset_tokens`: `email` PK, `token`, `created_at` nullable.
 - `sessions`: `id` string PK, `user_id` FK users nullable cascade delete, `ip_address(45)` nullable, `user_agent` text nullable, `payload` longText, `last_activity` integer terindeks.
 - `notifications`: `id` UUID PK, `type`, `notifiable_type` + `notifiable_id` (morph), `data` text, `read_at` nullable, `timestamps`.
 
 #### Kas, kolaborasi, dan sumber dana
 
-- `buku_kas`: `id`, `user_id` FK users cascade delete, `nama_buku`, `saldo` integer, `is_default` boolean default false, `goal` integer nullable, `tanggal_goal` date nullable, `description(200)` nullable, `pernah_dikolaborasikan` boolean default false, `timestamps`, unik `[user_id, nama_buku]`.
+- `buku_kas`: `id`, `user_id` FK users cascade delete, `nama_buku`, `saldo` integer, `is_default` boolean default false, `is_tabungan` boolean default false, `goal` integer nullable, `tanggal_goal` date nullable, `description(200)` nullable, `pernah_dikolaborasikan` boolean default false, `timestamps`, unik `[user_id, nama_buku]`, indeks `[user_id, is_tabungan, nama_buku]`.
 - `share_buku`: `id`, `buku_kas_id` FK `buku_kas` cascade delete, `user_id` FK users nullable cascade delete (kosong untuk link publik), `privilege` enum `viewer`/`editor`, `berlaku_mulai` datetime nullable, `berlaku_sampai` datetime nullable, `invited_by_user_id` FK users nullable null on delete, `public_token(64)` nullable unik, `timestamps`, unik `[buku_kas_id, user_id]`, indeks `[user_id, berlaku_mulai, berlaku_sampai]`.
 - `sumber_dana` (dompet): `id`, `user_id` FK users cascade delete, `nama_dompet(50)`, `jenis(20)` default `tunai` terindeks, `saldo` bigInteger default 0, `is_default` boolean default false, `description(200)` nullable, `timestamps` + `deleted_at` (soft delete), unik `[user_id, nama_dompet]`, indeks `[user_id, is_default]`.
 

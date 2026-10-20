@@ -6,7 +6,7 @@
                     <label for="buku-kas">Kas</label>
                     <select id="buku-kas" wire:model.live="bukuKasId">
                         <option value="semua">Semua Kas</option>
-                        @foreach (\App\Models\BukuKas::all() as $buku)
+                        @foreach (\App\Models\BukuKas::urutanTabungan()->get() as $buku)
                             <option value="{{ $buku->id }}">{{ $buku->nama_buku }}</option>
                         @endforeach
                     </select>

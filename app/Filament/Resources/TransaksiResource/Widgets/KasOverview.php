@@ -25,6 +25,15 @@ class KasOverview extends BaseWidget
         $filterSumberDana = $this->getTablePageInstance()->filterDompet;
         $saldoSumberDana = SumberDana::withTrashed()->find($filterSumberDana)?->saldo;
 
+        $user = auth()->user();
+        $hitungTabungan = $user ? $user->hitungTabunganDiTotal() : true;
+        $kasQuery = BukuKas::query();
+        $labelKas = 'Semua Kas';
+        if (! $hitungTabungan) {
+            $kasQuery->where('is_tabungan', false);
+            $labelKas = 'Kas Biasa';
+        }
+
         return [
             Stat::make(
                 'Saldo',
@@ -32,7 +41,7 @@ class KasOverview extends BaseWidget
             )
                 ->description($filterSumberDana
                     ? 'Saldo sumber dana terpilih'
-                    : 'Semua Kas Rp '.number_format(BukuKas::sum('saldo')))
+                    : $labelKas.' Rp '.number_format($kasQuery->sum('saldo')))
                 ->color(($saldoSumberDana ?? $saldoBukuKas) < 0 ? 'danger' : 'primary'),
         ];
     }

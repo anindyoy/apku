@@ -5,10 +5,13 @@ namespace App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Concerns\CachesResourceListRecords;
 use App\Filament\Resources\BukuKasResource;
 use App\Models\Dompet;
+use App\Services\DashboardCache;
 use App\Services\KategoriService;
 use App\Services\KuotaAkun;
 use App\Services\TransaksiService;
 use Filament\Actions;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -33,6 +36,24 @@ class ListBukuKas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('pengaturanTampilan')
+                ->label('Pengaturan tampilan')
+                ->icon('heroicon-o-adjustments-horizontal')
+                ->modalHeading('Pengaturan tampilan kas')
+                ->modalSubmitActionLabel('Simpan pengaturan')
+                ->modalWidth('md')
+                ->form(fn (): array => [
+                    Toggle::make('hitung_tabungan_di_total')
+                        ->label('Hitung saldo tabungan ke total saldo kas')
+                        ->helperText('Aktif: saldo kas tabungan diikutsertakan dalam kalkulasi total saldo kas di dashboard. Nonaktif: total saldo kas hanya menghitung kas biasa.'),
+                ])
+                ->fillForm(fn (): array => ['hitung_tabungan_di_total' => auth()->user()->hitungTabunganDiTotal()])
+                ->action(function (array $data): void {
+                    $user = auth()->user();
+                    $user->forceFill(['hitung_tabungan_di_total' => (bool) $data['hitung_tabungan_di_total']])->save();
+                    Notification::make()->title('Pengaturan kas disimpan')->success()->send();
+                }),
+
             Actions\CreateAction::make()
                 ->modalDescription(fn (): Htmlable => KuotaAkun::kas(auth()->user()))
                 ->visible(fn (): bool => auth()->user()->dapatMembuatBukuKas())

@@ -164,7 +164,7 @@ class Dashboard extends BaseDashboard implements HasTable
         }
 
         return DashboardCache::remember($key, $user->id, fn () => match ($key) {
-            'kas' => $user->buku_kas()->get(),
+            'kas' => $user->buku_kas()->urutanTabungan()->get(),
             'dompet' => $user->dompet()->get(),
             'utang', 'piutang' => $this->debtData($key),
             'langganan' => $this->langgananData($user),

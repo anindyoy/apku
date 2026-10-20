@@ -341,6 +341,7 @@ class Transaksi extends Model
     public static function opsiBukuKasYangDapatDikelola(): array
     {
         return OpsiSelectCache::ingat('buku-kas', fn (): array => static::batasiBukuKasYangDapatDikelola(BukuKas::query())
+            ->urutanTabungan()
             ->pluck('nama_buku', 'id')
             ->all(), auth()->id(), 'dapat-dikelola');
     }

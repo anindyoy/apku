@@ -29,6 +29,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rule;
 
@@ -58,6 +59,7 @@ class BukuKasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->urutanTabungan())
             ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
                 // Tables\Columns\TextColumn::make('user_id')
@@ -72,6 +74,11 @@ class BukuKasResource extends Resource
                         ->weight('bold')
                         ->size('lg')
                         ->wrap(),
+
+                    TextColumn::make('tipe_kas')
+                        ->badge()
+                        ->state(fn (BukuKas $record): string => $record->is_tabungan ? 'Kas Tabungan' : 'Kas Biasa')
+                        ->color(fn (BukuKas $record): string => $record->is_tabungan ? 'primary' : 'gray'),
 
                     TextColumn::make('akses')
                         ->badge()
@@ -91,12 +98,8 @@ class BukuKasResource extends Resource
                                 ? ' · Produk emas: '.number_format($record->tabungan_emas_count, 0, ',', '.')
                                 : '')),
 
-                    // Tables\Columns\TextColumn::make('goal')
-                    //     ->numeric()
-                    //     ->sortable(),
-                    // Tables\Columns\TextColumn::make('tanggal_goal')
-                    //     ->date()
-                    //     ->sortable(),
+                    ViewColumn::make('progres_tabungan')
+                        ->view('filament.tables.columns.progres-tabungan'),
 
                     TextColumn::make('created_at')
                         ->prefix('Dibuat: ')
@@ -177,6 +180,7 @@ class BukuKasResource extends Resource
                                 ->options(fn (): array => array_filter(
                                     OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
                                         ->where('user_id', $record->user_id)
+                                        ->urutanTabungan()
                                         ->pluck('nama_buku', 'id')
                                         ->all(), $record->user_id),
                                     fn ($id): bool => (int) $id !== (int) $record->id,

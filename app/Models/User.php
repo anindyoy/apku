@@ -72,6 +72,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'pisahkan_tipe_kategori' => 'boolean',
             'paket_langganan_dipilih_id' => 'integer',
             'tabungan_emas_aktif' => 'boolean',
+            'hitung_tabungan_di_total' => 'boolean',
         ];
     }
 
@@ -172,6 +173,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function tabunganEmasAktif(): bool
     {
         return (bool) ($this->tabungan_emas_aktif ?? false);
+    }
+
+    /** Menentukan apakah saldo kas tabungan ikut dihitung pada total saldo (default aktif). */
+    public function hitungTabunganDiTotal(): bool
+    {
+        return (bool) ($this->hitung_tabungan_di_total ?? true);
     }
 
     private function bukuKasMasihDapatDikelolaPemilik(BukuKas $bukuKas): bool

@@ -125,8 +125,8 @@ class ListTransaksis extends ListRecords
 
     public function getBukuKasOptions(): array
     {
-        return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
-            ->orderBy('nama_buku')
+        return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+            ->urutanTabungan()
             ->pluck('nama_buku', 'id')
             ->toArray(), auth()->id());
     }

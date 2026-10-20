@@ -57,6 +57,7 @@ class ShareBukuResource extends Resource
                 ->label('Kas')
                 ->options(fn (): array => BukuKas::withoutGlobalScopes()
                     ->where('user_id', auth()->id())
+                    ->urutanTabungan()
                     ->pluck('nama_buku', 'id')->all())
                 ->rules([Rule::exists('buku_kas', 'id')->where('user_id', auth()->id())])
                 ->searchable(false)

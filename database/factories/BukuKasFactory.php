@@ -24,6 +24,7 @@ class BukuKasFactory extends Factory
             'user_id' => User::inRandomOrder()->notAdmin()->first()->id,
             'nama_buku' => fake()->word().'-'.fake()->unique()->numerify('########'),
             'saldo' => 0,
+            'is_tabungan' => false,
             'description' => fake()->sentence(),
             'goal' => $goal == 4 ? rand(100, 1000) : null,
             'tanggal_goal' => $goal == 4 ? fake()->dateTimeBetween('now', '+1 year') : null,

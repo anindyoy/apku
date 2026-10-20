@@ -110,13 +110,72 @@
                         {{ $this->table }}
                     @elseif (in_array($itemKey, ['kas', 'dompet']))
                         {{-- Kunci dompet dipertahankan; teks UI memakai sumber dana. --}}
-                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total saldo {{ $itemKey === 'dompet' ? 'sumber dana' : $itemKey }}</p>
-                        <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $data->sum('saldo'), 0, ',', '.') }}</p>
-                        <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Tersebar di {{ $data->count() }} {{ $itemKey === 'dompet' ? 'sumber dana' : $itemKey }}</p>
+                        @php
+                            $user = auth()->user();
+                            $hitungTabungan = $user ? $user->hitungTabunganDiTotal() : true;
+                            $totalSaldo = ($itemKey === 'kas' && ! $hitungTabungan)
+                                ? $data->where('is_tabungan', false)->sum('saldo')
+                                : $data->sum('saldo');
+                            $eyebrow = match (true) {
+                                $itemKey === 'dompet' => 'Total saldo sumber dana',
+                                $itemKey === 'kas' && ! $hitungTabungan => 'Total saldo kas biasa',
+                                default => 'Total saldo kas',
+                            };
+                            $caption = match (true) {
+                                $itemKey === 'dompet' => 'Tersebar di ' . $data->count() . ' sumber dana',
+                                $itemKey === 'kas' && ! $hitungTabungan => 'Tersebar di ' . $data->count() . ' kas (saldo tabungan dipisahkan)',
+                                default => 'Tersebar di ' . $data->count() . ' kas',
+                            };
+                        @endphp
+                        <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">{{ $eyebrow }}</p>
+                        <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $totalSaldo, 0, ',', '.') }}</p>
+                        <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">{{ $caption }}</p>
                         <dl class="dashboard-list mt-3">
                             @forelse ($data as $item)
                                 <div class="dashboard-row flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[color:var(--dash-line)] py-2 last:border-b-0 last:pb-0 [&_dt]:min-w-0 [&_dt]:flex-[1_1_7rem] [&_dt]:text-sm [&_dt]:font-medium [&_dt]:[overflow-wrap:anywhere] [&_dd]:max-w-full [&_dd]:text-sm [&_dd]:font-[650] [&_dd]:tabular-nums [&_dd]:[overflow-wrap:anywhere] [&_.dashboard-caption]:text-[.7rem] [&_.dashboard-caption]:font-normal">
-                                    <dt>{{ $itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet }}</dt>
+                                    <dt>
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <span>{{ $itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet }}</span>
+                                            @if ($itemKey === 'kas' && $item->is_tabungan)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">Tabungan</span>
+                                            @endif
+                                        </div>
+                                        @if ($itemKey === 'kas' && $item->is_tabungan)
+                                            @php
+                                                $progres = $item->progresTabungan();
+                                                $isPremium = auth()->user()?->masaAktifBerlaku() ?? false;
+                                            @endphp
+                                            @if ($item->goal)
+                                                <div class="dashboard-caption mt-1 text-[.7rem] text-[color:var(--dash-muted)]">
+                                                    Target: Rp {{ number_format((float) $item->goal, 0, ',', '.') }} ({{ $progres->persen }}%)
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mt-1 overflow-hidden">
+                                                    <div class="bg-primary-600 h-1.5 rounded-full dark:bg-primary-500" style="width: {{ $progres->barPersen }}%"></div>
+                                                </div>
+                                            @endif
+                                            @if ($item->tanggal_goal)
+                                                <div class="mt-1">
+                                                    @if ($isPremium && $progres->status)
+                                                        @php
+                                                            $badgeClass = match ($progres->status) {
+                                                                'tercapai' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                                                                'terlewat' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                                                                'mendekati' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                                                                default => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+                                                            };
+                                                        @endphp
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-medium {{ $badgeClass }}">
+                                                            {{ $progres->labelStatus }}
+                                                        </span>
+                                                    @else
+                                                        <span class="dashboard-caption text-[.7rem] text-[color:var(--dash-muted)]">
+                                                            Tenggat: {{ $progres->tanggalDeadlineFormatted }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        @endif
+                                    </dt>
                                     <dd>Rp {{ number_format((float) $item->saldo, 0, ',', '.') }}</dd>
                                 </div>
                             @empty

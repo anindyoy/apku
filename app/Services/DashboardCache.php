@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class DashboardCache
 {
     private const DEPENDENCIES = [
-        'kas' => ['buku_kas', 'tabungan_emas'],
+        'kas' => ['buku_kas', 'tabungan_emas', 'users'],
         // Tabel dompet sudah bernama sumber_dana; alias dipertahankan untuk kompatibilitas cache lama.
         'dompet' => ['sumber_dana'],
         'utang' => ['utang_piutang', 'utang_piutang_detail'],

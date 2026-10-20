@@ -218,7 +218,7 @@ trait HasTambahTransaksiAction
 
         $user = auth()->user();
 
-        return BukuKas::query()->with('user:id,name')->get()
+        return BukuKas::query()->urutanTabungan()->with('user:id,name')->get()
             ->filter(fn (BukuKas $kas): bool => $kas->user_id === $bukuKas->user_id
                 && $user->dapatMengelolaKategoriPada($kas))
             ->mapWithKeys(fn (BukuKas $kas): array => [
