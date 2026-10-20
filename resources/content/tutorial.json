@@ -214,7 +214,7 @@
             "Periksa sumber dan waktu harga. Ambil harga buyback yang tersedia atau simpan harga manual untuk kas terkait jika diperlukan."
         ],
         "example": "Masukkan berat 0,5 gram dan label Emas Antam untuk mencatat kepemilikan setengah gram.",
-        "note": "Berat mendukung empat desimal dan desimal koma. Pembuatan mencatat berat sebagai saldo awal tanpa modal. Tombol Beli emas, Jual emas, dan Histori belum tersedia pada halaman. Estimasi harga tidak membuat transaksi; saat layanan harga gagal, aplikasi dapat memakai snapshot terakhir."
+        "note": "Fitur tabungan emas dapat diaktifkan sendiri oleh setiap user pada menu Setting > Akun Saya (default nonaktif). Berat mendukung empat desimal dan desimal koma. Pembuatan mencatat berat sebagai saldo awal tanpa modal. Tombol Beli emas, Jual emas, dan Histori belum tersedia pada halaman. Estimasi harga tidak membuat transaksi; saat layanan harga gagal, aplikasi dapat memakai snapshot terakhir."
     },
     {
         "id": "laporan",

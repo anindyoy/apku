@@ -13,6 +13,7 @@ use App\Models\Kategori;
 use App\Services\BukuKasService;
 use App\Services\HargaEmasService;
 use App\Services\OpsiSelectCache;
+use App\Services\PengaturanTabunganEmas;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\Action as FilamentAction;
@@ -86,7 +87,7 @@ class BukuKasResource extends Resource
                         ->sortable()
                         ->counts(['transaksi', 'tabunganEmas'])
                         ->description(fn (BukuKas $record): string => 'Jumlah transaksi: '.number_format($record->transaksi_count, 0, ',', '.')
-                            .($record->tabungan_emas_count > 0
+                            .(app(PengaturanTabunganEmas::class)->aktif() && $record->tabungan_emas_count > 0
                                 ? ' · Produk emas: '.number_format($record->tabungan_emas_count, 0, ',', '.')
                                 : '')),
 
@@ -127,7 +128,8 @@ class BukuKasResource extends Resource
                     FilamentAction::make('cekNilaiEmas')
                         ->label('Cek Nilai Emas')
                         ->icon('heroicon-o-calculator')
-                        ->visible(fn (BukuKas $record): bool => $record->tabunganEmas()->where('berat_gram', '>', 0)->exists())
+                        ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
+                            && $record->tabunganEmas()->where('berat_gram', '>', 0)->exists())
                         ->modalHeading(fn (BukuKas $record): string => 'Nilai emas pada '.$record->nama_buku)
                         ->modalSubmitAction(false)
                         ->modalCancelActionLabel('Tutup')
@@ -136,7 +138,8 @@ class BukuKasResource extends Resource
                     FilamentAction::make('hargaEmasManual')
                         ->label('Harga Emas Manual')
                         ->icon('heroicon-o-pencil-square')
-                        ->visible(fn (BukuKas $record): bool => $record->tabunganEmas()->exists()
+                        ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
+                            && $record->tabunganEmas()->exists()
                             && auth()->user()->dapatMengelolaTransaksiPada($record))
                         ->form([
                             KomponenNominal::terapkan(

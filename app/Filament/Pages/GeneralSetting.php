@@ -4,8 +4,10 @@ namespace App\Filament\Pages;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Services\PengaturanKontak;
+use App\Services\PengaturanTabunganEmas;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -13,7 +15,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-// Pengaturan umum aplikasi yang tidak terkait dengan fitur spesifik seperti harga emas.
+// Pengaturan umum aplikasi untuk kontak dan aktivasi fitur.
 class GeneralSetting extends Page implements HasForms
 {
     use InteractsWithForms;
@@ -38,12 +40,23 @@ class GeneralSetting extends Page implements HasForms
     public function mount(): void
     {
         abort_unless(static::canAccess(), 403);
-        $this->form->fill(app(PengaturanKontak::class)->tersimpan());
+        $this->form->fill(array_merge(
+            app(PengaturanKontak::class)->tersimpan(),
+            ['tabungan_emas_aktif' => app(PengaturanTabunganEmas::class)->aktif()],
+        ));
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema->schema([
+            Section::make('Fitur tabungan emas')
+                ->description('Pengaturan aktivasi fitur tabungan emas untuk pengguna non-admin.')
+                ->schema([
+                    Toggle::make('tabungan_emas_aktif')
+                        ->label('Fitur tabungan emas user aktif')
+                        ->helperText('Jika nonaktif, menu dan aksi tabungan emas disembunyikan dari pengguna.')
+                        ->default(false),
+                ]),
             Section::make('Kontak admin')
                 ->description('Nomor yang tampil di halaman verifikasi email sebagai tombol bantuan WhatsApp.')
                 ->schema([
@@ -60,7 +73,11 @@ class GeneralSetting extends Page implements HasForms
     public function simpan(): void
     {
         abort_unless(static::canAccess(), 403);
-        app(PengaturanKontak::class)->simpan(auth()->user(), $this->form->getState());
+        $state = $this->form->getState();
+        app(PengaturanKontak::class)->simpan(auth()->user(), $state);
+        app(PengaturanTabunganEmas::class)->simpan(auth()->user(), [
+            'aktif' => (bool) ($state['tabungan_emas_aktif'] ?? false),
+        ]);
         Notification::make()->title('Pengaturan disimpan')->success()->send();
     }
 }

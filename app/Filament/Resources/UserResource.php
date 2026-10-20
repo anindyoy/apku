@@ -15,6 +15,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -60,6 +61,9 @@ class UserResource extends Resource
                     ->formatStateUsing(fn ($state) => filled($state) ? ucfirst($state) : null)
                     ->dehydrateStateUsing(fn ($state) => filled($state) ? strtolower($state) : null)
                     ->placeholder('regular / premium / admin'),
+                Toggle::make('tabungan_emas_aktif')
+                    ->label('Fitur tabungan emas')
+                    ->default(false),
             ]);
     }
 

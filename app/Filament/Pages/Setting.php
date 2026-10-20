@@ -4,8 +4,10 @@ namespace App\Filament\Pages;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Services\PengaturanHargaEmas;
+use App\Services\PengaturanTabunganEmas;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -35,12 +37,23 @@ class Setting extends Page implements HasForms
     public function mount(): void
     {
         abort_unless(static::canAccess(), 403);
-        $this->form->fill(app(PengaturanHargaEmas::class)->tersimpan());
+        $this->form->fill(array_merge(
+            app(PengaturanHargaEmas::class)->tersimpan(),
+            ['tabungan_emas_aktif' => app(PengaturanTabunganEmas::class)->aktif()],
+        ));
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema->schema([
+            Section::make('Aktivasi fitur')
+                ->description('Pengaturan aktivasi fitur tabungan emas untuk pengguna non-admin.')
+                ->schema([
+                    Toggle::make('tabungan_emas_aktif')
+                        ->label('Fitur tabungan emas user aktif')
+                        ->helperText('Jika nonaktif, menu dan aksi tabungan emas disembunyikan dari pengguna.')
+                        ->default(false),
+                ]),
             Section::make('Harga emas')
                 ->description('Berlaku untuk seluruh pengguna. Kosongkan kolom untuk menggunakan nilai default yang ditampilkan.')
                 ->schema([
@@ -67,7 +80,13 @@ class Setting extends Page implements HasForms
     public function simpan(): void
     {
         abort_unless(static::canAccess(), 403);
-        app(PengaturanHargaEmas::class)->simpan(auth()->user(), $this->form->getState());
+        $state = $this->form->getState();
+        app(PengaturanHargaEmas::class)->simpan(auth()->user(), $state);
+        if (array_key_exists('tabungan_emas_aktif', $state)) {
+            app(PengaturanTabunganEmas::class)->simpan(auth()->user(), [
+                'aktif' => (bool) $state['tabungan_emas_aktif'],
+            ]);
+        }
         Notification::make()->title('Pengaturan harga emas disimpan')->success()->send();
     }
 }

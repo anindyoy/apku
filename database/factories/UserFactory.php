@@ -28,10 +28,12 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'hp' => '08' . rand(100000000, 999999999),
+            'penggunaan' => 'Pribadi/Keluarga',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'type' => $type,
+            'tabungan_emas_aktif' => false,
             'masa_aktif' => $type === 'premium'
                 ? fake()->dateTimeBetween('+1 week', '+1 year') : null,
         ];

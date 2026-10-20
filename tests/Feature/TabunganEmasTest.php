@@ -19,7 +19,12 @@ use Livewire\Livewire;
 
 function siapkanAkunTabunganEmas(): array
 {
+    \App\Models\ApplicationSetting::updateOrCreate(
+        ['key' => 'tabungan_emas'],
+        ['value' => ['aktif' => true]]
+    );
     $user = createRegularUserWithBukuKas();
+    $user->forceFill(['tabungan_emas_aktif' => true])->save();
     $kas = $user->buku_kas()->firstOrFail();
     $dompet = Dompet::factory()->create(['user_id' => $user->id, 'saldo' => 10000000, 'is_default' => true]);
     $pemasukan = Kategori::factory()->untukKas($kas)->create(['user_id' => $user->id, 'nama' => 'Penjualan Emas', 'tipe' => 'Pemasukan']);

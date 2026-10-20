@@ -7,6 +7,7 @@ use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Forms\KomponenNominal;
 use App\Filament\Resources\TabunganEmasResource\Pages\ListTabunganEmas;
 use App\Models\TabunganEmas;
+use App\Services\PengaturanTabunganEmas;
 use App\Services\TabunganEmasService;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -38,6 +39,16 @@ class TabunganEmasResource extends Resource
     protected static ?string $modelLabel = 'Tabungan Emas';
 
     protected static ?string $pluralModelLabel = 'Tabungan Emas';
+
+    public static function canAccess(): bool
+    {
+        return ! auth()->user()?->isAdmin() && app(PengaturanTabunganEmas::class)->aktif();
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return ! auth()->user()?->isAdmin() && app(PengaturanTabunganEmas::class)->aktif();
+    }
 
     public static function form(Schema $schema): Schema
     {

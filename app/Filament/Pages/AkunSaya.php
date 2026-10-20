@@ -9,8 +9,10 @@ use BackedEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -94,6 +96,15 @@ class AkunSaya extends Page implements HasForms
                             ->placeholder('Kosongkan jika tidak ingin mengubah password'),
                     ])
                     ->columns(3),
+
+                Section::make('Pengaturan fitur')
+                    ->description('Tentukan fitur opsional yang ingin Anda gunakan pada akun Anda.')
+                    ->schema([
+                        Toggle::make('tabungan_emas_aktif')
+                            ->label('Fitur Tabungan Emas')
+                            ->helperText('Aktifkan pencatatan emas, estimasi nilai, dan menu Tabungan Emas di pengaturan kas Anda.')
+                            ->default(false),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -107,6 +118,7 @@ class AkunSaya extends Page implements HasForms
             'hp' => $data['hp'],
             'alamat' => $data['alamat'],
             'penggunaan' => $data['penggunaan'],
+            'tabungan_emas_aktif' => (bool) ($data['tabungan_emas_aktif'] ?? false),
         ];
 
         // Password sudah di-hash oleh dehydrateStateUsing di form field
@@ -115,5 +127,10 @@ class AkunSaya extends Page implements HasForms
         }
 
         auth()->user()->update($new);
+
+        Notification::make()
+            ->title('Data akun berhasil disimpan')
+            ->success()
+            ->send();
     }
 }

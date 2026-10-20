@@ -39,6 +39,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'masa_aktif',
         'email_verified_at',
         'paket_langganan_dipilih_id',
+        'tabungan_emas_aktif',
     ];
 
     /**
@@ -70,6 +71,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'dashboard_settings' => 'array',
             'pisahkan_tipe_kategori' => 'boolean',
             'paket_langganan_dipilih_id' => 'integer',
+            'tabungan_emas_aktif' => 'boolean',
         ];
     }
 
@@ -164,6 +166,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function pisahkanTipeKategori(): bool
     {
         return $this->pisahkan_tipe_kategori ?? true;
+    }
+
+    /** Status aktivasi fitur tabungan emas per user (default nonaktif). */
+    public function tabunganEmasAktif(): bool
+    {
+        return (bool) ($this->tabungan_emas_aktif ?? false);
     }
 
     private function bukuKasMasihDapatDikelolaPemilik(BukuKas $bukuKas): bool
