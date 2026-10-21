@@ -22,7 +22,7 @@ test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
     $table = $component->instance()->getTable();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $kas->id);
 
-    expect(array_keys($table->getColumns()))->toBe(['nama_buku', 'akses', 'saldo', 'created_at', 'updated_at'])
+    expect(array_keys($table->getColumns()))->toBe(['nama_buku', 'tipe_kas', 'akses', 'saldo', 'progres_tabungan', 'created_at', 'updated_at'])
         ->and($table->getContentGrid())->toBe(['default' => 1, 'md' => 2, 'xl' => 3])
         ->and($table->getColumn('nama_buku')->record($record)->getDescriptionBelow())->toBe('Deskripsi: Dana perjalanan keluarga')
         ->and($table->getColumn('akses')->record($record)->getPrefix())->toBe('Akses: ')
