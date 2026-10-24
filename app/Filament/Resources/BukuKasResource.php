@@ -111,7 +111,7 @@ class BukuKasResource extends Resource
                         ->prefix('Diperbarui: ')
                         ->dateTime()
                         ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
+                        ->toggleable(),
                 ])->space(3),
             ])
             ->filters([

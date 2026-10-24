@@ -30,7 +30,8 @@ test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
         ->and($table->getColumn('saldo')->record($record)->getPrefix())->toBe('Saldo: Rp ')
         ->and($table->getColumn('saldo')->record($record)->getDescriptionBelow())->toBe('Jumlah transaksi: 0 · Produk emas: 2')
         ->and($table->getColumn('created_at')->isToggledHiddenByDefault())->toBeTrue()
-        ->and($table->getColumn('updated_at')->isToggledHiddenByDefault())->toBeTrue();
+        ->and($table->getColumn('updated_at')->getPrefix())->toBe('Diperbarui: ')
+        ->and($table->getColumn('updated_at')->isToggledHiddenByDefault())->toBeFalse();
 
     $component->searchTable('perjalanan')->assertCanSeeTableRecords([$kas])
         ->searchTable('tidak ditemukan')->assertCanNotSeeTableRecords([$kas])

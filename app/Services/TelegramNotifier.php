@@ -90,7 +90,7 @@ class TelegramNotifier
      */
     public function kirimPembayaran(string $text): bool
     {
-        return $this->kirim($this->chatIdPembayaran, $text);
+        return $this->kirim($this->chatIdPembayaran, $text, 'HTML');
     }
 
     /**
