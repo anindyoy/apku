@@ -217,4 +217,30 @@ HTML;
     {
         return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
+
+    /**
+     * Kirim notifikasi kegagalan pengiriman email ke channel Telegram exception.
+     * Tidak menyertakan isi email atau data pembayaran sensitif.
+     *
+     * @param string $jenisEmail Jenis notifikasi email (mis. Invoice Order, Pembayaran Disetujui, Pembayaran Ditolak)
+     * @param string $kodeOrder Kode order langganan terkait
+     * @param string $error Pesan error ringkas
+     * @return bool
+     */
+    public function kirimKegagalanEmail(string $jenisEmail, string $kodeOrder, string $error): bool
+    {
+        $messageLines = [
+            '⚠️ Gagal Mengirim Notifikasi Email',
+            'Jenis: ' . $jenisEmail,
+            'Kode Order: ' . $kodeOrder,
+            'Error: ' . $error,
+            'Domain: ' . config('app.url'),
+            'Versi: #APKu',
+        ];
+
+        $message = implode("\n", $messageLines);
+        $message = $this->potongPesan($message);
+
+        return $this->kirimException($message);
+    }
 }

@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Enums\StatusLangganan;
 use App\Models\Langganan;
 use App\Models\User;
-use App\Notifications\LanggananDisetujui;
+use App\Notifications\PembayaranDisetujuiNotification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -60,7 +60,7 @@ class SetujuiLangganan
         }
 
         if ($baruDisetujui) {
-            $hasil->user->notify(new LanggananDisetujui($hasil));
+            $hasil->user->notify(new PembayaranDisetujuiNotification($hasil));
         }
 
         return $hasil;

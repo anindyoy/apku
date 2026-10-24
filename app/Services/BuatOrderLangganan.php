@@ -8,6 +8,7 @@ use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
 use App\Models\User;
 use App\Models\VoucherCode;
+use App\Notifications\InvoiceOrderNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -70,6 +71,11 @@ class BuatOrderLangganan
 
         if ($kesalahanVoucher !== null) {
             throw ValidationException::withMessages(['kode_voucher' => $kesalahanVoucher]);
+        }
+
+        // Kirim notifikasi email invoice kepada pemilik order non-admin.
+        if (! $user->isAdmin() && filled($user->email)) {
+            $user->notify(new InvoiceOrderNotification($order));
         }
 
         return $order;
