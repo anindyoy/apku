@@ -115,8 +115,8 @@ class BukuKasFormSchema
 
             Toggle::make('hubungkan_kategori')
                 ->label('Pakai semua kategori saya di kas ini')
-                ->helperText('Matikan jika kas ini memerlukan daftar kategori sendiri, misalnya untuk kas bersama. Hubungan kategori dapat diubah di Setting > Kategori.')
-                ->default(true)
+                ->helperText('Aktifkan jika kas ini ingin memakai seluruh kategori yang sudah ada. Hubungan kategori dapat diubah di Setting > Kategori.')
+                ->default(false)
                 ->visible(fn (string $operation): bool => $operation === 'create'),
         ];
     }

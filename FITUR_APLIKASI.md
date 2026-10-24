@@ -70,7 +70,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Menghapus kas kosong secara langsung.
 - Memindahkan seluruh transaksi dan saldo ke kas lain sebelum menghapus kas yang masih berisi transaksi.
 - Saat pemindahan, kategori yang belum terhubung ke kas tujuan dipetakan satu per satu ke kategori kas tujuan atau dikosongkan sesuai pilihan pengguna; kategori yang sudah terhubung ke kas tujuan dipertahankan.
-- Kas baru dapat langsung memakai seluruh kategori pemiliknya melalui pilihan **Pakai semua kategori saya di kas ini** (aktif secara default).
+- Kas baru dapat langsung memakai seluruh kategori pemiliknya melalui pilihan **Pakai semua kategori saya di kas ini** (nonaktif secara default).
 - Melalui fitur **Kolaborator Kas**, hanya pemilik dengan masa aktif premium yang masih berlaku dapat membuat kolaborasi kas, baik kepada pengguna APKu lain yang sudah terdaftar dan terverifikasi maupun melalui link publik. Tombol tambah tidak tersedia untuk akun reguler atau premium kedaluwarsa, dan pembuatan juga ditolak oleh otorisasi server. Kolaborasi yang sudah ada tetap dapat dikelola dan dicabut oleh pemilik.
 - Email kolaborator boleh kosong untuk membuat link kas publik bertoken acak. Akses publik selalu **Viewer**, tanpa login, dan diperiksa pada setiap permintaan berdasarkan tanggal mulai serta berakhir. Mencabut akses langsung menonaktifkan link; kolaborasi dengan email tetap privat.
 - Email kolaborator diketik melalui input teks tanpa daftar email pengguna. Setelah input ditinggalkan, status terdaftar ditampilkan berwarna hijau atau belum terdaftar berwarna merah. Jika diisi, email yang belum terdaftar gagal validasi; pembatasan akun terverifikasi, bukan diri sendiri, dan bukan admin tetap berlaku.

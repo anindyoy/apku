@@ -21,7 +21,7 @@ class ListBukuKas extends ListRecords
 
     protected static string $resource = BukuKasResource::class;
 
-    public bool $hubungkanKategoriKasBaru = true;
+    public bool $hubungkanKategoriKasBaru = false;
 
     public function getSubheading(): Htmlable
     {
@@ -63,7 +63,7 @@ class ListBukuKas extends ListRecords
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = auth()->id();
                     // Pilihan ini bukan kolom kas, jadi disimpan sementara sampai kas selesai dibuat.
-                    $this->hubungkanKategoriKasBaru = (bool) ($data['hubungkan_kategori'] ?? true);
+                    $this->hubungkanKategoriKasBaru = (bool) ($data['hubungkan_kategori'] ?? false);
                     unset($data['hubungkan_kategori']);
 
                     return $data;

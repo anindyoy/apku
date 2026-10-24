@@ -1,4 +1,4 @@
-<?php
+/<?php
 
 use App\Filament\Pages\Kategori as HalamanKategori;
 use App\Filament\Pages\Onboarding;
@@ -110,7 +110,7 @@ test('transaksi menolak kategori yang tidak terhubung ke kasnya', function () {
 test('editor mengelola kategori kas bersama atas nama pemilik kas', function () {
     $data = siapkanDataKategoriKas();
     $editor = createRegularUserWithBukuKas();
-    $dompetEditor = Dompet::create(['user_id' => $editor->id, 'nama_dompet' => 'Dompet Editor', 'saldo' => 0, 'is_default' => true]);
+    $dompetEditor = Dompet::create(['user_id' => $editor->rid, 'nama_dompet' => 'Dompet Editor', 'saldo' => 0, 'is_default' => true]);
     bagikanKas($data['kas'], $editor, 'editor');
     $this->actingAs($editor);
     $service = app(KategoriService::class);
@@ -296,6 +296,26 @@ test('kas baru dapat langsung memakai seluruh kategori pemilik atau dibiarkan ta
 
     expect($kategori->terhubungKe($kasBaru->id))->toBe($hubungkan);
 })->with([true, false])->group('kategori-kas');
+
+test('default toggle hubungkan kategori di form tambah kas bernilai false', function () {
+    $user = createRegularUserWithBukuKas();
+    Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Cash', 'saldo' => 0, 'is_default' => true]);
+    $kategori = app(KategoriService::class)->buat($user, ['nama' => 'Belanja', 'tipe' => 'Pengeluaran'], [$user->buku_kas()->value('id')]);
+
+    Livewire::actingAs($user)
+        ->test(ListBukuKas::class)
+        ->mountAction('create')
+        ->assertActionDataSet(['hubungkan_kategori' => false]);
+
+    Livewire::actingAs($user)
+        ->test(ListBukuKas::class)
+        ->callAction('create', data: ['nama_buku' => 'Kas Baru Tanpa Opsi', 'saldo' => 0])
+        ->assertHasNoActionErrors();
+
+    $kasBaru = BukuKas::withoutGlobalScopes()->where('user_id', $user->id)->where('nama_buku', 'Kas Baru Tanpa Opsi')->firstOrFail();
+
+    expect($kategori->terhubungKe($kasBaru->id))->toBeFalse();
+})->group('kategori-kas');
 
 test('import mencari kategori pada kas baris dan membuat kategori baru di kas tersebut', function () {
     $data = siapkanDataKategoriKas();
