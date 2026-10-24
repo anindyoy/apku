@@ -411,6 +411,29 @@ test('user dapat membuat order dengan label voucher berulang tanpa membuat kode 
         ->and($order->total_pembayaran)->toBe(75000);
 })->group('langganan');
 
+test('admin dapat menyetujui verifikasi pembayaran melalui modal konfirmasi biasa tanpa form keterangan', function () {
+    Notification::fake();
+    $admin = User::factory()->create(['role' => 'admin']);
+    $user = User::factory()->create(['role' => 'user', 'type' => 'reguler', 'masa_aktif' => null]);
+    $order = Langganan::factory()->create([
+        'user_id' => $user->id,
+        'status' => StatusLangganan::MenungguVerifikasi,
+        'durasi_hari' => 30,
+        'bukti_pembayaran_path' => 'bukti/file.jpg',
+    ]);
+
+    Livewire::actingAs($admin)
+        ->test(ListLangganans::class)
+        ->callTableAction('setujui', $order)
+        ->assertHasNoTableActionErrors();
+
+    expect($order->fresh()->status)->toBe(StatusLangganan::Disetujui)
+        ->and($order->fresh()->diverifikasi_oleh)->toBe($admin->id)
+        ->and($order->fresh()->catatan_admin)->toBeNull()
+        ->and($user->fresh()->type)->toBe('premium')
+        ->and($user->fresh()->masa_aktif)->not->toBeNull();
+})->group('langganan');
+
 test('invoice menyalin nomor tujuan lewat clipboard atau manual', function () {
     $script = <<<'JS'
     import assert from 'node:assert/strict';

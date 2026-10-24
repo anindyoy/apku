@@ -190,9 +190,8 @@ class LanggananResource extends Resource
                 Action::make('setujui')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->form([Textarea::make('catatan_admin')->label('Catatan')->maxLength(1000)])
-                    ->action(function (Langganan $record, array $data): void {
-                        app(SetujuiLangganan::class)->handle(auth()->user(), $record, $data['catatan_admin'] ?? null);
+                    ->action(function (Langganan $record): void {
+                        app(SetujuiLangganan::class)->handle(auth()->user(), $record);
                         Notification::make()->title('Langganan berhasil disetujui')->success()->send();
                     })
                     ->visible(fn (Langganan $record): bool => auth()->user()->isAdmin()
