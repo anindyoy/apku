@@ -1,4 +1,4 @@
-/<?php
+<?php
 
 use App\Filament\Pages\Kategori as HalamanKategori;
 use App\Filament\Pages\Onboarding;
@@ -110,7 +110,7 @@ test('transaksi menolak kategori yang tidak terhubung ke kasnya', function () {
 test('editor mengelola kategori kas bersama atas nama pemilik kas', function () {
     $data = siapkanDataKategoriKas();
     $editor = createRegularUserWithBukuKas();
-    $dompetEditor = Dompet::create(['user_id' => $editor->rid, 'nama_dompet' => 'Dompet Editor', 'saldo' => 0, 'is_default' => true]);
+    $dompetEditor = Dompet::create(['user_id' => $editor->id, 'nama_dompet' => 'Dompet Editor', 'saldo' => 0, 'is_default' => true]);
     bagikanKas($data['kas'], $editor, 'editor');
     $this->actingAs($editor);
     $service = app(KategoriService::class);

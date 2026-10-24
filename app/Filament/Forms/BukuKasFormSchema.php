@@ -117,7 +117,7 @@ class BukuKasFormSchema
                 ->label('Pakai semua kategori saya di kas ini')
                 ->helperText('Aktifkan jika kas ini ingin memakai seluruh kategori yang sudah ada. Hubungan kategori dapat diubah di Setting > Kategori.')
                 ->default(false)
-                ->visible(fn (string $operation): bool => $operation === 'create'),
+                ->visible(fn (?BukuKas $record, ?string $operation = null): bool => $record === null && $operation !== 'edit'),
         ];
     }
 }
