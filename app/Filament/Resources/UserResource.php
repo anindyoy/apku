@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 class UserResource extends Resource
 {
@@ -103,6 +104,11 @@ class UserResource extends Resource
                     ->falseLabel('Belum terverifikasi'),
             ])
             ->actions([
+                Impersonate::make()
+                    ->label('Masuk sebagai pengguna')
+                    ->visible(fn (User $record): bool => app()->environment('local')
+                        && auth()->user()?->isAdmin()
+                        && ! $record->isAdmin()),
                 // Aksi bagi admin untuk memverifikasi akun pengguna secara manual.
                 Action::make('verifikasiEmail')
                     ->label('Verifikasi')

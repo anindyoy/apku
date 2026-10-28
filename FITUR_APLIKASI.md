@@ -141,6 +141,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Membuat, mengubah, dan menghapus pengguna.
 - Mengatur tipe akun dan masa aktif, dengan nilai tipe akun yang ditampilkan di UI (tabel dan form) disajikan menggunakan huruf kapital di awal.
 - Memverifikasi alamat email pengguna secara manual (individual maupun massal).
+- Pada environment `local`, admin dapat memakai aksi **Masuk sebagai pengguna** di daftar pengguna untuk meninjau aplikasi sebagai akun non-admin. Aksi tidak tersedia di environment lain dan akun admin tidak dapat menjadi target.
 
 ### 11. Fitur pendukung
 
@@ -317,7 +318,7 @@ Fitur berikut hanya tersedia untuk admin:
 - Melihat daftar pengguna.
 - Melihat status verifikasi email, menyaring daftar berdasarkan status verifikasi (Terverifikasi/Belum terverifikasi), serta memverifikasi email pengguna secara manual baik melalui aksi tabel per baris maupun aksi massal (bulk action).
 - Dashboard admin menjadi halaman utama setelah login dan hanya menampilkan data agregat: jumlah pengguna, jumlah akun premium aktif, jumlah pembayaran yang menunggu verifikasi, serta statistik trial (trial aktif, trial berakhir minggu ini, total trial, jumlah konversi, dan persentase konversi).
-- Daftar pengguna tidak menampilkan jumlah kas, transaksi, atau utang-piutang dan tidak menyediakan aksi impersonasi.
+- Daftar pengguna tidak menampilkan jumlah kas, transaksi, atau utang-piutang. Pada environment `local`, admin dapat memakai aksi **Masuk sebagai pengguna** untuk meninjau pengalaman akun non-admin; aksi tidak tersedia di environment lain.
 - Navigasi admin difokuskan pada dashboard, pengguna, operasional langganan, dan Setting. Menu transaksi, pencarian transaksi, laporan, kas, sumber dana, kategori, utang, piutang, dan Akun Saya disembunyikan untuk admin.
 - Admin dapat membuat, mengubah, dan menghapus pengguna serta mengatur tipe akun dan masa aktif.
 - Submenu **Harga Emas** (`/admin/pengaturan/setting`) pada halaman Setting khusus admin menyediakan form pengaturan harga emas serta saklar aktivasi fitur tabungan emas pengguna (default inactive). Nilai default harga emas ditampilkan sebagai placeholder; kosongkan kolom dan simpan untuk kembali memakai default.

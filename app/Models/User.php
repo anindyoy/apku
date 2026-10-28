@@ -57,6 +57,16 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return true;
     }
 
+    public function canImpersonate(): bool
+    {
+        return app()->environment('local') && $this->isAdmin();
+    }
+
+    public function canBeImpersonated(): bool
+    {
+        return ! $this->isAdmin();
+    }
+
     /**
      * Get the attributes that should be cast.
      *

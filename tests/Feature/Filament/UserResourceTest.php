@@ -90,6 +90,26 @@ test('aksi verifikasi email disembunyikan untuk pengguna yang sudah terverifikas
 })
     ->group('filament', 'user');
 
+test('admin dapat impersonasi pengguna hanya pada environment local', function () {
+    $adminUser = createAdminUser();
+    $user = User::factory()->create();
+    $adminTarget = User::factory()->create(['role' => 'admin']);
+
+    app()['env'] = 'local';
+
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
+        ->assertTableActionVisible('impersonate', $user)
+        ->assertTableActionHidden('impersonate', $adminTarget);
+
+    app()['env'] = 'testing';
+
+    Livewire::actingAs($adminUser)
+        ->test(ListUsers::class)
+        ->assertTableActionHidden('impersonate', $user);
+})
+    ->group('filament', 'user');
+
 test('admin dapat memverifikasi email pengguna secara massal', function () {
     $adminUser = createAdminUser();
     $unverifiedUsers = User::factory(3)->unverified()->create();
