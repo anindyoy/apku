@@ -217,7 +217,7 @@ test('action audit pada record hanya mengaudit sumber dana tersebut', function (
         ->and($bank->fresh()->saldo)->toBe(500000);
 });
 
-test('form audit menempatkan kas tanggal dan catatan dalam grid tiga kolom serta catatan opsional', function () {
+test('form audit meletakkan kontrol kas di bawah rincian dan mengaktifkan pencatatan secara default', function () {
     ['user' => $user] = buatDataAuditSaldo();
 
     $komponen = Livewire::actingAs($user)
@@ -229,10 +229,26 @@ test('form audit menempatkan kas tanggal dan catatan dalam grid tiga kolom serta
 
     $komponen->assertFormFieldExists('catatan', fn (Textarea $field): bool => ! $field->isRequired());
     $komponen->assertFormFieldDoesNotExist('rincian.0.catatan');
+    $komponen->assertFormFieldExists('catat_penyesuaian', fn ($field): bool => $field->getDefaultState() === true);
 
+    $komponen->assertFormFieldExists('buku_kas_id');
+    $komponenForm = $komponen->instance()->{$namaSchema};
     expect($grid)->toBeInstanceOf(Grid::class)
-        ->and($grid->getColumns('lg'))->toBe(3)
-        ->and($grid->getChildSchema()->getFlatFields())->toHaveKeys(['buku_kas_id', 'tanggal', 'catatan']);
+        ->and($grid->getChildSchema()->getFlatFields())->toHaveKeys(['tanggal', 'catatan'])
+        ->and(array_key_last($komponenForm->getFlatFields()) )->toBe('buku_kas_id');
+});
+
+test('audit dapat menyimpan snapshot tanpa membuat transaksi penyesuaian', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
+
+    $audit = app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Snapshot saja', [
+        ['dompet_id' => $tunai->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 450000],
+    ], false);
+
+    expect($audit->detail)->toHaveCount(1)
+        ->and($audit->detail->first()->selisih)->toBe(-50000)
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(0)
+        ->and($tunai->fresh()->saldo)->toBe(500000);
 });
 
 test('form audit menampilkan semua sumber dana pada kas terpilih termasuk tanpa transaksi', function () {

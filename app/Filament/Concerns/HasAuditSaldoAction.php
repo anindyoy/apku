@@ -9,6 +9,7 @@ use App\Models\Transaksi;
 use App\Services\AuditSaldoDompetService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -50,18 +51,8 @@ trait HasAuditSaldoAction
             ->modalHeading('Cocokkan saldo aplikasi dengan saldo riil')
             ->modalDescription('Masukkan saldo riil setiap sumber dana. Selisih akan dicatat sebagai transaksi penyesuaian saldo.')
             ->form([
-                Grid::make(['default' => 1, 'lg' => 3])
+                Grid::make(['default' => 1, 'lg' => 2])
                     ->schema([
-                        Select::make('buku_kas_id')
-                            ->label('Kas pencatatan')
-                            ->options(fn (?SumberDana $record): array => $this->opsiKasAudit($record))
-                            ->default(fn (?SumberDana $record): ?int => $this->kasDefaultAudit($record))
-                            ->live()
-                            ->afterStateUpdated(fn (mixed $state, Set $set, ?SumberDana $record): mixed => $set(
-                                'rincian',
-                                $this->rincianAuditUntukKas((int) ($state ?? 0), $record),
-                            ))
-                            ->required(),
                         DateTimePicker::make('tanggal')
                             ->default(now())
                             ->seconds(false)
@@ -78,7 +69,7 @@ trait HasAuditSaldoAction
                     ->label('Saldo per sumber dana pada kas terpilih')
                     ->helperText('Semua sumber dana yang dapat Anda kelola ditampilkan, termasuk yang belum memiliki transaksi pada kas terpilih.')
                     ->default(fn (Get $get, ?SumberDana $record): array => $this->rincianAuditUntukKas(
-                        (int) ($get('buku_kas_id') ?? 0),
+                        (int) ($get('buku_kas_id') ?? $this->kasDefaultAudit($record) ?? 0),
                         $record,
                     ))
                     ->schema([
@@ -133,6 +124,25 @@ trait HasAuditSaldoAction
                     ->deletable(false)
                     ->reorderable(false)
                     ->required(),
+                Grid::make(['default' => 1, 'lg' => 2])
+                    ->schema([
+                        Checkbox::make('catat_penyesuaian')
+                            ->label('Catat transaksi penyesuaian pada kas')
+                            ->default(true)
+                            ->live(),
+                        Select::make('buku_kas_id')
+                            ->label('Kas pencatatan')
+                            ->options(fn (?SumberDana $record): array => $this->opsiKasAudit($record))
+                            ->default(fn (?SumberDana $record): ?int => $this->kasDefaultAudit($record))
+                            ->live()
+                            ->visible(fn (Get $get): bool => (bool) $get('catat_penyesuaian'))
+                            ->dehydratedWhenHidden()
+                            ->afterStateUpdated(fn (mixed $state, Set $set, ?SumberDana $record): mixed => $set(
+                                'rincian',
+                                $this->rincianAuditUntukKas((int) ($state ?? 0), $record),
+                            ))
+                            ->required(fn (Get $get): bool => (bool) $get('catat_penyesuaian')),
+                    ]),
             ])
             ->visible(fn (?SumberDana $record): bool => $record === null
                 || (auth()->user()->dapatMengelolaTransaksiPadaDompet($record) && $this->opsiKasAudit($record) !== []))
@@ -170,10 +180,11 @@ trait HasAuditSaldoAction
 
                 app(AuditSaldoDompetService::class)->simpan(
                     auth()->user(),
-                    BukuKas::findOrFail($data['buku_kas_id']),
+                    BukuKas::findOrFail($data['buku_kas_id'] ?? $this->kasDefaultAudit($record)),
                     $data['tanggal'],
                     $data['catatan'],
                     $data['rincian'],
+                    (bool) ($data['catat_penyesuaian'] ?? true),
                 );
 
                 Notification::make()

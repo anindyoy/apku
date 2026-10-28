@@ -93,7 +93,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 
 ### 5. Sumber Dana
 
-- Membuat dan mengubah sumber dana sebagai representasi tempat penyimpanan uang, misalnya kas tunai atau rekening bank.
+- Membuat dan mengubah sumber dana sebagai representasi tempat penyimpanan uang, misalnya kas tunai atau rekening bank. Form tambah dan ubah menyediakan saldo yang dapat diedit.
 - Nama sumber dana harus unik di antara sumber dana aktif milik pengguna yang sama; nama dari sumber dana yang sudah dihapus dapat digunakan kembali.
 - Menjadikan sumber dana tertentu sebagai sumber dana default.
 - Memindahkan saldo ke sumber dana lain sebelum menghapus sumber dana.
@@ -266,9 +266,9 @@ Pengguna baru diarahkan ke form pengaturan awal 1 halaman sebelum menggunakan fi
 - Daftar sumber dana menggunakan card Filament responsif yang menampilkan saldo, status akses, deskripsi, dan status sumber dana default dengan label yang jelas. Kisi menampilkan minimal dua kolom dan maksimal tiga: satu atau dua sumber dana memakai dua kolom, sedangkan tiga atau lebih memakai tiga kolom pada layar lebar. Data setiap halaman, pencarian, dan urutan list disimpan dalam cache hingga tiga hari dan diperbarui saat data sumber dana berubah.
 - Tetap menampilkan nama sumber dana yang sudah dihapus pada riwayat transaksi dan laporan.
 - Pengguna dapat mencocokkan saldo seluruh sumber dana yang dapat dikelola dengan memasukkan saldo riil hasil pengecekan di luar aplikasi.
-- Halaman sumber dana menyediakan pembuatan, perubahan, pemilihan sumber dana default, serta pemindahan saldo sebelum penghapusan.
+- Halaman sumber dana menyediakan pembuatan, perubahan nama, jenis, saldo, dan deskripsi, pemilihan sumber dana default, serta pemindahan saldo sebelum penghapusan.
 - Daftar sumber dana dan modal tambah menjelaskan sisa slot atau batas kuota sumber dana untuk pengguna Reguler dalam panel padat berisi satu kalimat. Panel berlatar kuning saat tersisa 1 slot dan merah saat batas tercapai, dengan dukungan mode gelap. Saat batas tercapai, daftar menampilkan pesan bahwa pengguna reguler tidak bisa menambah lagi karena kuota sudah terpenuhi dan aksi tambah disembunyikan; validasi server tetap berlaku. Premium aktif tidak menampilkan pesan kuota dan memiliki slot tidak terbatas, sedangkan Premium kedaluwarsa kembali mengikuti batas Reguler.
-- Form pencocokan saldo memilih kas utama secara default (atau kas utama pada pencocokan per kartu) dan menyediakan saldo riil, tanggal, kas pencatatan, serta catatan umum opsional. Semua sumber dana yang dapat dikelola ditampilkan untuk setiap kas terpilih, termasuk sumber dana tanpa transaksi pada kas tersebut. Kas pencatatan, tanggal, dan catatan pencocokan tersusun dalam grid tiga kolom pada layar lebar; input catatan sumber dana tidak ditampilkan.
+- Form pencocokan saldo memilih kas utama secara default dan menyediakan saldo riil, tanggal, serta catatan umum opsional. Semua sumber dana yang dapat dikelola ditampilkan, termasuk sumber dana tanpa transaksi. Saklar **Catat transaksi penyesuaian pada kas** aktif secara default; saat aktif, kas pencatatan dapat dipilih dan transaksi penyesuaian dibuat. Saat dinonaktifkan, audit tetap menyimpan snapshot saldo tanpa membuat transaksi penyesuaian. Kontrol pencatatan kas berada di bagian bawah form; input catatan sumber dana tidak ditampilkan.
 - Form pencocokan hanya menyediakan penghitung uang kertas dan logam pada sumber dana berjenis **Tunai**; input pecahan uang kertas tersusun dalam dua kolom pada layar lebar. Total kas dan tombol **Ulangi** berdampingan dalam dua kolom pada layar lebar. Toggle **Uang Logam** menampilkan atau menyembunyikan pecahan koin dan nonaktif secara default. Jumlah pecahan mengisi saldo riil secara otomatis dan tombol ulangi mengembalikan hitungan ke awal. Saldo riil sumber dana jenis lain tetap dapat dimasukkan secara manual.
 - Cocokkan Saldo tidak ditampilkan pada navbar. Akses pencocokan tersedia melalui tombol **Cocokkan saldo** dan **Riwayat pencocokan** pada halaman Sumber Dana; daftar riwayat tetap menyediakan tombol **Tambah pencocokan**.
 

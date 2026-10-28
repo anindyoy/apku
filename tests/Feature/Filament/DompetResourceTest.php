@@ -51,11 +51,13 @@ test('halaman dompet dapat membuat dan mengubah dompet', function () {
         ->test(ListDompet::class)
         ->callTableAction('edit', $bank, data: [
             'nama_dompet' => 'Bank Bisnis',
+            'saldo' => '250.000',
             'description' => 'Rekening bisnis',
         ])
         ->assertHasNoTableActionErrors();
 
-    expect($bank->fresh()->nama_dompet)->toBe('Bank Bisnis');
+    expect($bank->fresh()->nama_dompet)->toBe('Bank Bisnis')
+        ->and($bank->fresh()->saldo)->toBe(250000);
 });
 
 test('nama sumber dana dapat digunakan kembali setelah sumber dana dihapus', function () {

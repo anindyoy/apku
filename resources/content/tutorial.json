@@ -133,7 +133,7 @@
         "intro": "Sumber dana merepresentasikan uang tunai, rekening bank, atau tempat penyimpanan uang lainnya.",
         "steps": [
             "Buka Setting > Sumber Dana, tambahkan sumber dana, lalu isi nama dan deskripsi sesuai tempat penyimpanan uang. Nama harus berbeda dari sumber dana aktif lain milik Anda; nama sumber dana yang sudah dihapus boleh digunakan kembali.",
-            "Gunakan aksi ubah untuk memperbarui informasi, atau jadikan sumber dana yang paling sering digunakan sebagai default.",
+            "Gunakan aksi ubah untuk memperbarui nama, jenis, saldo, dan deskripsi sumber dana, atau jadikan sumber dana yang paling sering digunakan sebagai default.",
             "Periksa label Saldo, Default, Status, Jenis, dan Deskripsi pada card sumber dana sebelum mencatat transaksi. Perubahan sumber dana dan saldo diperbarui pada daftar setelah disimpan.",
             "Saat menghapus sumber dana, ikuti alur pemindahan saldo ke sumber dana lain dan periksa kembali hasilnya."
         ],
@@ -148,7 +148,7 @@
         "intro": "Cocokkan saldo aplikasi dengan saldo riil dari uang tunai atau rekening Anda.",
         "steps": [
             "Periksa uang tunai dan saldo rekening di luar aplikasi terlebih dahulu.",
-            "Buka Setting > Sumber Dana lalu klik Cocokkan saldo pada kartu sumber dana yang ingin diperiksa. Cocokkan saldo dari kartu hanya mencakup sumber dana tersebut. Untuk mencocokkan beberapa sumber dana sekaligus, gunakan Pencocokan massal pada header halaman dan pilih satu kas; semua sumber dana yang dapat Anda kelola akan ditampilkan, termasuk yang belum memiliki transaksi pada kas itu. Untuk melihat riwayat, klik Riwayat pencocokan pada halaman Sumber dana atau Tambah pencocokan dari daftar riwayat. Kas utama dipilih secara default. Catatan pencocokan boleh dikosongkan."
+            "Buka Setting > Sumber Dana lalu klik Cocokkan saldo pada kartu sumber dana yang ingin diperiksa. Cocokkan saldo dari kartu hanya mencakup sumber dana tersebut. Untuk mencocokkan beberapa sumber dana sekaligus, gunakan Pencocokan massal pada header halaman dan pilih satu kas; semua sumber dana yang dapat Anda kelola akan ditampilkan, termasuk yang belum memiliki transaksi pada kas itu. Untuk melihat riwayat, klik Riwayat pencocokan pada halaman Sumber dana atau Tambah pencocokan dari daftar riwayat. Saklar Catat transaksi penyesuaian pada kas aktif secara default dan kontrol kas pencatatan berada di bagian bawah form. Matikan saklar untuk menyimpan snapshot saldo tanpa membuat transaksi penyesuaian. Kas utama dipilih secara default. Catatan pencocokan boleh dikosongkan.",
             "Penghitung uang kas hanya ditampilkan pada sumber dana berjenis Tunai. Input pecahan uang kertas tersusun dua kolom pada layar lebar. Masukkan jumlah lembar atau keping setiap pecahan; toggle Uang Logam nonaktif secara default dan dapat diaktifkan untuk menampilkan pecahan koin. Total otomatis mengisi saldo riil; total kas dan tombol Ulangi tampil dua kolom pada layar lebar. Sumber dana non-Tunai hanya menerima saldo riil manual. Catatan sumber dana tidak tersedia pada form pencocokan.",
             "Tinjau selisih, simpan pencocokan, lalu periksa riwayat pencocokan dan transaksi penyesuaian. Jika saldo berubah selama proses, ulangi berdasarkan saldo terbaru."
         ],

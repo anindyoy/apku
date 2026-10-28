@@ -35,9 +35,10 @@ class SumberDanaFormSchema
 
             KomponenNominal::terapkan(
                 TextInput::make('saldo')
+                    ->label('Saldo')
                     ->default(0)
-                    ->disabled()
-                    ->dehydrated()
+                    ->required()
+                    ->numeric()
             ),
 
             TextInput::make('description')

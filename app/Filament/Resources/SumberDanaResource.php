@@ -31,6 +31,7 @@ class SumberDanaResource extends Resource
     }
 
     protected static ?string $cluster = Pengaturan::class;
+    protected static ?string $modelLabel = 'Sumber Dana';
 
     protected static ?string $model = SumberDana::class;
 
