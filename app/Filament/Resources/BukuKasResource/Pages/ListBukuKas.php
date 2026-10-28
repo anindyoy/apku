@@ -55,7 +55,7 @@ class ListBukuKas extends ListRecords
                 }),
 
             Actions\CreateAction::make()
-                ->modalDescription(fn (): Htmlable => KuotaAkun::kas(auth()->user()))
+                ->modalDescription(fn (): string => KuotaAkun::teksKas(auth()->user()))
                 ->visible(fn (): bool => auth()->user()->dapatMembuatBukuKas())
                 ->before(function (): void {
                     abort_unless(auth()->user()->dapatMembuatBukuKas(), 403);

@@ -50,7 +50,7 @@ class ListSumberDana extends ListRecords
                 ->icon('heroicon-o-clock')
                 ->url(AuditSaldoDompetResource::getUrl()),
             CreateAction::make()
-                ->modalDescription(fn (): Htmlable => KuotaAkun::sumberDana(auth()->user()))
+                ->modalDescription(fn (): string => KuotaAkun::teksSumberDana(auth()->user()))
                 ->visible(fn (): bool => auth()->user()->dapatMembuatSumberDana())
                 ->before(fn () => abort_unless(auth()->user()->dapatMembuatSumberDana(), 403))
                 ->mutateFormDataUsing(function (array $data): array {

@@ -24,6 +24,16 @@ class KuotaAkun
         return self::ringkasan($user, 'sumber dana', $user->sumberDana()->count());
     }
 
+    public static function teksSumberDana(User $user): string
+    {
+        return strip_tags(self::sumberDana($user)->toHtml());
+    }
+
+    public static function teksKas(User $user): string
+    {
+        return strip_tags(self::kas($user)->toHtml());
+    }
+
     private static function ringkasan(User $user, string $jenis, int $jumlah): Htmlable
     {
         $admin = $user->isAdmin();

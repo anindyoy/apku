@@ -55,7 +55,11 @@ test('kuota akun ditampilkan pada daftar dan modal sesuai jumlah dan masa aktif'
     if ($tanpaBatas || $jumlah < 2) {
         $component->assertActionVisible('create')->mountAction('create');
         $deskripsiModal = $component->instance()->getMountedAction()->getModalDescription();
-        expect($deskripsiModal?->toHtml() ?? '')->toBe($teks);
+        $teksModal = $deskripsiModal instanceof \Illuminate\Contracts\Support\Htmlable
+            ? $deskripsiModal->toHtml()
+            : (string) $deskripsiModal;
+        expect($teksModal)->toBe(trim(strip_tags($teks)))
+            ->and($teksModal)->not->toContain('<link', '<span', 'data-kuota-status=');
     } else {
         $component->assertActionHidden('create');
         expect($teks)->toContain('kuota sudah terpenuhi');

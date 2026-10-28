@@ -105,7 +105,8 @@ class UserResource extends Resource
             ])
             ->actions([
                 Impersonate::make()
-                    ->label('Masuk sebagai pengguna')
+                    ->iconButton()
+                    ->redirectTo('/admin')
                     ->visible(fn (User $record): bool => app()->environment('local')
                         && auth()->user()?->isAdmin()
                         && ! $record->isAdmin()),
