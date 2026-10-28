@@ -26,12 +26,30 @@ class KuotaAkun
 
     public static function teksSumberDana(User $user): string
     {
-        return strip_tags(self::sumberDana($user)->toHtml());
+        return self::teksRingkasan($user, 'sumber dana', $user->sumberDana()->count());
     }
 
     public static function teksKas(User $user): string
     {
-        return strip_tags(self::kas($user)->toHtml());
+        return self::teksRingkasan($user, 'kas', $user->buku_kas()->count());
+    }
+
+    private static function teksRingkasan(User $user, string $jenis, int $jumlah): string
+    {
+        $admin = $user->isAdmin();
+        if ($user->masaAktifBerlaku() && ! $admin) {
+            return '';
+        }
+
+        if ($admin) {
+            return ucfirst(str_replace('_', ' ', $jenis)).' '.$jumlah.', kuota Admin tidak terbatas.';
+        }
+
+        return match (max(0, 2 - $jumlah)) {
+            0 => 'Sebagai pengguna reguler, Anda tidak bisa menambah '.$jenis.' lagi karena kuota sudah terpenuhi.',
+            1 => 'Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi '.$jenis.'.',
+            default => 'Sebagai pengguna reguler, Anda bisa menambah hingga dua '.$jenis.'.',
+        };
     }
 
     private static function ringkasan(User $user, string $jenis, int $jumlah): Htmlable

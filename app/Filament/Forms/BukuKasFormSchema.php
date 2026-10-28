@@ -56,7 +56,6 @@ class BukuKasFormSchema
                     ->label('Target nominal')
                     ->placeholder('Contoh: 10.000.000')
                     ->nullable()
-                    ->minValue(10000)
                     ->disabled(fn (): bool => ! auth()->user()?->masaAktifBerlaku())
                     ->visible(fn (Get $get): bool => (bool) $get('is_tabungan'))
                     ->dehydratedWhenHidden()
@@ -64,9 +63,15 @@ class BukuKasFormSchema
                         function (?BukuKas $record): \Closure {
                             return function (string $attribute, $value, \Closure $fail) use ($record): void {
                                 $user = auth()->user();
-                                $valInt = filled($value) ? (int) $value : null;
+                                $valInt = filled($value) ? KomponenNominal::bersihkanKeInteger($value) : null;
                                 $oldInt = $record?->goal !== null ? (int) $record->goal : null;
-                                if ($valInt !== $oldInt && ! $user?->masaAktifBerlaku()) {
+                                $berubah = $valInt !== $oldInt;
+
+                                if (filled($value) && $valInt < 10000 && (! $record || $berubah)) {
+                                    $fail('Target nominal minimal bernilai 10000.');
+                                }
+
+                                if ($berubah && ! $user?->masaAktifBerlaku()) {
                                     $fail('Hanya pengguna Premium yang dapat mengubah target kas tabungan.');
                                 }
                             };

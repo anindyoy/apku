@@ -51,7 +51,7 @@ class ListDompet extends ListRecords
                 ->icon('heroicon-o-clock')
                 ->url(AuditSaldoDompetResource::getUrl()),
             CreateAction::make()
-                ->modalDescription(fn (): Htmlable => KuotaAkun::dompet(auth()->user()))
+                ->modalDescription(fn (): string => KuotaAkun::teksSumberDana(auth()->user()))
                 ->visible(fn (): bool => auth()->user()->dapatMembuatDompet())
                 ->before(fn () => abort_unless(auth()->user()->dapatMembuatDompet(), 403))
                 ->mutateFormDataUsing(function (array $data): array {
