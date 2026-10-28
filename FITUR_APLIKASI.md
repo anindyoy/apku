@@ -94,6 +94,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 ### 5. Sumber Dana
 
 - Membuat dan mengubah sumber dana sebagai representasi tempat penyimpanan uang, misalnya kas tunai atau rekening bank.
+- Nama sumber dana harus unik di antara sumber dana aktif milik pengguna yang sama; nama dari sumber dana yang sudah dihapus dapat digunakan kembali.
 - Menjadikan sumber dana tertentu sebagai sumber dana default.
 - Memindahkan saldo ke sumber dana lain sebelum menghapus sumber dana.
 - Pencocokan baru dapat dibuat melalui tombol **Tambah pencocokan** pada daftar Cocokkan Saldo, tombol **Cocokkan saldo** di setiap kartu Sumber Dana, atau tombol pencocokan massal pada header halaman Sumber Dana. Pencocokan dari kartu hanya mencakup sumber dana tersebut dan pilihan kas dibatasi pada kas yang memiliki transaksinya. Pencocokan dari header memungkinkan memilih satu kas dan memeriksa semua sumber dana yang memiliki transaksi pada kas tersebut.
@@ -387,7 +388,7 @@ Fitur berikut hanya tersedia untuk admin:
 
 - `buku_kas`: `id`, `user_id` FK users cascade delete, `nama_buku`, `saldo` integer, `is_default` boolean default false, `is_tabungan` boolean default false, `goal` integer nullable, `tanggal_goal` date nullable, `description(200)` nullable, `pernah_dikolaborasikan` boolean default false, `timestamps`, unik `[user_id, nama_buku]`, indeks `[user_id, is_tabungan, nama_buku]`.
 - `share_buku`: `id`, `buku_kas_id` FK `buku_kas` cascade delete, `user_id` FK users nullable cascade delete (kosong untuk link publik), `privilege` enum `viewer`/`editor`, `berlaku_mulai` datetime nullable, `berlaku_sampai` datetime nullable, `invited_by_user_id` FK users nullable null on delete, `public_token(64)` nullable unik, `timestamps`, unik `[buku_kas_id, user_id]`, indeks `[user_id, berlaku_mulai, berlaku_sampai]`.
-- `sumber_dana` (dompet): `id`, `user_id` FK users cascade delete, `nama_dompet(50)`, `jenis(20)` default `tunai` terindeks, `saldo` bigInteger default 0, `is_default` boolean default false, `description(200)` nullable, `timestamps` + `deleted_at` (soft delete), unik `[user_id, nama_dompet]`, indeks `[user_id, is_default]`.
+- `sumber_dana` (dompet): `id`, `user_id` FK users cascade delete, `nama_dompet(50)`, `nama_dompet_aktif(50)` kolom virtual berisi nama hanya jika sumber dana belum dihapus, `jenis(20)` default `tunai` terindeks, `saldo` bigInteger default 0, `is_default` boolean default false, `description(200)` nullable, `timestamps` + `deleted_at` (soft delete), unik `[user_id, nama_dompet_aktif]` agar nama unik pada sumber dana aktif dan bisa digunakan kembali setelah dihapus, indeks `[user_id, is_default]`.
 
 #### Kategori
 

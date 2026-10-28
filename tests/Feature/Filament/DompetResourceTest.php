@@ -58,6 +58,40 @@ test('halaman dompet dapat membuat dan mengubah dompet', function () {
     expect($bank->fresh()->nama_dompet)->toBe('Bank Bisnis');
 });
 
+test('nama sumber dana dapat digunakan kembali setelah sumber dana dihapus', function () {
+    ['user' => $user] = buatPenggunaUntukUiDompet();
+    $bank = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Bank Lama',
+        'saldo' => 0,
+    ]);
+    $bank->delete();
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->callAction('create', data: [
+            'nama_dompet' => 'Bank Lama',
+            'saldo' => 0,
+            'description' => 'Rekening baru',
+        ])
+        ->assertHasNoActionErrors();
+
+    expect($user->sumberDana()->where('nama_dompet', 'Bank Lama')->exists())->toBeTrue()
+        ->and(Dompet::withTrashed()->findOrFail($bank->id)->trashed())->toBeTrue();
+});
+
+test('nama sumber dana tetap harus unik di antara sumber dana aktif', function () {
+    ['user' => $user] = buatPenggunaUntukUiDompet();
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->callAction('create', data: [
+            'nama_dompet' => 'Cash',
+            'saldo' => 0,
+        ])
+        ->assertHasActionErrors(['nama_dompet' => 'unique']);
+});
+
 test('daftar dompet menggunakan kartu responsif', function () {
     ['user' => $user, 'cash' => $cash] = buatPenggunaUntukUiDompet();
     $bank = Dompet::create([

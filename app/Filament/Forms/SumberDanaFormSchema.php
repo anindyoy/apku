@@ -21,6 +21,7 @@ class SumberDanaFormSchema
                 ->rules(fn (?SumberDana $record): array => [
                     Rule::unique('sumber_dana', 'nama_dompet')
                         ->where('user_id', auth()->id())
+                        ->whereNull('deleted_at')
                         ->ignore($record?->id),
                 ])
                 // Komentar kode boleh menyebut nama kolom; placeholder UI memakai sumber dana.

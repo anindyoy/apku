@@ -72,6 +72,7 @@ test('tutorial kuota kas dan sumber dana menjelaskan batas serta masa aktif prem
     }
 
     expect($topik['dompet']['note'])->toContain('minimal dua dan maksimal tiga kolom', 'satu atau dua sumber dana', 'tiga atau lebih');
+    expect(implode(' ', $topik['dompet']['steps']))->toContain('nama sumber dana yang sudah dihapus boleh digunakan kembali');
     expect($topik['kas']['note'])->toContain('Kas bersama tidak dihitung');
     $this->get('/tutorial')->assertSuccessful();
 });
