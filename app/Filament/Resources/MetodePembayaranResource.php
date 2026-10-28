@@ -69,7 +69,7 @@ class MetodePembayaranResource extends Resource
                 ->disk('local')
                 ->directory('metode-pembayaran/qr')
                 ->visibility('private')
-                ->image()
+                ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                 ->maxSize(3072),
             TextInput::make('urutan')
                 ->numeric()
