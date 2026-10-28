@@ -76,15 +76,6 @@ class AuditSaldoDompetService
                     throw new AuthorizationException('Sumber dana audit tidak dapat dikelola.');
                 }
 
-                if (! Transaksi::withoutGlobalScopes()
-                    ->where('buku_kas_id', $bukuKas->id)
-                    ->where('sumber_dana_id', $record->id)
-                    ->exists()) {
-                    throw ValidationException::withMessages([
-                        'rincian' => "Sumber dana {$record->nama_dompet} tidak memiliki transaksi pada kas terpilih.",
-                    ]);
-                }
-
                 if ((int) $record->saldo !== (int) $item['saldo_aplikasi']) {
                     throw ValidationException::withMessages([
                         'rincian' => "Saldo sumber dana {$record->nama_dompet} telah berubah. Muat ulang data audit.",

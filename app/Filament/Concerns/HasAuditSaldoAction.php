@@ -76,7 +76,7 @@ trait HasAuditSaldoAction
                     ]),
                 Repeater::make('rincian')
                     ->label('Saldo per sumber dana pada kas terpilih')
-                    ->helperText('Hanya sumber dana yang memiliki transaksi pada kas terpilih yang ditampilkan.')
+                    ->helperText('Semua sumber dana yang dapat Anda kelola ditampilkan, termasuk yang belum memiliki transaksi pada kas terpilih.')
                     ->default(fn (Get $get, ?SumberDana $record): array => $this->rincianAuditUntukKas(
                         (int) ($get('buku_kas_id') ?? 0),
                         $record,
@@ -202,14 +202,7 @@ trait HasAuditSaldoAction
             return $opsiKas;
         }
 
-        $idKasTerkait = Transaksi::withoutGlobalScopes()
-            ->where('sumber_dana_id', $dompet->id)
-            ->distinct()
-            ->pluck('buku_kas_id')
-            ->map(fn ($id): string => (string) $id)
-            ->all();
-
-        return array_intersect_key($opsiKas, array_flip($idKasTerkait));
+        return $opsiKas;
     }
 
     private function kasDefaultAudit(?SumberDana $dompet): ?int
@@ -234,7 +227,6 @@ trait HasAuditSaldoAction
 
         return SumberDana::query()
             ->when($dompetTerpilih !== null, fn ($query) => $query->whereKey($dompetTerpilih->id))
-            ->whereHas('transaksi', fn ($query) => $query->where('buku_kas_id', $bukuKasId))
             ->get()
             ->filter(fn (SumberDana $dompet): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet))
             ->map(fn (SumberDana $dompet): array => [

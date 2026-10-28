@@ -235,7 +235,7 @@ test('form audit menempatkan kas tanggal dan catatan dalam grid tiga kolom serta
         ->and($grid->getChildSchema()->getFlatFields())->toHaveKeys(['buku_kas_id', 'tanggal', 'catatan']);
 });
 
-test('form audit hanya menampilkan sumber dana yang memiliki transaksi pada kas terpilih', function () {
+test('form audit menampilkan semua sumber dana pada kas terpilih termasuk tanpa transaksi', function () {
     ['user' => $user, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
     $kasLain = BukuKas::create([
         'user_id' => $user->id,
@@ -261,17 +261,17 @@ test('form audit hanya menampilkan sumber dana yang memiliki transaksi pada kas 
         ->mountAction('auditSaldo');
     $namaSchema = $komponen->instance()->getMountedActionSchemaName();
     $rincian = $komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true)['rincian'];
-    expect(collect($rincian->getState())->pluck('dompet_id')->sort()->values()->all())->toBe([$tunai->id, $bank->id]);
+    expect(collect($rincian->getState())->pluck('dompet_id')->sort()->values()->all())->toBe([$tunai->id, $bank->id, $sumberDanaLain->id]);
 
     $komponen->set('mountedActions.0.data.buku_kas_id', $kasLain->id);
 
     $namaSchema = $komponen->instance()->getMountedActionSchemaName();
     $rincian = $komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true)['rincian'];
 
-    expect(collect($rincian->getState())->pluck('dompet_id')->values()->all())->toBe([$sumberDanaLain->id]);
+    expect(collect($rincian->getState())->pluck('dompet_id')->sort()->values()->all())->toBe([$tunai->id, $bank->id, $sumberDanaLain->id]);
 });
 
-test('audit menolak sumber dana yang tidak memiliki transaksi pada kas terpilih', function () {
+test('audit menerima sumber dana tanpa transaksi pada kas terpilih', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
     $kasLain = BukuKas::create([
         'user_id' => $user->id,
@@ -279,9 +279,12 @@ test('audit menolak sumber dana yang tidak memiliki transaksi pada kas terpilih'
         'saldo' => 0,
     ]);
 
-    expect(fn () => app(AuditSaldoDompetService::class)->simpan($user, $kasLain, now(), null, [
+    $audit = app(AuditSaldoDompetService::class)->simpan($user, $kasLain, now(), null, [
         ['dompet_id' => $tunai->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 450000],
-    ]))->toThrow(ValidationException::class);
+    ]);
+
+    expect($audit->detail)->toHaveCount(1)
+        ->and($tunai->fresh()->saldo)->toBe(450000);
 });
 
 test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () {
