@@ -46,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('logo-options/apku-dompet.svg'))
             ->maxContentWidth(Width::Full)
             ->login()
+            ->passwordReset()
             ->navigationItems([
                 NavigationItem::make('Tutorial Penggunaan')
                     ->url(fn (): string => route('tutorial'))
