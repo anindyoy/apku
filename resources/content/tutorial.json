@@ -130,14 +130,14 @@
         "page": "Sumber Dana",
         "category": "Pengelolaan uang",
         "title": "Mengelola sumber dana",
-        "intro": "Sumber dana merepresentasikan uang tunai, rekening bank, atau tempat penyimpanan uang lainnya.",
+        "intro": "Sumber dana adalah tempat uang Anda disimpan, misalnya uang tunai di rumah, rekening bank, atau saldo e-wallet.",
         "steps": [
-            "Buka Setting > Sumber Dana, tambahkan sumber dana, lalu isi nama dan deskripsi sesuai tempat penyimpanan uang. Nama harus berbeda dari sumber dana aktif lain milik Anda; nama sumber dana yang sudah dihapus boleh digunakan kembali.",
-            "Gunakan aksi ubah untuk memperbarui nama, jenis, saldo, dan deskripsi sumber dana, atau jadikan sumber dana yang paling sering digunakan sebagai default.",
+            "Buka Setting > Sumber Dana, tambahkan sumber dana, lalu isi nama yang mudah dikenali, misalnya Tunai di rumah, BCA, atau GoPay. Nama harus berbeda dari sumber dana aktif lain milik Anda; nama sumber dana yang sudah dihapus boleh digunakan kembali.",
+            "Pilih jenis sumber dana yang sesuai: Tunai untuk uang tunai, Rekening bank untuk rekening bank, E-wallet untuk saldo layanan digital, atau Lainnya. Gunakan aksi ubah untuk memperbarui nama, jenis, saldo, dan deskripsi, atau jadikan sumber dana yang paling sering digunakan sebagai default.",
             "Periksa label Saldo, Default, Status, Jenis, dan Deskripsi pada card sumber dana sebelum mencatat transaksi. Perubahan sumber dana dan saldo diperbarui pada daftar setelah disimpan.",
             "Saat menghapus sumber dana, ikuti alur pemindahan saldo ke sumber dana lain dan periksa kembali hasilnya."
         ],
-        "example": "Gunakan sumber dana Tunai dan Rekening Bank untuk mengetahui di mana uang Anda berada.",
+        "example": "Buat Tunai di rumah untuk uang tunai, BCA untuk rekening bank, dan GoPay untuk saldo e-wallet agar mudah mengetahui di mana uang Anda berada.",
         "note": "Kisi kartu Sumber dana minimal dua dan maksimal tiga kolom: jika ada satu atau dua sumber dana, tampil dua kolom; jika ada tiga atau lebih, tampil tiga kolom pada layar lebar. Tombol aksi pada kartu Sumber dana turun ke baris berikutnya saat ruang sempit agar tetap berada di dalam kartu. Daftar Sumber dana menampilkan sisa slot atau batas kuota Reguler dalam panel berwarna berisi satu kalimat, sedangkan modal tambah menampilkan keterangannya sebagai teks biasa, misalnya: Sebagai pengguna reguler, Anda hanya bisa menambah satu lagi sumber dana. Saat penuh, pesan menjelaskan bahwa Anda tidak bisa menambah sumber dana lagi karena kuota sudah terpenuhi. Latar kuning berarti tersisa 1 slot, sedangkan latar merah berarti kuota sudah penuh. Reguler mendapat maksimal 2 sumber dana: sumber dana utama dan satu tambahan gratis. Saat kuota penuh, keterangan batas tercapai muncul dan aksi tambah disembunyikan; aktifkan Premium untuk menambah sumber dana. Premium aktif memiliki slot tidak terbatas dan tidak menampilkan pesan kuota. Setelah Premium berakhir, batas Reguler berlaku kembali. Sumber dana yang dihapus tidak mengisi kuota, tetapi namanya tetap tersedia pada riwayat transaksi dan laporan; nama tersebut dapat digunakan kembali untuk sumber dana aktif yang baru."
     },
     {
@@ -145,7 +145,7 @@
         "page": "Sumber Dana",
         "category": "Pengelolaan uang",
         "title": "Cocokkan dan penyesuaian saldo sumber dana",
-        "intro": "Cocokkan saldo aplikasi dengan saldo riil dari uang tunai atau rekening Anda.",
+        "intro": "Cocokkan Saldo membandingkan saldo yang tercatat di APKu dengan jumlah uang yang benar-benar Anda miliki di setiap sumber dana.",
         "steps": [
             "Periksa uang tunai dan saldo rekening di luar aplikasi terlebih dahulu.",
             "Buka Setting > Sumber Dana lalu klik Cocokkan saldo pada kartu sumber dana yang ingin diperiksa. Cocokkan saldo dari kartu hanya mencakup sumber dana tersebut. Untuk mencocokkan beberapa sumber dana sekaligus, gunakan Pencocokan massal pada header halaman dan pilih satu kas; semua sumber dana yang dapat Anda kelola akan ditampilkan, termasuk yang belum memiliki transaksi pada kas itu. Untuk melihat riwayat, klik Riwayat pencocokan pada halaman Sumber dana atau Tambah pencocokan dari daftar riwayat. Saklar Catat transaksi penyesuaian pada kas aktif secara default dan kontrol kas pencatatan berada di bagian bawah form. Matikan saklar untuk menyimpan snapshot saldo tanpa membuat transaksi penyesuaian. Kas utama dipilih secara default. Catatan pencocokan boleh dikosongkan.",

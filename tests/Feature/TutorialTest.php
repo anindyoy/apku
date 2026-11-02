@@ -37,6 +37,9 @@ test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', funct
 test('tutorial pencocokan saldo menjelaskan penghitung pecahan uang', function () {
     $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 
+    expect($topics['audit-saldo']['intro'])->toContain('membandingkan saldo yang tercatat di APKu', 'jumlah uang yang benar-benar Anda miliki');
+    expect($topics['dompet']['intro'])->toContain('tempat uang Anda disimpan', 'uang tunai di rumah', 'rekening bank', 'saldo e-wallet');
+    expect(implode(' ', $topics['dompet']['steps']))->toContain('Tunai di rumah', 'Rekening bank', 'E-wallet');
     expect(implode(' ', $topics['audit-saldo']['steps']))->toContain('Cocokkan saldo pada kartu sumber dana', 'Cocokkan saldo dari kartu hanya mencakup sumber dana tersebut', 'hanya ditampilkan pada sumber dana berjenis Tunai', 'dua kolom pada layar lebar', 'Saklar Catat transaksi penyesuaian pada kas aktif secara default', 'kontrol kas pencatatan berada di bagian bawah form', 'snapshot saldo tanpa membuat transaksi penyesuaian', 'Catatan pencocokan boleh dikosongkan', 'Catatan sumber dana tidak tersedia pada form pencocokan', 'total kas dan tombol Ulangi tampil dua kolom', 'Ulangi')
         ->and($topics['audit-saldo']['note'])->toContain('Rp100.000', 'Rp500');
 });

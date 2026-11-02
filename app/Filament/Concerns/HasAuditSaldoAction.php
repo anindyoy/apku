@@ -49,7 +49,7 @@ trait HasAuditSaldoAction
             ->label('Cocokkan saldo')
             ->icon('heroicon-o-clipboard-document-check')
             ->modalHeading('Cocokkan saldo aplikasi dengan saldo riil')
-            ->modalDescription('Masukkan saldo riil setiap sumber dana. Selisih akan dicatat sebagai transaksi penyesuaian saldo.')
+            ->modalDescription('Bandingkan saldo yang tercatat di APKu dengan jumlah uang yang benar-benar Anda miliki. Selisih akan dicatat sebagai transaksi penyesuaian saldo.')
             ->form([
                 Grid::make(['default' => 1, 'lg' => 2])
                     ->schema([
@@ -88,7 +88,8 @@ trait HasAuditSaldoAction
                             TextInput::make('saldo_riil')
                                 ->label('Saldo riil')
                                 ->required()
-                                ->placeholder('Masukkan saldo aktual di sumber dana fisik')
+                                ->helperText('Masukkan jumlah uang yang benar-benar tersedia di sumber dana ini, bukan saldo yang tercatat di APKu.')
+                                ->placeholder('Masukkan saldo yang benar-benar tersedia')
                         )
                             ->afterStateUpdated(function (mixed $state, Get $get, Set $set): mixed {
                                 if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {

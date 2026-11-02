@@ -16,6 +16,7 @@ class SumberDanaFormSchema
         return [
             TextInput::make('nama_dompet')
                 ->label('Nama sumber dana')
+                ->helperText('Tempat uang Anda disimpan, misalnya uang tunai, rekening bank, atau saldo e-wallet.')
                 ->required()
                 ->maxLength(50)
                 ->rules(fn (?SumberDana $record): array => [
@@ -25,11 +26,16 @@ class SumberDanaFormSchema
                         ->ignore($record?->id),
                 ])
                 // Komentar kode boleh menyebut nama kolom; placeholder UI memakai sumber dana.
-                ->placeholder('Contoh: Tunai Fisik, BCA, DANA, ShopeePay'),
+                ->placeholder('Contoh: Tunai di rumah, BCA, GoPay'),
 
             Select::make('jenis')
-                ->label('Jenis')
-                ->options(JenisSumberDana::opsi())
+                ->label('Jenis sumber dana')
+                ->options([
+                    JenisSumberDana::Tunai->value => 'Tunai',
+                    JenisSumberDana::Rekening->value => 'Rekening bank',
+                    JenisSumberDana::EWallet->value => 'E-wallet',
+                    JenisSumberDana::Lainnya->value => 'Lainnya',
+                ])
                 ->default(JenisSumberDana::Tunai->value)
                 ->required(),
 

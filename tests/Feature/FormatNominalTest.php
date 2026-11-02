@@ -49,6 +49,19 @@ test('komponen nominal memformat input rupiah dengan separator ribuan dan tanpa 
     expect(KomponenNominal::bersihkanKeInteger(''))->toBeNull();
 });
 
+test('formulir sumber dana menjelaskan arti dan contoh sumber dana', function () {
+    $fields = collect(SumberDanaFormSchema::fields())->keyBy(fn ($field) => $field->getName());
+
+    expect($fields['nama_dompet']->getPlaceholder())->toBe('Contoh: Tunai di rumah, BCA, GoPay')
+        ->and($fields['jenis']->getLabel())->toBe('Jenis sumber dana')
+        ->and($fields['jenis']->getOptions())->toBe([
+            'tunai' => 'Tunai',
+            'rekening' => 'Rekening bank',
+            'e_wallet' => 'E-wallet',
+            'lainnya' => 'Lainnya',
+        ]);
+});
+
 test('skema input nominal pada formulir buku kas dan sumber dana terkonfigurasi mask dan separator', function () {
     $fieldsKas = BukuKasFormSchema::fields();
     $saldoKas = collect($fieldsKas)->first(fn ($field) => $field->getName() === 'saldo');
