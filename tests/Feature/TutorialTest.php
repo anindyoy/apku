@@ -6,6 +6,19 @@ use Filament\Livewire\Topbar;
 use Livewire\Livewire;
 use Symfony\Component\Process\Process;
 
+test('tutorial contoh kas dan sumber dana menjelaskan skenario dasar premium dan kas bersama', function () {
+    $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+    $topic = $topics['contoh-kas-sumber-dana'];
+    $steps = implode(' ', $topic['steps']);
+
+    expect($topic['page'])->toBe('Kas dan Sumber Dana')
+        ->and($topic['intro'])->toContain('total saldo kas sama dengan total saldo sumber dana')
+        ->and($steps)->toContain('akun Reguler', 'Rp5.000.000', 'Penyesuaian Saldo', 'Premium aktif', 'Dana Liburan', 'kas Keluarga', 'Editor', 'Viewer')
+        ->and($topic['note'])->toContain('maksimal 2 kas dan 2 sumber dana', 'Premium aktif', 'Editor memakai sumber dana miliknya sendiri');
+
+    $this->get(route('tutorial', ['q' => $topic['title']]))->assertOk();
+});
+
 test('tutorial laporan menjelaskan posisi grup setelah utang piutang', function () {
     $response = $this->get(route('tutorial', ['q' => 'Membaca dan mengekspor laporan']))->assertOk();
     $topic = collect($response->viewData('topics'))->firstWhere('id', 'laporan');

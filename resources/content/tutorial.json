@@ -297,5 +297,22 @@
         ],
         "example": "Cari Laporan melalui Spotlight ketika ingin langsung memeriksa ringkasan bulanan.",
         "note": "Akun Reguler atau Premium yang kedaluwarsa memiliki pembatasan pengelolaan kas dan sumber dana tambahan. Periksa penanda akses dan status langganan jika suatu aksi tidak tersedia."
+    },
+    {
+        "id": "contoh-kas-sumber-dana",
+        "page": "Kas dan Sumber Dana",
+        "category": "Pengelolaan uang",
+        "title": "Contoh penggunaan kas dan sumber dana",
+        "intro": "Ikuti contoh bertahap untuk memahami bahwa kas mengelompokkan tujuan pencatatan uang, sedangkan sumber dana menunjukkan tempat uang berada. Setiap transaksi memengaruhi keduanya sehingga total saldo kas sama dengan total saldo sumber dana.",
+        "steps": [
+            "Mulai dari akun Reguler: buat kas Harian dan sumber dana Tunai dengan saldo awal Rp1.000.000. Tambahkan sumber dana BCA, lalu catat gaji Rp5.000.000 ke kas Harian melalui BCA. Setelah mencatat makan Rp50.000 dari Tunai dan listrik Rp300.000 dari BCA, saldo kas Harian Rp5.650.000, saldo Tunai Rp950.000, dan saldo BCA Rp4.700.000.",
+            "Pindahkan Rp500.000 dari BCA ke Tunai melalui transfer sumber dana. Saldo kas tidak berubah; saldo Tunai menjadi Rp1.450.000 dan BCA Rp4.200.000. Buat kas Usaha, lalu transfer Rp1.000.000 dari Harian ke Usaha. Saldo sumber dana tidak berubah; Harian menjadi Rp4.650.000 dan Usaha Rp1.000.000.",
+            "Gunakan Cocokkan Saldo jika uang nyata berbeda dari catatan. Jika uang tunai fisik Rp1.400.000 sementara catatan Tunai Rp1.450.000, selisih -Rp50.000 dicatat sebagai transaksi Penyesuaian Saldo pada kas yang dipilih. Saldo akhir kas Harian Rp4.600.000 dan Usaha Rp1.000.000; saldo Tunai Rp1.400.000 dan BCA Rp4.200.000. Total kedua sisi sama, yaitu Rp5.600.000.",
+            "Jika memakai Premium aktif, Anda dapat membagi kas berdasarkan pos: Utama, Belanja Dapur, Jajan, Transport, dan Kas Tabungan Dana Liburan. Dari gaji Rp5.000.000 di kas Utama melalui BCA, transfer Rp1.500.000 ke Belanja Dapur, Rp400.000 ke Jajan, Rp600.000 ke Transport, dan Rp500.000 ke Dana Liburan. Transfer antar-kas tidak mengubah saldo sumber dana.",
+            "Untuk contoh sistem amplop, pindahkan Rp500.000 dari BCA ke Tunai dan Rp300.000 dari BCA ke GoPay, lalu catat belanja pasar Rp250.000 pada Belanja Dapur melalui Tunai, kopi Rp35.000 pada Jajan melalui GoPay, bensin Rp100.000 pada Transport melalui Tunai, dan ojek online Rp25.000 pada Transport melalui GoPay. Saldo akhir kas berturut-turut: Utama Rp2.000.000, Belanja Dapur Rp1.250.000, Jajan Rp365.000, Transport Rp475.000, dan Dana Liburan Rp500.000; totalnya Rp4.590.000, sama dengan total sumber dana.",
+            "Untuk kas bersama, pemilik Premium dapat membagikan kas Keluarga kepada Editor atau Viewer. Pemilik dan Editor mencatat transaksi pada kas yang sama, tetapi masing-masing memakai sumber dananya sendiri. Contohnya, setoran Rina Rp2.000.000 dan Budi Rp1.500.000, dikurangi listrik Rp300.000 dan belanja Rp450.000, menghasilkan saldo kas Keluarga Rp2.750.000."
+        ],
+        "example": "Kas adalah untuk apa uang dicatat; sumber dana adalah di mana uang disimpan. Transfer antar-kas mengalokasikan pos tanpa memindahkan uang antar-sumber dana, sedangkan transfer sumber dana memindahkan posisi uang tanpa mengubah saldo kas.",
+        "note": "Akun Reguler dibatasi maksimal 2 kas dan 2 sumber dana. Banyak kas per pos, Kas Tabungan, dan pembuatan Kolaborator Kas memerlukan Premium aktif; akun Reguler dapat memakai kategori untuk mengelompokkan pos. Kas bersama tidak mengurangi kuota kas kolaborator. Editor memakai sumber dana miliknya sendiri dan hanya dapat mengubah atau menghapus transaksi buatannya; Viewer hanya dapat melihat."
     }
 ]
