@@ -169,7 +169,7 @@ trait HasTambahTransaksiAction
             $bukuKas,
             $dompet,
             (int) $data['saldo'],
-            'Saldo pertama',
+            'Kas baru dibuat',
         );
 
         return $bukuKas->getKey();

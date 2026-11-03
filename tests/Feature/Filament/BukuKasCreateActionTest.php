@@ -59,5 +59,5 @@ test('action membuat buku kas mencatat saldo awal pada dompet default', function
     expect($bukuKas->saldo)->toBe(50000)
         ->and($dompet->fresh()->saldo)->toBe(150000)
         ->and($transaksi->dompet_id)->toBe($dompet->id)
-        ->and($transaksi->deskripsi)->toBe('Saldo pertama');
+        ->and($transaksi->deskripsi)->toBe('Kas baru dibuat');
 })->group('filament', 'buku-kas');

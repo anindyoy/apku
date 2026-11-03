@@ -213,6 +213,7 @@ Pengguna baru diarahkan ke form pengaturan awal 1 halaman sebelum menggunakan fi
 ### 3. Pengelolaan transaksi
 
 - Menentukan tanggal, kas, sumber dana, nominal, dan deskripsi transaksi. Kategori opsional; pilihannya mengikuti kas yang dipilih dan dikosongkan jika tidak terhubung ke kas baru.
+- Kas yang dibuat dari form transaksi maupun halaman Kas mencatat saldo awal sebagai transaksi dengan deskripsi **Kas baru dibuat**.
 - Mencatat beberapa transaksi berurutan melalui aksi **Tambah yang lain**.
 - Tombol **Tambah transaksi** tetap tersedia selama pengguna memiliki kas yang dapat dikelola, termasuk ketika daftar difilter ke kas terbatas. Pilihan kas di modal hanya memuat kas yang dapat dikelola; aksi ubah dan hapus tidak tersedia untuk transaksi pada kas terbatas.
 - Pemasukan, pengeluaran, transfer kas, dan transfer sumber dana dicatat melalui satu modal **Tambah transaksi**; pilihan pertama dan jenis awal form adalah Pengeluaran, lalu jenis transaksi menentukan field serta warna form. Form tersusun satu kolom pada layar sempit dan dua kolom pada layar lebar; pilihan jenis transaksi tetap memakai grid dua kolom pada semua ukuran layar, termasuk mobile agar tidak meluap ke samping. Seluruh input dan tombol submit dinonaktifkan sementara ketika perubahan jenis sedang diproses. Transfer kas hanya meminta kas asal dan tujuan, sedangkan transfer sumber dana hanya meminta sumber dana asal dan tujuan.

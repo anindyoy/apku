@@ -82,7 +82,7 @@ class ListBukuKas extends ListRecords
                         $record,
                         $dompet,
                         $saldoAwal,
-                        'Saldo pertama',
+                        'Kas baru dibuat',
                     );
                 }),
         ];

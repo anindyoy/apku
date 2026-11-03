@@ -159,6 +159,7 @@ test('premium aktif dapat membuat kas dan dompet dari form transaksi', function 
     $kas = BukuKas::query()->where('user_id', $user->id)->where('nama_buku', 'Kas Baru')->firstOrFail();
     expect($kas->saldo)->toBe(2500)
         ->and($kas->description)->toBe('Kas untuk kebutuhan baru')
+        ->and(Transaksi::query()->where('buku_kas_id', $kas->id)->value('deskripsi'))->toBe('Kas baru dibuat')
         ->and($kategori->terhubungKe($kas->id))->toBeTrue()
         ->and((int) $komponen->get('mountedActions.0.data.buku_kas_id'))->toBe($kas->id);
 
