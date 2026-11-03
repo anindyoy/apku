@@ -305,6 +305,7 @@ test('audit menerima sumber dana tanpa transaksi pada kas terpilih', function ()
 
 test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
+    $user->update(['tampilkan_hitung_uang_kas' => true]);
 
     Livewire::actingAs($user)
         ->test(ListDompet::class)
@@ -318,6 +319,7 @@ test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () 
                     'nama_dompet' => $tunai->nama_dompet,
                     'saldo_aplikasi' => 500000,
                     'saldo_riil' => 500000,
+                    'tampilkan_hitung_uang_kas' => true,
                     'jumlah_pecahan' => [
                         'kertas_100000' => 2,
                         'kertas_1000' => 2,
@@ -345,10 +347,42 @@ test('form audit menyembunyikan penghitung uang dari sumber dana non-Tunai', fun
     $bagianHitungUang = collect($komponen->instance()->{$namaSchema}->getFlatComponents(withActions: false, withHidden: true))
         ->filter(fn ($bagian): bool => $bagian instanceof Section && $bagian->getHeading() === 'Hitung uang kas')
         ->values();
+    $toggleHitungUang = collect($komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true))
+        ->filter(fn ($field): bool => $field instanceof \Filament\Forms\Components\Toggle
+            && $field->getName() === 'tampilkan_hitung_uang_kas')
+        ->values();
 
     expect($bagianHitungUang)->toHaveCount(2)
-        ->and($bagianHitungUang->map(fn (Section $bagian): bool => $bagian->isVisible())->sort()->values()->all())->toBe([false, true])
+        ->and($bagianHitungUang->map(fn (Section $bagian): bool => $bagian->isVisible())->sort()->values()->all())->toBe([false, false])
+        ->and($toggleHitungUang)->toHaveCount(2)
+        ->and($toggleHitungUang->filter(fn ($toggle): bool => $toggle->isVisible()))->toHaveCount(1)
         ->and((new SumberDana(['jenis' => null]))->mendukungHitungUang())->toBeFalse();
+});
+
+test('toggle penghitung uang kas nonaktif secara default dan menyimpan pilihan per pengguna', function () {
+    ['user' => $user] = buatDataAuditSaldo();
+    $penggunaLain = User::factory()->create(['role' => 'reguler']);
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListSumberDana::class)
+        ->mountAction('auditSaldo');
+    $namaSchema = $komponen->instance()->getMountedActionSchemaName();
+    $fieldToggle = collect($komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true))
+        ->first(fn ($field): bool => $field instanceof \Filament\Forms\Components\Toggle
+            && $field->getName() === 'tampilkan_hitung_uang_kas');
+
+    expect($user->fresh()->tampilkan_hitung_uang_kas)->toBeFalse()
+        ->and($fieldToggle->getState())->toBeFalse();
+
+    $komponen->set('mountedActions.0.data.rincian.0.tampilkan_hitung_uang_kas', true);
+
+    $namaSchema = $komponen->instance()->getMountedActionSchemaName();
+    $bagianHitungUang = collect($komponen->instance()->{$namaSchema}->getFlatComponents(withActions: false, withHidden: true))
+        ->filter(fn ($bagian): bool => $bagian instanceof Section && $bagian->getHeading() === 'Hitung uang kas');
+
+    expect($user->fresh()->tampilkan_hitung_uang_kas)->toBeTrue()
+        ->and($penggunaLain->fresh()->tampilkan_hitung_uang_kas)->toBeFalse()
+        ->and($bagianHitungUang->filter(fn (Section $bagian): bool => $bagian->isVisible()))->toHaveCount(1);
 });
 
 test('audit menolak pecahan untuk sumber dana non-Tunai meski data dikirim langsung', function () {

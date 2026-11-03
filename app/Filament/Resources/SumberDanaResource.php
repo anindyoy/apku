@@ -16,6 +16,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Layout\Grid as TableGrid;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -55,30 +56,38 @@ class SumberDanaResource extends Resource
             ->columns([
                 Stack::make([
                     TextColumn::make('nama_dompet')->label('Sumber dana')->searchable()->weight('bold')->size('lg')->wrap(),
-                    TextColumn::make('saldo')
-                        ->prefix('Saldo: Rp ')
-                        ->numeric()
-                        ->color(fn (int $state): string => $state < 0 ? 'danger' : 'gray'),
-                    TextColumn::make('is_default')
-                        ->label('Default')
-                        ->prefix('Default: ')
-                        ->formatStateUsing(fn (bool $state): string => $state ? 'Ya' : 'Tidak')
-                        ->badge()
-                        ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
-                    TextColumn::make('status_akses')
-                        ->label('Status')
-                        ->prefix('Status: ')
-                        ->badge()
-                        ->getStateUsing(fn (SumberDana $record): string => auth()->user()->dapatMengelolaTransaksiPadaDompet($record) ? 'Aktif' : 'Terbatas')
-                        ->color(fn (string $state): string => $state === 'Aktif' ? 'success' : 'danger'),
-                    TextColumn::make('description')->label('Deskripsi')->prefix('Deskripsi: ')->wrap(),
+                    TableGrid::make(['default' => 1, 'xl' => 2])
+                        ->schema([
+                            Stack::make([
+                                TextColumn::make('jenis_label')->label('Jenis')->prefix('Jenis: '),
+                                TextColumn::make('saldo')
+                                    ->prefix('Saldo: Rp ')
+                                    ->numeric()
+                                    ->color(fn (int $state): string => $state < 0 ? 'danger' : 'gray'),
+                            ])->space(3),
+                            Stack::make([
+                                TextColumn::make('is_default')
+                                    ->label('Utama')
+                                    ->prefix('Utama: ')
+                                    ->formatStateUsing(fn (bool $state): string => $state ? 'Ya' : 'Tidak')
+                                    ->badge()
+                                    ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
+                                TextColumn::make('status_akses')
+                                    ->label('Status')
+                                    ->prefix('Status: ')
+                                    ->badge()
+                                    ->getStateUsing(fn (SumberDana $record): string => auth()->user()->dapatMengelolaTransaksiPadaDompet($record) ? 'Aktif' : 'Terbatas')
+                                    ->color(fn (string $state): string => $state === 'Aktif' ? 'success' : 'danger'),
+                                TextColumn::make('description')->label('Deskripsi')->prefix('Deskripsi: ')->wrap(),
+                            ])->space(3),
+                        ]),
                 ])->space(3),
             ])
             ->actions([
                 EditAction::make()
                     ->visible(fn (SumberDana $record): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($record)),
                 Action::make('jadikanDefault')
-                    ->label('Jadikan default')
+                    ->label('Jadikan utama')
                     ->icon('heroicon-o-star')
                     ->visible(fn (SumberDana $record): bool => ! $record->is_default && auth()->user()->dapatMengelolaTransaksiPadaDompet($record))
                     ->action(function (SumberDana $record): void {

@@ -123,10 +123,13 @@ test('daftar dompet menggunakan kartu responsif', function () {
     $table = $component->instance()->getTable();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $cash->id);
 
-    expect($table->getContentGrid())->toBe(['default' => 2, 'md' => 2, 'xl' => 2])
+    expect($component->html())->toContain('Utama: Ya', 'Jadikan utama')->not->toContain('Default: ', 'Jadikan default')
+        ->and($table->getContentGrid())->toBe(['default' => 2, 'md' => 2, 'xl' => 2])
+        ->and($table->getColumn('jenis_label')->record($record)->getPrefix())->toBe('Jenis: ')
+        ->and($table->getColumn('jenis_label')->record($record)->getState())->toBe('Tunai')
         ->and($table->getColumn('saldo')->record($record)->getPrefix())->toBe('Saldo: Rp ')
-        ->and($table->getColumn('is_default')->record($record)->getPrefix())->toBe('Default: ')
-        ->and($table->getColumn('is_default')->record($record)->formatState(true))->toBe('Default: Ya')
+        ->and($table->getColumn('is_default')->record($record)->getPrefix())->toBe('Utama: ')
+        ->and($table->getColumn('is_default')->record($record)->formatState(true))->toBe('Utama: Ya')
         ->and($table->getColumn('status_akses')->record($record)->getPrefix())->toBe('Status: ')
         ->and($table->getColumn('description')->record($record)->getPrefix())->toBe('Deskripsi: ');
 });

@@ -15,6 +15,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
@@ -68,44 +69,57 @@ trait HasAuditSaldoAction
                 Repeater::make('rincian')
                     ->label('Saldo per sumber dana pada kas terpilih')
                     ->helperText('Semua sumber dana yang dapat Anda kelola ditampilkan, termasuk yang belum memiliki transaksi pada kas terpilih.')
-                    ->default(fn (Get $get, ?SumberDana $record): array => $this->rincianAuditUntukKas(
+                    ->default(fn(Get $get, ?SumberDana $record): array => $this->rincianAuditUntukKas(
                         (int) ($get('buku_kas_id') ?? $this->kasDefaultAudit($record) ?? 0),
                         $record,
                     ))
                     ->schema([
                         Hidden::make('dompet_id'),
-                        TextInput::make('nama_sumber_dana')
-                            ->label('Sumber dana')
-                            ->disabled()
-                            ->dehydrated(),
-                        KomponenNominal::terapkan(
-                            TextInput::make('saldo_aplikasi')
-                                ->label('Saldo aplikasi')
-                                ->disabled()
-                                ->dehydrated()
-                        ),
-                        KomponenNominal::terapkan(
-                            TextInput::make('saldo_riil')
-                                ->label('Saldo riil')
-                                ->required()
-                                ->helperText('Masukkan jumlah uang yang benar-benar tersedia di sumber dana ini, bukan saldo yang tercatat di APKu.')
-                                ->placeholder('Masukkan saldo yang benar-benar tersedia')
-                        )
-                            ->afterStateUpdated(function (mixed $state, Get $get, Set $set): mixed {
-                                if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
-                                    return null;
-                                }
+                        Grid::make(['default' => 1, 'lg' => 3])
+                            ->schema([
+                                TextInput::make('nama_sumber_dana')
+                                    ->label('Sumber dana')
+                                    ->disabled()
+                                    ->dehydrated(),
+                                KomponenNominal::terapkan(
+                                    TextInput::make('saldo_aplikasi')
+                                        ->label('Saldo aplikasi')
+                                        ->disabled()
+                                        ->dehydrated()
+                                ),
+                                KomponenNominal::terapkan(
+                                    TextInput::make('saldo_riil')
+                                        ->label('Saldo riil')
+                                        ->required()
+                                        ->helperText('Masukkan jumlah uang yang benar-benar tersedia di sumber dana ini, bukan saldo yang tercatat di APKu.')
+                                        ->placeholder('Masukkan saldo yang benar-benar tersedia')
+                                )
+                                    ->afterStateUpdated(function (mixed $state, Get $get, Set $set): mixed {
+                                        if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
+                                            return null;
+                                        }
 
-                                return $set('jumlah_pecahan', $this->pecahanAwal());
-                            }),
+                                        return $set('jumlah_pecahan', $this->pecahanAwal());
+                                    }),
+                            ]),
+                        Toggle::make('tampilkan_hitung_uang_kas')
+                            ->label('Tampilkan form hitung uang kas')
+                            ->default(fn(): bool => (bool) auth()->user()->tampilkan_hitung_uang_kas)
+                            ->visible(fn(Get $get): bool => $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
+                            ->live()
+                            ->afterStateUpdated(fn(mixed $state) => auth()->user()->forceFill([
+                                'tampilkan_hitung_uang_kas' => (bool) $state,
+                            ])->save()),
+
                         Section::make('Hitung uang kas')
                             ->description('Jumlah pecahan akan mengisi saldo riil secara otomatis. Saldo riil juga dapat diisi secara manual.')
-                            ->hidden(fn (Get $get): bool => ! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
+                            ->hidden(fn(Get $get): bool => ! (bool) auth()->user()->tampilkan_hitung_uang_kas
+                                || ! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
                             ->schema([
                                 ViewField::make('jumlah_pecahan')
                                     ->view('filament.forms.components.hitung-uang-kas')
                                     ->viewData(['kelompokPecahan' => self::PECAHAN_UANG])
-                                    ->default(fn (): array => $this->pecahanAwal())
+                                    ->default(fn(): array => $this->pecahanAwal())
                                     ->live(debounce: 300)
                                     ->afterStateUpdated(function (?array $state, Get $get, Set $set): void {
                                         if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
@@ -120,7 +134,7 @@ trait HasAuditSaldoAction
                             ->compact()
                             ->collapsible(),
                     ])
-                    ->columns(2)
+                    ->columns(1)
                     ->addable(false)
                     ->deletable(false)
                     ->reorderable(false)
@@ -133,23 +147,23 @@ trait HasAuditSaldoAction
                             ->live(),
                         Select::make('buku_kas_id')
                             ->label('Kas pencatatan')
-                            ->options(fn (?SumberDana $record): array => $this->opsiKasAudit($record))
-                            ->default(fn (?SumberDana $record): ?int => $this->kasDefaultAudit($record))
+                            ->options(fn(?SumberDana $record): array => $this->opsiKasAudit($record))
+                            ->default(fn(?SumberDana $record): ?int => $this->kasDefaultAudit($record))
                             ->live()
-                            ->visible(fn (Get $get): bool => (bool) $get('catat_penyesuaian'))
+                            ->visible(fn(Get $get): bool => (bool) $get('catat_penyesuaian'))
                             ->dehydratedWhenHidden()
-                            ->afterStateUpdated(fn (mixed $state, Set $set, ?SumberDana $record): mixed => $set(
+                            ->afterStateUpdated(fn(mixed $state, Set $set, ?SumberDana $record): mixed => $set(
                                 'rincian',
                                 $this->rincianAuditUntukKas((int) ($state ?? 0), $record),
                             ))
-                            ->required(fn (Get $get): bool => (bool) $get('catat_penyesuaian')),
+                            ->required(fn(Get $get): bool => (bool) $get('catat_penyesuaian')),
                     ]),
             ])
-            ->visible(fn (?SumberDana $record): bool => $record === null
+            ->visible(fn(?SumberDana $record): bool => $record === null
                 || (auth()->user()->dapatMengelolaTransaksiPadaDompet($record) && $this->opsiKasAudit($record) !== []))
             ->action(function (array $data, ?SumberDana $record): void {
                 if ($record !== null) {
-                    $dompetIds = collect($data['rincian'] ?? [])->pluck('dompet_id')->map(fn ($id): int => (int) $id);
+                    $dompetIds = collect($data['rincian'] ?? [])->pluck('dompet_id')->map(fn($id): int => (int) $id);
 
                     if ($dompetIds->count() !== 1 || $dompetIds->first() !== $record->id) {
                         throw ValidationException::withMessages([
@@ -238,10 +252,10 @@ trait HasAuditSaldoAction
         }
 
         return SumberDana::query()
-            ->when($dompetTerpilih !== null, fn ($query) => $query->whereKey($dompetTerpilih->id))
+            ->when($dompetTerpilih !== null, fn($query) => $query->whereKey($dompetTerpilih->id))
             ->get()
-            ->filter(fn (SumberDana $dompet): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet))
-            ->map(fn (SumberDana $dompet): array => [
+            ->filter(fn(SumberDana $dompet): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet))
+            ->map(fn(SumberDana $dompet): array => [
                 'dompet_id' => $dompet->id,
                 'nama_sumber_dana' => $dompet->nama_dompet,
                 'saldo_aplikasi' => (int) $dompet->saldo,
@@ -255,7 +269,7 @@ trait HasAuditSaldoAction
     private function pecahanAwal(): array
     {
         return collect(self::PECAHAN_UANG)
-            ->flatMap(fn (array $pecahan): array => array_fill_keys(array_keys($pecahan), null))
+            ->flatMap(fn(array $pecahan): array => array_fill_keys(array_keys($pecahan), null))
             ->all();
     }
 

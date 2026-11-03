@@ -40,6 +40,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'email_verified_at',
         'paket_langganan_dipilih_id',
         'tabungan_emas_aktif',
+        'tampilkan_hitung_uang_kas',
     ];
 
     /**
@@ -82,6 +83,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'pisahkan_tipe_kategori' => 'boolean',
             'paket_langganan_dipilih_id' => 'integer',
             'tabungan_emas_aktif' => 'boolean',
+            'tampilkan_hitung_uang_kas' => 'boolean',
             'hitung_tabungan_di_total' => 'boolean',
         ];
     }
