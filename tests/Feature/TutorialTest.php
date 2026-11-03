@@ -216,7 +216,7 @@ it('tutorial sidebar mengikuti topik hash scroll dan hasil pencarian', function 
     $process->setInput($script)->run();
     expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
 
-    foreach (['' => 19, 'XLSX' => 2, 'tidakadatopik123' => 0] as $query => $count) {
+    foreach (['' => 20, 'XLSX' => 2, 'tidakadatopik123' => 0] as $query => $count) {
         $response = $this->get(route('tutorial', ['q' => $query]))->assertOk();
         $document = new DOMDocument;
         @$document->loadHTML($response->getContent());
@@ -322,11 +322,12 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
     expect($response->getContent())->toContain('--accent:#0f766e', 'background:#0f766e', '--accent:#5eead4');
     $topics = $response->viewData('topics');
 
-    expect($topics)->toHaveCount(19);
+    expect($topics)->toHaveCount(20);
     expect(array_column($topics, 'id'))->toBe([
         'akun', 'pengaturan-awal', 'dashboard', 'transaksi', 'transfer', 'pencarian',
         'import', 'kas', 'kolaborasi', 'kas-publik', 'dompet', 'audit-saldo',
         'kategori', 'emas', 'laporan', 'utang-piutang', 'langganan', 'trial-premium', 'profil-notifikasi',
+        'contoh-kas-sumber-dana',
     ]);
 
     $document = new DOMDocument;
@@ -360,18 +361,18 @@ it('tutorial mengelompokkan topik menurut halaman fitur dan menyembunyikan kelom
     $response = $this->get(route('tutorial', ['q' => 'Viewer']))->assertOk();
     $groups = $response->viewData('groups');
 
-    expect($groups->keys()->all())->toBe(['Kategori', 'Kas', 'Langganan Premium']);
-    expect(array_column($response->viewData('topics'), 'id'))->toBe(['kategori', 'kolaborasi', 'kas-publik', 'langganan']);
+    expect($groups->keys()->all())->toBe(['Kategori', 'Kas', 'Langganan Premium', 'Kas dan Sumber Dana']);
+    expect(array_column($response->viewData('topics'), 'id'))->toBe(['kategori', 'kolaborasi', 'kas-publik', 'langganan', 'contoh-kas-sumber-dana']);
 
     $document = new DOMDocument;
     @$document->loadHTML($response->getContent());
     $xpath = new DOMXPath($document);
-    expect($xpath->query('//aside//div[@class="nav-group"]'))->toHaveCount(3);
-    expect($xpath->query('//main/section[@class="chapter"]'))->toHaveCount(3);
+    expect($xpath->query('//aside//div[@class="nav-group"]'))->toHaveCount(4);
+    expect($xpath->query('//main/section[@class="chapter"]'))->toHaveCount(4);
     // Hanya hitung tautan daftar isi yang terpilih di dalam sidebar (aside > details > nav).
-    expect($xpath->query('//aside//a[@data-topic-link]'))->toHaveCount(4);
+    expect($xpath->query('//aside//a[@data-topic-link]'))->toHaveCount(5);
     // Pastikan hanya topik terpilih yang dirender sebagai artikel.
-    expect($xpath->query('//main//article'))->toHaveCount(4);
+    expect($xpath->query('//main//article'))->toHaveCount(5);
 });
 
 it('tutorial mencari isi panduan tanpa membedakan kapital dan mengabaikan spasi tepi', function () {
@@ -379,7 +380,7 @@ it('tutorial mencari isi panduan tanpa membedakan kapital dan mengabaikan spasi 
 
     expect(array_column($response->viewData('topics'), 'id'))->toBe(['import', 'laporan']);
     expect($response->viewData('query'))->toBe('XLSX');
-    expect($response->viewData('total'))->toBe(19);
+    expect($response->viewData('total'))->toBe(20);
 });
 
 it('tutorial menampilkan kondisi kosong dan mengamankan teks pencarian', function () {
