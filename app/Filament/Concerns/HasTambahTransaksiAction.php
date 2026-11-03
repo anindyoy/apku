@@ -34,7 +34,7 @@ trait HasTambahTransaksiAction
         ];
     }
 
-    public function dataAwalFormTransaksi($livewire, string $jenisForm = 'pemasukan'): array
+    public function dataAwalFormTransaksi($livewire, string $jenisForm = 'pengeluaran'): array
     {
         return [
             ...$this->dataAwalTransaksi($livewire),
@@ -246,7 +246,6 @@ trait HasTambahTransaksiAction
             ])
             ->createOptionUsing(fn (array $data): int => $this->buatKasDariForm($data))
             ->createOptionAction(fn (Action $action): Action => $action
-                ->modalWidth('md')
                 ->visible(fn (): bool => $this->dapatMenambahKasDompetDariForm()));
     }
 
@@ -362,8 +361,8 @@ trait HasTambahTransaksiAction
                         ToggleButtons::make('jenis_form')
                             ->label('Jenis transaksi')
                             ->options([
-                                'pemasukan' => 'Pemasukan',
                                 'pengeluaran' => 'Pengeluaran',
+                                'pemasukan' => 'Pemasukan',
                                 'transfer_kas' => 'Transfer kas',
                                 'transfer_dompet' => 'Transfer sumber dana',
                             ])
