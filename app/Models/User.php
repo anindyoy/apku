@@ -40,6 +40,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'email_verified_at',
         'paket_langganan_dipilih_id',
         'tabungan_emas_aktif',
+        'pemeriksaan_saldo_aktif',
         'tampilkan_hitung_uang_kas',
     ];
 
@@ -83,6 +84,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'pisahkan_tipe_kategori' => 'boolean',
             'paket_langganan_dipilih_id' => 'integer',
             'tabungan_emas_aktif' => 'boolean',
+            'pemeriksaan_saldo_aktif' => 'boolean',
             'tampilkan_hitung_uang_kas' => 'boolean',
             'hitung_tabungan_di_total' => 'boolean',
         ];
@@ -191,6 +193,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function hitungTabunganDiTotal(): bool
     {
         return (bool) ($this->hitung_tabungan_di_total ?? true);
+    }
+
+    /** Status pemeriksaan keseimbangan saldo per pengguna (default nonaktif). */
+    public function pemeriksaanSaldoAktif(): bool
+    {
+        return (bool) ($this->pemeriksaan_saldo_aktif ?? false);
     }
 
     private function bukuKasMasihDapatDikelolaPemilik(BukuKas $bukuKas): bool

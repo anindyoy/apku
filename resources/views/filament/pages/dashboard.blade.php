@@ -84,6 +84,18 @@
                         'dashboard-full-width' => in_array('transaksi', $items, true),
                     ])
                 >
+                    @php $pemeriksaanSaldo = $key === 'kas-dompet' ? $this->pemeriksaanSaldo() : null; @endphp
+                    @if ($pemeriksaanSaldo)
+                        <div @class([
+                            'mb-4 rounded-lg border p-3 text-sm',
+                            'border-emerald-300 bg-emerald-50 text-emerald-900 [&:is(.dark_*)]:border-emerald-800 [&:is(.dark_*)]:bg-emerald-950/40 [&:is(.dark_*)]:text-emerald-200' => $pemeriksaanSaldo['seimbang'],
+                            'border-amber-300 bg-amber-50 text-amber-950 [&:is(.dark_*)]:border-amber-800 [&:is(.dark_*)]:bg-amber-950/40 [&:is(.dark_*)]:text-amber-100' => ! $pemeriksaanSaldo['seimbang'],
+                        ]) role="status" aria-live="polite">
+                            <p class="font-semibold">{{ $pemeriksaanSaldo['seimbang'] ? 'Saldo kas dan sumber dana seimbang' : 'Total saldo kas dan sumber dana tidak cocok' }}</p>
+                            <p class="mt-1">Total {{ $pemeriksaanSaldo['cakupan_kas'] }}: Rp {{ number_format($pemeriksaanSaldo['saldo_kas'], 0, ',', '.') }} · Total sumber dana: Rp {{ number_format($pemeriksaanSaldo['saldo_sumber_dana'], 0, ',', '.') }}.</p>
+                            <p class="mt-1">{{ $pemeriksaanSaldo['seimbang'] ? 'Selisih Rp 0.' : 'Selisih '.($pemeriksaanSaldo['selisih'] > 0 ? 'lebih pada kas' : 'lebih pada sumber dana').': Rp '.number_format(abs($pemeriksaanSaldo['selisih']), 0, ',', '.').'.' }} Pemeriksaan total tidak memastikan setiap akun cocok; periksa tiap sumber dana melalui <a class="font-semibold underline underline-offset-2" href="{{ \App\Filament\Resources\AuditSaldoDompetResource::getUrl() }}">Cocokkan Saldo</a>.</p>
+                        </div>
+                    @endif
                     <div @class(['grid gap-5', 'sm:grid-cols-2' => count($items) > 1])>
                         @foreach ($items as $itemKey)
                             @php
@@ -128,6 +140,9 @@
                             };
                         @endphp
                         <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">{{ $eyebrow }}</p>
+                        @if ($pemeriksaanSaldo && ! $pemeriksaanSaldo['seimbang'])
+                            <p class="mb-1 text-xs font-semibold text-amber-800 [&:is(.dark_*)]:text-amber-200">Bagian dari total yang tidak cocok. <a class="underline underline-offset-2" href="{{ \App\Filament\Resources\AuditSaldoDompetResource::getUrl() }}">Cocokkan Saldo</a></p>
+                        @endif
                         <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $totalSaldo, 0, ',', '.') }}</p>
                         <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">{{ $caption }}</p>
                         <dl class="dashboard-list mt-3">

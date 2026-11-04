@@ -104,6 +104,10 @@ class AkunSaya extends Page implements HasForms
                             ->label('Fitur Tabungan Emas')
                             ->helperText('Aktifkan pencatatan emas, estimasi nilai, dan menu Tabungan Emas di pengaturan kas Anda.')
                             ->default(false),
+                        Toggle::make('pemeriksaan_saldo_aktif')
+                            ->label('Pemeriksaan keseimbangan saldo')
+                            ->helperText('Tampilkan pemeriksaan total saldo kas dan sumber dana pada Dashboard.')
+                            ->default(false),
                     ]),
             ])
             ->statePath('data');
@@ -119,6 +123,7 @@ class AkunSaya extends Page implements HasForms
             'alamat' => $data['alamat'],
             'penggunaan' => $data['penggunaan'],
             'tabungan_emas_aktif' => (bool) ($data['tabungan_emas_aktif'] ?? false),
+            'pemeriksaan_saldo_aktif' => (bool) ($data['pemeriksaan_saldo_aktif'] ?? false),
         ];
 
         // Password sudah di-hash oleh dehydrateStateUsing di form field

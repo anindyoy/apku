@@ -8,6 +8,7 @@ use App\Filament\Resources\TransaksiResource;
 use App\Filament\Widgets\AdminOverview;
 use App\Models\Transaksi;
 use App\Services\DashboardCache;
+use App\Services\PemeriksaanKeseimbanganSaldo;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -170,6 +171,16 @@ class Dashboard extends BaseDashboard implements HasTable
             'langganan' => $this->langgananData($user),
             default => null,
         });
+    }
+
+    public function pemeriksaanSaldo(): ?array
+    {
+        $user = auth()->user();
+        if ($user->isAdmin() || ! $user->pemeriksaanSaldoAktif()) {
+            return null;
+        }
+
+        return DashboardCache::remember('pemeriksaan-saldo', $user->id, fn () => app(PemeriksaanKeseimbanganSaldo::class)->ringkasan($user));
     }
 
     private function langgananData($user): array
