@@ -74,6 +74,17 @@ test('import transaksi csv menyimpan semua baris dan memperbarui saldo', functio
         ->and(Transaksi::withoutGlobalScopes()->where('user_id', $data['user']->id)->whereNotNull('import_transaksi_id')->count())->toBe(2);
 })->group('filament', 'import-transaksi');
 
+test('arsip xlsx rusak ditolak sebelum dibaca parser', function () {
+    $file = UploadedFile::fake()->createWithContent('payload.xlsx', 'bukan arsip ZIP');
+
+    expect(fn () => app(ImportTransaksiService::class)->bacaHeader($file))
+        ->toThrow(ValidationException::class);
+})->group('filament', 'import-transaksi');
+
+test('upload sementara livewire dibatasi eksplisit maksimal 10 MB', function () {
+    expect(config('livewire.temporary_file_upload.rules'))->toBe(['required', 'file', 'max:10240']);
+})->group('filament', 'import-transaksi');
+
 test('import riwayat tanpa dampak saldo tetap dapat diubah dan dibatalkan', function () {
     $data = siapkanDataImportTransaksi();
     $data['bukuKas']->update(['saldo' => 750000]);

@@ -30,6 +30,10 @@ class ImportTransaksiService
 
     public const BATAS_UKURAN_FILE = 10 * 1024 * 1024;
 
+    private const BATAS_HASIL_EKSTRAKSI_XLSX = 50 * 1024 * 1024;
+
+    private const BATAS_ENTRI_XLSX = 5000;
+
     private const HEADER = ['tanggal', 'jenis', 'buku_kas', 'dompet', 'kategori', 'nominal', 'deskripsi'];
 
     // Teks template yang terlihat pengguna memakai sumber dana; kunci HEADER tetap dompet agar file lama terbaca.
@@ -564,7 +568,48 @@ class ImportTransaksiService
             throw ValidationException::withMessages(['file' => 'Ukuran file import maksimal 10 MB.']);
         }
 
+        if ($extension === 'xlsx') {
+            $this->validasiArsipXlsx($path);
+        }
+
         return $extension;
+    }
+
+    private function validasiArsipXlsx(string $path): void
+    {
+        $arsip = new \ZipArchive;
+
+        if ($arsip->open($path) !== true) {
+            throw ValidationException::withMessages(['file' => 'File XLSX tidak valid atau tidak dapat dibuka.']);
+        }
+
+        try {
+            if ($arsip->numFiles > self::BATAS_ENTRI_XLSX
+                || $arsip->locateName('[Content_Types].xml') === false
+                || $arsip->locateName('xl/workbook.xml') === false) {
+                throw ValidationException::withMessages(['file' => 'Struktur file XLSX tidak valid.']);
+            }
+
+            $totalUkuran = 0;
+
+            for ($index = 0; $index < $arsip->numFiles; $index++) {
+                $stat = $arsip->statIndex($index);
+                if (! is_array($stat) || ! isset($stat['size'], $stat['comp_size'])) {
+                    throw ValidationException::withMessages(['file' => 'Struktur file XLSX tidak valid.']);
+                }
+
+                $ukuran = (int) $stat['size'];
+                $terkompresi = (int) $stat['comp_size'];
+                $totalUkuran += $ukuran;
+
+                if ($totalUkuran > self::BATAS_HASIL_EKSTRAKSI_XLSX
+                    || ($ukuran > 1024 * 1024 && $ukuran > max(1, $terkompresi) * 100)) {
+                    throw ValidationException::withMessages(['file' => 'File XLSX terlalu besar setelah diekstrak.']);
+                }
+            }
+        } finally {
+            $arsip->close();
+        }
     }
 
     /** @param array<int, mixed> $nilai */

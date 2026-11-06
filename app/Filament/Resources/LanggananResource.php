@@ -9,6 +9,7 @@ use App\Models\Langganan;
 use App\Models\MetodePembayaran;
 use App\Models\PaketLangganan;
 use App\Services\BatalkanLangganan;
+use App\Services\GambarUploadAman;
 use App\Services\KonfirmasiPembayaranLangganan;
 use App\Services\OpsiSelectCache;
 use App\Services\SetujuiLangganan;
@@ -29,6 +30,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use UnitEnum;
 
 class LanggananResource extends Resource
@@ -152,7 +154,11 @@ class LanggananResource extends Resource
                 Action::make('lihatBukti')
                     ->label('Lihat bukti')
                     ->icon('heroicon-o-document-magnifying-glass')
-                    ->url(fn (Langganan $record): string => Storage::disk('local')->temporaryUrl($record->bukti_pembayaran_path, now()->addMinutes(5)))
+                    ->url(fn (Langganan $record): string => Storage::disk('local')->temporaryUrl(
+                        $record->bukti_pembayaran_path,
+                        now()->addMinutes(5),
+                        ['ResponseContentDisposition' => 'attachment'],
+                    ))
                     ->openUrlInNewTab()
                     ->visible(fn (Langganan $record): bool => filled($record->bukti_pembayaran_path)),
                 Action::make('konfirmasiPembayaran')
@@ -164,8 +170,13 @@ class LanggananResource extends Resource
                             ->disk('local')
                             ->directory('langganan/bukti-pembayaran')
                             ->visibility('private')
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf'])
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(3072)
+                            ->saveUploadedFileUsing(fn ($component, TemporaryUploadedFile $file): string => app(GambarUploadAman::class)->simpan(
+                                $file,
+                                $component->getDiskName(),
+                                $component->getDirectory() ?? 'langganan/bukti-pembayaran',
+                            ))
                             ->required(),
                         Textarea::make('catatan_user')->label('Catatan')->maxLength(1000),
                     ])

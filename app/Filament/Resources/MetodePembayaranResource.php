@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MetodePembayaranResource\Pages\ListMetodePembayarans;
 use App\Models\MetodePembayaran;
+use App\Services\GambarUploadAman;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
@@ -16,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use UnitEnum;
 
 class MetodePembayaranResource extends Resource
@@ -70,7 +72,12 @@ class MetodePembayaranResource extends Resource
                 ->directory('metode-pembayaran/qr')
                 ->visibility('private')
                 ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
-                ->maxSize(3072),
+                ->maxSize(3072)
+                ->saveUploadedFileUsing(fn ($component, TemporaryUploadedFile $file): string => app(GambarUploadAman::class)->simpan(
+                    $file,
+                    $component->getDiskName(),
+                    $component->getDirectory() ?? 'metode-pembayaran/qr',
+                )),
             TextInput::make('urutan')
                 ->numeric()
                 ->integer()
