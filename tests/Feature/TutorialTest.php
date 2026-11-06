@@ -344,6 +344,7 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
         // Hanya hitung tautan daftar isi yang terpilih, abaikan tautan pager Sebelumnya/Berikutnya.
         expect($xpath->query('//a[@data-topic-link and @href="#'.$topic['id'].'"]'))->toHaveCount(1);
         expect($xpath->query('//article[@id="'.$topic['id'].'"]/ol/li'))->toHaveCount(count($topic['steps']));
+        expect($xpath->query('//article[@id="'.$topic['id'].'"]//div[contains(concat(" ", normalize-space(@class), " "), " note ")]/ul/li')->length)->toBeGreaterThanOrEqual(1);
         // Pastikan artikel hanya muncul pada bab halamannya yang terpilih.
         expect($xpath->query('//main/section[@class="chapter"]/h2[text()="'.$topic['page'].'"]/../article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
     }

@@ -240,7 +240,14 @@
                             <h4 id="{{ $topic['id'] }}-langkah">Langkah penggunaan</h4>
                             <ol>@foreach($topic['steps'] as $step)<li>{{ $step }}</li>@endforeach</ol>
                             <div class="callout example" id="{{ $topic['id'] }}-contoh"><strong>Contoh penggunaan</strong><p>{{ $topic['example'] }}</p></div>
-                            <div class="callout note" id="{{ $topic['id'] }}-catatan"><strong>Perlu diketahui</strong><p>{{ $topic['note'] }}</p></div>
+                            <div class="callout note" id="{{ $topic['id'] }}-catatan">
+                                <strong>Perlu diketahui</strong>
+                                <ul>
+                                    @foreach(preg_split('/(?<=[.!?])\s+/u', trim($topic['note']), -1, PREG_SPLIT_NO_EMPTY) as $note)
+                                        <li>{{ $note }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
                             @if($prev || $next)
                                 <nav class="pager" aria-label="Navigasi topik">
                                     @if($prev)<a class="prev" href="#{{ $prev['id'] }}"><small>&larr; Sebelumnya</small><strong>{{ $prev['title'] }}</strong></a>@endif
