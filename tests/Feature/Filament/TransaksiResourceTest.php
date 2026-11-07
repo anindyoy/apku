@@ -116,7 +116,12 @@ test('daftar transaksi mobile menampilkan ringkasan tanpa kolom desktop', functi
         ->toContain('data-tone="success"')
         ->toContain('transaction-mobile-amount')
         ->toContain('Rp 123.456')
+        ->toContain('Kas: '.$user->buku_kas()->firstOrFail()->nama_buku)
+        ->toContain('Sumber Dana: '.$user->sumberDana()->firstOrFail()->nama_dompet)
         ->toContain('fi-ta-table-stacked-on-mobile');
+
+    expect(Livewire::actingAs($user)->test(ListTransaksis::class)->instance()->getTable()->getRecordAction($transaksi))
+        ->toBe('edit');
 
     $columns = collect(TransaksiResource::transactionColumns())->keyBy(fn ($column) => $column->getName());
     expect($columns->get('ringkasan_mobile')->getHiddenFrom())->toBe('md')

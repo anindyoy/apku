@@ -277,8 +277,9 @@ test('dashboard user aksi baris mengubah dan menghapus transaksi beserta saldo',
     $record = app(TransaksiService::class)->buat($user, $data, 'Pemasukan');
     $page = Livewire::test(Dashboard::class)
         ->assertTableActionVisible('edit', $record)
-        ->assertTableActionVisible('delete', $record)
-        ->mountTableAction('edit', $record)
+        ->assertTableActionVisible('delete', $record);
+    expect($page->instance()->getTable()->getRecordAction($record))->toBe('edit');
+    $page->mountTableAction('edit', $record)
         ->assertActionMounted()
         ->unmountTableAction()
         ->callTableAction('edit', $record, data: [...$data, 'nominal' => 75000])

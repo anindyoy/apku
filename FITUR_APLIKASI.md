@@ -32,10 +32,11 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Pengguna Premium aktif dapat membuat kas dan sumber dana dari pilihan pada form transaksi. Kas baru dimulai dengan saldo nol dan seluruh kategori milik pemilik kas otomatis dihubungkan; sumber dana baru dimulai dengan saldo nol. Opsi ini tetap mematuhi kuota akun dan validasi nama unik.
 - Transaksi baru memengaruhi saldo secara default, termasuk saldo awal dan transfer kas; pengecualian tersedia untuk import riwayat tanpa dampak saldo.
 - Mengubah dan menghapus transaksi sesuai hak akses.
+- Baris transaksi yang dapat dikelola membuka modal Ubah saat diklik; aksi Ubah pada baris tetap tersedia.
 - Saldo per baris pada daftar transaksi mengikuti saldo kas dan sumber dana tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
 - Filter periode, kas, dan sumber dana pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
 - Pada layar desktop, header dan isi tabel Transaksi, Pencarian Transaksi, serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Kas, Kategori, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.
-- Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, kategori, dan tanggal secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
+- Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, kategori, tanggal, kas, dan sumber dana secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-sumber dana.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.

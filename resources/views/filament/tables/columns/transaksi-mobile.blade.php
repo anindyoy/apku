@@ -13,4 +13,8 @@
         <span class="transaction-mobile-activity">{{ $kategori ?: 'Tanpa kategori' }}</span>
         <span class="transaction-mobile-date">{{ date('d M Y, H:i', strtotime($record->tanggal)) }}</span>
     </div>
+    <div class="transaction-mobile-detail">
+        <span class="transaction-mobile-activity">Kas: {{ $record->buku_kas?->nama_buku ?? '-' }}</span>
+        <span class="transaction-mobile-activity">Sumber Dana: {{ $record->sumberDana?->nama_dompet ?? '-' }}</span>
+    </div>
 </div>

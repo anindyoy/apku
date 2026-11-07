@@ -54,7 +54,7 @@ class TransaksiResource extends Resource
             ->columns(static::transactionColumns())
             ->defaultSort('tanggal', 'desc')
             ->recordUrl(null)
-            ->recordAction(null)
+            ->recordAction('edit')
             ->filters([
             ])
             ->actions(static::transactionActions());

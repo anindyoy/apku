@@ -233,7 +233,7 @@ class Dashboard extends BaseDashboard implements HasTable
             ->recordActions(TransaksiResource::transactionActions())
             ->paginated(false)
             ->recordUrl(null)
-            ->recordAction(null)
+            ->recordAction('edit')
             ->emptyStateHeading('Belum ada transaksi');
     }
 }
