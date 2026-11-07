@@ -15,6 +15,7 @@ it('menampilkan landing page publik dengan navigasi utama dan ringkasan fitur', 
     expect($html)->toContain(route('filament.admin.auth.login'));
     expect($html)->toContain(route('filament.admin.auth.register'));
     expect($html)->toContain(route('tutorial'));
+    expect($html)->toContain('aria-label="Buka menu navigasi"', 'Pilihan akun', 'Daftar gratis');
 });
 
 it('menampilkan harga paket aktif di halaman depan dengan hemat per bulan', function () {

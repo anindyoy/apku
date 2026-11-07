@@ -15,14 +15,25 @@
     <header class="border-b border-slate-200 bg-white">
         <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-4 sm:px-8" aria-label="Navigasi utama">
             <a href="{{ route('home') }}" aria-label="APKu, beranda"><img src="{{ asset('logo-options/apku-dompet-wordmark.svg') }}" alt="APKu" class="h-10 w-auto sm:h-12"></a>
-            <div class="flex items-center gap-2 sm:gap-5">
-                <a href="#fitur" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 sm:inline">Fitur</a>
-                <a href="#akun" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 sm:inline">Pilihan akun</a>
-                <a href="#harga" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 sm:inline">Harga</a>
-                <a href="{{ route('tutorial') }}" class="hidden text-sm font-semibold text-slate-600 hover:text-teal-700 md:inline">Tutorial</a>
+            <div class="hidden items-center gap-2 sm:flex sm:gap-5">
+                <a href="#fitur" class="text-sm font-semibold text-slate-600 hover:text-teal-700">Fitur</a>
+                <a href="#akun" class="text-sm font-semibold text-slate-600 hover:text-teal-700">Pilihan akun</a>
+                <a href="#harga" class="text-sm font-semibold text-slate-600 hover:text-teal-700">Harga</a>
+                <a href="{{ route('tutorial') }}" class="text-sm font-semibold text-slate-600 hover:text-teal-700">Tutorial</a>
                 <a href="{{ route('filament.admin.auth.login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">Masuk</a>
                 <a href="{{ route('filament.admin.auth.register') }}" class="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800">Daftar gratis</a>
             </div>
+            <details class="relative sm:hidden">
+                <summary class="cursor-pointer list-none rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600" aria-label="Buka menu navigasi">Menu</summary>
+                <div class="absolute right-0 top-full z-30 mt-2 grid min-w-48 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+                    <a href="#fitur" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50">Fitur</a>
+                    <a href="#akun" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50">Pilihan akun</a>
+                    <a href="#harga" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50">Harga</a>
+                    <a href="{{ route('tutorial') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50">Tutorial</a>
+                    <a href="{{ route('filament.admin.auth.login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">Masuk</a>
+                    <a href="{{ route('filament.admin.auth.register') }}" class="rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-800">Daftar gratis</a>
+                </div>
+            </details>
         </nav>
     </header>
     <main id="konten">
