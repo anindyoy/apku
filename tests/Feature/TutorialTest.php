@@ -338,13 +338,14 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
         expect($topic['category'])->not->toBeEmpty();
         expect($topic['intro'])->not->toBeEmpty();
         expect($topic['example'])->not->toBeEmpty();
-        expect($topic['note'])->not->toBeEmpty();
+        expect($topic['note'] ?? '')->toBeString();
         expect(count($topic['steps']))->toBeGreaterThanOrEqual(3);
         expect($xpath->query('//article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
         // Hanya hitung tautan daftar isi yang terpilih, abaikan tautan pager Sebelumnya/Berikutnya.
         expect($xpath->query('//a[@data-topic-link and @href="#'.$topic['id'].'"]'))->toHaveCount(1);
         expect($xpath->query('//article[@id="'.$topic['id'].'"]/ol/li'))->toHaveCount(count($topic['steps']));
-        expect($xpath->query('//article[@id="'.$topic['id'].'"]//div[contains(concat(" ", normalize-space(@class), " "), " note ")]/ul/li')->length)->toBeGreaterThanOrEqual(1);
+        $jumlahButirCatatan = $xpath->query('//article[@id="'.$topic['id'].'"]//div[contains(concat(" ", normalize-space(@class), " "), " note ")]/ul/li')->length;
+        expect($jumlahButirCatatan)->toBe(($topic['note'] ?? '') === '' ? 0 : preg_match_all('/(?<=[.!?])\s+/u', trim($topic['note'])) + 1);
         // Pastikan artikel hanya muncul pada bab halamannya yang terpilih.
         expect($xpath->query('//main/section[@class="chapter"]/h2[text()="'.$topic['page'].'"]/../article[@id="'.$topic['id'].'"]'))->toHaveCount(1);
     }
@@ -356,6 +357,43 @@ it('tutorial publik menampilkan seluruh topik dan tautan daftar isi tanpa login'
     expect($xpath->query('//aside//div[@class="nav-group"]'))->toHaveCount(count($response->viewData('groups')));
     expect($xpath->query('//main/section[@class="chapter"]'))->toHaveCount(count($response->viewData('groups')));
     $this->assertGuest();
+});
+
+it('tutorial tetap tampil saat catatan topik kosong atau tidak tersedia', function () {
+    $topik = [
+        'id' => 'topik-tanpa-catatan',
+        'page' => 'Panduan',
+        'category' => 'Umum',
+        'title' => 'Topik tanpa catatan',
+        'intro' => 'Pengantar.',
+        'steps' => ['Langkah pertama.'],
+        'example' => 'Contoh.',
+        'note' => '',
+    ];
+    $topics = collect([$topik]);
+
+    $html = view('tutorial', [
+        'topics' => [$topik],
+        'groups' => $topics->groupBy('page'),
+        'total' => 1,
+        'query' => '',
+    ])->withErrors([])->render();
+
+    $document = new DOMDocument;
+    @$document->loadHTML($html);
+    $xpath = new DOMXPath($document);
+    expect($xpath->query('//article[@id="topik-tanpa-catatan"]//div[contains(concat(" ", normalize-space(@class), " "), " note ")]'))->toHaveCount(0);
+});
+
+it('tutorial menautkan penyebutan fitur ke topik terkait', function () {
+    $response = $this->get(route('tutorial'))->assertOk();
+    $document = new DOMDocument;
+    @$document->loadHTML($response->getContent());
+    $xpath = new DOMXPath($document);
+
+    expect($xpath->query('//article[@id="akun"]//a[@href="'.route('tutorial').'#akun"]'))->toHaveCount(0);
+    expect($xpath->query('//article[@id="transaksi"]//a[@href="'.route('tutorial').'#dashboard"]')->length)->toBeGreaterThan(0);
+    expect($xpath->query('//article[@id="dashboard"]//a[@href="'.route('tutorial').'#dompet"]')->length)->toBeGreaterThan(0);
 });
 
 it('tutorial mengelompokkan topik menurut halaman fitur dan menyembunyikan kelompok tanpa hasil', function () {

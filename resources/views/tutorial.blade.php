@@ -149,6 +149,34 @@
 @php
     $ordered = array_values($topics);
     $positions = array_flip(array_column($ordered, 'id'));
+    $fiturTutorial = [
+        'pemulihan akun' => 'akun', 'verifikasi email' => 'akun', 'kata sandi' => 'akun', 'akun' => 'akun',
+        'pengaturan awal' => 'pengaturan-awal', 'saldo awal' => 'pengaturan-awal',
+        'dashboard' => 'dashboard', 'dasbor' => 'dashboard',
+        'transaksi penyesuaian saldo' => 'audit-saldo', 'penyesuaian saldo' => 'audit-saldo', 'cocokkan saldo' => 'audit-saldo',
+        'transfer sumber dana' => 'transfer', 'transfer kas' => 'transfer', 'transfer' => 'transfer',
+        'pencarian transaksi' => 'pencarian', 'filter transaksi' => 'pencarian', 'pencarian' => 'pencarian',
+        'import transaksi' => 'import', 'impor transaksi' => 'import', 'import' => 'import', 'impor' => 'import',
+        'kas bersama' => 'kolaborasi', 'kolaborasi kas' => 'kolaborasi', 'viewer' => 'kolaborasi', 'editor' => 'kolaborasi', 'kolaborasi' => 'kolaborasi',
+        'kas publik' => 'kas-publik', 'link kas publik' => 'kas-publik', 'tautan kas publik' => 'kas-publik',
+        'sumber dana' => 'dompet', 'kas' => 'kas',
+        'kategori transaksi' => 'kategori', 'kategori' => 'kategori',
+        'tabungan emas' => 'emas', 'emas' => 'emas',
+        'laporan' => 'laporan', 'utang dan piutang' => 'utang-piutang', 'utang-piutang' => 'utang-piutang', 'piutang' => 'utang-piutang', 'utang' => 'utang-piutang',
+        'trial premium' => 'trial-premium', 'uji coba premium' => 'trial-premium', 'premium' => 'langganan', 'voucher' => 'langganan', 'langganan' => 'langganan',
+        'profil' => 'profil-notifikasi', 'notifikasi' => 'profil-notifikasi', 'navigasi cepat' => 'profil-notifikasi',
+    ];
+    uksort($fiturTutorial, fn (string $a, string $b): int => mb_strlen($b) <=> mb_strlen($a));
+    $polaFiturTutorial = '/(?<![\\pL\\pN_])(' . implode('|', array_map(fn (string $fitur): string => preg_quote($fitur, '/'), array_keys($fiturTutorial))) . ')(?![\\pL\\pN_])/iu';
+    $tautkanFitur = fn (?string $teks, string $idTopikSaatIni): string => preg_replace_callback($polaFiturTutorial, function (array $cocok) use ($fiturTutorial, $idTopikSaatIni): string {
+        $idTopik = $fiturTutorial[mb_strtolower($cocok[0])];
+
+        if ($idTopik === $idTopikSaatIni) {
+            return $cocok[0];
+        }
+
+        return '<a href="' . e(route('tutorial') . '#' . $idTopik) . '">' . e($cocok[0]) . '</a>';
+    }, e($teks ?? '')) ?? e($teks ?? '');
 @endphp
 <a class="skip" href="#panduan">Lewati ke panduan</a>
 
@@ -236,18 +264,20 @@
                         <article id="{{ $topic['id'] }}">
                             <span class="tag">{{ $topic['category'] }}</span>
                             <h3>{{ $topic['title'] }}</h3>
-                            <p class="intro">{{ $topic['intro'] }}</p>
+                            <p class="intro">{!! $tautkanFitur($topic['intro'], $topic['id']) !!}</p>
                             <h4 id="{{ $topic['id'] }}-langkah">Langkah penggunaan</h4>
-                            <ol>@foreach($topic['steps'] as $step)<li>{{ $step }}</li>@endforeach</ol>
-                            <div class="callout example" id="{{ $topic['id'] }}-contoh"><strong>Contoh penggunaan</strong><p>{{ $topic['example'] }}</p></div>
-                            <div class="callout note" id="{{ $topic['id'] }}-catatan">
-                                <strong>Perlu diketahui</strong>
-                                <ul>
-                                    @foreach(preg_split('/(?<=[.!?])\s+/u', trim($topic['note']), -1, PREG_SPLIT_NO_EMPTY) as $note)
-                                        <li>{{ $note }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
+                            <ol>@foreach($topic['steps'] as $step)<li>{!! $tautkanFitur($step, $topic['id']) !!}</li>@endforeach</ol>
+                            <div class="callout example" id="{{ $topic['id'] }}-contoh"><strong>Contoh penggunaan</strong><p>{!! $tautkanFitur($topic['example'], $topic['id']) !!}</p></div>
+                            @if(filled($topic['note'] ?? null))
+                                <div class="callout note" id="{{ $topic['id'] }}-catatan">
+                                    <strong>Perlu diketahui</strong>
+                                    <ul>
+                                        @foreach(preg_split('/(?<=[.!?])\s+/u', trim($topic['note']), -1, PREG_SPLIT_NO_EMPTY) as $note)
+                                            <li>{!! $tautkanFitur($note, $topic['id']) !!}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
                             @if($prev || $next)
                                 <nav class="pager" aria-label="Navigasi topik">
                                     @if($prev)<a class="prev" href="#{{ $prev['id'] }}"><small>&larr; Sebelumnya</small><strong>{{ $prev['title'] }}</strong></a>@endif
