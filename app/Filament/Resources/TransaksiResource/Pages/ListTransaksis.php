@@ -81,6 +81,7 @@ class ListTransaksis extends ListRecords
                         'filterYear' => $this->filterYear,
                         'filterBukuKas' => $this->filterBukuKas,
                         'filterDompet' => $this->filterDompet,
+                        'listUrl' => static::getUrl(),
                     ]),
                 EmbeddedTable::make(),
                 RenderHook::make(PanelsRenderHook::RESOURCE_PAGES_LIST_RECORDS_TABLE_AFTER),

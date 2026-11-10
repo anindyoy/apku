@@ -45,6 +45,7 @@ test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', funct
     expect(implode(' ', $topik['transaksi']['steps']))->toContain('Ketuk baris transaksi yang dapat Anda kelola untuk langsung membuka modal Ubah', 'jenis, nominal, kategori, tanggal, kas, dan sumber dana', 'form kategori yang sama seperti di Setting', 'Pengguna Premium aktif dapat membuka form kas atau sumber dana', 'deskripsi Kas baru dibuat');
     expect(implode(' ', $topik['kategori']['steps']))->toContain('akun Reguler maupun Premium juga dapat membuat kategori langsung');
     expect($topik['transaksi']['note'])->toContain('Dicatat oleh', 'pernah dikolaborasikan dengan akun lain', 'kedaluwarsa atau dicabut', 'Tautan kas publik');
+    expect(implode(' ', $topik['pencarian']['steps']))->toContain('menu opsi', 'latar teal dengan teks putih');
 });
 
 test('tutorial pencocokan saldo menjelaskan penghitung pecahan uang', function () {

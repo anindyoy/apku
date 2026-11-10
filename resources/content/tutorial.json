@@ -6,13 +6,12 @@
         "title": "Daftar, masuk, dan pemulihan akun",
         "intro": "Gunakan akun pribadi untuk menyimpan catatan keuangan Anda. Tombol dan aksen utama halaman tutorial serta panel setelah masuk berwarna teal seperti pada halaman utama APKu.",
         "steps": [
-            "Buka halaman utama APKu, pilih Daftar gratis atau Mulai gratis, lalu lengkapi formulir registrasi. Di aplikasi production, selesaikan juga verifikasi keamanan yang muncul.",
+            "Buka halaman utama APKu. Di layar kecil, tekan Menu untuk membuka Fitur, Pilihan akun, Harga, Tutorial, Masuk, dan Daftar gratis; di layar lebar tautan tersebut tampil langsung di bagian atas. Pilih Daftar gratis atau Mulai gratis, lalu lengkapi formulir registrasi. Di aplikasi production, selesaikan juga verifikasi keamanan yang muncul.",
             "Buka email verifikasi berbahasa Indonesia dan pilih Verifikasi Alamat Email. Jika belum diterima, periksa folder spam, kirim ulang melalui halaman verifikasi, atau hubungi admin via WhatsApp jika ada masalah.",
             "Pilih Masuk di halaman utama, gunakan email dan password, kemudian selesaikan pengaturan awal jika diminta.",
             "Jika lupa kata sandi, pilih tautan lupa kata sandi pada halaman masuk, masukkan alamat email, lalu pilih Atur Ulang Kata Sandi pada email yang dikirim. Setelah mengganti kata sandi, masuk kembali."
         ],
-        "example": "Daftar menggunakan email yang aktif agar tautan verifikasi dan pemulihan password dapat diterima.",
-        "note": "Simpan kata sandi dengan aman. Pesan validasi formulir dan status autentikasi ditampilkan dalam bahasa Indonesia. Tutorial ini dapat dibuka tanpa akun, sedangkan data keuangan pribadi memerlukan login."
+        "example": "Daftar menggunakan email yang aktif agar tautan verifikasi dan pemulihan password dapat diterima."
     },
     {
         "id": "pengaturan-awal",
@@ -26,8 +25,7 @@
             "Masukkan saldo awal sesuai uang yang tersedia agar pencatatan dimulai dari kondisi yang benar.",
             "Tambahkan kategori pemasukan dan pengeluaran yang sering dipakai, lalu selesaikan wizard. Kategori ini langsung terhubung ke kas utama."
         ],
-        "example": "Kas: Keuangan Rumah Tangga. Sumber dana: Rekening Bank. Saldo awal: Rp1.000.000. Kategori: Gaji dan Belanja.",
-        "note": "Saldo awal langsung memperbarui saldo kas dan sumber dana setelah disimpan. Kas dan sumber dana adalah dua sudut pandang atas uang yang sama. Jangan menjumlahkan total saldo kas dan total saldo sumber dana sebagai total kekayaan."
+        "example": "Kas: Keuangan Rumah Tangga. Sumber dana: Rekening Bank. Saldo awal: Rp1.000.000. Kategori: Gaji dan Belanja."
     },
     {
         "id": "dashboard",
@@ -42,7 +40,7 @@
             "Pilih tab untuk berpindah bagian; di ponsel tab tersusun dua kolom sehingga tidak perlu digeser ke samping. Saat fokus berada di tab, gunakan panah kiri/kanan atau Home/End. Gunakan Ubah atau Hapus pada transaksi jika aksi tersedia."
         ],
         "example": "Gunakan tombol Kelola Sumber Dana pada tab Kas & Sumber Dana untuk langsung membuka daftar sumber dana.",
-        "note": "Pemeriksaan keseimbangan saldo aktif secara manual melalui Setting > Akun Saya dan membandingkan total saldo kas dengan total sumber dana milik Anda. Cakupan kas mengikuti pengaturan apakah Kas Tabungan dihitung. Jika ada selisih, periksa masing-masing sumber dana melalui Cocokkan Saldo; total yang sama tidak menjamin setiap saldo akun cocok. Pengaturan tampilan dan urutan disimpan per akun. Urutan yang sudah Anda atur tetap berlaku, dan tab pertama yang tampil akan dibuka saat halaman dimuat atau pengaturan diubah. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi penyesuaian saldo."
+        "note": "Pemeriksaan keseimbangan saldo aktif secara manual melalui Setting > Akun Saya dan membandingkan total saldo kas dengan total sumber dana milik Anda. Cakupan kas mengikuti pengaturan apakah Kas Tabungan dihitung. Jika ada selisih, periksa masing-masing sumber dana melalui Cocokkan Saldo; total yang sama tidak menjamin setiap saldo akun cocok. Urutan yang sudah Anda atur tetap berlaku, dan tab pertama yang tampil akan dibuka saat halaman dimuat atau pengaturan diubah. Penanda informasi kuning pada transaksi menjelaskan pembatasan, misalnya kas tidak aktif atau transaksi penyesuaian saldo."
     },
     {
         "id": "transaksi",
@@ -82,7 +80,7 @@
         "title": "Filter dan pencarian transaksi",
         "intro": "Temukan catatan lama melalui filter periode atau pencarian transaksi global.",
         "steps": [
-            "Di daftar Transaksi, buka Filter transaksi yang awalnya tertutup, lalu pilih bulan, tahun, kas, atau sumber dana pada deretan kontrol filter. Panel dan kontrol filter menyesuaikan tema terang atau gelap agar teks, ikon, dan batas kontrol tetap mudah dibedakan. Panah di dalam pilihan membuka daftar opsi; tombol di kiri dan kanan periode berpindah ke bulan sebelum atau sesudahnya. Gunakan Reset filter untuk kembali ke pilihan awal.",
+            "Di daftar Transaksi, buka Filter transaksi yang awalnya tertutup, lalu pilih bulan, tahun, kas, atau sumber dana dari menu opsi. Opsi terpilih dan opsi yang diarahkan memakai latar teal dengan teks putih agar tetap terbaca pada tema terang maupun gelap. Tombol di kiri dan kanan periode berpindah ke bulan sebelum atau sesudahnya. Gunakan Reset filter untuk kembali ke pilihan awal.",
             "Gunakan pencarian deskripsi untuk menemukan catatan pada daftar transaksi.",
             "Buka Pencarian Transaksi untuk mencari berdasarkan deskripsi, kategori, kas, sumber dana, jenis transaksi, atau nominal; persempit dengan filter yang tersedia. Di layar mobile, hasil memakai ringkasan jenis, nominal, kategori, dan tanggal.",
             "Periksa detail hasil, lalu gunakan Ubah atau Hapus jika Anda memiliki hak pengelolaan."

@@ -24,6 +24,21 @@ test('toolbar filter transaksi menampilkan kontrol periode buku kas dan reset', 
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
+test('tautan filter transaksi selalu menuju halaman daftar transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+
+    $component = Livewire::actingAs($user)->test(ListTransaksis::class)->assertSuccessful();
+    $component->set('filterMonth', '11');
+
+    $html = $component->html();
+
+    expect($html)
+        ->toContain('href="' . ListTransaksis::getUrl())
+        ->not->toContain('href="http://localhost/livewire-')
+        ->not->toContain('href="/livewire-');
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
 test('toolbar filter transaksi menggunakan warna teks yang kontras pada setiap tema', function () {
     $user = createRegularUserWithBukuKas();
 
@@ -33,24 +48,25 @@ test('toolbar filter transaksi menggunakan warna teks yang kontras pada setiap t
 
     expect($html)
         ->toContain('data-testid="filter-transaksi-section"')
-        ->toContain('!text-gray-950 focus:ring-0 dark:!text-white')
+        ->toContain('aria-haspopup="menu"')
+        ->toContain('role="menuitem"')
+        ->toContain('hover:bg-teal-700 hover:text-white dark:text-gray-100 dark:hover:bg-teal-600')
+        ->toContain('bg-teal-700 text-white')
         ->toContain('border border-gray-400 bg-gray-100 shadow-sm')
         ->toContain('dark:border-white/10 dark:bg-white/5')
         ->toContain('hover:bg-gray-200')
         ->toContain('dark:hover:bg-white/10')
-        ->toContain('bg-transparent')
-        ->toContain('bg-white text-gray-800 dark:bg-gray-800 dark:text-gray-200')
+        ->toContain('dark:bg-gray-800')
         ->not->toContain('<style>');
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
-test('panah select filter transaksi memiliki jarak dari tepi kanan', function () {
+test('panah menu filter transaksi memiliki jarak dari tepi kanan', function () {
     $user = createRegularUserWithBukuKas();
     $html = Livewire::actingAs($user)->test(ListTransaksis::class)->html();
 
     expect(substr_count($html, 'data-testid="transaction-select-chevron"'))->toBe(4)
-        ->and(substr_count($html, 'appearance-none border-0 bg-transparent bg-none'))->toBe(4)
-        ->and(substr_count($html, 'absolute inset-y-0 right-3.5 my-auto h-5 w-5'))->toBe(4)
+        ->and(substr_count($html, 'ml-2 h-5 w-5 shrink-0 text-gray-600 dark:text-gray-300'))->toBe(2)
         ->and($html)->toContain('relative h-full w-36')
         ->and($html)->toContain('relative h-full w-24')
         ->and($html)->toContain('rounded-lg border border-gray-400 bg-gray-100 shadow-sm');
