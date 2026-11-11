@@ -456,3 +456,122 @@ test('halaman kategori menampilkan dan mengelola kategori sesuai kas yang dapat 
         ->assertHasNoTableActionErrors();
     expect($milikPemilik->idKas())->toBe([]);
 })->group('kategori-kas', 'filament');
+
+test('checkbox aktifkan di semua kas dapat memilih seluruh kas dan masing-masing kas tetap dapat diedit', function () {
+    $data = siapkanDataKategoriKas();
+    $idKasUtama = $data['kas']->id;
+    $idKasUsaha = $data['kasLain']->id;
+    $semuaIdKas = BukuKas::query()->urutanTabungan()->where('user_id', $data['user']->id)->pluck('id')->all();
+
+    // Tambah kategori: awalnya kosong karena ada lebih dari 1 kas
+    $halaman = Livewire::actingAs($data['user'])->test(HalamanKategori::class)
+        ->mountTableAction('tambah')
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kas' => false,
+            'kas' => [],
+        ]);
+
+    // Aktifkan semua kas lewat master checkbox
+    $halaman->setTableActionData([
+        'aktifkan_di_semua_kas' => true,
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kas' => true,
+        'kas' => $semuaIdKas,
+    ]);
+
+    // Pengguna tetap dapat mengedit masing-masing checkbox (lepas salah satu kas)
+    $halaman->setTableActionData([
+        'kas' => [$idKasUtama],
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kas' => false,
+        'kas' => [$idKasUtama],
+    ]);
+
+    // Simpan data hasil penyesuaian individual
+    $halaman->setTableActionData([
+        'nama' => 'Operasional',
+        'tipe' => 'Pengeluaran',
+        'kas' => [$idKasUtama],
+    ])->callMountedTableAction()->assertHasNoTableActionErrors();
+
+    $kategori = Kategori::withoutGlobalScopes()->where('nama', 'Operasional')->sole();
+    expect($kategori->idKas())->toBe([$idKasUtama]);
+
+    // Ubah kategori: karena baru terhubung ke 1 kas dari 2 kas, master checkbox false
+    $halaman->mountTableAction('ubah', $kategori)
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kas' => false,
+            'kas' => [$idKasUtama],
+        ]);
+
+    // Aktifkan semua kas pada form edit
+    $halaman->setTableActionData([
+        'aktifkan_di_semua_kas' => true,
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kas' => true,
+        'kas' => $semuaIdKas,
+    ]);
+
+    // Simpan pembaruan ke semua kas
+    $halaman->setTableActionData([
+        'nama' => 'Operasional Kantor',
+        'tipe' => 'Pengeluaran',
+        'kas' => $semuaIdKas,
+    ])->callMountedTableAction()->assertHasNoTableActionErrors();
+
+    expect($kategori->fresh()->nama)->toBe('Operasional Kantor')
+        ->and($kategori->idKas())->toEqualCanonicalizing($semuaIdKas);
+
+    // Buka kembali form ubah: sekarang terhubung ke semua kas, sehingga master checkbox true
+    $halaman->mountTableAction('ubah', $kategori)
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kas' => true,
+            'kas' => $semuaIdKas,
+        ]);
+
+    // Nonaktifkan master checkbox: seluruh kas terlepas
+    $halaman->setTableActionData([
+        'aktifkan_di_semua_kas' => false,
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kas' => false,
+        'kas' => [],
+    ]);
+
+    // Pilih kas usaha secara manual setelah menonaktifkan master checkbox
+    $halaman->setTableActionData([
+        'kas' => [$idKasUsaha],
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kas' => false,
+        'kas' => [$idKasUsaha],
+    ]);
+
+    $halaman->callMountedTableAction()->assertHasNoTableActionErrors();
+    expect($kategori->fresh()->idKas())->toBe([$idKasUsaha]);
+})->group('kategori-kas', 'filament');
+
+test('form kategori dengan satu kas mencentang aktifkan di semua kas secara default', function () {
+    $user = createRegularUserWithBukuKas();
+    $kas = $user->buku_kas()->firstOrFail();
+
+    Livewire::actingAs($user)->test(HalamanKategori::class)
+        ->mountTableAction('tambah')
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kas' => true,
+            'kas' => [$kas->id],
+        ])
+        ->setTableActionData([
+            'aktifkan_di_semua_kas' => false,
+        ])
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kas' => false,
+            'kas' => [],
+        ])
+        ->setTableActionData([
+            'kas' => [$kas->id],
+        ])
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kas' => true,
+            'kas' => [$kas->id],
+        ]);
+})->group('kategori-kas', 'filament');
+

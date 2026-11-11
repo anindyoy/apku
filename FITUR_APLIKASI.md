@@ -279,7 +279,7 @@ Pengguna baru diarahkan ke form pengaturan awal 1 halaman sebelum menggunakan fi
 
 - Kategori bertipe Pemasukan, Pengeluaran, atau Semua dikelola dalam satu tabel berisi nama, tipe, dan kas yang terhubung, dengan filter kas dan tipe.
 - Daftar kategori menampilkan jumlah transaksi sebagai keterangan di bawah nama (misalnya **4 transaksi**), tanpa kolom jumlah terpisah. Nama panjang dapat turun baris. Kategori kas bersama menampilkan nama pemiliknya.
-- Form tambah dan ubah memuat nama, tipe, dan daftar centang kas. Semua kas yang dipilih harus milik pemilik yang sama. Tipe default kategori baru mengikuti pengaturan tampilan pengguna.
+- Form tambah dan ubah memuat nama, tipe, checkbox **Aktifkan di semua kas**, dan daftar centang kas. Checkbox ini memilih atau mengosongkan seluruh kas sekaligus tanpa mengunci pilihan, sehingga pengguna tetap dapat mengubah centang masing-masing kas setelahnya. Semua kas yang dipilih harus milik pemilik yang sama. Tipe default kategori baru mengikuti pengaturan tampilan pengguna.
 - Tombol **Pengaturan tampilan** pada header halaman membuka toggle untuk memisahkan atau menggabungkan tipe kategori pada dropdown transaksi; pengaturan ini tidak mengubah data kategori yang sudah ada.
 - Melepas kategori dari kas yang transaksinya masih memakainya diblokir. Aksi **Lepas dari kas** menyediakan pilihan untuk mengosongkan kategori pada transaksi kas tersebut terlebih dahulu.
 - Menghapus kategori yang masih dipakai menawarkan kategori pengganti yang terhubung ke semua kas terkait; tanpa pengganti, transaksinya menjadi tanpa kategori.

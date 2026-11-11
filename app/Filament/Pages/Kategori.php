@@ -116,10 +116,16 @@ class Kategori extends Page implements HasTable
                     ->modalHeading('Tambah kategori')
                     ->modalWidth('md')
                     ->form(fn (): array => $this->formKategori())
-                    ->fillForm(fn (): array => [
-                        'tipe' => auth()->user()->pisahkanTipeKategori() ? 'Pengeluaran' : 'Semua',
-                        'kas' => count($this->opsiKas()) === 1 ? array_keys($this->opsiKas()) : [],
-                    ])
+                    ->fillForm(function (): array {
+                        $opsiKas = $this->opsiKas();
+                        $adaSatuKas = count($opsiKas) === 1;
+
+                        return [
+                            'tipe' => auth()->user()->pisahkanTipeKategori() ? 'Pengeluaran' : 'Semua',
+                            'kas' => $adaSatuKas ? array_keys($opsiKas) : [],
+                            'aktifkan_di_semua_kas' => $adaSatuKas,
+                        ];
+                    })
                     ->action(fn (array $data, Action $action) => $this->jalankan($action, function () use ($data): string {
                         app(KategoriService::class)->buat(auth()->user(), $data, $data['kas'] ?? []);
 
@@ -135,11 +141,17 @@ class Kategori extends Page implements HasTable
                     ->modalHeading(fn (KategoriModel $record): string => 'Ubah '.$record->nama)
                     ->modalWidth('md')
                     ->form(fn (KategoriModel $record): array => $this->formKategori($record))
-                    ->fillForm(fn (KategoriModel $record): array => [
-                        'nama' => $record->nama,
-                        'tipe' => $record->tipe,
-                        'kas' => array_values(array_intersect($record->idKas(), array_keys($this->opsiKas($record)))),
-                    ])
+                    ->fillForm(function (KategoriModel $record): array {
+                        $opsiKas = $this->opsiKas($record);
+                        $kasTerpilih = array_values(array_intersect(array_keys($opsiKas), $record->idKas()));
+
+                        return [
+                            'nama' => $record->nama,
+                            'tipe' => $record->tipe,
+                            'kas' => $kasTerpilih,
+                            'aktifkan_di_semua_kas' => ! empty($opsiKas) && count($kasTerpilih) === count($opsiKas),
+                        ];
+                    })
                     ->action(fn (KategoriModel $record, array $data, Action $action) => $this->jalankan($action, function () use ($record, $data): string {
                         app(KategoriService::class)->ubah(auth()->user(), $record, $data, $data['kas'] ?? []);
 

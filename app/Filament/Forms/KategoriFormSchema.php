@@ -4,9 +4,11 @@ namespace App\Filament\Forms;
 
 use App\Models\Kategori;
 use Closure;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
 
 class KategoriFormSchema
 {
@@ -26,11 +28,45 @@ class KategoriFormSchema
             $tipe->default($tipeDefault);
         }
 
+        $semuaKas = Checkbox::make('aktifkan_di_semua_kas')
+            ->label('Aktifkan di semua kas')
+            ->dehydrated(false)
+            ->live()
+            ->default(function () use ($kasOptions, $kasDefault): bool {
+                $opsi = (array) ($kasOptions() ?? []);
+                if (empty($opsi)) {
+                    return false;
+                }
+
+                $defaultKas = $kasDefault !== null ? (array) $kasDefault() : [];
+
+                return count($defaultKas) > 0 && count(array_intersect(
+                    array_map('strval', array_keys($opsi)),
+                    array_map('strval', $defaultKas),
+                )) === count($opsi);
+            })
+            ->afterStateUpdated(function (mixed $state, Set $set) use ($kasOptions): void {
+                $opsi = (array) ($kasOptions() ?? []);
+                $set('kas', (bool) $state ? array_keys($opsi) : []);
+            })
+            ->columnSpanFull();
+
         $kas = CheckboxList::make('kas')
             ->label('Dipakai di kas')
             ->options($kasOptions)
             ->helperText('Kategori hanya dapat dipilih pada transaksi kas yang dicentang. Semua kas harus milik pemilik yang sama.')
-            ->required($kasRequired);
+            ->required($kasRequired)
+            ->live()
+            ->afterStateUpdated(function (?array $state, Set $set) use ($kasOptions): void {
+                $opsi = (array) ($kasOptions() ?? []);
+                $opsiKeys = array_map('strval', array_keys($opsi));
+                $terpilih = array_map('strval', (array) ($state ?? []));
+
+                $semuaTerpilih = ! empty($opsiKeys) && count(array_intersect($opsiKeys, $terpilih)) === count($opsiKeys);
+
+                $set('aktifkan_di_semua_kas', $semuaTerpilih);
+            })
+            ->columnSpanFull();
 
         if ($kasDefault !== null) {
             $kas->default($kasDefault);
@@ -43,7 +79,9 @@ class KategoriFormSchema
                 ->maxLength(255)
                 ->placeholder('Contoh: Gaji, Makan, Transport, Belanja, Tagihan'),
             $tipe,
+            $semuaKas,
             $kas,
         ];
     }
 }
+
