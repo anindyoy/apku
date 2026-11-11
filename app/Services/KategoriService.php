@@ -6,6 +6,7 @@ use App\Models\BukuKas;
 use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
+use App\Services\OpsiSelectCache;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -166,15 +167,89 @@ class KategoriService
     {
         $idKategori = Kategori::withoutGlobalScopes()->where('user_id', $bukuKas->user_id)->pluck('id');
 
-        if ($idKategori->isEmpty()) {
+        $this->hubungkanKasKeKategori($bukuKas, $idKategori->all());
+    }
+
+    /** Menghubungkan daftar kategori tertentu ke kas yang baru dibuat. */
+    public function hubungkanKasKeKategori(BukuKas $bukuKas, array $idKategori): void
+    {
+        $idValid = Kategori::withoutGlobalScopes()
+            ->where('user_id', $bukuKas->user_id)
+            ->whereIn('id', array_values(array_unique(array_map('intval', array_filter($idKategori)))))
+            ->pluck('id');
+
+        if ($idValid->isEmpty()) {
             return;
         }
 
-        DB::table('kategori_kas')->insertOrIgnore($idKategori->map(fn (int $id): array => [
+        DB::table('kategori_kas')->insertOrIgnore($idValid->map(fn (int $id): array => [
             'kategori_id' => $id,
             'buku_kas_id' => $bukuKas->id,
         ])->all());
         Kategori::bersihkanCacheOpsi([$bukuKas->id]);
+    }
+
+    /**
+     * Menyinkronkan daftar kategori yang terhubung ke kas.
+     *
+     * @param  array<int, int|string>  $idKategori
+     */
+    public function sinkronkanKasDenganKategori(User $user, BukuKas $bukuKas, array $idKategori): void
+    {
+        if (! $user->dapatMengelolaKategoriPada($bukuKas)) {
+            throw new AuthorizationException('Kategori pada kas ini tidak dapat dikelola.');
+        }
+
+        $idTerpilih = array_values(array_unique(array_map('intval', array_filter($idKategori))));
+
+        // Pastikan seluruh kategori yang dipilih adalah milik pemilik kas.
+        $kategoriPemilik = Kategori::withoutGlobalScopes()
+            ->where('user_id', $bukuKas->user_id)
+            ->get();
+
+        $saatIni = $bukuKas->idKategori();
+        $dilepas = array_values(array_diff($saatIni, $idTerpilih));
+        $ditambah = array_values(array_diff($idTerpilih, $saatIni));
+
+
+        // Validasi: kategori yang dilepas tidak boleh masih dipakai transaksi di kas ini.
+        if ($dilepas !== []) {
+            foreach ($dilepas as $idKat) {
+                $kategori = $kategoriPemilik->firstWhere('id', $idKat);
+                $jumlah = Transaksi::withoutGlobalScopes()
+                    ->where('buku_kas_id', $bukuKas->id)
+                    ->where('kategori_id', $idKat)
+                    ->count();
+
+                if ($jumlah > 0) {
+                    $namaKategori = $kategori?->nama ?? 'tersebut';
+                    throw ValidationException::withMessages([
+                        'kategori' => "Kategori '{$namaKategori}' masih digunakan oleh {$jumlah} transaksi pada kas ini. Lepas kategori melalui Setting > Kategori jika ingin mengosongkannya pada transaksi.",
+                    ]);
+                }
+            }
+        }
+
+        $this->dalamTransaksi(function () use ($bukuKas, $dilepas, $ditambah): void {
+            if ($dilepas !== []) {
+                DB::table('kategori_kas')
+                    ->where('buku_kas_id', $bukuKas->id)
+                    ->whereIn('kategori_id', $dilepas)
+                    ->delete();
+            }
+
+            if ($ditambah !== []) {
+                DB::table('kategori_kas')->insertOrIgnore(array_map(fn (int $id): array => [
+                    'kategori_id' => $id,
+                    'buku_kas_id' => $bukuKas->id,
+                ], $ditambah));
+            }
+
+            if ($dilepas !== [] || $ditambah !== []) {
+                Kategori::bersihkanCacheOpsi([$bukuKas->id]);
+                OpsiSelectCache::bersihkan('buku-kas', $bukuKas->user_id);
+            }
+        });
     }
 
     /**

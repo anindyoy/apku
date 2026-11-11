@@ -5,6 +5,7 @@ namespace App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Concerns\CachesResourceListRecords;
 use App\Filament\Resources\BukuKasResource;
 use App\Models\Dompet;
+use App\Models\Kategori;
 use App\Services\DashboardCache;
 use App\Services\KategoriService;
 use App\Services\KuotaAkun;
@@ -22,6 +23,9 @@ class ListBukuKas extends ListRecords
     protected static string $resource = BukuKasResource::class;
 
     public bool $hubungkanKategoriKasBaru = false;
+
+    /** @var array<int, int> */
+    public array $kategoriKasBaru = [];
 
     public function getSubheading(): Htmlable
     {
@@ -63,14 +67,23 @@ class ListBukuKas extends ListRecords
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = auth()->id();
                     // Pilihan ini bukan kolom kas, jadi disimpan sementara sampai kas selesai dibuat.
-                    $this->hubungkanKategoriKasBaru = (bool) ($data['hubungkan_kategori'] ?? false);
-                    unset($data['hubungkan_kategori']);
+                    $kategori = (array) ($data['kategori'] ?? []);
+                    if (empty($kategori) && (bool) ($data['hubungkan_kategori'] ?? false)) {
+                        $this->kategoriKasBaru = Kategori::withoutGlobalScopes()
+                            ->where('user_id', auth()->id())
+                            ->pluck('id')
+                            ->all();
+                    } else {
+                        $this->kategoriKasBaru = array_values(array_map('intval', $kategori));
+                    }
+                    $this->hubungkanKategoriKasBaru = ! empty($this->kategoriKasBaru);
+                    unset($data['kategori'], $data['hubungkan_kategori'], $data['aktifkan_di_semua_kategori']);
 
                     return $data;
                 })
                 ->after(function ($record): void {
-                    if ($this->hubungkanKategoriKasBaru) {
-                        app(KategoriService::class)->hubungkanSemuaKategoriPemilik($record);
+                    if (! empty($this->kategoriKasBaru)) {
+                        app(KategoriService::class)->hubungkanKasKeKategori($record, $this->kategoriKasBaru);
                     }
 
                     $saldoAwal = (int) $record->saldo;

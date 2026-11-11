@@ -297,7 +297,7 @@ test('kas baru dapat langsung memakai seluruh kategori pemilik atau dibiarkan ta
     expect($kategori->terhubungKe($kasBaru->id))->toBe($hubungkan);
 })->with([true, false])->group('kategori-kas');
 
-test('default toggle hubungkan kategori di form tambah kas bernilai false', function () {
+test('default checkbox kategori di form tambah kas tidak tercentang', function () {
     $user = createRegularUserWithBukuKas();
     Dompet::create(['user_id' => $user->id, 'nama_dompet' => 'Cash', 'saldo' => 0, 'is_default' => true]);
     $kategori = app(KategoriService::class)->buat($user, ['nama' => 'Belanja', 'tipe' => 'Pengeluaran'], [$user->buku_kas()->value('id')]);
@@ -305,7 +305,10 @@ test('default toggle hubungkan kategori di form tambah kas bernilai false', func
     Livewire::actingAs($user)
         ->test(ListBukuKas::class)
         ->mountAction('create')
-        ->assertActionDataSet(['hubungkan_kategori' => false]);
+        ->assertActionDataSet([
+            'aktifkan_di_semua_kategori' => false,
+            'kategori' => [],
+        ]);
 
     Livewire::actingAs($user)
         ->test(ListBukuKas::class)
@@ -316,6 +319,132 @@ test('default toggle hubungkan kategori di form tambah kas bernilai false', func
 
     expect($kategori->terhubungKe($kasBaru->id))->toBeFalse();
 })->group('kategori-kas');
+
+test('checkbox aktifkan di semua kategori di form tambah kas memilih seluruh kategori dan dapat disesuaikan', function () {
+    $data = siapkanDataKategoriKas();
+    $user = $data['user'];
+    $service = app(KategoriService::class);
+    $kat1 = $service->buat($user, ['nama' => 'Makan', 'tipe' => 'Pengeluaran'], [$data['kas']->id]);
+    $kat2 = $service->buat($user, ['nama' => 'Gaji', 'tipe' => 'Pemasukan'], [$data['kas']->id]);
+
+    $halaman = Livewire::actingAs($user)
+        ->test(ListBukuKas::class)
+        ->mountAction('create')
+        ->assertActionDataSet([
+            'aktifkan_di_semua_kategori' => false,
+            'kategori' => [],
+        ]);
+
+    // Aktifkan semua kategori melalui master checkbox
+    $halaman->setActionData([
+        'aktifkan_di_semua_kategori' => true,
+    ])->assertActionDataSet([
+        'aktifkan_di_semua_kategori' => true,
+        'kategori' => [$kat2->id, $kat1->id],
+    ]);
+
+    // Lepas salah satu kategori secara individual
+    $halaman->setActionData([
+        'kategori' => [$kat1->id],
+    ])->assertActionDataSet([
+        'aktifkan_di_semua_kategori' => false,
+        'kategori' => [$kat1->id],
+    ]);
+
+    // Simpan kas baru dengan kategori terpilih
+    $halaman->setActionData([
+        'nama_buku' => 'Kas Parsial',
+        'saldo' => 0,
+        'kategori' => [$kat1->id],
+    ])->callMountedAction()->assertHasNoActionErrors();
+
+    $kasParsial = BukuKas::withoutGlobalScopes()->where('user_id', $user->id)->where('nama_buku', 'Kas Parsial')->sole();
+    expect($kat1->terhubungKe($kasParsial->id))->toBeTrue()
+        ->and($kat2->terhubungKe($kasParsial->id))->toBeFalse();
+})->group('kategori-kas', 'filament');
+test('form edit kas menampilkan checkbox kategori dan menyinkronkan perubahan', function () {
+    $data = siapkanDataKategoriKas();
+    $user = $data['user'];
+    $kas = $data['kas'];
+    $service = app(KategoriService::class);
+
+    $kat1 = $service->buat($user, ['nama' => 'Gaji', 'tipe' => 'Pemasukan'], [$kas->id]);
+    $kat2 = $service->buat($user, ['nama' => 'Makan', 'tipe' => 'Pengeluaran'], [$kas->id]);
+    $kat3 = $service->buat($user, ['nama' => 'Zakat', 'tipe' => 'Pengeluaran'], [$data['kasLain']->id]);
+
+    // Kas saat ini terhubung ke kat1 dan kat2, belum ke kat3.
+    // Karena belum terhubung ke semua kategori (2 dari 3), master checkbox bernilai false.
+    $halaman = Livewire::actingAs($user)
+        ->test(ListBukuKas::class)
+        ->mountTableAction('edit', $kas)
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kategori' => false,
+            'kategori' => [$kat1->id, $kat2->id],
+        ]);
+
+    // Aktifkan semua kategori melalui master checkbox
+    $halaman->setTableActionData([
+        'aktifkan_di_semua_kategori' => true,
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kategori' => true,
+        'kategori' => [$kat1->id, $kat2->id, $kat3->id],
+    ]);
+
+    // Simpan: sekarang kas terhubung ke kat1, kat2, dan kat3
+    $halaman->callMountedTableAction()->assertHasNoTableActionErrors();
+
+    expect($kas->fresh()->idKategori())->toEqualCanonicalizing([$kat1->id, $kat2->id, $kat3->id]);
+
+    // Buka kembali form edit: sekarang terhubung ke semua kategori, master checkbox true
+    $halamanBaru = Livewire::actingAs($user)
+        ->test(ListBukuKas::class)
+        ->mountTableAction('edit', $kas->fresh())
+        ->assertTableActionDataSet([
+            'aktifkan_di_semua_kategori' => true,
+            'kategori' => [$kat1->id, $kat2->id, $kat3->id],
+        ]);
+
+    // Nonaktifkan master checkbox: seluruh kategori terlepas
+    $halamanBaru->setTableActionData([
+        'aktifkan_di_semua_kategori' => false,
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kategori' => false,
+        'kategori' => [],
+    ]);
+
+    // Pilih kategori 1 dan 2 secara manual setelah menonaktifkan master checkbox
+    $halamanBaru->setTableActionData([
+        'kategori' => [$kat1->id, $kat2->id],
+    ])->assertTableActionDataSet([
+        'aktifkan_di_semua_kategori' => false,
+        'kategori' => [$kat1->id, $kat2->id],
+    ]);
+
+    $halamanBaru->callMountedTableAction()->assertHasNoTableActionErrors();
+    expect($kas->fresh()->idKategori())->toEqualCanonicalizing([$kat1->id, $kat2->id]);
+})->group('kategori-kas', 'filament');
+
+test('form edit kas menolak melepas kategori yang masih dipakai transaksi di kas tersebut', function () {
+    $data = siapkanDataKategoriKas();
+    $user = $data['user'];
+    $kas = $data['kas'];
+    $service = app(KategoriService::class);
+
+    $kat = $service->buat($user, ['nama' => 'Belanja', 'tipe' => 'Pengeluaran'], [$kas->id]);
+    catatDenganKategori($user, $kas, $data['dompet'], $kat);
+
+    Livewire::actingAs($user)
+        ->test(ListBukuKas::class)
+        ->mountTableAction('edit', $kas)
+        ->setTableActionData([
+            'kategori' => [],
+        ])
+        ->callMountedTableAction()
+        ->assertHasErrors(['kategori']);
+
+    expect($kat->terhubungKe($kas->id))->toBeTrue();
+})->group('kategori-kas', 'filament');
+
 
 test('import mencari kategori pada kas baris dan membuat kategori baru di kas tersebut', function () {
     $data = siapkanDataKategoriKas();

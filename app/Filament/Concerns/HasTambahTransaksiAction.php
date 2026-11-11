@@ -153,7 +153,10 @@ trait HasTambahTransaksiAction
             'description' => $data['description'] ?? null,
         ]);
 
-        if ((bool) ($data['hubungkan_kategori'] ?? false)) {
+        $kategori = (array) ($data['kategori'] ?? []);
+        if (! empty($kategori)) {
+            app(KategoriService::class)->hubungkanKasKeKategori($bukuKas, $kategori);
+        } elseif ((bool) ($data['hubungkan_kategori'] ?? false)) {
             app(KategoriService::class)->hubungkanSemuaKategoriPemilik($bukuKas);
         }
 

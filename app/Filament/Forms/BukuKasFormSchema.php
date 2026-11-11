@@ -3,16 +3,38 @@
 namespace App\Filament\Forms;
 
 use App\Models\BukuKas;
+use App\Models\Kategori;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class BukuKasFormSchema
 {
+    /** @return array<int, string> */
+    public static function opsiKategori(?BukuKas $record = null): array
+    {
+        $userId = $record?->user_id ?? auth()->id();
+        if (! $userId) {
+            return [];
+        }
+
+        return Kategori::withoutGlobalScopes()
+            ->where('user_id', $userId)
+            ->orderBy('nama')
+            ->get()
+            ->mapWithKeys(fn (Kategori $kategori): array => [
+                $kategori->id => $kategori->nama.' ('.$kategori->tipe.')',
+            ])
+            ->all();
+    }
+
     /** @return array<int, mixed> */
     public static function fields(): array
     {
@@ -118,12 +140,35 @@ class BukuKasFormSchema
                 ->default(null)
                 ->placeholder('Catatan singkat tentang buku kas ini (maks. 200 karakter)'),
 
-            Toggle::make('hubungkan_kategori')
-                ->label('Pakai semua kategori saya di kas ini')
-                ->helperText('Aktifkan jika kas ini ingin memakai seluruh kategori yang sudah ada. Hubungan kategori dapat diubah di Setting > Kategori.')
+            Checkbox::make('aktifkan_di_semua_kategori')
+                ->label('Aktifkan di semua kategori')
+                ->dehydrated(false)
+                ->live()
                 ->default(false)
-                ->columnSpanFull()
-                ->visible(fn (?BukuKas $record, ?string $operation = null): bool => $record === null && $operation !== 'edit'),
+                ->visible(fn (?BukuKas $record): bool => static::opsiKategori($record) !== [])
+                ->afterStateUpdated(function (mixed $state, Set $set, ?BukuKas $record): void {
+                    $opsi = static::opsiKategori($record);
+                    $set('kategori', (bool) $state ? array_keys($opsi) : []);
+                })
+                ->columnSpanFull(),
+
+            CheckboxList::make('kategori')
+                ->label('Kategori')
+                ->options(fn (?BukuKas $record): array => static::opsiKategori($record))
+                ->helperText('Pilih kategori yang dapat digunakan pada transaksi kas ini. Hubungan kategori dapat diubah di Setting > Kategori.')
+                ->default([])
+                ->live()
+                ->visible(fn (?BukuKas $record): bool => static::opsiKategori($record) !== [])
+                ->afterStateUpdated(function (?array $state, Set $set, ?BukuKas $record): void {
+                    $opsi = static::opsiKategori($record);
+                    $opsiKeys = array_map('strval', array_keys($opsi));
+                    $terpilih = array_map('strval', (array) ($state ?? []));
+
+                    $semuaTerpilih = ! empty($opsiKeys) && count(array_intersect($opsiKeys, $terpilih)) === count($opsiKeys);
+
+                    $set('aktifkan_di_semua_kategori', $semuaTerpilih);
+                })
+                ->columnSpanFull(),
         ];
     }
 }

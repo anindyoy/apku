@@ -14,6 +14,7 @@ use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Services\BukuKasService;
 use App\Services\HargaEmasService;
+use App\Services\KategoriService;
 use App\Services\OpsiSelectCache;
 use App\Services\PengaturanTabunganEmas;
 use BackedEnum;
@@ -122,7 +123,27 @@ class BukuKasResource extends Resource
             ->actions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()),
+                        ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id())
+                        ->mutateRecordDataUsing(function (BukuKas $record, array $data): array {
+                            $opsi = BukuKasFormSchema::opsiKategori($record);
+                            $terpilih = $record->idKategori();
+                            $data['kategori'] = $terpilih;
+                            $data['aktifkan_di_semua_kategori'] = ! empty($opsi) && count(array_intersect(array_keys($opsi), $terpilih)) === count($opsi);
+
+                            return $data;
+                        })
+                        ->using(function (BukuKas $record, array $data): BukuKas {
+                            $kategoriDipilih = array_key_exists('kategori', $data) ? (array) $data['kategori'] : null;
+                            unset($data['kategori'], $data['aktifkan_di_semua_kategori']);
+
+                            $record->update($data);
+
+                            if ($kategoriDipilih !== null) {
+                                app(KategoriService::class)->sinkronkanKasDenganKategori(auth()->user(), $record, $kategoriDipilih);
+                            }
+
+                            return $record;
+                        }),
 
                     FilamentAction::make('kolaborator')
                         ->label('Kolaborator Kas')

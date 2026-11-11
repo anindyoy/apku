@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 #[ScopedBy([UserScope::class])]
 class BukuKas extends Model
@@ -75,6 +76,16 @@ class BukuKas extends Model
     public function kategori()
     {
         return $this->belongsToMany(Kategori::class, 'kategori_kas', 'buku_kas_id', 'kategori_id');
+    }
+
+    /** @return array<int, int> */
+    public function idKategori(): array
+    {
+        return DB::table('kategori_kas')
+            ->where('buku_kas_id', $this->id)
+            ->pluck('kategori_id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
     }
 
     public function tabunganEmas()

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BukuKasResource\Pages;
 
 use App\Filament\Resources\BukuKasResource;
+use App\Models\Kategori;
 use App\Services\KategoriService;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
@@ -14,20 +15,32 @@ class CreateBukuKas extends CreateRecord
 
     public bool $hubungkanKategoriKasBaru = false;
 
+    /** @var array<int, int> */
+    public array $kategoriKasBaru = [];
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = Auth::id();
         // Pilihan ini bukan kolom kas, jadi disimpan sementara sampai kas selesai dibuat.
-        $this->hubungkanKategoriKasBaru = (bool) ($data['hubungkan_kategori'] ?? false);
-        unset($data['hubungkan_kategori']);
+        $kategori = (array) ($data['kategori'] ?? []);
+        if (empty($kategori) && (bool) ($data['hubungkan_kategori'] ?? false)) {
+            $this->kategoriKasBaru = Kategori::withoutGlobalScopes()
+                ->where('user_id', Auth::id())
+                ->pluck('id')
+                ->all();
+        } else {
+            $this->kategoriKasBaru = array_values(array_map('intval', $kategori));
+        }
+        $this->hubungkanKategoriKasBaru = ! empty($this->kategoriKasBaru);
+        unset($data['kategori'], $data['hubungkan_kategori'], $data['aktifkan_di_semua_kategori']);
 
         return $data;
     }
 
     protected function afterCreate(): void
     {
-        if ($this->hubungkanKategoriKasBaru) {
-            app(KategoriService::class)->hubungkanSemuaKategoriPemilik($this->record);
+        if (! empty($this->kategoriKasBaru)) {
+            app(KategoriService::class)->hubungkanKasKeKategori($this->record, $this->kategoriKasBaru);
         }
     }
 }
