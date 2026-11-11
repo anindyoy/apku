@@ -6,6 +6,7 @@ use App\Filament\Forms\BukuKasFormSchema;
 use App\Filament\Forms\DompetFormSchema;
 use App\Filament\Forms\KategoriFormSchema;
 use App\Filament\Forms\KomponenNominal;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Models\BukuKas;
 use App\Models\Dompet;
 use App\Models\Kategori;
@@ -239,7 +240,7 @@ trait HasTambahTransaksiAction
 
     private function selectKasDenganOpsiTambah(Select $select): Select
     {
-        return $select
+        return SelectKasDanSumberDana::terapkan($select)
             ->createOptionModalHeading('Tambah kas')
             ->createOptionForm([
                 Grid::make(2)->schema(BukuKasFormSchema::fields()),
@@ -251,7 +252,7 @@ trait HasTambahTransaksiAction
 
     private function selectDompetDenganOpsiTambah(Select $select): Select
     {
-        return $select
+        return SelectKasDanSumberDana::terapkan($select)
             ->createOptionModalHeading('Tambah sumber dana')
             ->createOptionForm([
                 Grid::make(2)->schema(DompetFormSchema::fields()),

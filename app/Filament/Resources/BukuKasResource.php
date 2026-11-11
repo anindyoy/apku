@@ -6,6 +6,7 @@ use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Forms\BukuKasFormSchema;
 use App\Filament\Forms\KomponenNominal;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
@@ -175,26 +176,27 @@ class BukuKasResource extends Resource
                         ->modalDescription(fn (BukuKas $record): string => "Kas {$record->nama_buku} masih memiliki transaksi. Pilih kas tujuan sebelum menghapusnya.")
                         ->modalSubmitActionLabel('Pindahkan dan hapus')
                         ->form(fn (BukuKas $record): array => [
-                            Select::make('buku_kas_id')
-                                ->label('Kas tujuan')
-                                ->options(fn (): array => array_filter(
-                                    OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
-                                        ->where('user_id', $record->user_id)
-                                        ->urutanTabungan()
-                                        ->pluck('nama_buku', 'id')
-                                        ->all(), $record->user_id),
-                                    fn ($id): bool => (int) $id !== (int) $record->id,
-                                    ARRAY_FILTER_USE_KEY,
-                                ))
-                                ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
-                                ->searchable(false)
-                                ->live()
-                                ->rules([
-                                    Rule::exists('buku_kas', 'id')
-                                        ->where('user_id', $record->user_id)
-                                        ->whereNot('id', $record->id),
-                                ])
-                                ->required(),
+                            SelectKasDanSumberDana::terapkan(
+                                Select::make('buku_kas_id')
+                                    ->label('Kas tujuan')
+                                    ->options(fn (): array => array_filter(
+                                        OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+                                            ->where('user_id', $record->user_id)
+                                            ->urutanTabungan()
+                                            ->pluck('nama_buku', 'id')
+                                            ->all(), $record->user_id),
+                                        fn ($id): bool => (int) $id !== (int) $record->id,
+                                        ARRAY_FILTER_USE_KEY,
+                                    ))
+                                    ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
+                                    ->live()
+                                    ->rules([
+                                        Rule::exists('buku_kas', 'id')
+                                            ->where('user_id', $record->user_id)
+                                            ->whereNot('id', $record->id),
+                                    ])
+                                    ->required()
+                            ),
 
                             Section::make('Kategori transaksi')
                                 ->description('Kategori berikut belum terhubung ke kas tujuan. Pilih kategori penggantinya di kas tujuan, atau biarkan kosong agar transaksinya menjadi tanpa kategori.')

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Forms\KomponenNominal;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Filament\Resources\TabunganEmasResource\Pages\ListTabunganEmas;
 use App\Models\TabunganEmas;
 use App\Services\PengaturanTabunganEmas;
@@ -53,11 +54,13 @@ class TabunganEmasResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Select::make('buku_kas_id')
-                ->label('Kas')
-                ->options(fn (): array => auth()->user()->buku_kas()->urutanTabungan()->pluck('nama_buku', 'id')->all())
-                ->disabled(fn (?TabunganEmas $record): bool => filled($record))
-                ->required(),
+            SelectKasDanSumberDana::terapkan(
+                Select::make('buku_kas_id')
+                    ->label('Kas')
+                    ->options(fn (): array => auth()->user()->buku_kas()->urutanTabungan()->pluck('nama_buku', 'id')->all())
+                    ->disabled(fn (?TabunganEmas $record): bool => filled($record))
+                    ->required()
+            ),
             static::inputBerat()->disabled(fn (?TabunganEmas $record): bool => filled($record)),
             TextInput::make('label')->label('Label emas')->placeholder('Emas Antam')->required()->maxLength(100),
             KomponenNominal::terapkan(

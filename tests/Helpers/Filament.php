@@ -32,6 +32,26 @@ if (! function_exists('createRegularUserWithBukuKas')) {
     }
 }
 
+if (! function_exists('createPremiumUserWithBukuKas')) {
+    function createPremiumUserWithBukuKas(): User
+    {
+        $user = User::factory()->create([
+            'role' => 'user',
+            'type' => 'premium',
+            'email_verified_at' => now(),
+            'masa_aktif' => today()->addYear(),
+        ]);
+
+        BukuKas::factory()->create([
+            'user_id' => $user->id,
+            'nama_buku' => 'Kas Test',
+            'saldo' => 100000,
+        ]);
+
+        return $user;
+    }
+}
+
 if (! function_exists('createAdminUser')) {
     function createAdminUser(): User
     {

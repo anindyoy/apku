@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Filament\Resources\TransaksiResource;
 use App\Models\BukuKas;
 use App\Models\Dompet;
@@ -128,22 +129,22 @@ class PencarianTransaksi extends Page implements HasTable
                         'Transfer Pengeluaran' => 'Transfer Pengeluaran',
                     ]),
 
-                SelectFilter::make('buku_kas_id')
-                    ->label('Kas')
-                    ->options(fn (): array => OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
-                        ->urutanTabungan()
-                        ->pluck('nama_buku', 'id')
-                        ->all(), auth()->id()))
-                    ->searchable()
-                    ->preload(),
+                SelectKasDanSumberDana::terapkanFilter(
+                    SelectFilter::make('buku_kas_id')
+                        ->label('Kas')
+                        ->options(fn (): array => OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+                            ->urutanTabungan()
+                            ->pluck('nama_buku', 'id')
+                            ->all(), auth()->id()))
+                ),
 
-                SelectFilter::make('dompet_id')
-                    ->label('Sumber dana')
-                    ->options(fn (): array => OpsiSelectCache::ingat('dompet', fn (): array => Dompet::query()
-                        ->pluck('nama_dompet', 'id')
-                        ->all(), auth()->id(), 'aktif'))
-                    ->searchable()
-                    ->preload(),
+                SelectKasDanSumberDana::terapkanFilter(
+                    SelectFilter::make('dompet_id')
+                        ->label('Sumber dana')
+                        ->options(fn (): array => OpsiSelectCache::ingat('dompet', fn (): array => Dompet::query()
+                            ->pluck('nama_dompet', 'id')
+                            ->all(), auth()->id(), 'aktif'))
+                ),
             ])
             ->recordUrl(null)
             ->recordAction(null)

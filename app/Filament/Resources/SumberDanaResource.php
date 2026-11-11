@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Filament\Forms\SumberDanaFormSchema;
 use App\Filament\Resources\SumberDanaResource\Pages\ListSumberDana;
 use App\Models\BukuKas;
@@ -102,19 +103,23 @@ class SumberDanaResource extends Resource
                         && auth()->user()->dapatMengelolaTransaksiPadaDompet($record)
                         && auth()->user()->sumberDana()->count() > 1)
                     ->form(fn (SumberDana $record): array => [
-                        Select::make('dompet_tujuan_id')
-                            ->label('Sumber dana tujuan')
-                            ->options(fn (): array => array_filter(
-                                Transaksi::opsiSumberDanaYangDapatDikelola(),
-                                fn ($id): bool => (int) $id !== (int) $record->id,
-                                ARRAY_FILTER_USE_KEY,
-                            ))
-                            ->required(),
-                        Select::make('buku_kas_id')
-                            ->label('Kas pencatatan')
-                            ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
-                            ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
-                            ->required(),
+                        SelectKasDanSumberDana::terapkan(
+                            Select::make('dompet_tujuan_id')
+                                ->label('Sumber dana tujuan')
+                                ->options(fn (): array => array_filter(
+                                    Transaksi::opsiSumberDanaYangDapatDikelola(),
+                                    fn ($id): bool => (int) $id !== (int) $record->id,
+                                    ARRAY_FILTER_USE_KEY,
+                                ))
+                                ->required()
+                        ),
+                        SelectKasDanSumberDana::terapkan(
+                            Select::make('buku_kas_id')
+                                ->label('Kas pencatatan')
+                                ->options(fn (): array => Transaksi::opsiBukuKasYangDapatDikelola())
+                                ->default(fn (): ?int => auth()->user()->idBukuKasUtama())
+                                ->required()
+                        ),
                     ])
                     ->action(function (SumberDana $record, array $data): void {
                         app(TransferDompetService::class)->pindahkanSaldoDanHapus(

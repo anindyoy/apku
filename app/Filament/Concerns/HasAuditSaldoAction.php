@@ -3,6 +3,7 @@
 namespace App\Filament\Concerns;
 
 use App\Filament\Forms\KomponenNominal;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Models\BukuKas;
 use App\Models\SumberDana;
 use App\Models\Transaksi;
@@ -145,18 +146,20 @@ trait HasAuditSaldoAction
                             ->label('Catat transaksi penyesuaian pada kas')
                             ->default(true)
                             ->live(),
-                        Select::make('buku_kas_id')
-                            ->label('Kas pencatatan')
-                            ->options(fn(?SumberDana $record): array => $this->opsiKasAudit($record))
-                            ->default(fn(?SumberDana $record): ?int => $this->kasDefaultAudit($record))
-                            ->live()
-                            ->visible(fn(Get $get): bool => (bool) $get('catat_penyesuaian'))
-                            ->dehydratedWhenHidden()
-                            ->afterStateUpdated(fn(mixed $state, Set $set, ?SumberDana $record): mixed => $set(
-                                'rincian',
-                                $this->rincianAuditUntukKas((int) ($state ?? 0), $record),
-                            ))
-                            ->required(fn(Get $get): bool => (bool) $get('catat_penyesuaian')),
+                        SelectKasDanSumberDana::terapkan(
+                            Select::make('buku_kas_id')
+                                ->label('Kas pencatatan')
+                                ->options(fn(?SumberDana $record): array => $this->opsiKasAudit($record))
+                                ->default(fn(?SumberDana $record): ?int => $this->kasDefaultAudit($record))
+                                ->live()
+                                ->visible(fn(Get $get): bool => (bool) $get('catat_penyesuaian'))
+                                ->dehydratedWhenHidden()
+                                ->afterStateUpdated(fn(mixed $state, Set $set, ?SumberDana $record): mixed => $set(
+                                    'rincian',
+                                    $this->rincianAuditUntukKas((int) ($state ?? 0), $record),
+                                ))
+                                ->required(fn(Get $get): bool => (bool) $get('catat_penyesuaian'))
+                        ),
                     ]),
             ])
             ->visible(fn(?SumberDana $record): bool => $record === null

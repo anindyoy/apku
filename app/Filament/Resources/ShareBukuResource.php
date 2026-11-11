@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Filament\Resources\ShareBukuResource\Pages;
 use App\Models\BukuKas;
 use App\Models\ShareBuku;
@@ -53,15 +54,16 @@ class ShareBukuResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Select::make('buku_kas_id')
-                ->label('Kas')
-                ->options(fn (): array => BukuKas::withoutGlobalScopes()
-                    ->where('user_id', auth()->id())
-                    ->urutanTabungan()
-                    ->pluck('nama_buku', 'id')->all())
-                ->rules([Rule::exists('buku_kas', 'id')->where('user_id', auth()->id())])
-                ->searchable(false)
-                ->required(),
+            SelectKasDanSumberDana::terapkan(
+                Select::make('buku_kas_id')
+                    ->label('Kas')
+                    ->options(fn (): array => BukuKas::withoutGlobalScopes()
+                        ->where('user_id', auth()->id())
+                        ->urutanTabungan()
+                        ->pluck('nama_buku', 'id')->all())
+                    ->rules([Rule::exists('buku_kas', 'id')->where('user_id', auth()->id())])
+                    ->required()
+            ),
             TextInput::make('user_id')
                 ->label('Email Kolaborator')
                 ->email()

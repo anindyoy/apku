@@ -8,6 +8,7 @@ use App\Services\OpsiSelectCache;
 use Database\Factories\TransaksiFactory;
 use App\Models\SumberDana;
 use App\Filament\Forms\KomponenNominal;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -172,43 +173,51 @@ class Transaksi extends Model
                         ->disabled()
                         ->visible(fn ($record) => $record),
 
-                    Select::make('buku_kas_id')
-                        ->label(fn (?Transaksi $record): string => $record?->transfer_code && $record->tipe_transfer !== 'dompet' ? 'Kas asal' : 'Kas')
-                        ->live()
-                        ->afterStateUpdated(function (Get $get, Set $set, ?Transaksi $record): void {
-                            // Kategori yang tidak terhubung ke kas baru dikosongkan.
-                            if (! array_key_exists((int) $get('kategori_id'), static::opsiKategori((int) $get('buku_kas_id'), $record?->jenis))) {
-                                $set('kategori_id', null);
-                            }
-                        })
-                        ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
-                        ->disableOptionWhen(fn (string $value, ?Transaksi $record): bool => ! array_key_exists($value, static::opsiBukuKasYangDapatDikelola())
-                            || (filled($record?->transfer_code) && BukuKas::find($value)?->user_id !== auth()->id()))
-                        ->required(),
+                    SelectKasDanSumberDana::terapkan(
+                        Select::make('buku_kas_id')
+                            ->label(fn (?Transaksi $record): string => $record?->transfer_code && $record->tipe_transfer !== 'dompet' ? 'Kas asal' : 'Kas')
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set, ?Transaksi $record): void {
+                                // Kategori yang tidak terhubung ke kas baru dikosongkan.
+                                if (! array_key_exists((int) $get('kategori_id'), static::opsiKategori((int) $get('buku_kas_id'), $record?->jenis))) {
+                                    $set('kategori_id', null);
+                                }
+                            })
+                            ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
+                            ->disableOptionWhen(fn (string $value, ?Transaksi $record): bool => ! array_key_exists($value, static::opsiBukuKasYangDapatDikelola())
+                                || (filled($record?->transfer_code) && BukuKas::find($value)?->user_id !== auth()->id()))
+                            ->required()
+                    ),
 
-                    Select::make('buku_kas_id_tujuan')
-                        ->label('Kas tujuan')
-                        ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
-                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiBukuKasYangDapatDikelola())
-                            || BukuKas::find($value)?->user_id !== auth()->id())
-                        ->different('buku_kas_id')
-                        ->required()
-                        ->visible(fn (?Transaksi $record): bool => (bool) $record?->transfer_code && $record->tipe_transfer !== 'dompet'),
+                    SelectKasDanSumberDana::terapkan(
+                        Select::make('buku_kas_id_tujuan')
+                            ->label('Kas tujuan')
+                            ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
+                            ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiBukuKasYangDapatDikelola())
+                                || BukuKas::find($value)?->user_id !== auth()->id())
+                            ->different('buku_kas_id')
+                            ->required()
+                            ->visible(fn (?Transaksi $record): bool => (bool) $record?->transfer_code && $record->tipe_transfer !== 'dompet')
+                    ),
 
                     // Nama field memakai dompet_id agar kompatibel dengan test dan alur lama; relasi tetap sumberDana.
-                    Select::make('dompet_id')
-                        ->label(fn (?Transaksi $record): string => $record?->tipe_transfer === 'dompet' || $transfer ? 'Sumber dana asal' : 'Sumber dana')
-                        ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
-                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
-                        ->required(),
+                    SelectKasDanSumberDana::terapkan(
+                        Select::make('dompet_id')
+                            ->label(fn (?Transaksi $record): string => $record?->tipe_transfer === 'dompet' || $transfer ? 'Sumber dana asal' : 'Sumber dana')
+                            ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
+                            ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
+                            ->required()
+                    ),
 
-                    Select::make('dompet_id_tujuan')
-                        ->label('Sumber dana tujuan')
-                        ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
-                        ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
-                        ->different('dompet_id')
-                        ->required()
-                        ->visible(fn (?Transaksi $record): bool => $transfer || $record?->tipe_transfer === 'dompet'),
+                    SelectKasDanSumberDana::terapkan(
+                        Select::make('dompet_id_tujuan')
+                            ->label('Sumber dana tujuan')
+                            ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
+                            ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
+                            ->different('dompet_id')
+                            ->required()
+                            ->visible(fn (?Transaksi $record): bool => $transfer || $record?->tipe_transfer === 'dompet')
+                    ),
 
                     Select::make('kategori_id')
                         ->label('Kategori')

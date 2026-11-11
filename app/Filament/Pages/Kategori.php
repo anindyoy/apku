@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Clusters\Pengaturan;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Filament\Forms\KategoriFormSchema;
+use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Models\BukuKas;
 use App\Models\Kategori as KategoriModel;
 use App\Models\Transaksi;
@@ -98,12 +99,14 @@ class Kategori extends Page implements HasTable
                     ->wrap(),
             ])
             ->filters([
-                SelectFilter::make('kas')
-                    ->label('Kas')
-                    ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
-                    ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
-                        ? $query->whereHas('kas', fn (Builder $query) => $query->whereKey($data['value']))
-                        : $query),
+                SelectKasDanSumberDana::terapkanFilter(
+                    SelectFilter::make('kas')
+                        ->label('Kas')
+                        ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
+                        ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
+                            ? $query->whereHas('kas', fn (Builder $query) => $query->whereKey($data['value']))
+                            : $query)
+                ),
 
                 SelectFilter::make('tipe')
                     ->options(array_combine(KategoriModel::TIPE, KategoriModel::TIPE)),
@@ -168,11 +171,12 @@ class Kategori extends Page implements HasTable
                     ->modalSubmitActionLabel('Lepas')
                     ->modalWidth('md')
                     ->form(fn (KategoriModel $record): array => [
-                        Select::make('buku_kas_id')
-                            ->label('Kas')
-                            ->options($this->opsiKasTerhubung($record))
-                            ->searchable(false)
-                            ->required(),
+                        SelectKasDanSumberDana::terapkan(
+                            Select::make('buku_kas_id')
+                                ->label('Kas')
+                                ->options($this->opsiKasTerhubung($record))
+                                ->required()
+                        ),
                         Checkbox::make('kosongkan')
                             ->label('Kosongkan kategori pada transaksi kas ini yang masih memakainya'),
                     ])
