@@ -445,6 +445,47 @@ test('form edit kas menolak melepas kategori yang masih dipakai transaksi di kas
     expect($kat->terhubungKe($kas->id))->toBeTrue();
 })->group('kategori-kas', 'filament');
 
+test('checkbox kas di form kategori dipisah jadi 2 kolom jika opsi lebih dari 5', function () {
+    // Kurang dari atau sama dengan 5 kas -> 1 kolom
+    $schema5 = \App\Filament\Forms\KategoriFormSchema::fields(fn () => [
+        1 => 'Kas 1', 2 => 'Kas 2', 3 => 'Kas 3', 4 => 'Kas 4', 5 => 'Kas 5',
+    ]);
+    /** @var \Filament\Forms\Components\CheckboxList $kasField5 */
+    $kasField5 = collect($schema5)->first(fn ($item) => $item instanceof \Filament\Forms\Components\CheckboxList);
+    expect($kasField5->getColumns('sm'))->toBeNull();
+
+    // Lebih dari 5 kas -> 2 kolom
+    $schema6 = \App\Filament\Forms\KategoriFormSchema::fields(fn () => [
+        1 => 'Kas 1', 2 => 'Kas 2', 3 => 'Kas 3', 4 => 'Kas 4', 5 => 'Kas 5', 6 => 'Kas 6',
+    ]);
+    /** @var \Filament\Forms\Components\CheckboxList $kasField6 */
+    $kasField6 = collect($schema6)->first(fn ($item) => $item instanceof \Filament\Forms\Components\CheckboxList);
+    expect($kasField6->getColumns('sm'))->toBe(2);
+})->group('kategori-kas', 'filament');
+
+test('checkbox kategori di form kas dipisah jadi 2 kolom jika opsi lebih dari 5', function () {
+    $user = createRegularUserWithBukuKas();
+    $service = app(KategoriService::class);
+    $kas = $user->buku_kas()->firstOrFail();
+
+    // Buat 5 kategori -> 1 kolom
+    for ($i = 1; $i <= 5; $i++) {
+        $service->buat($user, ['nama' => "Kategori {$i}", 'tipe' => 'Pengeluaran'], [$kas->id]);
+    }
+    $halaman5 = Livewire::actingAs($user)->test(ListBukuKas::class)->mountAction('create');
+    $schemaName5 = $halaman5->instance()->getMountedActionSchemaName();
+    $components5 = $halaman5->instance()->{$schemaName5}->getFlatComponents(withActions: false, withHidden: true);
+    expect($components5['kategori']->getColumns('sm'))->toBeNull();
+
+    // Tambah kategori ke-6 -> 2 kolom
+    $service->buat($user, ['nama' => 'Kategori 6', 'tipe' => 'Pengeluaran'], [$kas->id]);
+    $halaman6 = Livewire::actingAs($user)->test(ListBukuKas::class)->mountAction('create');
+    $schemaName6 = $halaman6->instance()->getMountedActionSchemaName();
+    $components6 = $halaman6->instance()->{$schemaName6}->getFlatComponents(withActions: false, withHidden: true);
+    expect($components6['kategori']->getColumns('sm'))->toBe(2);
+})->group('kategori-kas', 'filament');
+
+
 
 test('import mencari kategori pada kas baris dan membuat kategori baru di kas tersebut', function () {
     $data = siapkanDataKategoriKas();

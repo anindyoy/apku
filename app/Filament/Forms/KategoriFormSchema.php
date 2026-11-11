@@ -57,6 +57,7 @@ class KategoriFormSchema
             ->helperText('Kategori hanya dapat dipilih pada transaksi kas yang dicentang. Semua kas harus milik pemilik yang sama.')
             ->required($kasRequired)
             ->live()
+            ->columns(fn (CheckboxList $component): array|int => count($component->getOptions()) > 5 ? ['default' => 1, 'sm' => 2] : 1)
             ->afterStateUpdated(function (?array $state, Set $set) use ($kasOptions): void {
                 $opsi = (array) ($kasOptions() ?? []);
                 $opsiKeys = array_map('strval', array_keys($opsi));

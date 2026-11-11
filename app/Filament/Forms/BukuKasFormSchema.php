@@ -158,6 +158,7 @@ class BukuKasFormSchema
                 ->helperText('Pilih kategori yang dapat digunakan pada transaksi kas ini. Hubungan kategori dapat diubah di Setting > Kategori.')
                 ->default([])
                 ->live()
+                ->columns(fn (CheckboxList $component): array|int => count($component->getOptions()) > 5 ? ['default' => 1, 'sm' => 2] : 1)
                 ->visible(fn (?BukuKas $record): bool => static::opsiKategori($record) !== [])
                 ->afterStateUpdated(function (?array $state, Set $set, ?BukuKas $record): void {
                     $opsi = static::opsiKategori($record);
