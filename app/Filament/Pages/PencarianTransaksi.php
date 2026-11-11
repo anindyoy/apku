@@ -132,18 +132,13 @@ class PencarianTransaksi extends Page implements HasTable
                 SelectKasDanSumberDana::terapkanFilter(
                     SelectFilter::make('buku_kas_id')
                         ->label('Kas')
-                        ->options(fn (): array => OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
-                            ->urutanTabungan()
-                            ->pluck('nama_buku', 'id')
-                            ->all(), auth()->id()))
+                        ->options(fn (): array => Transaksi::opsiBukuKasDefault())
                 ),
 
                 SelectKasDanSumberDana::terapkanFilter(
                     SelectFilter::make('dompet_id')
                         ->label('Sumber dana')
-                        ->options(fn (): array => OpsiSelectCache::ingat('dompet', fn (): array => Dompet::query()
-                            ->pluck('nama_dompet', 'id')
-                            ->all(), auth()->id(), 'aktif'))
+                        ->options(fn (): array => Transaksi::opsiSumberDanaSumberTransfer())
                 ),
             ])
             ->recordUrl(null)

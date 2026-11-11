@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
+use App\Services\OpsiSelectCache;
 use Database\Factories\BukuKasFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,6 +53,13 @@ class BukuKas extends Model
             $builder->orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
                 ->orderBy('nama_buku');
         });
+
+        $bersihkanKolaborator = function (BukuKas $kas): void {
+            $kas->bersihkanCacheKolaborator();
+        };
+
+        static::saved($bersihkanKolaborator);
+        static::deleted($bersihkanKolaborator);
     }
 
     public function user()
@@ -90,6 +98,41 @@ class BukuKas extends Model
     {
         return self::where('user_id', $user_id)
             ->inRandomOrder();
+    }
+
+    /**
+     * Opsi kas yang kategorinya dapat dikelola pengguna, terformat dengan label kas bersama jika ada.
+     *
+     * @return array<int, array{label: string, user_id: int}>
+     */
+    public static function opsiKasKelolaKategori(User $user): array
+    {
+        return OpsiSelectCache::ingat('buku-kas', function () use ($user): array {
+            return static::query()->urutanTabungan()->with('user:id,name')->get()
+                ->filter(fn (BukuKas $kas): bool => $user->dapatMengelolaKategoriPada($kas))
+                ->mapWithKeys(fn (BukuKas $kas): array => [
+                    $kas->id => [
+                        'label' => $kas->user_id === $user->id
+                            ? $kas->nama_buku
+                            : $kas->nama_buku.' (kas bersama '.($kas->user?->name ?? '-').')',
+                        'user_id' => $kas->user_id,
+                    ],
+                ])
+                ->all();
+        }, $user->id, 'kelola-kategori');
+    }
+
+    /** Membersihkan cache opsi kas untuk seluruh kolaborator pada kas ini. */
+    public function bersihkanCacheKolaborator(): void
+    {
+        if (! $this->pernah_dikolaborasikan) {
+            return;
+        }
+
+        $idAnggota = $this->anggota()->pluck('users.id')->all();
+        foreach ($idAnggota as $userId) {
+            OpsiSelectCache::bersihkan('buku-kas', (int) $userId);
+        }
     }
 
     protected function cacheOpsiSelectEntitas(): string

@@ -40,6 +40,10 @@ class ShareBuku extends Model
             if ($share->user_id !== null) {
                 OpsiSelectCache::bersihkan('buku-kas', $share->user_id);
             }
+            $bukuKas = $share->buku_kas ?? BukuKas::withoutGlobalScopes()->find($share->buku_kas_id);
+            if ($bukuKas) {
+                OpsiSelectCache::bersihkan('buku-kas', $bukuKas->user_id);
+            }
         };
         static::saved($bersihkanCache);
         static::deleted($bersihkanCache);

@@ -183,7 +183,7 @@ class Transaksi extends Model
                                     $set('kategori_id', null);
                                 }
                             })
-                            ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
+                            ->options(fn (): array => static::opsiBukuKasDefault())
                             ->disableOptionWhen(fn (string $value, ?Transaksi $record): bool => ! array_key_exists($value, static::opsiBukuKasYangDapatDikelola())
                                 || (filled($record?->transfer_code) && BukuKas::find($value)?->user_id !== auth()->id()))
                             ->required()
@@ -192,7 +192,7 @@ class Transaksi extends Model
                     SelectKasDanSumberDana::terapkan(
                         Select::make('buku_kas_id_tujuan')
                             ->label('Kas tujuan')
-                            ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
+                            ->options(fn (): array => static::opsiBukuKasDefault())
                             ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiBukuKasYangDapatDikelola())
                                 || BukuKas::find($value)?->user_id !== auth()->id())
                             ->different('buku_kas_id')
@@ -204,7 +204,7 @@ class Transaksi extends Model
                     SelectKasDanSumberDana::terapkan(
                         Select::make('dompet_id')
                             ->label(fn (?Transaksi $record): string => $record?->tipe_transfer === 'dompet' || $transfer ? 'Sumber dana asal' : 'Sumber dana')
-                            ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
+                            ->options(fn (): array => static::opsiSumberDanaSumberTransfer())
                             ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
                             ->required()
                     ),
@@ -212,7 +212,7 @@ class Transaksi extends Model
                     SelectKasDanSumberDana::terapkan(
                         Select::make('dompet_id_tujuan')
                             ->label('Sumber dana tujuan')
-                            ->options(fn (): array => SumberDana::query()->pluck('nama_dompet', 'id')->all())
+                            ->options(fn (): array => static::opsiSumberDanaSumberTransfer())
                             ->disableOptionWhen(fn (string $value): bool => ! array_key_exists($value, static::opsiDompetYangDapatDikelola()))
                             ->different('dompet_id')
                             ->required()
@@ -345,6 +345,39 @@ class Transaksi extends Model
     public static function opsiDompetSumberTransfer(): array
     {
         return static::opsiSumberDanaSumberTransfer();
+    }
+
+    public static function opsiBukuKasDefault(): array
+    {
+        return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+            ->urutanTabungan()
+            ->pluck('nama_buku', 'id')
+            ->all(), auth()->id());
+    }
+
+    public static function opsiBukuKasMilikSendiri(?int $userId = null): array
+    {
+        $userId ??= auth()->id();
+
+        return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::withoutGlobalScopes()
+            ->where('user_id', $userId)
+            ->urutanTabungan()
+            ->pluck('nama_buku', 'id')
+            ->all(), $userId, 'milik-sendiri');
+    }
+
+    public static function opsiBukuKasTransfer(): array
+    {
+        return OpsiSelectCache::ingat('buku-kas', function (): array {
+            $opsiBukuKas = static::opsiBukuKasYangDapatDikelola();
+            $idBukuKasMilikSendiri = BukuKas::query()
+                ->where('user_id', auth()->id())
+                ->whereKey(array_keys($opsiBukuKas))
+                ->pluck('id')
+                ->all();
+
+            return array_intersect_key($opsiBukuKas, array_flip($idBukuKasMilikSendiri));
+        }, auth()->id(), 'transfer');
     }
 
     public static function opsiBukuKasYangDapatDikelola(): array

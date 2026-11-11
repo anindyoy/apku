@@ -6,16 +6,16 @@
                     <label for="buku-kas">Kas</label>
                     <select id="buku-kas" wire:model.live="bukuKasId">
                         <option value="semua">Semua Kas</option>
-                        @foreach (\App\Models\BukuKas::urutanTabungan()->get() as $buku)
-                            <option value="{{ $buku->id }}">{{ $buku->nama_buku }}</option>
+                        @foreach ($this->opsiBukuKas as $id => $nama)
+                            <option value="{{ $id }}">{{ $nama }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="laporan-filter__input">
                     <select id="sumber-dana" wire:model.live="dompetId">
                         <option value="semua">Semua Sumber Dana</option>
-                        @foreach (\App\Models\SumberDana::withTrashed()->get() as $sumberDana)
-                            <option value="{{ $sumberDana->id }}">{{ $sumberDana->nama_dompet }}{{ $sumberDana->trashed() ? ' (Dihapus)' : '' }}</option>
+                        @foreach ($this->opsiSumberDana as $id => $nama)
+                            <option value="{{ $id }}">{{ $nama }}</option>
                         @endforeach
                     </select>
                 </div>

@@ -20,8 +20,15 @@ class OpsiSelectCache
 
     public static function bersihkan(string $entitas, ?int $userId = null): void
     {
-        foreach (self::varian($entitas) as $varian) {
-            Cache::forget(self::key($entitas, $userId, $varian));
+        $daftarEntitas = match ($entitas) {
+            'sumber_dana', 'dompet' => ['sumber_dana', 'dompet'],
+            default => [$entitas],
+        };
+
+        foreach ($daftarEntitas as $item) {
+            foreach (self::varian($item) as $varian) {
+                Cache::forget(self::key($item, $userId, $varian));
+            }
         }
     }
 
@@ -33,11 +40,11 @@ class OpsiSelectCache
     private static function varian(string $entitas): array
     {
         return match ($entitas) {
-            'buku-kas' => ['default', 'dapat-dikelola'],
+            'buku-kas' => ['default', 'dapat-dikelola', 'milik-sendiri', 'transfer', 'kelola-kategori'],
             // Kunci dompet dipertahankan untuk kompatibilitas test lama; entitas baru memakai sumber_dana.
-            'dompet' => ['aktif', 'dapat-dikelola', 'dengan-terhapus'],
-            'sumber_dana' => ['aktif', 'dapat-dikelola', 'dengan-terhapus'],
-            'kategori' => ['Pemasukan', 'Pengeluaran', 'semua'],
+            'dompet' => ['default', 'aktif', 'dapat-dikelola', 'dengan-terhapus'],
+            'sumber_dana' => ['default', 'aktif', 'dapat-dikelola', 'dengan-terhapus'],
+            'kategori' => ['Pemasukan', 'Pengeluaran', 'semua', 'dengan-tipe', 'pengganti'],
             default => ['default'],
         };
     }

@@ -11,6 +11,7 @@ use App\Filament\Resources\BukuKasResource\Pages;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
 use App\Models\Kategori;
+use App\Models\Transaksi;
 use App\Services\BukuKasService;
 use App\Services\HargaEmasService;
 use App\Services\OpsiSelectCache;
@@ -180,11 +181,7 @@ class BukuKasResource extends Resource
                                 Select::make('buku_kas_id')
                                     ->label('Kas tujuan')
                                     ->options(fn (): array => array_filter(
-                                        OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
-                                            ->where('user_id', $record->user_id)
-                                            ->urutanTabungan()
-                                            ->pluck('nama_buku', 'id')
-                                            ->all(), $record->user_id),
+                                        Transaksi::opsiBukuKasMilikSendiri($record->user_id),
                                         fn ($id): bool => (int) $id !== (int) $record->id,
                                         ARRAY_FILTER_USE_KEY,
                                     ))
@@ -236,9 +233,11 @@ class BukuKasResource extends Resource
             return [];
         }
 
-        $opsi = $tujuan->kategori()->withoutGlobalScopes()->orderBy('nama')->get()
+        $opsi = OpsiSelectCache::ingat('kategori', fn (): array => $tujuan->kategori()->withoutGlobalScopes()
+            ->orderBy('nama')
+            ->get()
             ->mapWithKeys(fn (Kategori $kategori): array => [$kategori->id => $kategori->nama.' ('.$kategori->tipe.')'])
-            ->all();
+            ->all(), $tujuan->id, 'dengan-tipe');
 
         return collect(app(BukuKasService::class)->kategoriPerluDipetakan($asal, $tujuan))
             ->map(fn (string $nama, int $id): Select => Select::make('pemetaan_kategori.'.$id)

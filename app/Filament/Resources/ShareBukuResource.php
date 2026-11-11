@@ -8,6 +8,7 @@ use App\Filament\Forms\SelectKasDanSumberDana;
 use App\Filament\Resources\ShareBukuResource\Pages;
 use App\Models\BukuKas;
 use App\Models\ShareBuku;
+use App\Models\Transaksi;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -57,10 +58,7 @@ class ShareBukuResource extends Resource
             SelectKasDanSumberDana::terapkan(
                 Select::make('buku_kas_id')
                     ->label('Kas')
-                    ->options(fn (): array => BukuKas::withoutGlobalScopes()
-                        ->where('user_id', auth()->id())
-                        ->urutanTabungan()
-                        ->pluck('nama_buku', 'id')->all())
+                    ->options(fn (): array => Transaksi::opsiBukuKasMilikSendiri())
                     ->rules([Rule::exists('buku_kas', 'id')->where('user_id', auth()->id())])
                     ->required()
             ),

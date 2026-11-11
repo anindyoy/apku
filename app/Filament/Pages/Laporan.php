@@ -5,7 +5,9 @@ namespace App\Filament\Pages;
 use App\Filament\Concerns\HidesFromAdminNavigation;
 use App\Models\BukuKas;
 use App\Models\Dompet;
+use App\Models\SumberDana;
 use App\Models\Transaksi;
+use App\Services\OpsiSelectCache;
 use BackedEnum;
 use Carbon\CarbonImmutable;
 use Dompdf\Dompdf;
@@ -62,6 +64,23 @@ class Laporan extends Page
     public function getLabelPeriodeProperty(): string
     {
         return $this->labelPeriode(...$this->rentangTanggal());
+    }
+
+    public function getOpsiBukuKasProperty(): array
+    {
+        return Transaksi::opsiBukuKasDefault();
+    }
+
+    public function getOpsiSumberDanaProperty(): array
+    {
+        return OpsiSelectCache::ingat('sumber_dana', fn (): array => SumberDana::withTrashed()
+            ->orderByDesc('is_default')
+            ->orderBy('nama_dompet')
+            ->get()
+            ->mapWithKeys(fn (SumberDana $sumberDana): array => [
+                $sumberDana->id => $sumberDana->nama_dompet.($sumberDana->trashed() ? ' (Dihapus)' : ''),
+            ])
+            ->all(), auth()->id(), 'dengan-terhapus');
     }
 
     public function mount(): void

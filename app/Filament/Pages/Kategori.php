@@ -10,6 +10,7 @@ use App\Models\BukuKas;
 use App\Models\Kategori as KategoriModel;
 use App\Models\Transaksi;
 use App\Services\KategoriService;
+use App\Services\OpsiSelectCache;
 use BackedEnum;
 use Closure;
 use Filament\Actions\Action;
@@ -102,7 +103,7 @@ class Kategori extends Page implements HasTable
                 SelectKasDanSumberDana::terapkanFilter(
                     SelectFilter::make('kas')
                         ->label('Kas')
-                        ->options(fn (): array => BukuKas::query()->pluck('nama_buku', 'id')->all())
+                        ->options(fn (): array => Transaksi::opsiBukuKasDefault())
                         ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
                             ? $query->whereHas('kas', fn (Builder $query) => $query->whereKey($data['value']))
                             : $query)
@@ -247,16 +248,11 @@ class Kategori extends Page implements HasTable
      */
     private function opsiKas(?KategoriModel $kategori = null): array
     {
-        $user = auth()->user();
+        $semuaKas = BukuKas::opsiKasKelolaKategori(auth()->user());
 
-        return BukuKas::query()->urutanTabungan()->with('user:id,name')->get()
-            ->filter(fn (BukuKas $kas): bool => $user->dapatMengelolaKategoriPada($kas)
-                && ($kategori === null || $kas->user_id === $kategori->user_id))
-            ->mapWithKeys(fn (BukuKas $kas): array => [
-                $kas->id => $kas->user_id === $user->id
-                    ? $kas->nama_buku
-                    : $kas->nama_buku.' (kas bersama '.($kas->user?->name ?? '-').')',
-            ])
+        return collect($semuaKas)
+            ->filter(fn (array $item): bool => $kategori === null || $item['user_id'] === $kategori->user_id)
+            ->map(fn (array $item): string => $item['label'])
             ->all();
     }
 
@@ -273,19 +269,21 @@ class Kategori extends Page implements HasTable
      */
     private function opsiPengganti(KategoriModel $kategori): array
     {
-        $kasTerpakai = Transaksi::withoutGlobalScopes()
-            ->where('kategori_id', $kategori->id)
-            ->distinct()
-            ->pluck('buku_kas_id');
+        return OpsiSelectCache::ingat('kategori', function () use ($kategori): array {
+            $kasTerpakai = Transaksi::withoutGlobalScopes()
+                ->where('kategori_id', $kategori->id)
+                ->distinct()
+                ->pluck('buku_kas_id');
 
-        return KategoriModel::withoutGlobalScopes()
-            ->where('user_id', $kategori->user_id)
-            ->whereKeyNot($kategori->id)
-            ->orderBy('nama')
-            ->get()
-            ->filter(fn (KategoriModel $calon): bool => $kasTerpakai->diff($calon->idKas())->isEmpty())
-            ->mapWithKeys(fn (KategoriModel $calon): array => [$calon->id => $calon->nama.' ('.$calon->tipe.')'])
-            ->all();
+            return KategoriModel::withoutGlobalScopes()
+                ->where('user_id', $kategori->user_id)
+                ->whereKeyNot($kategori->id)
+                ->orderBy('nama')
+                ->get()
+                ->filter(fn (KategoriModel $calon): bool => $kasTerpakai->diff($calon->idKas())->isEmpty())
+                ->mapWithKeys(fn (KategoriModel $calon): array => [$calon->id => $calon->nama.' ('.$calon->tipe.')'])
+                ->all();
+        }, $kategori->id, 'pengganti');
     }
 
     /** Menjalankan aksi kategori dan menampilkan pesan validasi sebagai notifikasi. */

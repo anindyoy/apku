@@ -126,10 +126,7 @@ class ListTransaksis extends ListRecords
 
     public function getBukuKasOptions(): array
     {
-        return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
-            ->urutanTabungan()
-            ->pluck('nama_buku', 'id')
-            ->toArray(), auth()->id());
+        return Transaksi::opsiBukuKasDefault();
     }
 
     public function getDompetOptions(): array

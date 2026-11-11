@@ -84,14 +84,7 @@ trait HasTambahTransaksiAction
 
     public function opsiBukuKasTransfer(): array
     {
-        $opsiBukuKas = Transaksi::opsiBukuKasYangDapatDikelola();
-        $idBukuKasMilikSendiri = BukuKas::query()
-            ->where('user_id', auth()->id())
-            ->whereKey(array_keys($opsiBukuKas))
-            ->pluck('id')
-            ->all();
-
-        return array_intersect_key($opsiBukuKas, array_flip($idBukuKasMilikSendiri));
+        return Transaksi::opsiBukuKasTransfer();
     }
 
     public function idDompetTransferKas(): ?int
@@ -217,16 +210,11 @@ trait HasTambahTransaksiAction
             return [];
         }
 
-        $user = auth()->user();
+        $semuaKas = BukuKas::opsiKasKelolaKategori(auth()->user());
 
-        return BukuKas::query()->urutanTabungan()->with('user:id,name')->get()
-            ->filter(fn (BukuKas $kas): bool => $kas->user_id === $bukuKas->user_id
-                && $user->dapatMengelolaKategoriPada($kas))
-            ->mapWithKeys(fn (BukuKas $kas): array => [
-                $kas->id => $kas->user_id === $user->id
-                    ? $kas->nama_buku
-                    : $kas->nama_buku.' (kas bersama '.($kas->user?->name ?? '-').')',
-            ])
+        return collect($semuaKas)
+            ->filter(fn (array $item): bool => $item['user_id'] === $bukuKas->user_id)
+            ->map(fn (array $item): string => $item['label'])
             ->all();
     }
 

@@ -27,12 +27,18 @@ class Kategori extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn (Kategori $kategori) => static::bersihkanCacheOpsi($kategori->idKas()));
+        static::saved(function (Kategori $kategori): void {
+            static::bersihkanCacheOpsi($kategori->idKas(), $kategori->id);
+            OpsiSelectCache::bersihkan('buku-kas', $kategori->user_id);
+        });
         // Baris pivot ikut terhapus oleh database, sehingga daftar kas dicatat sebelum penghapusan.
         static::deleting(function (Kategori $kategori): void {
             $kategori->idKasSebelumDihapus = $kategori->idKas();
         });
-        static::deleted(fn (Kategori $kategori) => static::bersihkanCacheOpsi($kategori->idKasSebelumDihapus));
+        static::deleted(function (Kategori $kategori): void {
+            static::bersihkanCacheOpsi($kategori->idKasSebelumDihapus, $kategori->id);
+            OpsiSelectCache::bersihkan('buku-kas', $kategori->user_id);
+        });
     }
 
     public function user()
@@ -74,10 +80,14 @@ class Kategori extends Model
     }
 
     /** @param array<int, int|string> $idKas */
-    public static function bersihkanCacheOpsi(array $idKas): void
+    public static function bersihkanCacheOpsi(array $idKas, ?int $kategoriId = null): void
     {
         foreach ($idKas as $id) {
             OpsiSelectCache::bersihkan('kategori', (int) $id);
+        }
+
+        if ($kategoriId !== null) {
+            OpsiSelectCache::bersihkan('kategori', $kategoriId);
         }
     }
 }
