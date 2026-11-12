@@ -3,6 +3,7 @@
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Kategori;
+use App\Models\SumberDana;
 use App\Models\Transaksi;
 use Livewire\Livewire;
 
@@ -275,6 +276,30 @@ test('filter buku kas - mount initialize filterBukuKas dari parameter', function
         ])
         ->assertSuccessful()
         ->assertSet('filterBukuKas', (string) $bukuKas->id);
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
+test('filter transaksi mengalihkan pengguna jika URL memuat kas milik pengguna lain', function () {
+    $user = createRegularUserWithBukuKas();
+    $penggunaLain = createRegularUserWithBukuKas();
+    $bukuKasPenggunaLain = $penggunaLain->buku_kas()->firstOrFail();
+
+    Livewire::actingAs($user)
+        ->withQueryParams(['filter_buku_kas' => $bukuKasPenggunaLain->id])
+        ->test(ListTransaksis::class)
+        ->assertRedirect(ListTransaksis::getUrl());
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
+test('filter transaksi mengalihkan pengguna jika URL memuat sumber dana milik pengguna lain', function () {
+    $user = createRegularUserWithBukuKas();
+    $penggunaLain = createRegularUserWithBukuKas();
+    $sumberDanaPenggunaLain = SumberDana::factory()->create(['user_id' => $penggunaLain->id]);
+
+    Livewire::actingAs($user)
+        ->withQueryParams(['filter_dompet' => $sumberDanaPenggunaLain->id])
+        ->test(ListTransaksis::class)
+        ->assertRedirect(ListTransaksis::getUrl());
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 

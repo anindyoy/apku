@@ -65,11 +65,22 @@ class ListTransaksis extends ListRecords
         $this->filterMonth = request()->query('filter_month', date('m'));
         $this->filterYear = request()->query('filter_year', date('Y'));
         $requestedBukuKas = $filterBukuKas ?? request()->query('filter_buku_kas');
-        $this->filterBukuKas = filled($requestedBukuKas) ? (string) $requestedBukuKas : null;
         $requestedDompet = request()->query('filter_dompet');
-        $this->filterDompet = filled($requestedDompet) && SumberDana::withTrashed()->whereKey($requestedDompet)->exists()
-            ? (string) $requestedDompet
-            : null;
+
+        if (filled($requestedBukuKas) && ! BukuKas::query()->whereKey($requestedBukuKas)->exists()) {
+            $this->redirect(static::getUrl());
+
+            return;
+        }
+
+        if (filled($requestedDompet) && ! SumberDana::withTrashed()->whereKey($requestedDompet)->exists()) {
+            $this->redirect(static::getUrl());
+
+            return;
+        }
+
+        $this->filterBukuKas = filled($requestedBukuKas) ? (string) $requestedBukuKas : null;
+        $this->filterDompet = filled($requestedDompet) ? (string) $requestedDompet : null;
     }
 
     public function content(Schema $schema): Schema

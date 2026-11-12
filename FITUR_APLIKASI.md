@@ -34,7 +34,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Baris transaksi yang dapat dikelola membuka modal Ubah saat diklik; aksi Ubah pada baris tetap tersedia.
 - Saldo per baris pada daftar transaksi mengikuti saldo kas dan sumber dana tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
-- Filter periode, kas, dan sumber dana pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan.
+- Filter periode, kas yang dapat diakses pengguna, dan sumber dana pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan. URL daftar transaksi dengan ID filter kas atau sumber dana yang tidak dapat diakses dialihkan ke `/admin/transaksi` tanpa filter.
 - Pada layar desktop, header dan isi tabel Transaksi, Pencarian Transaksi, serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Kas, Kategori, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.
 - Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, kategori, tanggal, kas, dan sumber dana secara ringkas tanpa perlu menggeser tabel; rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
 - Transfer saldo antar-kas.
