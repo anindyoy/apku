@@ -22,15 +22,7 @@ abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Run seeders after migration
-        if (app()->environment('testing')) {
-            $this->seed();
-        }
-    }
+    protected $seed = true;
 
     public function renderTest($page, $record = false)
     {
