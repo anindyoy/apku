@@ -63,6 +63,7 @@ test('tutorial dashboard menjelaskan tata letak tab mobile', function () {
     $steps = implode(' ', $topics['dashboard']['steps']);
 
     expect($steps)->toContain('ponsel tab tersusun dua kolom')
+        ->toContain('Klik nama atau saldo kas/sumber dana', 'daftar transaksi yang sudah difilter')
         ->not->toContain('geser baris tab ke samping');
 });
 

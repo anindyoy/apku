@@ -147,51 +147,73 @@
                         <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">{{ $caption }}</p>
                         <dl class="dashboard-list mt-3">
                             @forelse ($data as $item)
+                                @php
+                                    $filter = $itemKey === 'kas'
+                                        ? ['filter_buku_kas' => $item->id]
+                                        : ['filter_dompet' => $item->id];
+                                    $filterUrl = \App\Filament\Resources\TransaksiResource::getUrl('index', $filter);
+                                    $filterLabel = $itemKey === 'kas' ? 'Kas' : 'Sumber Dana';
+                                    $itemName = $itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet;
+                                @endphp
                                 <div class="dashboard-row flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[color:var(--dash-line)] py-2 last:border-b-0 last:pb-0 [&_dt]:min-w-0 [&_dt]:flex-[1_1_7rem] [&_dt]:text-sm [&_dt]:font-medium [&_dt]:[overflow-wrap:anywhere] [&_dd]:max-w-full [&_dd]:text-sm [&_dd]:font-[650] [&_dd]:tabular-nums [&_dd]:[overflow-wrap:anywhere] [&_.dashboard-caption]:text-[.7rem] [&_.dashboard-caption]:font-normal">
                                     <dt>
-                                        <div class="flex flex-wrap items-center gap-1.5">
-                                            <span>{{ $itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet }}</span>
+                                        <a
+                                            href="{{ $filterUrl }}"
+                                            data-dashboard-transaction-filter="{{ $itemKey }}-{{ $item->id }}"
+                                            aria-label="Lihat transaksi {{ $filterLabel }} {{ $itemName }}"
+                                            class="block rounded-sm text-teal-700 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600 [&:is(.dark_*)]:text-teal-400"
+                                        >
+                                            <div class="flex flex-wrap items-center gap-1.5">
+                                                <span>{{ $itemName }}</span>
+                                                <x-filament::icon icon="heroicon-o-arrow-top-right-on-square" class="size-3.5 shrink-0" aria-hidden="true" />
+                                                @if ($itemKey === 'kas' && $item->is_tabungan)
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">Tabungan</span>
+                                                @endif
+                                            </div>
                                             @if ($itemKey === 'kas' && $item->is_tabungan)
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">Tabungan</span>
-                                            @endif
-                                        </div>
-                                        @if ($itemKey === 'kas' && $item->is_tabungan)
-                                            @php
-                                                $progres = $item->progresTabungan();
-                                                $isPremium = auth()->user()?->masaAktifBerlaku() ?? false;
-                                            @endphp
-                                            @if ($item->goal)
-                                                <div class="dashboard-caption mt-1 text-[.7rem] text-[color:var(--dash-muted)]">
-                                                    Target: Rp {{ number_format((float) $item->goal, 0, ',', '.') }} ({{ $progres->persen }}%)
+                                                @php
+                                                    $progres = $item->progresTabungan();
+                                                    $isPremium = auth()->user()?->masaAktifBerlaku() ?? false;
+                                                @endphp
+                                                @if ($item->goal)
+                                                    <div class="dashboard-caption mt-1 text-[.7rem] text-[color:var(--dash-muted)]">
+                                                        Target: Rp {{ number_format((float) $item->goal, 0, ',', '.') }} ({{ $progres->persen }}%)
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mt-1 overflow-hidden">
+                                                        <div class="bg-primary-600 h-1.5 rounded-full dark:bg-primary-500" style="width: {{ $progres->barPersen }}%"></div>
+                                                    </div>
+                                                @endif
+                                                @if ($item->tanggal_goal)
+                                                    <div class="mt-1">
+                                                        @if ($isPremium && $progres->status)
+                                                            @php
+                                                                $badgeClass = match ($progres->status) {
+                                                                    'tercapai' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                                                                    'terlewat' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+                                                                    'mendekati' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                                                                    default => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+                                                                };
+                                                            @endphp
+                                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-medium {{ $badgeClass }}">
+                                                                {{ $progres->labelStatus }}
+                                                            </span>
+                                                        @else
+                                                            <span class="dashboard-caption text-[.7rem] text-[color:var(--dash-muted)]">
+                                                                Tenggat: {{ $progres->tanggalDeadlineFormatted }}
+                                                            </span>
+                                                        @endif
                                                 </div>
-                                                <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mt-1 overflow-hidden">
-                                                    <div class="bg-primary-600 h-1.5 rounded-full dark:bg-primary-500" style="width: {{ $progres->barPersen }}%"></div>
-                                                </div>
+                                                @endif
                                             @endif
-                                            @if ($item->tanggal_goal)
-                                                <div class="mt-1">
-                                                    @if ($isPremium && $progres->status)
-                                                        @php
-                                                            $badgeClass = match ($progres->status) {
-                                                                'tercapai' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                                                'terlewat' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-                                                                'mendekati' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-                                                                default => 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-                                                            };
-                                                        @endphp
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-medium {{ $badgeClass }}">
-                                                            {{ $progres->labelStatus }}
-                                                        </span>
-                                                    @else
-                                                        <span class="dashboard-caption text-[.7rem] text-[color:var(--dash-muted)]">
-                                                            Tenggat: {{ $progres->tanggalDeadlineFormatted }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @endif
-                                        @endif
+                                        </a>
                                     </dt>
-                                    <dd>Rp {{ number_format((float) $item->saldo, 0, ',', '.') }}</dd>
+                                    <dd>
+                                        <a
+                                            href="{{ $filterUrl }}"
+                                            aria-label="Lihat transaksi {{ $filterLabel }} {{ $itemName }}"
+                                            class="rounded-sm text-teal-700 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600 [&:is(.dark_*)]:text-teal-400"
+                                        >Rp {{ number_format((float) $item->saldo, 0, ',', '.') }}</a>
+                                    </dd>
                                 </div>
                             @empty
                                 <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $itemKey === 'dompet' ? 'sumber dana' : $itemKey }}.</p>

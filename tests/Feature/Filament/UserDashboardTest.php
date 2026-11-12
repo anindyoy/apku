@@ -190,6 +190,55 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     }
 });
 
+test('dashboard kas dan sumber dana membuka transaksi dengan filter terpilih', function () {
+    $user = User::factory()->create();
+    $kas = BukuKas::factory()->create(['user_id' => $user->id]);
+    $kasLain = BukuKas::factory()->create(['user_id' => $user->id]);
+    $sumberDana = Dompet::factory()->create(['user_id' => $user->id]);
+    $sumberDanaLain = Dompet::factory()->create(['user_id' => $user->id]);
+    $transaksiKas = Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $kas->id,
+        'dompet_id' => $sumberDanaLain->id,
+        'tanggal' => now(),
+    ]));
+    $transaksiSumberDana = Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $kasLain->id,
+        'dompet_id' => $sumberDana->id,
+        'tanggal' => now(),
+    ]));
+    $html = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+    $xpath = new DOMXPath($dom);
+
+    foreach ([
+        ['kas-'.$kas->id, 'filter_buku_kas', $kas->id, 'filter_dompet'],
+        ['dompet-'.$sumberDana->id, 'filter_dompet', $sumberDana->id, 'filter_buku_kas'],
+    ] as [$key, $filter, $id, $otherFilter]) {
+        $link = $xpath->query('//*[@data-dashboard-transaction-filter="'.$key.'"]')->item(0);
+        expect($link)->not->toBeNull();
+        expect($xpath->query('.//*[local-name()="svg"]', $link)->length)->toBeGreaterThan(0);
+        parse_str((string) parse_url($link->getAttribute('href'), PHP_URL_QUERY), $query);
+        expect($query[$filter] ?? null)->toBe((string) $id)
+            ->and($query)->not->toHaveKey($otherFilter);
+    }
+
+    Livewire::actingAs($user)
+        ->withQueryParams(['filter_buku_kas' => (string) $kas->id])
+        ->test(ListTransaksis::class)
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$transaksiKas])
+        ->assertCanNotSeeTableRecords([$transaksiSumberDana]);
+    Livewire::actingAs($user)
+        ->withQueryParams(['filter_dompet' => (string) $sumberDana->id])
+        ->test(ListTransaksis::class)
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$transaksiSumberDana])
+        ->assertCanNotSeeTableRecords([$transaksiKas]);
+});
+
 test('dashboard user menghubungkan tab dengan panel dan mendukung navigasi keyboard', function () {
     $user = User::factory()->create();
     $html = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
