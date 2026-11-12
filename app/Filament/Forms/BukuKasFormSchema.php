@@ -7,6 +7,7 @@ use App\Models\Kategori;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -139,6 +140,12 @@ class BukuKasFormSchema
                 ->maxLength(200)
                 ->default(null)
                 ->placeholder('Catatan singkat tentang buku kas ini (maks. 200 karakter)'),
+
+            // Kompatibilitas mundur untuk aksi yang mengirimkan parameter hubungkan_kategori
+            Hidden::make('hubungkan_kategori')
+                ->default(false)
+                ->visible(fn (?BukuKas $record): bool => $record === null)
+                ->dehydrated(),
 
             Checkbox::make('aktifkan_di_semua_kategori')
                 ->label('Aktifkan di semua kategori')

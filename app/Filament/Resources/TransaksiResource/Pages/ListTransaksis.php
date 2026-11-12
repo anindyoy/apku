@@ -8,6 +8,7 @@ use App\Filament\Resources\TransaksiResource;
 use App\Filament\Resources\TransaksiResource\Widgets\KasOverview;
 use App\Models\BukuKas;
 use App\Models\SumberDana;
+use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\ImportTransaksiService;
 use App\Services\OpsiSelectCache;

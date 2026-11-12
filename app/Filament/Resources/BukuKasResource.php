@@ -134,7 +134,7 @@ class BukuKasResource extends Resource
                         })
                         ->using(function (BukuKas $record, array $data): BukuKas {
                             $kategoriDipilih = array_key_exists('kategori', $data) ? (array) $data['kategori'] : null;
-                            unset($data['kategori'], $data['aktifkan_di_semua_kategori']);
+                            unset($data['kategori'], $data['aktifkan_di_semua_kategori'], $data['hubungkan_kategori']);
 
                             $record->update($data);
 
