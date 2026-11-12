@@ -39,7 +39,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListTransaksis extends ListRecords
 {
-    use ExposesTableToWidgets;
+    use ExposesTableToWidgets {
+        getWidgetData as getBaseTableWidgetData;
+    }
     use HasTambahTransaksiAction;
 
     protected static string $resource = TransaksiResource::class;
@@ -454,6 +456,15 @@ class ListTransaksis extends ListRecords
         }, 'template-import-transaksi.xlsx', [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    public function getWidgetData(): array
+    {
+        return [
+            ...$this->getBaseTableWidgetData(),
+            'filterBukuKas' => $this->filterBukuKas,
+            'filterDompet' => $this->filterDompet,
+        ];
     }
 
     public function getHeaderWidgets(): array

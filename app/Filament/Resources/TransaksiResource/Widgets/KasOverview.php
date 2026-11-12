@@ -2,16 +2,25 @@
 
 namespace App\Filament\Resources\TransaksiResource\Widgets;
 
-use Filament\Widgets\StatsOverviewWidget\Stat;
-use Filament\Widgets\Concerns\InteractsWithPageTable;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\SumberDana;
+use Filament\Widgets\Concerns\InteractsWithPageTable;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Livewire\Attributes\Reactive;
 
 class KasOverview extends BaseWidget
 {
     use InteractsWithPageTable;
+
+    protected static bool $isLazy = false;
+
+    #[Reactive]
+    public ?string $filterBukuKas = null;
+
+    #[Reactive]
+    public ?string $filterDompet = null;
 
     protected function getTablePage(): string
     {
@@ -20,9 +29,10 @@ class KasOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        $filterBukuKas = $this->getTablePageInstance()->filterBukuKas;
+        // Gunakan properti reaktif dari halaman tabel agar filter tetap terbaca saat pembaruan Livewire.
+        $filterBukuKas = $this->filterBukuKas;
         $saldoBukuKas = BukuKas::find($filterBukuKas)?->saldo ?? 0;
-        $filterSumberDana = $this->getTablePageInstance()->filterDompet;
+        $filterSumberDana = $this->filterDompet;
         $saldoSumberDana = SumberDana::withTrashed()->find($filterSumberDana)?->saldo;
 
         $user = auth()->user();
