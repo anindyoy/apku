@@ -2,6 +2,7 @@
 
 use App\Filament\Resources\UtangResource\Pages\ListUtangs;
 use App\Filament\Resources\UtangResource\Pages\UtangDetail;
+use App\Filament\Resources\PiutangResource\Pages\ListPiutangs;
 use App\Models\User;
 use App\Models\UtangPiutang;
 use App\Models\UtangPiutangDetail;
@@ -107,6 +108,36 @@ test('user bisa menambah nominal utang pada halaman detail', function () {
         'deskripsi' => 'Tambah nominal utang',
     ]);
 })->group('utang');
+
+test('user bisa membuat utang atau piutang dari halaman daftar', function (string $page, string $tipe) {
+    $user = User::notAdmin()->firstOrFail();
+
+    Livewire::actingAs($user)
+        ->test($page)
+        ->callAction('create', data: [
+            'kepada' => 'Pihak baru',
+            'nominal' => 75000,
+            'created_at' => now()->format('Y-m-d H:i:s'),
+            'deskripsi' => 'Catatan awal',
+        ])
+        ->assertHasNoActionErrors();
+
+    $record = UtangPiutang::query()
+        ->where('user_id', $user->id)
+        ->where('tipe', $tipe)
+        ->where('kepada', 'Pihak baru')
+        ->firstOrFail();
+
+    $this->assertDatabaseHas('utang_piutang_detail', [
+        'utang_piutang_id' => $record->id,
+        'nominal' => 75000,
+        'tipe' => 'tambah',
+        'deskripsi' => 'Catatan awal',
+    ]);
+})->with([
+    'utang' => [ListUtangs::class, 'utang'],
+    'piutang' => [ListPiutangs::class, 'piutang'],
+])->group('utang');
 
 test('user bisa mencatat pembayaran utang pada halaman detail', function () {
     $user = User::notAdmin()->inRandomOrder()->first();

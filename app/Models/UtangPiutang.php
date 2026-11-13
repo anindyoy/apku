@@ -160,8 +160,8 @@ class UtangPiutang extends Model
 
                     return $data;
                 })
-                ->after(function ($record, $livewire) {
-                    $data = $livewire->mountedActionsData[0];
+                ->after(function ($record, Action $action) {
+                    $data = $action->getRawData();
                     UtangPiutangDetail::create([
                         'utang_piutang_id' => $record->id,
                         'nominal' => $data['nominal'],
