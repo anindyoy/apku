@@ -651,27 +651,27 @@ test('checkbox aktifkan di semua kas dapat memilih seluruh kas dan masing-masing
 
     // Pengguna tetap dapat mengedit masing-masing checkbox (lepas salah satu kas)
     $halaman->setTableActionData([
-        'kas' => [$idKasUtama],
+        'kas' => [$idKasUsaha],
     ])->assertTableActionDataSet([
         'aktifkan_di_semua_kas' => false,
-        'kas' => [$idKasUtama],
+        'kas' => [$idKasUsaha],
     ]);
 
     // Simpan data hasil penyesuaian individual
     $halaman->setTableActionData([
         'nama' => 'Operasional',
         'tipe' => 'Pengeluaran',
-        'kas' => [$idKasUtama],
+        'kas' => [$idKasUsaha],
     ])->callMountedTableAction()->assertHasNoTableActionErrors();
 
     $kategori = Kategori::withoutGlobalScopes()->where('nama', 'Operasional')->sole();
-    expect($kategori->idKas())->toBe([$idKasUtama]);
+    expect($kategori->idKas())->toBe([$idKasUsaha]);
 
     // Ubah kategori: karena baru terhubung ke 1 kas dari 2 kas, master checkbox false
     $halaman->mountTableAction('ubah', $kategori)
         ->assertTableActionDataSet([
             'aktifkan_di_semua_kas' => false,
-            'kas' => [$idKasUtama],
+            'kas' => [$idKasUsaha],
         ]);
 
     // Aktifkan semua kas pada form edit
