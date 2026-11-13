@@ -62,7 +62,7 @@ test('tutorial dashboard menjelaskan kartu responsif', function () {
     $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
     $steps = implode(' ', $topics['dashboard']['steps']);
 
-    expect($steps)->toContain('judul kartu', 'Buka semua', 'Ciutkan semua')
+    expect($steps)->toContain('judul kartu', 'Buka semua', 'Tutup semua')
         ->toContain('Klik nama atau saldo kas/sumber dana', 'daftar transaksi yang sudah difilter')
         ->not->toContain('tab tersusun', 'Pilih tab');
 });

@@ -49,7 +49,7 @@
                         class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-teal-600 hover:text-teal-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600 [&:is(.dark_*)]:text-teal-400 [&:is(.dark_*)]:hover:text-teal-300"
                     >
                         <x-filament::icon icon="heroicon-o-chevron-down" class="size-4 transition-transform" x-bind:class="anyOpen ? 'rotate-180' : ''" aria-hidden="true" />
-                        <span x-text="anyOpen ? 'Ciutkan semua' : 'Buka semua'">Ciutkan semua</span>
+                        <span x-text="anyOpen ? 'Tutup semua' : 'Buka semua'">Tutup semua</span>
                     </button>
                 </div>
             @endif
