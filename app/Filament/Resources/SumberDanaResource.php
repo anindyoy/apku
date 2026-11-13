@@ -53,6 +53,9 @@ class SumberDanaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->reorder()
+                ->orderByDesc('is_default')
+                ->orderBy('nama_dompet'))
             ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
                 Stack::make([

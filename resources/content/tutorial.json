@@ -114,7 +114,7 @@
         "steps": [
             "Buka Setting > Kas dan gunakan aksi tambah untuk membuat kas dengan nama serta deskripsi yang mudah dikenali.",
             "Pilih tipe kas: Kas Biasa atau Kas Tabungan. Fitur Kas Tabungan tersedia untuk pengguna Premium aktif dan memungkinkan pengisian target tabungan (minimal Rp 10.000) serta tenggat waktu pencapaian.",
-            "Buka menu Aksi pada card kas untuk mengubah data, mengubah tipe kas, atau menjadikannya kas utama/default. Nilai target dan tenggat tabungan tetap tersimpan di database meskipun tipe diubah kembali menjadi Kas Biasa.",
+            "Kas utama selalu berada di urutan pertama pada daftar. Buka menu Aksi pada card kas untuk mengubah data, mengubah tipe kas, atau menjadikannya kas utama/default. Nilai target dan tenggat tabungan tetap tersimpan di database meskipun tipe diubah kembali menjadi Kas Biasa.",
             "Periksa label Akses, Kepemilikan, Saldo, Tipe, progres target tabungan, dan Jumlah transaksi pada card. Jumlah produk emas ditampilkan hanya jika kas memiliki produk emas. Perubahan kas dan saldo diperbarui pada daftar setelah disimpan.",
             "Gunakan tombol Pengaturan tampilan di bagian atas daftar kas untuk mengatur apakah saldo kas tabungan diikutsertakan dalam perhitungan total saldo kas atau dipisahkan.",
             "Saat menambah atau mengubah kas, pilihan Aktifkan di semua kategori dan daftar centang kategori dapat digunakan untuk menghubungkan seluruh atau sebagian kategori. Pada form ubah, kategori yang sudah terhubung akan tercentang otomatis.",
@@ -132,7 +132,7 @@
         "steps": [
             "Buka Setting > Sumber Dana, tambahkan sumber dana, lalu isi nama yang mudah dikenali, misalnya Tunai di rumah, BCA, atau GoPay. Nama harus berbeda dari sumber dana aktif lain milik Anda; nama sumber dana yang sudah dihapus boleh digunakan kembali.",
             "Pilih jenis sumber dana yang sesuai: Tunai untuk uang tunai, Rekening bank untuk rekening bank, E-wallet untuk saldo layanan digital, atau Lainnya. Gunakan aksi ubah untuk memperbarui nama, jenis, saldo, dan deskripsi, atau jadikan sumber dana yang paling sering digunakan sebagai sumber dana utama.",
-            "Periksa label Saldo, Utama, Status, Jenis, dan Deskripsi pada card sumber dana sebelum mencatat transaksi. Aksi Jadikan utama memilih sumber dana yang akan digunakan otomatis. Perubahan sumber dana dan saldo diperbarui pada daftar setelah disimpan.",
+            "Sumber dana utama selalu berada di urutan pertama pada daftar. Periksa label Saldo, Utama, Status, Jenis, dan Deskripsi pada card sumber dana sebelum mencatat transaksi. Aksi Jadikan utama memilih sumber dana yang akan digunakan otomatis. Perubahan sumber dana dan saldo diperbarui pada daftar setelah disimpan.",
             "Saat menghapus sumber dana, ikuti alur pemindahan saldo ke sumber dana lain dan periksa kembali hasilnya."
         ],
         "example": "Buat Tunai di rumah untuk uang tunai, BCA untuk rekening bank, dan GoPay untuk saldo e-wallet agar mudah mengetahui di mana uang Anda berada.",

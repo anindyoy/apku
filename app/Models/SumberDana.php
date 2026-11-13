@@ -7,6 +7,7 @@ use App\Models\Concerns\MembersihkanCacheOpsiSelect;
 use App\Models\Scopes\UserScope;
 use Database\Factories\SumberDanaFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,6 +28,14 @@ class SumberDana extends Model
             'is_default' => 'boolean',
             'jenis' => JenisSumberDana::class,
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('order', function (Builder $builder): void {
+            $builder->orderByDesc('is_default')
+                ->orderBy('nama_dompet');
+        });
     }
 
     public function user()

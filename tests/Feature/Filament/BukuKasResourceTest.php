@@ -38,6 +38,29 @@ test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
         ->searchTable($kas->nama_buku)->assertCanSeeTableRecords([$kas]);
 })->group('filament', 'buku-kas');
 
+test('daftar kas menempatkan kas utama sebelum kas lainnya', function () {
+    $user = createRegularUserWithBukuKas();
+    $kasLama = $user->buku_kas()->firstOrFail();
+    $kasLama->update(['is_default' => false]);
+    $kasBiasa = \App\Models\BukuKas::factory()->create([
+        'user_id' => $user->id,
+        'nama_buku' => 'A Kas Biasa',
+        'is_default' => false,
+        'is_tabungan' => false,
+    ]);
+    $kasUtama = \App\Models\BukuKas::factory()->create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Z Kas Tabungan Utama',
+        'is_default' => true,
+        'is_tabungan' => true,
+    ]);
+
+    $component = Livewire::actingAs($user)->test(ListBukuKas::class)->assertSuccessful();
+
+    expect($component->instance()->getTableRecords()->pluck('id')->all())
+        ->toBe([$kasUtama->id, $kasBiasa->id, $kasLama->id]);
+})->group('filament', 'buku-kas');
+
 test('card kas menyembunyikan informasi emas saat tidak ada produk', function () {
     $user = createRegularUserWithBukuKas();
     // Pastikan fitur tabungan emas aktif namun kas belum memiliki produk emas.

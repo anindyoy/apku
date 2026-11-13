@@ -33,10 +33,11 @@ class BukuKas extends Model
         ];
     }
 
-    /** Scope untuk mengurutkan kas biasa terlebih dahulu, kemudian kas tabungan, dan urut nama di setiap kelompok. */
+    /** Scope untuk menempatkan kas utama lebih dulu, lalu mengurutkan kas biasa dan kas tabungan menurut nama. */
     public function scopeUrutanTabungan(Builder $query): Builder
     {
         return $query->reorder()
+            ->orderByDesc('is_default')
             ->orderBy('is_tabungan')
             ->orderBy('nama_buku');
     }
@@ -51,7 +52,8 @@ class BukuKas extends Model
     {
         parent::boot();
         static::addGlobalScope('order', function (Builder $builder) {
-            $builder->orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
+            $builder->orderByDesc('is_default')
+                ->orderByRaw("CASE WHEN nama_buku = 'Kas Utama' THEN 1 ELSE 2 END")
                 ->orderBy('nama_buku');
         });
 

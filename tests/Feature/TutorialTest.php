@@ -84,6 +84,9 @@ test('tutorial trial hanya menampilkan ajakan kepada pengguna yang memenuhi syar
 test('tutorial kuota kas dan sumber dana menjelaskan batas serta masa aktif premium', function () {
     $topik = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 
+    expect(implode(' ', $topik['kas']['steps']))->toContain('Kas utama selalu berada di urutan pertama')
+        ->and(implode(' ', $topik['dompet']['steps']))->toContain('Sumber dana utama selalu berada di urutan pertama');
+
     foreach (['kas', 'dompet'] as $id) {
         expect($topik[$id]['note'])->toContain('maksimal 2', 'sisa slot', 'aksi tambah disembunyikan', 'Setelah Premium berakhir', 'satu kalimat', 'Latar kuning', 'latar merah');
         expect($topik[$id]['note'])->toContain('tidak menampilkan pesan kuota');

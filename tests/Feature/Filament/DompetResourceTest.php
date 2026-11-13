@@ -2,6 +2,7 @@
 
 use App\Filament\Resources\DompetResource\Pages\ListDompet;
 use App\Filament\Resources\DompetResource;
+use App\Filament\Resources\SumberDanaResource\Pages\ListSumberDana;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\Dompet;
@@ -132,6 +133,29 @@ test('daftar dompet menggunakan kartu responsif', function () {
         ->and($table->getColumn('is_default')->record($record)->formatState(true))->toBe('Utama: Ya')
         ->and($table->getColumn('status_akses')->record($record)->getPrefix())->toBe('Status: ')
         ->and($table->getColumn('description')->record($record)->getPrefix())->toBe('Deskripsi: ');
+});
+
+test('daftar sumber dana menempatkan sumber dana utama sebelum sumber dana lainnya', function () {
+    ['user' => $user, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+    $cash->update(['is_default' => false]);
+    $sumberDanaLain = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'A Rekening',
+        'saldo' => 0,
+    ]);
+    $sumberDanaUtama = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Z Tabungan',
+        'saldo' => 0,
+        'is_default' => true,
+    ]);
+
+    $component = Livewire::actingAs($user)->test(ListSumberDana::class)->assertSuccessful();
+
+    expect($component->instance()->getTableRecords()->pluck('id')->all())
+        ->toBe([$sumberDanaUtama->id, $sumberDanaLain->id, $cash->id])
+        ->and(array_keys(Transaksi::opsiSumberDanaYangDapatDikelola()))
+        ->toBe([$sumberDanaUtama->id, $sumberDanaLain->id, $cash->id]);
 });
 
 test('grid daftar dompet menyesuaikan jumlah sumber dana', function () {
