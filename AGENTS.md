@@ -65,6 +65,12 @@ Aturan berikut berlaku untuk seluruh pekerjaan di folder proyek ini dan semua su
 
 - Jangan melakukan `git commit` kecuali diminta secara eksplisit oleh pengguna. Perubahan boleh dibuat atau diedit di working tree, tetapi commit harus menunggu instruksi langsung.
 
+## Akses Produksi
+
+- Aplikasi APKu produksi dapat diakses melalui SSH dengan alias `invishar`.
+- Direktori aplikasi di server produksi adalah `/home/invishar/apku`.
+- Untuk pemeriksaan produksi, sambungkan dengan `ssh invishar`, lalu pindah ke direktori tersebut. Jangan menjalankan perubahan kode, deploy, atau perintah yang mengubah data produksi tanpa permintaan eksplisit pengguna.
+
 ## ClickUp
 
 - MCP ClickUp proyek ini terhubung melalui konfigurasi `.codex/config.toml` dan autentikasi OAuth pengguna.
