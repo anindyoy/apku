@@ -114,7 +114,8 @@ test('dashboard user menyimpan toggle dan urutan per akun melalui pengaturan', f
         ->and(strpos($html, 'wire:key="dashboard-langganan"'))->toBeLessThan(strpos($html, 'wire:key="dashboard-kas-dompet"'));
     $hidden = array_map(fn ($section) => [...$section, 'visible' => false], $sections);
     $fresh->call('saveSettings', $hidden)->assertHasNoErrors();
-    expect($fresh->html())->not->toContain('role="tabpanel"', 'role="tablist"');
+    expect($fresh->html())->not->toContain('id="dashboard-toggle-')
+        ->and($fresh->html())->toContain('Dashboard disembunyikan');
 });
 
 test('dashboard user menolak pengaturan tidak valid dan aksi admin', function () {
@@ -146,26 +147,44 @@ test('dashboard user menampilkan masa aktif dan keadaan kosong', function (?stri
     'masih aktif' => [fn () => today()->addDays(10)->toDateString(), true],
 ]);
 
-test('dashboard user memakai tab berikon dan panel selebar halaman', function () {
+test('dashboard user memakai kartu responsif dengan panel buka tutup', function () {
     $user = User::factory()->create();
     $html = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
-    $grid = $xpath->query('//div[contains(@class,"dashboard-tabs")]')->item(0);
+    $grid = $xpath->query('//div[contains(@class,"dashboard-cards")]')->item(0);
     expect($grid)->not->toBeNull();
-    expect($xpath->query('./section', $grid)->length)->toBe(4);
-    $table = $xpath->query('./section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
-    expect($table->getAttribute('class'))->toContain('dashboard-full-width');
+    expect($xpath->query('.//section[@data-section]', $grid)->length)->toBe(4);
+    expect($xpath->query('.//section[@data-section]', $grid)->item(0)->getAttribute('data-section'))->toBe('kas-dompet');
+    $table = $xpath->query('.//section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
+    expect($table->getAttribute('class'))->toContain('lg:col-span-8');
     expect($table->getAttribute('class'))->toContain( '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
-    expect($xpath->query('.//*[@role="tab"]', $grid)->length)->toBe(4);
-    expect($xpath->query('.//*[@role="tab" and @aria-selected="true"]', $grid)->length)->toBe(1);
-    expect($xpath->query('.//*[@role="tab"]', $grid)->item(0)->getAttribute('id'))->toBe('dashboard-tab-transaksi');
-    $tablist = $xpath->query('.//*[@role="tablist"]', $grid)->item(0);
-    expect($tablist->getAttribute('class'))->toContain('grid-cols-2', 'sm:flex', 'sm:min-w-max');
-    expect($tablist->getAttribute('class'))->not->toContain('min-w-max text-center');
-    expect($xpath->query('.//*[@role="tab"]', $grid)->item(0)->getAttribute('class'))->toContain('min-w-0', 'px-2', 'sm:shrink-0', 'sm:px-4');
-    expect($xpath->query('.//*[@role="tablist"]/..', $grid)->item(0)->getAttribute('class'))->not->toContain('overflow-x-auto');
+    expect($xpath->query('.//button[starts-with(@id,"dashboard-toggle-")]', $grid)->length)->toBe(4);
+    foreach ($xpath->query('.//section[@data-section]', $grid) as $card) {
+        $key = $card->getAttribute('data-section');
+        $button = $xpath->query('.//button[@id="dashboard-toggle-'.$key.'"]', $card)->item(0);
+        $content = $xpath->query('.//*[@id="dashboard-content-'.$key.'"]', $card)->item(0);
+        expect($button->getAttribute('aria-controls'))->toBe($content->getAttribute('id'))
+            ->and($button->getAttribute('x-on:click'))->toBe("open['$key'] = ! open['$key']")
+            ->and($content->getAttribute('x-show'))->toBe("open['$key']");
+    }
+    $script = <<<'JS'
+        const assert = require('node:assert/strict');
+        const initialize = new Function('window', 'return (' + process.argv[1] + ')');
+        const mobile = initialize({matchMedia: () => ({matches: false})});
+        assert.deepEqual(mobile.open, {'kas-dompet': true, 'utang-piutang': false, 'transaksi': false, 'langganan': false});
+        assert.equal(mobile.anyOpen, true);
+        mobile.toggleAll();
+        assert.deepEqual(Object.values(mobile.open), [false, false, false, false]);
+        mobile.toggleAll();
+        assert.deepEqual(Object.values(mobile.open), [true, true, true, true]);
+        const desktop = initialize({matchMedia: () => ({matches: true})});
+        assert.deepEqual(Object.values(desktop.open), [true, true, true, true]);
+        JS;
+    $process = new \Symfony\Component\Process\Process(['node', '-e', $script, $grid->getAttribute('x-data')], base_path());
+    $process->run();
+    expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
     expect(file_get_contents(resource_path('views/filament/pages/dashboard.blade.php')))->not->toContain('<style');
 });
 
@@ -182,7 +201,7 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     $xpath = new DOMXPath($dom);
     $card = $xpath->query('//section[@data-section="kas-dompet"]')->item(0);
     expect($card->getAttribute('class'))->toContain('dashboard-card');
-    expect($xpath->query('//button[@id="dashboard-tab-kas-dompet"]/*[local-name()="svg"]')->length)->toBe(1);
+    expect($xpath->query('//button[@id="dashboard-toggle-kas-dompet"]//*[local-name()="svg"]')->length)->toBe(2);
     foreach (['kas' => 'Rp 100.000', 'dompet' => 'Rp 80.000'] as $key => $total) {
         $feature = $xpath->query('.//*[@data-dashboard-item="'.$key.'"]', $card)->item(0);
         expect($feature)->not->toBeNull();
@@ -239,45 +258,24 @@ test('dashboard kas dan sumber dana membuka transaksi dengan filter terpilih', f
         ->assertCanNotSeeTableRecords([$transaksiKas]);
 });
 
-test('dashboard user menghubungkan tab dengan panel dan mendukung navigasi keyboard', function () {
+test('dashboard user menghubungkan tombol kartu dengan panel konten', function () {
     $user = User::factory()->create();
     $html = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
-    $panels = $xpath->query('//section[@role="tabpanel"]');
-    expect($panels->length)->toBe(4);
-    foreach ($panels as $panel) {
-        $key = $panel->getAttribute('data-section');
-        $tab = $xpath->query('//button[@id="'.$panel->getAttribute('aria-labelledby').'"]')->item(0);
-        expect($tab->getAttribute('aria-controls'))->toBe($panel->getAttribute('id'))
-            ->and($tab->getAttribute('tabindex'))->toBe($key === 'transaksi' ? '0' : '-1')
-            ->and($panel->getAttribute('x-show'))->toBe("activeTab === '$key'")
-            ->and($panel->hasAttribute('x-cloak'))->toBe($key !== 'transaksi');
+    $cards = $xpath->query('//section[@data-section]');
+    expect($cards->length)->toBe(4);
+    foreach ($cards as $card) {
+        $key = $card->getAttribute('data-section');
+        $button = $xpath->query('.//button[@id="dashboard-toggle-'.$key.'"]', $card)->item(0);
+        $summary = $xpath->query('./div[@x-cloak and not(@id)]', $card)->item(0);
+        $content = $xpath->query('./div[@id="dashboard-content-'.$key.'"]', $card)->item(0);
+        expect($button)->not->toBeNull()
+            ->and($summary)->not->toBeNull()
+            ->and($summary->hasAttribute('x-cloak'))->toBeTrue()
+            ->and($content->hasAttribute('x-cloak'))->toBeTrue();
     }
-    $handler = $xpath->query('//*[@role="tablist"]')->item(0)->getAttribute('x-on:keydown');
-    $script = <<<'JS'
-        const assert = require('node:assert/strict');
-        const handler = new Function('$event', '$el', process.argv[1]);
-        let active = 0;
-        let focused = 0;
-        const tabs = Array.from({length: 4}, (_, index) => ({
-            focus() { focused = index; }, click() { active = index; }
-        }));
-        const el = { querySelectorAll() { return tabs; } };
-        for (const [key, expected] of [['ArrowLeft', 3], ['ArrowRight', 0], ['End', 3], ['Home', 0], ['ArrowRight', 1]]) {
-            let prevented = false;
-            handler({key, target: tabs[active], preventDefault() { prevented = true; }}, el);
-            assert.equal(active, expected);
-            assert.equal(focused, expected);
-            assert.equal(prevented, true);
-        }
-        handler({key: 'Tab', target: tabs[active], preventDefault() { throw new Error('Tab harus tetap dapat meninggalkan navigasi'); }}, el);
-        assert.equal(active, 1);
-        JS;
-    $process = new \Symfony\Component\Process\Process(['node', '-e', $script, $handler], base_path());
-    $process->run();
-    expect($process->isSuccessful())->toBeTrue($process->getErrorOutput());
 });
 
 test('dashboard user tombol tambah membuka form dan menyimpan transaksi', function () {

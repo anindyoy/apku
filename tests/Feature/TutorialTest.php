@@ -58,13 +58,13 @@ test('tutorial pencocokan saldo menjelaskan penghitung pecahan uang', function (
         ->and($topics['audit-saldo']['note'])->toContain('Rp100.000', 'Rp500');
 });
 
-test('tutorial dashboard menjelaskan tata letak tab mobile', function () {
+test('tutorial dashboard menjelaskan kartu responsif', function () {
     $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
     $steps = implode(' ', $topics['dashboard']['steps']);
 
-    expect($steps)->toContain('ponsel tab tersusun dua kolom')
+    expect($steps)->toContain('judul kartu', 'Buka semua', 'Ciutkan semua')
         ->toContain('Klik nama atau saldo kas/sumber dana', 'daftar transaksi yang sudah difilter')
-        ->not->toContain('geser baris tab ke samping');
+        ->not->toContain('tab tersusun', 'Pilih tab');
 });
 
 test('tutorial langganan menjelaskan tombol salin nomor tujuan', function () {

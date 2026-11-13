@@ -10,12 +10,11 @@
         @if ($trialBanner)
             @include('filament.components.trial-premium-banner', ['trial' => $trialBanner])
         @else
-            {{-- Banner ajakan di header agar akun layak langsung melihat CTA tanpa membuka tab Langganan. --}}
+            {{-- Banner ajakan di header agar akun layak langsung melihat CTA tanpa membuka kartu Langganan. --}}
             @include('filament.components.trial-premium-cta', ['info' => $infoTrialDashboard])
         @endif
         @php
             $sections = $this->visibleTabs();
-            $firstTab = $sections[0]['key'] ?? null;
             $icons = [
                 'transaksi' => 'heroicon-o-arrows-right-left',
                 'kas-dompet' => 'heroicon-o-wallet',
@@ -24,67 +23,117 @@
             ];
         @endphp
         <div
-            wire:key="dashboard-tabs-{{ md5(json_encode($sections)) }}"
-            x-data="{ activeTab: @js($firstTab) }"
-            class="dashboard-tabs min-w-0 [--dash-muted:#64748b] [--dash-line:#e2e8f0] [--dash-bg:#f8fafc] [&:is(.dark_*)]:[--dash-muted:#94a3b8] [&:is(.dark_*)]:[--dash-line:#334155] [&:is(.dark_*)]:[--dash-bg:#1e293b]"
+            wire:key="dashboard-cards-{{ md5(json_encode($sections)) }}"
+            x-data="{
+                open: (() => {
+                    const wide = window.matchMedia('(min-width: 768px)').matches;
+                    return {
+                        @foreach ($sections as $section)
+                            @js($section['key']): wide || @js($section['key']) === 'kas-dompet'@if (! $loop->last),@endif
+                        @endforeach
+                    };
+                })(),
+                get anyOpen() { return Object.values(this.open).some(Boolean) },
+                toggleAll() {
+                    const value = ! this.anyOpen;
+                    for (const key in this.open) this.open[key] = value;
+                }
+            }"
+            class="dashboard-cards min-w-0 [--dash-muted:#64748b] [--dash-line:#e2e8f0] [--dash-bg:#f8fafc] [&:is(.dark_*)]:[--dash-muted:#94a3b8] [&:is(.dark_*)]:[--dash-line:#334155] [&:is(.dark_*)]:[--dash-bg:#1e293b]"
         >
             @if ($sections)
-                <div class="mb-3 border-b border-slate-200 [&:is(.dark_*)]:border-slate-700">
-                    <div
-                        role="tablist"
-                        aria-label="Bagian dashboard"
-                        class="grid w-full grid-cols-2 text-center text-sm font-medium sm:flex sm:min-w-max"
-                        x-on:keydown="
-                            if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes($event.key)) {
-                                $event.preventDefault();
-                                const tabs = Array.from($el.querySelectorAll('[role=tab]'));
-                                const index = tabs.indexOf($event.target);
-                                const next = $event.key === 'Home' ? 0 : $event.key === 'End' ? tabs.length - 1 : (index + ($event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-                                tabs[next].focus();
-                                tabs[next].click();
-                            }
-                        "
+                <div class="mb-3 flex justify-end">
+                    <button
+                        type="button"
+                        x-on:click="toggleAll()"
+                        class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-teal-600 hover:text-teal-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600 [&:is(.dark_*)]:text-teal-400 [&:is(.dark_*)]:hover:text-teal-300"
                     >
-                        @foreach ($sections as $section)
-                            <button
-                                type="button"
-                                id="dashboard-tab-{{ $section['key'] }}"
-                                role="tab"
-                                aria-controls="dashboard-panel-{{ $section['key'] }}"
-                                aria-selected="{{ $section['key'] === $firstTab ? 'true' : 'false' }}"
-                                tabindex="{{ $section['key'] === $firstTab ? 0 : -1 }}"
-                                x-bind:aria-selected="activeTab === '{{ $section['key'] }}'"
-                                x-bind:tabindex="activeTab === '{{ $section['key'] }}' ? 0 : -1"
-                                x-on:click="activeTab = '{{ $section['key'] }}'"
-                                class="inline-flex min-w-0 items-center justify-center gap-2 rounded-t-lg border-b-2 border-transparent px-2 py-3 text-slate-500 hover:border-slate-300 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-teal-600 sm:shrink-0 sm:px-4 [&[aria-selected=true]]:border-teal-600 [&[aria-selected=true]]:text-teal-600 [&:is(.dark_*)]:text-slate-400 [&:is(.dark_*)]:hover:text-slate-200 [&:is(.dark_*)[aria-selected=true]]:border-teal-400 [&:is(.dark_*)[aria-selected=true]]:text-teal-400"
-                            >
-                                <x-filament::icon :icon="$icons[$section['key']]" class="size-4 shrink-0" aria-hidden="true" />
-                                {{ $section['label'] }}
-                            </button>
-                        @endforeach
-                    </div>
+                        <x-filament::icon icon="heroicon-o-chevron-down" class="size-4 transition-transform" x-bind:class="anyOpen ? 'rotate-180' : ''" aria-hidden="true" />
+                        <span x-text="anyOpen ? 'Ciutkan semua' : 'Buka semua'">Ciutkan semua</span>
+                    </button>
                 </div>
             @endif
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-[18px]">
             @forelse ($sections as $section)
                 @php
                     $key = $section['key'];
                     $items = $section['sections'];
                 @endphp
                 <section
-                    id="dashboard-panel-{{ $key }}"
+                    id="dashboard-card-{{ $key }}"
                     wire:key="dashboard-{{ $key }}"
-                    role="tabpanel"
-                    aria-labelledby="dashboard-tab-{{ $key }}"
-                    tabindex="0"
                     data-section="{{ $key }}"
-                    x-show="activeTab === '{{ $key }}'"
-                    @if ($key !== $firstTab) x-cloak @endif
                     @class([
-                        'dashboard-card min-w-0 rounded-lg bg-white p-4 ring-1 ring-slate-200 [--accent:#f59e0b] [&:is(.dark_*)]:bg-gray-900 [&:is(.dark_*)]:ring-slate-700 [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2',
-                        'dashboard-full-width' => in_array('transaksi', $items, true),
+                        'dashboard-card min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white [--accent:#f59e0b] [&:is(.dark_*)]:border-gray-800 [&:is(.dark_*)]:bg-gray-900 [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2',
+                        'lg:col-span-6' => in_array($key, ['kas-dompet', 'utang-piutang'], true),
+                        'lg:col-span-8' => $key === 'transaksi',
+                        'lg:col-span-4' => $key === 'langganan',
                     ])
                 >
+                    <h2 class="w-full text-base font-semibold">
+                        <button
+                            type="button"
+                            id="dashboard-toggle-{{ $key }}"
+                            aria-controls="dashboard-content-{{ $key }}"
+                            aria-expanded="{{ $key === 'kas-dompet' ? 'true' : 'false' }}"
+                            x-bind:aria-expanded="open['{{ $key }}']"
+                            x-on:click="open['{{ $key }}'] = ! open['{{ $key }}']"
+                            class="flex w-full items-center justify-between px-4 py-3.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 md:px-5 md:py-4"
+                        >
+                            <span class="flex items-center gap-2">
+                                <x-filament::icon :icon="$icons[$key]" class="size-4 text-teal-600 [&:is(.dark_*)]:text-teal-400" aria-hidden="true" />
+                                {{ $section['label'] }}
+                            </span>
+                            <span class="grid size-[30px] shrink-0 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 [&:is(.dark_*)]:border-slate-700 [&:is(.dark_*)]:bg-slate-800/70 [&:is(.dark_*)]:text-slate-400">
+                                <x-filament::icon icon="heroicon-o-chevron-down" class="size-4 transition-transform" x-bind:class="open['{{ $key }}'] ? 'rotate-180' : ''" aria-hidden="true" />
+                            </span>
+                        </button>
+                    </h2>
                     @php $pemeriksaanSaldo = $key === 'kas-dompet' ? $this->pemeriksaanSaldo() : null; @endphp
+                    <div x-show="!open['{{ $key }}']" x-cloak class="flex flex-wrap items-baseline gap-x-5 gap-y-1 px-4 pb-3.5 md:px-5">
+                        @foreach ($items as $itemKey)
+                            @php $summary = $this->sectionData($itemKey); @endphp
+                            @if (in_array($itemKey, ['kas', 'dompet'], true))
+                                @php
+                                    $summaryTotal = $itemKey === 'kas' && ! auth()->user()->hitungTabunganDiTotal()
+                                        ? $summary->where('is_tabungan', false)->sum('saldo')
+                                        : $summary->sum('saldo');
+                                    $summaryLabel = $itemKey === 'dompet' ? 'Sumber dana' : 'Kas';
+                                @endphp
+                                <span>
+                                    <span class="mr-1.5 text-xs text-[color:var(--dash-muted)]">{{ $summaryLabel }}</span>
+                                    <span class="font-bold tabular-nums">{{ 'Rp '.number_format((float) $summaryTotal, 0, ',', '.') }}</span>
+                                </span>
+                            @elseif (in_array($itemKey, ['utang', 'piutang'], true))
+                                <span>
+                                    <span class="mr-1.5 text-xs text-[color:var(--dash-muted)]">{{ ucfirst($itemKey) }}</span>
+                                    <span class="font-bold tabular-nums">{{ 'Rp '.number_format((float) $summary['total'], 0, ',', '.') }}</span>
+                                </span>
+                            @elseif ($itemKey === 'langganan')
+                                <span>
+                                    <span class="mr-1.5 text-xs text-[color:var(--dash-muted)]">Paket</span>
+                                    <span class="font-bold">{{ $summary['active'] ? 'Premium aktif' : 'Reguler' }}</span>
+                                </span>
+                            @else
+                                <span class="text-xs text-[color:var(--dash-muted)]">{{ $this->getTableRecords()->count() }} transaksi terbaru</span>
+                            @endif
+                        @endforeach
+                        @if ($pemeriksaanSaldo)
+                            <span @class([
+                                'inline-flex items-center gap-1.5 text-xs font-medium',
+                                'text-emerald-500' => $pemeriksaanSaldo['seimbang'],
+                                'text-amber-500' => ! $pemeriksaanSaldo['seimbang'],
+                            ])>
+                                <span @class([
+                                    'size-2 rounded-full',
+                                    'bg-emerald-500' => $pemeriksaanSaldo['seimbang'],
+                                    'bg-amber-500' => ! $pemeriksaanSaldo['seimbang'],
+                                ])></span>
+                                {{ $pemeriksaanSaldo['seimbang'] ? 'Seimbang' : 'Tidak cocok' }}
+                            </span>
+                        @endif
+                    </div>
+                    <div id="dashboard-content-{{ $key }}" x-show="open['{{ $key }}']" x-cloak class="px-4 pb-4 md:px-5 md:pb-5">
                     @if ($pemeriksaanSaldo)
                         <div @class([
                             'mb-4 rounded-lg border p-3 text-sm',
@@ -244,7 +293,7 @@
                         @else
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Belum memiliki langganan premium aktif.</p>
                         @endif
-                        {{-- Ajakan trial hanya tampil di header agar tidak ganda; tab cukup menampilkan sisa trial. --}}
+                        {{-- Ajakan trial hanya tampil di header agar tidak ganda; kartu cukup menampilkan sisa trial. --}}
                         @if ($data['trial'] ?? null)
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Trial Premium: {{ ($data['trial']['sisa'] ?? 0) === 0 ? 'berakhir hari ini' : ($data['trial']['sisa'] ?? 0).' hari tersisa' }} sampai {{ $data['trial']['berakhir'] ?? '-' }}.</p>
                         @endif
@@ -257,12 +306,14 @@
                             </div>
                         @endforeach
                     </div>
+                    </div>
                 </section>
             @empty
                 <x-filament::section heading="Dashboard disembunyikan" compact class="dashboard-full-width col-span-full">
                     Aktifkan bagian yang ingin ditampilkan melalui tombol Atur dashboard.
                 </x-filament::section>
             @endforelse
+            </div>
         </div>
     @endif
 </x-filament-panels::page>

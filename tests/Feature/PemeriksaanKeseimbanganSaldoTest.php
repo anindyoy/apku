@@ -51,6 +51,7 @@ test('dashboard menampilkan selisih dan tautan cocokkan saldo hanya saat fitur a
     Livewire::actingAs($user)->test(Dashboard::class)
         ->assertSuccessful()
         ->assertSeeText('Total saldo kas dan sumber dana tidak cocok')
+        ->assertSeeText('Tidak cocok')
         ->assertSeeText('Selisih lebih pada kas: Rp 50.000.')
         ->assertSeeText('Cocokkan Saldo');
 

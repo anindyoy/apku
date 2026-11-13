@@ -38,11 +38,11 @@ class Dashboard extends BaseDashboard implements HasTable
     protected string $view = 'filament.pages.dashboard';
 
     public const SECTIONS = [
-        'transaksi' => '5 transaksi terakhir',
         'kas' => 'Kas saya',
         'dompet' => 'Sumber dana saya',
         'utang' => 'Utang',
         'piutang' => 'Piutang',
+        'transaksi' => '5 transaksi terakhir',
         'langganan' => 'Masa aktif langganan',
     ];
 

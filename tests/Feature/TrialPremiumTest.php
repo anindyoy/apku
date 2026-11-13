@@ -265,7 +265,7 @@ test('trial statistik admin dan pembatalan berjalan benar', function () {
     $html = $komponen->html();
     expect($html)->toContain('Trial aktif', 'Total trial', 'Konversi');
 
-    // Header Dashboard menampilkan ajakan sekali di atas tab, tanpa duplikasi di tab Langganan.
+    // Header Dashboard menampilkan ajakan sekali di atas kartu, tanpa duplikasi di kartu Langganan.
     $calonHeader = buatCalonTrial(['hp' => '081999000333', 'email' => 'header-cta@example.com']);
     $htmlHeader = Livewire::actingAs($calonHeader)->test(\App\Filament\Pages\Dashboard::class)->assertSuccessful()->html();
     $dokumen = new DOMDocument;
@@ -273,11 +273,11 @@ test('trial statistik admin dan pembatalan berjalan benar', function () {
     $pencari = new DOMXPath($dokumen);
     $ajakan = $pencari->query('//*[@data-testid="trial-premium-cta"]');
     expect($ajakan->length)->toBe(1);
-    $tab = $pencari->query('//div[contains(@class,"dashboard-tabs")]')->item(0);
+    $cards = $pencari->query('//div[contains(@class,"dashboard-cards")]')->item(0);
     $posisiAjakan = strpos($htmlHeader, 'data-testid="trial-premium-cta"');
-    $posisiTab = strpos($htmlHeader, 'dashboard-tabs');
-    expect($posisiAjakan)->toBeLessThan($posisiTab)
-        ->and($pencari->query('.//*[@data-testid="trial-premium-cta"]', $tab)->length)->toBe(0);
+    $posisiKartu = strpos($htmlHeader, 'dashboard-cards');
+    expect($posisiAjakan)->toBeLessThan($posisiKartu)
+        ->and($pencari->query('.//*[@data-testid="trial-premium-cta"]', $cards)->length)->toBe(0);
     expect($htmlHeader)->not->toContain('data-testid="trial-premium-banner"');
 
     // Akun trial aktif melihat banner status di header, bukan ajakan.
