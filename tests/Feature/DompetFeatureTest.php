@@ -123,6 +123,40 @@ test('service transfer buku kas membuat pasangan konsisten dan menjaga dompet ya
         ->and($cash->fresh()->saldo)->toBe(100000);
 });
 
+test('transfer kas saat dibuat diubah dan dihapus tidak mengubah saldo sumber dana', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $bukuKasTujuan = BukuKas::create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Tujuan',
+        'saldo' => 0,
+    ]);
+
+    $hasil = app(TransaksiService::class)->transferBukuKas(
+        $user,
+        $bukuKas,
+        $bukuKasTujuan,
+        $cash,
+        $bank,
+        40000,
+    );
+
+    expect($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(0);
+
+    app(TransaksiService::class)->ubah($user, $hasil['keluar'], [
+        'dompet_id' => $bank->id,
+        'nominal' => 50000,
+    ]);
+
+    expect($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(0);
+
+    app(TransaksiService::class)->hapus($user, $hasil['masuk']);
+
+    expect($cash->fresh()->saldo)->toBe(100000)
+        ->and($bank->fresh()->saldo)->toBe(0);
+});
+
 test('service transfer buku kas menolak tujuan dompet terbatas tanpa perubahan parsial', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatDataDompet([
         'masa_aktif' => today()->subDay(),

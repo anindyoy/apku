@@ -65,10 +65,10 @@
         "intro": "Gunakan jenis transfer untuk memindahkan saldo sesuai tujuan pemindahannya.",
         "steps": [
             "Buka Tambah transaksi, lalu pilih transfer kas atau transfer sumber dana.",
-            "Untuk transfer kas, tentukan kas asal dan kas tujuan. Sumber dana pencatatan dipilih otomatis oleh aplikasi.",
+            "Untuk transfer kas, tentukan kas asal dan kas tujuan. Sumber dana pencatatan dipilih otomatis oleh aplikasi dan saldonya tidak berubah.",
             "Untuk transfer sumber dana, tentukan sumber dana asal dan tujuan. Kas pencatatan dipilih otomatis oleh aplikasi.",
-            "Lengkapi tanggal, nominal, dan deskripsi yang tersedia, simpan, kemudian periksa saldo asal serta tujuan.",
-            "Untuk memperbaiki transfer, buka Ubah pada salah satu baris pasangan. Pilih kas asal dan tujuan serta sumber dana pada transfer kas, atau kas serta sumber dana asal dan tujuan pada transfer sumber dana. Simpan dan periksa kembali saldo kedua sisi."
+            "Lengkapi tanggal, nominal, dan deskripsi yang tersedia, simpan, kemudian periksa saldo kas asal dan tujuan atau saldo sumber dana asal dan tujuan sesuai jenis transfer.",
+            "Untuk memperbaiki transfer, buka Ubah pada salah satu baris pasangan. Pilih kas asal dan tujuan serta sumber dana pencatatan pada transfer kas, atau kas serta sumber dana asal dan tujuan pada transfer sumber dana. Simpan dan periksa kembali saldo yang dipindahkan; transfer kas hanya mengubah saldo kas."
         ],
         "example": "Memindahkan uang dari rekening bank ke uang tunai dicatat sebagai transfer sumber dana. Mengalokasikan uang dari kas Harian ke kas Liburan menggunakan transfer kas.",
         "note": "Transfer kas ditandai biru dan transfer sumber dana kuning. Transfer pada kas bersama hanya tersedia bagi pemilik kas."

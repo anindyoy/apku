@@ -48,6 +48,13 @@ test('tutorial transaksi menjelaskan header desktop dan ringkasan mobile', funct
     expect(implode(' ', $topik['pencarian']['steps']))->toContain('menu opsi', 'latar teal dengan teks putih');
 });
 
+test('tutorial transfer menjelaskan saldo yang berubah untuk setiap jenis transfer', function () {
+    $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
+    $steps = implode(' ', $topics['transfer']['steps']);
+
+    expect($steps)->toContain('saldonya tidak berubah', 'transfer kas hanya mengubah saldo kas');
+});
+
 test('tutorial pencocokan saldo menjelaskan penghitung pecahan uang', function () {
     $topics = collect(json_decode(file_get_contents(resource_path('content/tutorial.json')), true, flags: JSON_THROW_ON_ERROR))->keyBy('id');
 

@@ -30,7 +30,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Mencatat pemasukan dan pengeluaran.
 - Form transaksi menyediakan pembuatan kategori langsung dari pilihan Kategori untuk semua pengguna non-admin; kategori otomatis terhubung ke kas yang dipilih dan tipe awal mengikuti jenis transaksi.
 - Pengguna Premium aktif dapat membuat kas dan sumber dana dari pilihan pada form transaksi. Kas baru dimulai dengan saldo nol dan seluruh kategori milik pemilik kas otomatis dihubungkan; sumber dana baru dimulai dengan saldo nol. Opsi ini tetap mematuhi kuota akun dan validasi nama unik.
-- Transaksi baru memengaruhi saldo secara default, termasuk saldo awal dan transfer kas; pengecualian tersedia untuk import riwayat tanpa dampak saldo.
+- Transaksi baru memengaruhi saldo secara default. Transfer kas hanya memengaruhi saldo kas asal dan tujuan, sedangkan sumber dana pencatatannya tidak berubah; pengecualian tanpa dampak saldo tersedia untuk import riwayat.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Baris transaksi yang dapat dikelola membuka modal Ubah saat diklik; aksi Ubah pada baris tetap tersedia.
 - Saldo per baris pada daftar transaksi mengikuti saldo kas dan sumber dana tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
@@ -54,7 +54,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Setiap transaksi menyimpan identitas pengguna yang mencatatnya.
 - Editor menggunakan sumber dana miliknya sendiri dan kategori milik kas bersama, dapat mengelola kategori kas tersebut, serta hanya dapat mengubah atau menghapus transaksi buatannya.
 - Informasi sumber dana anggota lain disamarkan pada daftar transaksi, pencarian, laporan, dan hasil ekspor.
-- Transfer kas menentukan sumber dana pencatatan secara otomatis, sedangkan transfer sumber dana menentukan kas pencatatan secara otomatis. Transaksi pada kas terbatas tidak dapat diubah atau dihapus.
+- Transfer kas menentukan sumber dana pencatatan secara otomatis tanpa mengubah saldo sumber dana, sedangkan transfer sumber dana menentukan kas pencatatan secara otomatis tanpa mengubah saldo kas. Transaksi pada kas terbatas tidak dapat diubah atau dihapus.
 - File import divalidasi sebelum disimpan.
 - Header file import dibaca otomatis dan mendukung pemetaan nama kolom yang berbeda ke kolom transaksi.
 
@@ -222,7 +222,7 @@ Pengguna baru diarahkan ke form pengaturan awal 1 halaman sebelum menggunakan fi
 - Pemasukan, pengeluaran, transfer kas, dan transfer sumber dana dicatat melalui satu modal **Tambah transaksi**; pilihan pertama dan jenis awal form adalah Pengeluaran, lalu jenis transaksi menentukan field serta warna form. Form tersusun satu kolom pada layar sempit dan dua kolom pada layar lebar; pilihan jenis transaksi tetap memakai grid dua kolom pada semua ukuran layar, termasuk mobile agar tidak meluap ke samping. Seluruh input dan tombol submit dinonaktifkan sementara ketika perubahan jenis sedang diproses. Transfer kas hanya meminta kas asal dan tujuan, sedangkan transfer sumber dana hanya meminta sumber dana asal dan tujuan.
 - Seluruh input nominal rupiah pada form aplikasi (transaksi, buku kas, sumber dana, onboarding, paket langganan, tabungan emas, utang/piutang, serta pencocokan saldo) menggunakan separator ribuan titik saat ditulis maupun ditampilkan di UI, tanpa menampilkan dua digit desimal di belakang koma.
 - Modal **Ubah transaksi** pada daftar transaksi, dashboard, dan pencarian memakai dua kolom pada layar yang cukup lebar serta satu kolom pada layar sempit. Deskripsi menggunakan lebar penuh, dan input nominal menampilkan prefix **Rp** seperti form Tambah.
-- Pada modal **Ubah transaksi**, kas dan sumber dana dapat diganti. Transfer kas menampilkan kas asal, kas tujuan, dan sumber dana; transfer sumber dana menampilkan kas, sumber dana asal, dan sumber dana tujuan. Perubahan memperbarui pasangan transfer dan saldo terkait secara atomik. Kas dan sumber dana ketiga dan seterusnya tetap terlihat tetapi tidak dapat dipilih saat masa Premium tidak berlaku; aturan hak akses juga diperiksa saat penyimpanan.
+- Pada modal **Ubah transaksi**, kas dan sumber dana dapat diganti. Transfer kas menampilkan kas asal, kas tujuan, dan sumber dana pencatatan; transfer sumber dana menampilkan kas, sumber dana asal, dan sumber dana tujuan. Perubahan memperbarui pasangan transfer dan saldo yang dipindahkan secara atomik; transfer kas hanya mengubah saldo kas dan transfer sumber dana hanya mengubah saldo sumber dana. Kas dan sumber dana ketiga dan seterusnya tetap terlihat tetapi tidak dapat dipilih saat masa Premium tidak berlaku; aturan hak akses juga diperiksa saat penyimpanan.
 - Menampilkan saldo berjalan untuk kas atau sumber dana yang sedang dipilih.
 - Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer sumber dana berwarna kuning.
 - Nama kategori pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.

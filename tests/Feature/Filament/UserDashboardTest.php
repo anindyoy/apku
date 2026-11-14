@@ -160,6 +160,10 @@ test('dashboard user memakai kartu responsif dengan panel buka tutup', function 
     expect($sections->item(0)->getAttribute('data-section'))->toBe('kas-dompet')
         ->and($sections->item(2)->getAttribute('data-section'))->toBe('transaksi')
         ->and($sections->item(3)->getAttribute('data-section'))->toBe('langganan');
+    expect($sections->item(0)->getAttribute('class'))
+        ->toContain('lg:col-span-6')
+        ->and($sections->item(1)->getAttribute('class'))
+        ->toContain('lg:col-span-6');
     $table = $xpath->query('.//section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
     $membership = $xpath->query('.//section[@*[name()="wire:key"]="dashboard-langganan"]', $grid)->item(0);
     expect($table->getAttribute('class'))->toContain('lg:col-span-12')

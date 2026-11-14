@@ -415,7 +415,10 @@ class TransaksiService
 
         $dampak = $this->dampak($transaksi);
         BukuKas::withoutGlobalScopes()->whereKey($transaksi->buku_kas_id)->decrement('saldo', $dampak);
-        SumberDana::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->sumber_dana_id)->decrement('saldo', $dampak);
+
+        if ($transaksi->tipe_transfer !== 'buku_kas') {
+            SumberDana::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->sumber_dana_id)->decrement('saldo', $dampak);
+        }
     }
 
     private function terapkanDampak(Transaksi $transaksi): void
@@ -426,7 +429,10 @@ class TransaksiService
 
         $dampak = $this->dampak($transaksi);
         BukuKas::withoutGlobalScopes()->whereKey($transaksi->buku_kas_id)->increment('saldo', $dampak);
-        SumberDana::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->sumber_dana_id)->increment('saldo', $dampak);
+
+        if ($transaksi->tipe_transfer !== 'buku_kas') {
+            SumberDana::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->sumber_dana_id)->increment('saldo', $dampak);
+        }
     }
 
     private function dampak(Transaksi $transaksi): int

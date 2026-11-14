@@ -62,9 +62,8 @@
                     data-section="{{ $key }}"
                     @class([
                         'dashboard-card min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white [--accent:#f59e0b] [&:is(.dark_*)]:border-gray-800 [&:is(.dark_*)]:bg-gray-900 [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2',
-                        'lg:col-span-6' => in_array($key, ['kas-dompet', 'utang-piutang'], true),
+                        'lg:col-span-6' => in_array($key, ['kas-dompet', 'utang-piutang', 'langganan'], true),
                         'lg:col-span-12' => $key === 'transaksi',
-                        'lg:col-span-6' => $key === 'langganan',
                     ])
                 >
                     <h2 class="w-full text-base font-semibold">
