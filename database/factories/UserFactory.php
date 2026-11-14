@@ -24,9 +24,11 @@ class UserFactory extends Factory
     public function definition(): array
     {
         $type = fake()->randomElement(['premium', 'reguler']);
+        $email = fake()->safeEmail();
+
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => Str::uuid().'@'.Str::after($email, '@'),
             'hp' => '08' . rand(100000000, 999999999),
             'penggunaan' => 'Pribadi/Keluarga',
             'email_verified_at' => now(),
