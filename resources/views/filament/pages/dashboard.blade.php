@@ -187,6 +187,11 @@
                                 $itemKey === 'kas' && ! $hitungTabungan => 'Tersebar di ' . $data->count() . ' kas (saldo tabungan dipisahkan)',
                                 default => 'Tersebar di ' . $data->count() . ' kas',
                             };
+                            $hasSearch = $data->count() > 5;
+                            $searchPlaceholder = $itemKey === 'kas' ? 'Cari kas...' : 'Cari sumber dana...';
+                            $searchAriaLabel = $itemKey === 'kas' ? 'Cari kas' : 'Cari sumber dana';
+                            $searchTestId = $itemKey === 'kas' ? 'cari-kas' : 'cari-sumber-dana';
+                            $searchNotFound = $itemKey === 'kas' ? 'Kas tidak ditemukan.' : 'Sumber dana tidak ditemukan.';
                         @endphp
                         <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">{{ $eyebrow }}</p>
                         @if ($pemeriksaanSaldo && ! $pemeriksaanSaldo['seimbang'])
@@ -194,17 +199,64 @@
                         @endif
                         <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $totalSaldo, 0, ',', '.') }}</p>
                         <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">{{ $caption }}</p>
-                        <dl class="dashboard-list mt-3">
-                            @forelse ($data as $item)
-                                @php
-                                    $filter = $itemKey === 'kas'
-                                        ? ['filter_buku_kas' => $item->id]
-                                        : ['filter_dompet' => $item->id];
-                                    $filterUrl = \App\Filament\Resources\TransaksiResource::getUrl('index', $filter);
-                                    $filterLabel = $itemKey === 'kas' ? 'Kas' : 'Sumber Dana';
-                                    $itemName = $itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet;
-                                @endphp
-                                <div class="dashboard-row flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[color:var(--dash-line)] py-2 last:border-b-0 last:pb-0 [&_dt]:min-w-0 [&_dt]:flex-[1_1_7rem] [&_dt]:text-sm [&_dt]:font-medium [&_dt]:[overflow-wrap:anywhere] [&_dd]:max-w-full [&_dd]:text-sm [&_dd]:font-[650] [&_dd]:tabular-nums [&_dd]:[overflow-wrap:anywhere] [&_.dashboard-caption]:text-[.7rem] [&_.dashboard-caption]:font-normal">
+                        <div
+                            @if ($hasSearch)
+                                x-data="{
+                                    search: '',
+                                    items: {{ \Illuminate\Support\Js::from($data->map(fn ($item) => mb_strtolower($itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet))->values()) }},
+                                    get hasMatches() {
+                                        if (!this.search.trim()) return true;
+                                        const query = this.search.toLowerCase().trim();
+                                        return this.items.some(name => name.includes(query));
+                                    }
+                                }"
+                            @endif
+                        >
+                            @if ($hasSearch)
+                                <div class="relative mt-3">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500">
+                                        <x-filament::icon icon="heroicon-o-magnifying-glass" class="size-4" aria-hidden="true" />
+                                    </div>
+                                    <input
+                                        x-ref="searchInput"
+                                        type="search"
+                                        x-model="search"
+                                        x-on:keydown.escape="search = ''"
+                                        placeholder="{{ $searchPlaceholder }}"
+                                        aria-label="{{ $searchAriaLabel }}"
+                                        data-testid="{{ $searchTestId }}"
+                                        class="block w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-8 text-xs text-slate-900 placeholder-slate-400 transition focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 dark:focus:border-teal-500 dark:focus:ring-teal-500 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+                                    />
+                                    <button
+                                        type="button"
+                                        x-cloak
+                                        x-show="search.length > 0"
+                                        x-on:click="search = ''; $refs.searchInput.focus()"
+                                        aria-label="{{ $itemKey === 'kas' ? 'Hapus pencarian kas' : 'Hapus pencarian sumber dana' }}"
+                                        data-testid="clear-{{ $searchTestId }}"
+                                        class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 dark:focus-visible:text-slate-300"
+                                    >
+                                        <x-filament::icon icon="heroicon-m-x-mark" class="size-4" aria-hidden="true" />
+                                    </button>
+                                </div>
+                            @endif
+                            <dl class="dashboard-list mt-3">
+                                @forelse ($data as $item)
+                                    @php
+                                        $filter = $itemKey === 'kas'
+                                            ? ['filter_buku_kas' => $item->id]
+                                            : ['filter_dompet' => $item->id];
+                                        $filterUrl = \App\Filament\Resources\TransaksiResource::getUrl('index', $filter);
+                                        $filterLabel = $itemKey === 'kas' ? 'Kas' : 'Sumber Dana';
+                                        $itemName = $itemKey === 'kas' ? $item->nama_buku : $item->nama_dompet;
+                                    @endphp
+                                    <div
+                                        class="dashboard-row flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[color:var(--dash-line)] py-2 last:border-b-0 last:pb-0 [&_dt]:min-w-0 [&_dt]:flex-[1_1_7rem] [&_dt]:text-sm [&_dt]:font-medium [&_dt]:[overflow-wrap:anywhere] [&_dd]:max-w-full [&_dd]:text-sm [&_dd]:font-[650] [&_dd]:tabular-nums [&_dd]:[overflow-wrap:anywhere] [&_.dashboard-caption]:text-[.7rem] [&_.dashboard-caption]:font-normal"
+                                        data-item-name="{{ mb_strtolower($itemName) }}"
+                                        @if ($hasSearch)
+                                            x-show="!search.trim() || $el.dataset.itemName.includes(search.toLowerCase().trim())"
+                                        @endif
+                                    >
                                     <dt>
                                         <a
                                             href="{{ $filterUrl }}"
@@ -267,7 +319,11 @@
                             @empty
                                 <p class="dashboard-empty rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">Belum ada {{ $itemKey === 'dompet' ? 'sumber dana' : $itemKey }}.</p>
                             @endforelse
+                            @if ($hasSearch)
+                                <p x-cloak x-show="!hasMatches" class="dashboard-empty mt-2 rounded-lg bg-[var(--dash-bg)] p-3 text-center text-sm text-[color:var(--dash-muted)]">{{ $searchNotFound }}</p>
+                            @endif
                         </dl>
+                    </div>
                     @elseif (in_array($itemKey, ['utang', 'piutang']))
                         <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">Total sisa {{ $itemKey }}</p><p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $data['total'], 0, ',', '.') }}</p>
                         <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">3 catatan dengan pembaruan terbaru</p>

@@ -427,3 +427,65 @@ test('informasi akses transaksi membedakan alasan dan hilang saat akses aktif', 
     $user->role = 'admin';
     expect(TransaksiResource::alasanTransaksiTidakDapatDikelola($record))->toBeNull();
 });
+
+test('dashboard user menampilkan input cari kas dan sumber dana hanya jika masing-masing memiliki lebih dari lima data', function () {
+    $user = User::factory()->create();
+
+    // 1. Kondisi awal: 5 kas dan 5 sumber dana (keduanya <= 5).
+    BukuKas::factory()->count(5)->create(['user_id' => $user->id]);
+    Dompet::factory()->count(5)->create(['user_id' => $user->id]);
+
+    $html = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+    $xpath = new DOMXPath($dom);
+
+    expect($xpath->query('//input[@data-testid="cari-kas"]')->length)->toBe(0)
+        ->and($xpath->query('//input[@data-testid="cari-sumber-dana"]')->length)->toBe(0);
+
+    // 2. Tambah 1 kas sehingga kas berjumlah 6 (> 5), sumber dana tetap 5 (<= 5).
+    BukuKas::factory()->create(['user_id' => $user->id, 'nama_buku' => 'Kas Tabungan Khusus']);
+
+    $htmlKas = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
+    $domKas = new DOMDocument;
+    @$domKas->loadHTML('<?xml encoding="utf-8" ?>'.$htmlKas);
+    $xpathKas = new DOMXPath($domKas);
+
+    $inputKas = $xpathKas->query('//input[@data-testid="cari-kas"]');
+    expect($inputKas->length)->toBe(1)
+        ->and($inputKas->item(0)->getAttribute('placeholder'))->toBe('Cari kas...')
+        ->and($inputKas->item(0)->getAttribute('aria-label'))->toBe('Cari kas')
+        ->and($xpathKas->query('//button[@data-testid="clear-cari-kas"]')->length)->toBe(1)
+        ->and($xpathKas->query('//button[@data-testid="clear-cari-kas"]')->item(0)->getAttribute('aria-label'))->toBe('Hapus pencarian kas')
+        ->and($xpathKas->query('//input[@data-testid="cari-sumber-dana"]')->length)->toBe(0)
+        ->and($xpathKas->query('//button[@data-testid="clear-cari-sumber-dana"]')->length)->toBe(0);
+
+    // 3. Tambah 1 sumber dana sehingga sumber dana berjumlah 6 (> 5), kas tetap 6 (> 5).
+    Dompet::factory()->create(['user_id' => $user->id, 'nama_dompet' => 'Rekening Tabungan']);
+
+    $htmlSemua = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
+    $domSemua = new DOMDocument;
+    @$domSemua->loadHTML('<?xml encoding="utf-8" ?>'.$htmlSemua);
+    $xpathSemua = new DOMXPath($domSemua);
+
+    $inputKasKedua = $xpathSemua->query('//input[@data-testid="cari-kas"]');
+    $inputSumberDana = $xpathSemua->query('//input[@data-testid="cari-sumber-dana"]');
+
+    expect($inputKasKedua->length)->toBe(1)
+        ->and($xpathSemua->query('//button[@data-testid="clear-cari-kas"]')->length)->toBe(1)
+        ->and($inputSumberDana->length)->toBe(1)
+        ->and($xpathSemua->query('//button[@data-testid="clear-cari-sumber-dana"]')->length)->toBe(1)
+        ->and($xpathSemua->query('//button[@data-testid="clear-cari-sumber-dana"]')->item(0)->getAttribute('aria-label'))->toBe('Hapus pencarian sumber dana')
+        ->and($inputSumberDana->item(0)->getAttribute('placeholder'))->toBe('Cari sumber dana...')
+        ->and($inputSumberDana->item(0)->getAttribute('aria-label'))->toBe('Cari sumber dana');
+
+    // Pastikan setiap row kas dan sumber dana memiliki data-item-name untuk pencarian Alpine.
+    $featureKas = $xpathSemua->query('//div[@data-dashboard-item="kas"]')->item(0);
+    $rowsKas = $xpathSemua->query('.//div[contains(@class,"dashboard-row")][@data-item-name]', $featureKas);
+    expect($rowsKas->length)->toBe(6);
+
+    $featureDompet = $xpathSemua->query('//div[@data-dashboard-item="dompet"]')->item(0);
+    $rowsDompet = $xpathSemua->query('.//div[contains(@class,"dashboard-row")][@data-item-name]', $featureDompet);
+    expect($rowsDompet->length)->toBe(6);
+});
+
