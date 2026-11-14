@@ -32,7 +32,7 @@
         "page": "Dashboard",
         "category": "Ringkasan",
         "title": "Membaca dan mengatur dashboard",
-        "intro": "Dashboard merangkum Kas & Sumber Dana, Utang & Piutang, lima transaksi terbaru, serta masa aktif langganan dalam kartu yang dapat dibuka dan ditutup. Pada ponsel, hanya kartu Kas & Sumber Dana yang terbuka saat halaman dimuat; di layar lebar semua kartu terbuka. Kartu yang ditutup tetap menampilkan ringkasan, sedangkan tabel transaksi memakai jarak yang ringkas agar lebih banyak informasi terlihat.",
+        "intro": "Dashboard merangkum Kas & Sumber Dana, Utang & Piutang, lima transaksi terbaru, serta masa aktif langganan dalam kartu yang dapat dibuka dan ditutup. Saat halaman dimuat, secara default semua kartu dalam keadaan tertutup dan tetap menampilkan ringkasan, sedangkan tabel transaksi memakai jarak yang ringkas agar lebih banyak informasi terlihat.",
         "steps": [
             "Buka Dashboard setelah login untuk memeriksa saldo serta ringkasan keuangan. Jika mengaktifkan Pemeriksaan keseimbangan saldo di Setting > Akun Saya, kartu Kas & Sumber Dana juga menampilkan apakah total saldo kas dan sumber dana seimbang.",
             "Gunakan tombol di judul kartu untuk membuka atau mentutup isinya; tombol Buka semua atau Tutup semua mengatur seluruh kartu sekaligus. Jika data kas atau sumber dana lebih dari 5, gunakan kolom pencarian pada masing-masing bagian untuk menyaring nama secara langsung. Gunakan Kelola pada bagian yang sesuai untuk membuka daftarnya. Klik nama atau saldo kas/sumber dana untuk membuka daftar transaksi yang sudah difilter sesuai pilihan. Di kartu Transaksi, periksa ringkasan transaksi pada layar ponsel, lalu gunakan Tambah atau Lihat lengkap.",

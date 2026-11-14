@@ -25,14 +25,11 @@
         <div
             wire:key="dashboard-cards-{{ md5(json_encode($sections)) }}"
             x-data="{
-                open: (() => {
-                    const wide = window.matchMedia('(min-width: 768px)').matches;
-                    return {
-                        @foreach ($sections as $section)
-                            @js($section['key']): wide || @js($section['key']) === 'kas-dompet'@if (! $loop->last),@endif
-                        @endforeach
-                    };
-                })(),
+                open: {
+                    @foreach ($sections as $section)
+                        @js($section['key']): false{{ ! $loop->last ? ',' : '' }}
+                    @endforeach
+                },
                 get anyOpen() { return Object.values(this.open).some(Boolean) },
                 toggleAll() {
                     const value = ! this.anyOpen;
@@ -49,7 +46,7 @@
                         class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-teal-600 hover:text-teal-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600 [&:is(.dark_*)]:text-teal-400 [&:is(.dark_*)]:hover:text-teal-300"
                     >
                         <x-filament::icon icon="heroicon-o-chevron-down" class="size-4 transition-transform" x-bind:class="anyOpen ? 'rotate-180' : ''" aria-hidden="true" />
-                        <span x-text="anyOpen ? 'Tutup semua' : 'Buka semua'">Tutup semua</span>
+                        <span x-text="anyOpen ? 'Tutup semua' : 'Buka semua'">Buka semua</span>
                     </button>
                 </div>
             @endif
@@ -75,7 +72,7 @@
                             type="button"
                             id="dashboard-toggle-{{ $key }}"
                             aria-controls="dashboard-content-{{ $key }}"
-                            aria-expanded="{{ $key === 'kas-dompet' ? 'true' : 'false' }}"
+                            aria-expanded="false"
                             x-bind:aria-expanded="open['{{ $key }}']"
                             x-on:click="open['{{ $key }}'] = ! open['{{ $key }}']"
                             class="flex w-full items-center justify-between px-4 py-3.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-600 focus-visible:outline-offset-2 md:px-5 md:py-4"
