@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\PencarianTransaksi;
+use App\Filament\Resources\TransaksiResource;
 use App\Filament\Resources\TransaksiResource\Pages\ListTransaksis;
 use App\Models\BukuKas;
 use App\Models\ShareBuku;
@@ -10,7 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
-test('keterangan pencatat hanya tampil pada kas dengan riwayat kolaborasi akun', function (string $page) {
+test('keterangan pencatat tidak tampil pada transaksi yang dicatat pengguna yang sedang login', function (string $page) {
     Notification::fake();
     $user = createRegularUserWithBukuKas();
     $kasPribadi = $user->buku_kas()->firstOrFail();
@@ -31,11 +32,26 @@ test('keterangan pencatat hanya tampil pada kas dengan riwayat kolaborasi akun',
     }
     $component->assertCanSeeTableRecords($records);
     $loaded = $component->instance()->getTableRecords()->keyBy('id');
-    foreach ($records as $index => $record) {
-        $expected = $index === 0 ? null : 'Dicatat oleh: '.$user->name;
-        $component->assertTableColumnExists('tanggal', fn ($column): bool => $column->getDescriptionBelow() === $expected, $loaded[$record->id]);
+    foreach ($records as $record) {
+        $component->assertTableColumnExists('tanggal', fn ($column): bool => $column->getDescriptionBelow() === null, $loaded[$record->id]);
     }
 })->with([ListTransaksis::class, PencarianTransaksi::class, Dashboard::class]);
+
+test('keterangan pencatat tetap tampil untuk transaksi kolaborasi yang dicatat pengguna lain', function () {
+    $user = createRegularUserWithBukuKas();
+    $kas = BukuKas::factory()->create(['user_id' => $user->id]);
+    $share = ShareBuku::factory()->create(['buku_kas_id' => $kas->id]);
+    $share->delete();
+    $pencatat = User::factory()->create();
+    $transaksi = Transaksi::factory()->create([
+        'user_id' => $pencatat->id,
+        'buku_kas_id' => $kas->id,
+    ]);
+
+    $this->actingAs($user);
+
+    expect(TransaksiResource::keteranganPencatat($transaksi))->toBe('Dicatat oleh: '.$pencatat->name);
+});
 
 test('riwayat kolaborasi akun tetap tersimpan setelah kedaluwarsa dan pencabutan', function () {
     Notification::fake();

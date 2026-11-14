@@ -112,7 +112,38 @@
                                     <span class="font-bold">{{ $summary['active'] ? 'Premium aktif' : 'Reguler' }}</span>
                                 </span>
                             @else
-                                <span class="text-xs text-[color:var(--dash-muted)]">{{ $this->getTableRecords()->count() }} transaksi terbaru</span>
+                                @php $transaksiTerakhir = $this->getTableRecords()->first(); @endphp
+                                @if ($transaksiTerakhir)
+                                    @php
+                                        $kategoriLabel = \App\Filament\Resources\TransaksiResource::getKategoriLabel($transaksiTerakhir) ?: 'Tanpa kategori';
+                                        $warna = \App\Filament\Resources\TransaksiResource::getWarnaTipeTransaksi($transaksiTerakhir->jenis, $transaksiTerakhir->tipe_transfer);
+                                        $pencatat = \App\Filament\Resources\TransaksiResource::keteranganPencatat($transaksiTerakhir);
+                                        $sumberDanaLabel = $transaksiTerakhir->labelDompetUntuk(auth()->user());
+                                        $namaKas = $transaksiTerakhir->buku_kas?->nama_buku ?? '-';
+                                    @endphp
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                                        <span class="font-semibold text-[color:var(--dash-muted)]">Terakhir:</span>
+                                        <span @class([
+                                            'inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset',
+                                            'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-500/30' => $warna === 'success',
+                                            'bg-rose-50 text-rose-700 ring-rose-600/20 dark:bg-rose-950/40 dark:text-rose-300 dark:ring-rose-500/30' => $warna === 'danger',
+                                            'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-500/30' => $warna === 'warning',
+                                            'bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-950/40 dark:text-sky-300 dark:ring-sky-500/30' => $warna === 'info',
+                                            'bg-slate-50 text-slate-700 ring-slate-600/20 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700' => ! in_array($warna, ['success', 'danger', 'warning', 'info'], true),
+                                        ])>{{ $transaksiTerakhir->jenis }}</span>
+                                        <span class="font-bold tabular-nums text-slate-900 dark:text-slate-100">{{ 'Rp '.number_format((float) $transaksiTerakhir->nominal, 0, ',', '.') }}</span>
+                                        <span class="text-[color:var(--dash-muted)]">·</span>
+                                        <span>{{ date('d M Y, H:i', strtotime($transaksiTerakhir->tanggal)) }}@if ($pencatat) <span class="text-[color:var(--dash-muted)]">({{ $pencatat }})</span>@endif</span>
+                                        <span class="text-[color:var(--dash-muted)]">·</span>
+                                        <span>Kas: <span class="font-medium text-slate-800 dark:text-slate-200">{{ $namaKas }}</span></span>
+                                        <span class="text-[color:var(--dash-muted)]">·</span>
+                                        <span>Sumber dana: <span class="font-medium text-slate-800 dark:text-slate-200">{{ $sumberDanaLabel }}</span></span>
+                                        <span class="text-[color:var(--dash-muted)]">·</span>
+                                        <span>Kategori: <span class="font-medium text-slate-800 dark:text-slate-200">{{ $kategoriLabel }}</span>@if ($transaksiTerakhir->deskripsi) <span class="text-[color:var(--dash-muted)]">({{ $transaksiTerakhir->deskripsi }})</span>@endif</span>
+                                    </div>
+                                @else
+                                    <span class="text-xs text-[color:var(--dash-muted)]">Belum ada transaksi</span>
+                                @endif
                             @endif
                         @endforeach
                         @if ($pemeriksaanSaldo)

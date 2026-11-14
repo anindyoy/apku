@@ -148,7 +148,7 @@ class TransaksiResource extends Resource
 
     public static function keteranganPencatat(Transaksi $record): ?string
     {
-        return $record->buku_kas?->pernah_dikolaborasikan
+        return $record->user_id !== auth()->id() && $record->buku_kas?->pernah_dikolaborasikan
             ? 'Dicatat oleh: '.($record->user?->name ?? '-')
             : null;
     }

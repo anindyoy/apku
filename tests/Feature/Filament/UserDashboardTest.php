@@ -279,6 +279,52 @@ test('dashboard user menghubungkan tombol kartu dengan panel konten', function (
     }
 });
 
+test('dashboard user menampilkan satu transaksi terakhir saat kartu transaksi ditutup', function () {
+    $user = User::factory()->create();
+    $kas = BukuKas::factory()->create(['user_id' => $user->id, 'nama_buku' => 'Kas Utama']);
+    $dompet = Dompet::factory()->create(['user_id' => $user->id, 'nama_dompet' => 'BCA Pribadi']);
+    $kategori = Kategori::factory()->untukKas($kas)->create(['user_id' => $user->id, 'nama' => 'Makan Siang']);
+
+    // Saat belum ada transaksi
+    $htmlKosong = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
+    $domKosong = new DOMDocument;
+    @$domKosong->loadHTML('<?xml encoding="utf-8" ?>'.$htmlKosong);
+    $xpathKosong = new DOMXPath($domKosong);
+    $cardTransaksiKosong = $xpathKosong->query('//section[@data-section="transaksi"]')->item(0);
+    $summaryKosong = $xpathKosong->query('./div[@x-cloak and not(@id)]', $cardTransaksiKosong)->item(0);
+    expect(trim($summaryKosong->textContent))->toContain('Belum ada transaksi');
+
+    // Buat transaksi
+    Transaksi::withoutEvents(fn () => Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $kas->id,
+        'sumber_dana_id' => $dompet->id,
+        'kategori_id' => $kategori->id,
+        'nominal' => 35000,
+        'jenis' => 'Pengeluaran',
+        'deskripsi' => 'Nasi Padang',
+        'tanggal' => '2026-11-14 12:30:00',
+    ]));
+
+    $htmlAda = Livewire::actingAs($user)->test(Dashboard::class)->assertSuccessful()->html();
+    $domAda = new DOMDocument;
+    @$domAda->loadHTML('<?xml encoding="utf-8" ?>'.$htmlAda);
+    $xpathAda = new DOMXPath($domAda);
+    $cardTransaksiAda = $xpathAda->query('//section[@data-section="transaksi"]')->item(0);
+    $summaryAda = $xpathAda->query('./div[@x-cloak and not(@id)]', $cardTransaksiAda)->item(0);
+    $text = trim($summaryAda->textContent);
+
+    expect($text)->toContain('Terakhir:')
+        ->toContain('Pengeluaran')
+        ->toContain('Rp 35.000')
+        ->toContain('14 Nov 2026, 12:30')
+        ->toContain('Kas: Kas Utama')
+        ->toContain('Sumber dana: BCA Pribadi')
+        ->toContain('Kategori: Makan Siang')
+        ->toContain('(Nasi Padang)')
+        ->not->toContain('transaksi terbaru');
+});
+
 test('dashboard user tombol tambah membuka form dan menyimpan transaksi', function () {
     $user = User::factory()->create();
     $kas = BukuKas::factory()->create(['user_id' => $user->id]);
