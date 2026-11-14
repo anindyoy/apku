@@ -155,10 +155,15 @@ test('dashboard user memakai kartu responsif dengan panel buka tutup', function 
     $xpath = new DOMXPath($dom);
     $grid = $xpath->query('//div[contains(@class,"dashboard-cards")]')->item(0);
     expect($grid)->not->toBeNull();
-    expect($xpath->query('.//section[@data-section]', $grid)->length)->toBe(4);
-    expect($xpath->query('.//section[@data-section]', $grid)->item(0)->getAttribute('data-section'))->toBe('kas-dompet');
+    $sections = $xpath->query('.//section[@data-section]', $grid);
+    expect($sections->length)->toBe(4);
+    expect($sections->item(0)->getAttribute('data-section'))->toBe('kas-dompet')
+        ->and($sections->item(2)->getAttribute('data-section'))->toBe('transaksi')
+        ->and($sections->item(3)->getAttribute('data-section'))->toBe('langganan');
     $table = $xpath->query('.//section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
-    expect($table->getAttribute('class'))->toContain('lg:col-span-8');
+    $membership = $xpath->query('.//section[@*[name()="wire:key"]="dashboard-langganan"]', $grid)->item(0);
+    expect($table->getAttribute('class'))->toContain('lg:col-span-12')
+        ->and($membership->getAttribute('class'))->toContain('lg:col-span-6');
     expect($table->getAttribute('class'))->toContain( '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
     expect($xpath->query('.//button[starts-with(@id,"dashboard-toggle-")]', $grid)->length)->toBe(4);
     foreach ($xpath->query('.//section[@data-section]', $grid) as $card) {
@@ -535,4 +540,3 @@ test('dashboard user menampilkan input cari kas dan sumber dana hanya jika masin
     $rowsDompet = $xpathSemua->query('.//div[contains(@class,"dashboard-row")][@data-item-name]', $featureDompet);
     expect($rowsDompet->length)->toBe(6);
 });
-
