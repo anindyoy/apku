@@ -91,12 +91,26 @@ trait HasAuditSaldoAction
                                 KomponenNominal::terapkan(
                                     TextInput::make('saldo_riil')
                                         ->label('Saldo riil')
-                                        ->required()
-                                        ->helperText('Masukkan jumlah uang yang benar-benar tersedia di sumber dana ini, bukan saldo yang tercatat di APKu.')
+                                        ->required(fn(Get $get): bool => ! ((bool) $get('tampilkan_hitung_uang_kas')
+                                            && $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))))
+                                        ->disabled(fn(Get $get): bool => (bool) $get('tampilkan_hitung_uang_kas')
+                                            && $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
+                                        ->dehydrated()
+                                        ->helperText(fn(Get $get): string => (bool) $get('tampilkan_hitung_uang_kas')
+                                            && $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))
+                                            ? 'Saldo riil akan mengikuti total hitung uang kas.'
+                                            : 'Masukkan jumlah uang yang benar-benar tersedia di sumber dana ini, bukan saldo yang tercatat di APKu.')
                                         ->placeholder('Masukkan saldo yang benar-benar tersedia')
+                                        ->live(debounce: 300)
                                 )
                                     ->afterStateUpdated(function (mixed $state, Get $get, Set $set): mixed {
                                         if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
+                                            return null;
+                                        }
+
+                                        $totalPecahan = $this->totalUangDihitung($get('jumlah_pecahan') ?? []);
+
+                                        if ($totalPecahan !== null && $totalPecahan === KomponenNominal::bersihkanKeInteger($state)) {
                                             return null;
                                         }
 
@@ -113,23 +127,14 @@ trait HasAuditSaldoAction
                             ])->save()),
 
                         Section::make('Hitung uang kas')
-                            ->description('Jumlah pecahan akan mengisi saldo riil secara otomatis. Saldo riil juga dapat diisi secara manual.')
+                            ->description('Total hitung pecahan diterapkan ke saldo riil saat pencocokan disimpan. Matikan penghitung untuk mengisi saldo riil secara manual.')
                             ->hidden(fn(Get $get): bool => ! (bool) auth()->user()->tampilkan_hitung_uang_kas
                                 || ! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0)))
                             ->schema([
                                 ViewField::make('jumlah_pecahan')
                                     ->view('filament.forms.components.hitung-uang-kas')
                                     ->viewData(['kelompokPecahan' => self::PECAHAN_UANG])
-                                    ->default(fn(): array => $this->pecahanAwal())
-                                    ->live(debounce: 300)
-                                    ->afterStateUpdated(function (?array $state, Get $get, Set $set): void {
-                                        if (! $this->dompetMendukungHitungUang((int) ($get('dompet_id') ?? 0))) {
-                                            return;
-                                        }
-
-                                        $total = $this->totalUangDihitung($state ?? []);
-                                        $set('saldo_riil', $total ?? (int) $get('saldo_aplikasi'));
-                                    }),
+                                    ->default(fn(): array => $this->pecahanAwal()),
                             ])
                             ->columnSpanFull()
                             ->compact()
@@ -185,16 +190,28 @@ trait HasAuditSaldoAction
                         return $item;
                     }
 
-                    $total = $this->totalUangDihitung($jumlahPecahan ?? []);
+                    $hitungKasAktif = (bool) ($item['tampilkan_hitung_uang_kas'] ?? false)
+                        || (bool) auth()->user()->tampilkan_hitung_uang_kas;
+                    $item['tampilkan_hitung_uang_kas'] = $hitungKasAktif;
 
-                    if ($total !== null) {
-                        $item['saldo_riil'] = $total;
+                    if (! $hitungKasAktif) {
+                        unset($item['jumlah_pecahan']);
+
+                        return $item;
                     }
 
+                    $item['saldo_riil'] = $this->totalUangDihitung($jumlahPecahan ?? []) ?? 0;
                     unset($item['jumlah_pecahan']);
 
                     return $item;
                 }, $data['rincian']);
+
+                $sumberDanaHitungKas = collect($data['rincian'])
+                    ->filter(fn(array $item): bool => (bool) ($item['tampilkan_hitung_uang_kas'] ?? false)
+                        && $this->dompetMendukungHitungUang((int) ($item['dompet_id'] ?? 0)))
+                    ->pluck('dompet_id')
+                    ->map(fn($id): int => (int) $id)
+                    ->all();
 
                 app(AuditSaldoDompetService::class)->simpan(
                     auth()->user(),
@@ -203,6 +220,7 @@ trait HasAuditSaldoAction
                     $data['catatan'],
                     $data['rincian'],
                     (bool) ($data['catat_penyesuaian'] ?? true),
+                    $sumberDanaHitungKas,
                 );
 
                 Notification::make()

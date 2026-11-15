@@ -35,7 +35,15 @@ class AuditSaldoDompetService
     /**
      * @param  array<int, array{dompet_id: int, saldo_aplikasi: int, saldo_riil: int, catatan?: string|null, jumlah_pecahan?: array<string, int|string|null>|null}>  $rincian
      */
-    public function simpan(User $user, BukuKas $bukuKas, mixed $tanggal, ?string $catatan, array $rincian, bool $catatPenyesuaian = true): AuditSaldoDompet
+    public function simpan(
+        User $user,
+        BukuKas $bukuKas,
+        mixed $tanggal,
+        ?string $catatan,
+        array $rincian,
+        bool $catatPenyesuaian = true,
+        array $sumberDanaWajibDisesuaikan = [],
+    ): AuditSaldoDompet
     {
         if ($bukuKas->user_id !== $user->id || ! $user->dapatMengelolaTransaksiPada($bukuKas)) {
             throw new AuthorizationException('Kas audit tidak dapat dikelola.');
@@ -45,7 +53,7 @@ class AuditSaldoDompetService
             throw ValidationException::withMessages(['rincian' => 'Minimal satu sumber dana harus diaudit.']);
         }
 
-        $proses = function () use ($user, $bukuKas, $tanggal, $catatan, $rincian, $catatPenyesuaian): AuditSaldoDompet {
+        $proses = function () use ($user, $bukuKas, $tanggal, $catatan, $rincian, $catatPenyesuaian, $sumberDanaWajibDisesuaikan): AuditSaldoDompet {
             $idSumberDana = collect($rincian)->pluck('dompet_id')->map(fn ($id): int => (int) $id);
 
             if ($idSumberDana->duplicates()->isNotEmpty()) {
@@ -125,7 +133,7 @@ class AuditSaldoDompetService
 
                 $selisihAkhir = $saldoRiilAkhir - (int) $record->saldo;
 
-                if ($selisihAkhir === 0 || ! $catatPenyesuaian) {
+                if ($selisihAkhir === 0 || (! $catatPenyesuaian && ! in_array($record->id, $sumberDanaWajibDisesuaikan, true))) {
                     continue;
                 }
 

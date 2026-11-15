@@ -318,7 +318,7 @@ test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () 
                     'dompet_id' => $tunai->id,
                     'nama_dompet' => $tunai->nama_dompet,
                     'saldo_aplikasi' => 500000,
-                    'saldo_riil' => 500000,
+                    'saldo_riil' => 999999,
                     'tampilkan_hitung_uang_kas' => true,
                     'jumlah_pecahan' => [
                         'kertas_100000' => 2,
@@ -334,6 +334,166 @@ test('hasil hitung pecahan menjadi saldo riil saat audit disimpan', function () 
 
     expect(AuditSaldoDompet::firstOrFail()->detail->firstOrFail()->saldo_riil)->toBe(203500)
         ->and($tunai->fresh()->saldo)->toBe(203500);
+});
+
+test('hitung kas aktif memakai nol saat semua pecahan kosong dan mengabaikan saldo riil manual', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
+    $user->update(['tampilkan_hitung_uang_kas' => true]);
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->callAction('auditSaldo', data: [
+            'buku_kas_id' => $bukuKas->id,
+            'tanggal' => now(),
+            'catatan' => 'Hitung kas kosong',
+            'rincian' => [[
+                'dompet_id' => $tunai->id,
+                'nama_dompet' => $tunai->nama_dompet,
+                'saldo_aplikasi' => 500000,
+                'saldo_riil' => 999999,
+                'tampilkan_hitung_uang_kas' => true,
+                'jumlah_pecahan' => [],
+            ]],
+        ])
+        ->assertHasNoActionErrors();
+
+    expect(AuditSaldoDompet::firstOrFail()->detail->firstOrFail()->saldo_riil)->toBe(0)
+        ->and($tunai->fresh()->saldo)->toBe(0);
+});
+
+test('hitung kas tetap menyesuaikan saldo aplikasi saat saklar transaksi dimatikan', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
+    $user->update(['tampilkan_hitung_uang_kas' => true]);
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->callAction('auditSaldo', data: [
+            'buku_kas_id' => $bukuKas->id,
+            'tanggal' => now(),
+            'catatan' => 'Hitung kas dengan saklar mati',
+            'catat_penyesuaian' => false,
+            'rincian' => [[
+                'dompet_id' => $tunai->id,
+                'nama_dompet' => $tunai->nama_dompet,
+                'saldo_aplikasi' => 500000,
+                'saldo_riil' => 999999,
+                'tampilkan_hitung_uang_kas' => true,
+                'jumlah_pecahan' => ['kertas_100000' => 2],
+            ], [
+                'dompet_id' => $bank->id,
+                'nama_dompet' => $bank->nama_dompet,
+                'saldo_aplikasi' => 500000,
+                'saldo_riil' => 400000,
+            ]],
+        ])
+        ->assertHasNoActionErrors();
+
+    expect(AuditSaldoDompet::firstOrFail()->detail->firstOrFail()->saldo_riil)->toBe(200000)
+        ->and($tunai->fresh()->saldo)->toBe(200000)
+        ->and($bank->fresh()->saldo)->toBe(500000)
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(1);
+});
+
+test('hitung kas aktif memakai preferensi tersimpan jika nilai toggle tidak terkirim', function () {
+    ['user' => $user, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->mountAction('auditSaldo')
+        ->set('mountedActions.0.data.rincian', [
+            [
+                'dompet_id' => $tunai->id,
+                'nama_sumber_dana' => $tunai->nama_dompet,
+                'saldo_aplikasi' => $tunai->saldo,
+                'saldo_riil' => $tunai->saldo,
+                'jumlah_pecahan' => [],
+            ],
+            [
+                'dompet_id' => $bank->id,
+                'nama_sumber_dana' => $bank->nama_dompet,
+                'saldo_aplikasi' => $bank->saldo,
+                'saldo_riil' => $bank->saldo,
+            ],
+        ])
+        ->set('mountedActions.0.data.rincian.0.tampilkan_hitung_uang_kas', true)
+        ->set('mountedActions.0.data.rincian.0.jumlah_pecahan.kertas_100000', 2)
+        ->set('mountedActions.0.data.rincian.0.tampilkan_hitung_uang_kas', null);
+
+    $user->update(['tampilkan_hitung_uang_kas' => true]);
+
+    $komponen
+        ->set('mountedActions.0.data.catat_penyesuaian', false)
+        ->callMountedAction()
+        ->assertHasNoActionErrors();
+
+    expect(AuditSaldoDompet::firstOrFail()->detail->firstOrFail()->saldo_riil)->toBe(200000)
+        ->and($tunai->fresh()->saldo)->toBe(200000)
+        ->and($bank->fresh()->saldo)->toBe(500000);
+});
+
+test('form hitung kas yang diisi bertahap mengubah saldo aplikasi saat disimpan', function () {
+    ['user' => $user, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->mountAction('auditSaldo')
+        ->set('mountedActions.0.data.rincian', [
+            [
+                'dompet_id' => $tunai->id,
+                'nama_sumber_dana' => $tunai->nama_dompet,
+                'saldo_aplikasi' => $tunai->saldo,
+                'saldo_riil' => $tunai->saldo,
+                'jumlah_pecahan' => [],
+            ],
+            [
+                'dompet_id' => $bank->id,
+                'nama_sumber_dana' => $bank->nama_dompet,
+                'saldo_aplikasi' => $bank->saldo,
+                'saldo_riil' => $bank->saldo,
+            ],
+        ])
+        ->set('mountedActions.0.data.rincian.0.tampilkan_hitung_uang_kas', true)
+        ->set('mountedActions.0.data.rincian.0.jumlah_pecahan.kertas_100000', 2)
+        ->callMountedAction()
+        ->assertHasNoActionErrors();
+
+    expect($tunai->fresh()->saldo)->toBe(200000)
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(1);
+});
+
+test('input saldo riil dinonaktifkan hanya untuk sumber dana tunai saat penghitung aktif', function () {
+    ['user' => $user] = buatDataAuditSaldo();
+    $user->update(['tampilkan_hitung_uang_kas' => true]);
+
+    $komponen = Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->mountAction('auditSaldo');
+    $namaSchema = $komponen->instance()->getMountedActionSchemaName();
+    $fieldSaldoRiil = collect($komponen->instance()->{$namaSchema}->getFlatFields(withHidden: true))
+        ->filter(fn ($field): bool => $field instanceof \Filament\Forms\Components\TextInput
+            && $field->getName() === 'saldo_riil')
+        ->values();
+
+    expect($fieldSaldoRiil)->toHaveCount(2)
+        ->and($fieldSaldoRiil->map(fn ($field): bool => $field->isDisabled())->all())->toBe([true, false]);
+});
+
+test('penghitung pecahan menghitung lokal dengan Alpine dan memakai binding Livewire tertunda', function () {
+    $html = view('filament.forms.components.hitung-uang-kas', [
+        'kelompokPecahan' => [
+            'Uang Kertas' => ['kertas_100000' => 100000],
+        ],
+        'getStatePath' => fn (): string => 'data.rincian.0.jumlah_pecahan',
+        'getState' => fn (): array => ['kertas_100000' => null],
+    ])->render();
+
+    expect($html)->toContain(
+        'x-model.number="pecahan[\'kertas_100000\']"',
+        'wire:model="data.rincian.0.jumlah_pecahan.kertas_100000"',
+        "saldoRiilPath: 'data.rincian.0.saldo_riil'",
+        'x-effect="$wire.set(saldoRiilPath, total(), false)"',
+        'this.denominasi.reduce((total, pecahan)',
+    )->not->toContain('$wire.', 'wire:ignore', 'jadwalkanSinkronisasi');
 });
 
 test('form audit menyembunyikan penghitung uang dari sumber dana non-Tunai', function () {
@@ -421,6 +581,7 @@ test('bagian uang logam pada penghitung pecahan tertutup secara default', functi
             'Uang Logam' => ['logam_1000' => 1000],
         ],
         'getStatePath' => fn (): string => 'data.rincian.0.jumlah_pecahan',
+        'getState' => fn (): array => ['kertas_1000' => null, 'logam_1000' => null],
     ])->render();
 
     expect($html)->toContain('uangLogamTerbuka: false', 'x-show="uangLogamTerbuka"', 'type="checkbox"', 'x-model="uangLogamTerbuka"', 'transform: translateX(')

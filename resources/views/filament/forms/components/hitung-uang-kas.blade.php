@@ -8,14 +8,16 @@
             ])->all())
         ->values()
         ->all();
+    $saldoRiilPath = str($getStatePath())->beforeLast('.')->append('.saldo_riil')->toString();
 @endphp
 
 <div
     class="space-y-3"
     x-id="['toggle-uang-logam']"
     x-data="{
-        pecahan: $wire.entangle(@js($getStatePath())).live,
+        pecahan: @js($getState() ?? []),
         denominasi: @js($daftarPecahan),
+        saldoRiilPath: @js($saldoRiilPath),
         uangLogamTerbuka: false,
         jumlah(kunci) {
             return Math.max(0, Number(this.pecahan?.[kunci]) || 0)
@@ -41,6 +43,7 @@
             )
         },
     }"
+    x-effect="$wire.set(saldoRiilPath, total(), false)"
 >
     <div class="text-sm font-semibold text-slate-800 dark:text-gray-100">💰 Hitung Uang Kas</div>
     <p class="text-sm text-slate-600 dark:text-gray-400">Masukkan jumlah lembar atau keping tiap pecahan. Total dihitung otomatis.</p>
@@ -110,6 +113,7 @@
                                 aria-label="Jumlah pecahan Rp {{ number_format($nominal, 0, ',', '.') }}"
                                 class="h-9 w-12 rounded-lg border border-slate-300 bg-white px-1 text-center text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
                                 x-model.number="pecahan[@js($kunci)]"
+                                wire:model="{{ $getStatePath() }}.{{ $kunci }}"
                             >
                             <button
                                 type="button"
