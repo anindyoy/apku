@@ -80,7 +80,7 @@
         "title": "Filter dan pencarian transaksi",
         "intro": "Temukan catatan lama melalui filter periode atau pencarian transaksi global.",
         "steps": [
-            "Di daftar Transaksi, buka Filter transaksi yang awalnya tertutup, lalu pilih bulan, tahun, kas, atau sumber dana dari menu opsi. Opsi terpilih dan opsi yang diarahkan memakai latar teal dengan teks putih agar tetap terbaca pada tema terang maupun gelap. Tombol di kiri dan kanan periode berpindah ke bulan sebelum atau sesudahnya. Gunakan Reset filter untuk kembali ke pilihan awal.",
+            "Di daftar Transaksi, buka Filter transaksi yang awalnya tertutup. Pilih bulan dan tahun pada kontrol periode, sumber dana pada dropdown Semua Sumber Dana, atau kas pada dropdown Semua Kas tanpa label terpisah. Opsi terpilih dan opsi yang diarahkan memakai latar teal dengan teks putih agar tetap terbaca pada tema terang maupun gelap. Tombol di kiri dan kanan periode berpindah ke bulan sebelum atau sesudahnya. Gunakan Reset filter untuk kembali ke pilihan awal.",
             "Gunakan pencarian deskripsi untuk menemukan catatan pada daftar transaksi.",
             "Buka Pencarian Transaksi untuk mencari berdasarkan deskripsi, kategori, kas, sumber dana, jenis transaksi, atau nominal; persempit dengan filter yang tersedia. Di layar mobile, hasil memakai ringkasan jenis, nominal, kategori, dan tanggal.",
             "Periksa detail hasil, lalu gunakan Ubah atau Hapus jika Anda memiliki hak pengelolaan."

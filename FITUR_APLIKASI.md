@@ -229,7 +229,7 @@ Pengguna baru diarahkan ke form pengaturan awal 1 halaman sebelum menggunakan fi
 - Penanda visual pada ikon dan teks record: pemasukan berwarna hijau, pengeluaran berwarna merah, transfer kas berwarna biru, dan transfer sumber dana berwarna kuning.
 - Nama kategori pada daftar transaksi selalu ditampilkan dengan huruf awal kapital.
 - Tabel transaksi menggunakan lima kolom utama; informasi pencatat ditampilkan di bawah tanggal hanya pada kas yang sedang atau pernah dikolaborasikan dengan akun lain (termasuk setelah kedaluwarsa atau dicabut, tidak termasuk tautan publik) jika pencatat bukan pengguna yang sedang login, sedangkan sumber dana ditampilkan di bawah kas. Saat filter kas atau sumber dana aktif, saldo berjalan ditampilkan di bawah nominal.
-- Filter transaksi berdasarkan bulan, tahun, kas, dan sumber dana; kontrol menggunakan latar, teks, ikon, dan batas yang kontras pada tema terang maupun gelap. Pilihan bulan dan tahun dibuat lebih ringkas, chevron filter lebih jelas, dan tombol reset sejajar di kanan ketika ruang tersedia.
+- Filter transaksi berdasarkan bulan, tahun, kas, dan sumber dana; kontrol menggunakan latar, teks, ikon, dan batas yang kontras pada tema terang maupun gelap. Periode, sumber dana, lalu kas dan tombol reset disusun pada baris terpisah; pilihan kas tampil tanpa label terpisah. Pilihan bulan dan tahun dibuat lebih ringkas dan chevron filter lebih jelas.
 - Navigasi cepat ke periode sebelumnya atau berikutnya.
 - Pencarian berdasarkan deskripsi pada daftar transaksi.
 - Template XLSX dapat diunduh dari halaman transaksi sebagai acuan format data; baris contohnya memakai tanggal `YYYY-MM-DD` tanpa waktu.

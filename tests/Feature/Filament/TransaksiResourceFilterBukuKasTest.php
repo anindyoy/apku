@@ -12,16 +12,20 @@ use Livewire\Livewire;
 test('toolbar filter transaksi menampilkan kontrol periode buku kas dan reset', function () {
     $user = createRegularUserWithBukuKas();
 
-    Livewire::actingAs($user)
+    $html = Livewire::actingAs($user)
         ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->assertSeeText('Periode transaksi')
-        ->assertSeeText('Kas')
         ->assertSeeText('Kas Test')
         ->assertSeeText('Semua Kas')
         ->assertSeeText('Reset filter')
         ->assertSeeHtml('aria-label="Bulan sebelumnya"')
-        ->assertSeeHtml('aria-label="Bulan berikutnya"');
+        ->assertSeeHtml('aria-label="Bulan berikutnya"')
+        ->html();
+
+    expect($html)
+        ->not->toContain('<label for="buku-kas-filter"')
+        ->toContain('id="buku-kas-filter"');
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
