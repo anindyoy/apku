@@ -8,6 +8,7 @@
             ])->all())
         ->values()
         ->all();
+    $jumlahPecahanPath = $getStatePath();
     $saldoRiilPath = str($getStatePath())->beforeLast('.')->append('.saldo_riil')->toString();
 @endphp
 
@@ -17,6 +18,7 @@
     x-data="{
         pecahan: @js($getState() ?? []),
         denominasi: @js($daftarPecahan),
+        jumlahPecahanPath: @js($jumlahPecahanPath),
         saldoRiilPath: @js($saldoRiilPath),
         uangLogamTerbuka: false,
         jumlah(kunci) {
@@ -43,7 +45,7 @@
             )
         },
     }"
-    x-effect="$wire.set(saldoRiilPath, total(), false)"
+    x-effect="$wire.set(jumlahPecahanPath, pecahan, false); $wire.set(saldoRiilPath, total(), false)"
 >
     <div class="text-sm font-semibold text-slate-800 dark:text-gray-100">💰 Hitung Uang Kas</div>
     <p class="text-sm text-slate-600 dark:text-gray-400">Masukkan jumlah lembar atau keping tiap pecahan. Total dihitung otomatis.</p>

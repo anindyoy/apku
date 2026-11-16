@@ -491,7 +491,8 @@ test('penghitung pecahan menghitung lokal dengan Alpine dan memakai binding Live
         'x-model.number="pecahan[\'kertas_100000\']"',
         'wire:model="data.rincian.0.jumlah_pecahan.kertas_100000"',
         "saldoRiilPath: 'data.rincian.0.saldo_riil'",
-        'x-effect="$wire.set(saldoRiilPath, total(), false)"',
+        "jumlahPecahanPath: 'data.rincian.0.jumlah_pecahan'",
+        'x-effect="$wire.set(jumlahPecahanPath, pecahan, false); $wire.set(saldoRiilPath, total(), false)"',
         'this.denominasi.reduce((total, pecahan)',
     )->not->toContain('$wire.', 'wire:ignore', 'jadwalkanSinkronisasi');
 });
