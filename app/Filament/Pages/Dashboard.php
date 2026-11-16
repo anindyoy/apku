@@ -230,6 +230,7 @@ class Dashboard extends BaseDashboard implements HasTable
                 ->orderByDesc('tanggal')->orderByDesc('id')->limit(5))
             ->stackedOnMobile()
             ->columns(array_values($columns))
+            ->recordClasses(fn (Transaksi $record): string => 'transaction-record transaction-record--'.TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
             ->recordActions(TransaksiResource::transactionActions())
             ->paginated(false)
             ->recordUrl(null)

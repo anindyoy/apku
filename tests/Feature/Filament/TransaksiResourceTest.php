@@ -56,6 +56,64 @@ test('warna record transaksi dibedakan berdasarkan tipe transaksi', function () 
 })
     ->group('filament', 'transaksi', 'warna-tipe-transaksi');
 
+test('baris daftar transaksi memakai latar sesuai tipe dan teks hitam', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+
+    $transaksis = collect([
+        ['jenis' => 'Pemasukan', 'tipe_transfer' => null, 'tone' => 'success'],
+        ['jenis' => 'Pengeluaran', 'tipe_transfer' => null, 'tone' => 'danger'],
+        ['jenis' => 'Transfer Pemasukan', 'tipe_transfer' => 'buku_kas', 'tone' => 'info'],
+        ['jenis' => 'Transfer Pemasukan', 'tipe_transfer' => 'dompet', 'tone' => 'warning'],
+    ])->map(fn (array $data) => Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => $data['jenis'],
+        'tipe_transfer' => $data['tipe_transfer'],
+        'tanggal' => now(),
+    ]));
+
+    $component = Livewire::actingAs($user)
+        ->test(ListTransaksis::class)
+        ->assertCanSeeTableRecords($transaksis);
+    $html = $component->html();
+
+    expect($html)->toContain('fi-ac-link-action fi-link');
+
+    $component
+        ->assertTableActionHasColor('edit', 'info', $transaksis->first())
+        ->assertTableActionHasColor('delete', 'danger', $transaksis->first());
+
+    foreach (['success', 'danger', 'info', 'warning'] as $tone) {
+        expect($html)->toContain('transaction-record--'.$tone);
+    }
+
+    $styles = file_get_contents(resource_path('css/filament-toolbar.css'));
+    expect($styles)
+        ->toContain('html:not(.dark) .fi-ta-row.transaction-record > .fi-ta-cell:not(:has(.fi-ta-actions)) *')
+        ->not->toContain('.fi-ta-row.transaction-record > .fi-ta-cell *')
+        ->toContain('color: #000 !important;')
+        ->toContain('border-bottom: 1px solid rgb(100 116 139 / 0.35) !important;')
+        ->toContain('.fi-ta-row.transaction-record > .fi-ta-cell:has(.fi-ta-actions)')
+        ->toContain('border-bottom: 0 !important;')
+        ->toContain('.dark .fi-ta-row.transaction-record:nth-child(odd) > .fi-ta-cell')
+        ->toContain('.dark .fi-ta-row.transaction-record:nth-child(even) > .fi-ta-cell')
+        ->toContain('.dark .fi-ta-row.transaction-record--success > .fi-ta-cell:not(:has(.fi-ta-actions)) *')
+        ->toContain('.dark .fi-ta-row.transaction-record--danger > .fi-ta-cell:not(:has(.fi-ta-actions)) *')
+        ->toContain('.dark .fi-ta-row.transaction-record--info > .fi-ta-cell:not(:has(.fi-ta-actions)) *')
+        ->toContain('.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-warning')
+        ->toContain('.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-info')
+        ->toContain('.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-danger')
+        ->toContain('@media (max-width: 639px)')
+        ->toContain('padding: 0.3rem 0.55rem;')
+        ->toContain('font-size: 0.75rem;')
+        ->toContain('html:not(.dark) .fi-ta-row.transaction-record--success > .fi-ta-cell')
+        ->toContain('html:not(.dark) .fi-ta-row.transaction-record--danger > .fi-ta-cell')
+        ->toContain('html:not(.dark) .fi-ta-row.transaction-record--info > .fi-ta-cell')
+        ->toContain('html:not(.dark) .fi-ta-row.transaction-record--warning > .fi-ta-cell');
+})
+    ->group('filament', 'transaksi', 'warna-baris-transaksi');
+
 test('tabel transaksi merangkum pencatat dan dompet pada deskripsi kolom', function () {
     $user = createRegularUserWithBukuKas();
     $transaksi = Transaksi::factory()->create([

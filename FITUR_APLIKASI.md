@@ -33,6 +33,8 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Transaksi baru memengaruhi saldo secara default. Transfer kas hanya memengaruhi saldo kas asal dan tujuan, sedangkan sumber dana pencatatannya tidak berubah; pengecualian tanpa dampak saldo tersedia untuk import riwayat.
 - Mengubah dan menghapus transaksi sesuai hak akses.
 - Baris transaksi yang dapat dikelola membuka modal Ubah saat diklik; aksi Ubah pada baris tetap tersedia.
+- Pada mode terang, latar baris pada daftar Transaksi, Pencarian Transaksi, dan transaksi terbaru di Dashboard dibedakan menurut tipe: pemasukan hijau, pengeluaran merah, transfer kas biru, dan transfer sumber dana kuning; teks data hitam. Pada mode gelap, latar baris bergantian hitam dan abu-abu, sedangkan teks mengikuti warna tipe transaksi.
+- Tombol aksi transaksi tampil berbentuk pil dengan latar dan garis tepi berwarna sesuai aksi: peringatan kuning, Ubah biru, dan Hapus merah; garis tipis memisahkan setiap baris.
 - Saldo per baris pada daftar transaksi mengikuti saldo kas dan sumber dana tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
 - Filter periode, kas yang dapat diakses pengguna, dan sumber dana pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan. URL daftar transaksi dengan ID filter kas atau sumber dana yang tidak dapat diakses dialihkan ke `/admin/transaksi` tanpa filter.
 - Pada layar desktop, header dan isi tabel Transaksi, Pencarian Transaksi, serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Kas, Kategori, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.

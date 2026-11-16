@@ -119,6 +119,7 @@ class PencarianTransaksi extends Page implements HasTable
                     ->sortable()
                     ->color(fn (Transaksi $record): string => TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
             ])
+            ->recordClasses(fn (Transaksi $record): string => 'transaction-record transaction-record--'.TransaksiResource::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
             ->filters([
                 SelectFilter::make('jenis')
                     ->label('Tipe transaksi')

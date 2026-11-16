@@ -176,3 +176,123 @@
 .dark .transaction-mobile-summary[data-tone="warning"] .transaction-mobile-amount { color: #fbbf24; }
 .dark .transaction-mobile-summary[data-tone="info"] .transaction-mobile-type,
 .dark .transaction-mobile-summary[data-tone="info"] .transaction-mobile-amount { color: #60a5fa; }
+
+html:not(.dark) .fi-ta-row.transaction-record > .fi-ta-cell:not(:has(.fi-ta-actions)),
+html:not(.dark) .fi-ta-row.transaction-record > .fi-ta-cell:not(:has(.fi-ta-actions)) * {
+    color: #000 !important;
+}
+
+html:not(.dark) .fi-ta-row.transaction-record--success > .fi-ta-cell {
+    background-color: #dcfce7 !important;
+}
+
+html:not(.dark) .fi-ta-row.transaction-record--danger > .fi-ta-cell {
+    background-color: #ffe8e8 !important;
+}
+
+html:not(.dark) .fi-ta-row.transaction-record--info > .fi-ta-cell {
+    background-color: #d8eff8 !important;
+}
+
+html:not(.dark) .fi-ta-row.transaction-record--warning > .fi-ta-cell {
+    background-color: #fef3c7 !important;
+}
+
+html:not(.dark) .fi-ta-row.transaction-record--gray > .fi-ta-cell {
+    background-color: #f3f4f6 !important;
+}
+
+.dark .fi-ta-row.transaction-record:nth-child(odd) > .fi-ta-cell {
+    background-color: #111827 !important;
+}
+
+.dark .fi-ta-row.transaction-record:nth-child(even) > .fi-ta-cell {
+    background-color: #1f2937 !important;
+}
+
+.dark .fi-ta-row.transaction-record--success > .fi-ta-cell:not(:has(.fi-ta-actions)) * {
+    color: #4ade80 !important;
+}
+
+.dark .fi-ta-row.transaction-record--danger > .fi-ta-cell:not(:has(.fi-ta-actions)) * {
+    color: #f87171 !important;
+}
+
+.dark .fi-ta-row.transaction-record--info > .fi-ta-cell:not(:has(.fi-ta-actions)) * {
+    color: #60a5fa !important;
+}
+
+.dark .fi-ta-row.transaction-record--warning > .fi-ta-cell:not(:has(.fi-ta-actions)) * {
+    color: #fbbf24 !important;
+}
+
+.dark .fi-ta-row.transaction-record--gray > .fi-ta-cell:not(:has(.fi-ta-actions)) * {
+    color: #9ca3af !important;
+}
+
+.fi-ta-row.transaction-record > .fi-ta-cell {
+    border-bottom: 1px solid rgb(100 116 139 / 0.35) !important;
+}
+
+@media (max-width: 639px) {
+    .fi-ta-row.transaction-record > .fi-ta-cell {
+        border-bottom: 0 !important;
+    }
+
+    .fi-ta-row.transaction-record > .fi-ta-cell:has(.fi-ta-actions) {
+        border-bottom: 1px solid rgb(100 116 139 / 0.35) !important;
+    }
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-link {
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+@media (max-width: 639px) {
+    .fi-ta-row.transaction-record .fi-ta-actions .fi-link {
+        gap: 0.35rem;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.75rem;
+    }
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-warning {
+    color: #92400e !important;
+    background-color: #fef3c7 !important;
+    border-color: #f59e0b !important;
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-info {
+    color: #1d4ed8 !important;
+    background-color: #dbeafe !important;
+    border-color: #3b82f6 !important;
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-danger {
+    color: #b91c1c !important;
+    background-color: #fee2e2 !important;
+    border-color: #ef4444 !important;
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-warning:hover {
+    background-color: #fde68a !important;
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-info:hover {
+    background-color: #bfdbfe !important;
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-link.fi-color-danger:hover {
+    background-color: #fecaca !important;
+}
+
+.fi-ta-row.transaction-record .fi-ta-actions .fi-btn,
+.fi-ta-row.transaction-record .fi-ta-actions .fi-icon-btn {
+    background-color: rgb(255 255 255 / 0.65) !important;
+}

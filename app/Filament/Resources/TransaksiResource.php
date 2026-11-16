@@ -52,6 +52,7 @@ class TransaksiResource extends Resource
             ->searchPlaceholder('Cari deskripsi...')
             ->paginated([10, 25, 50])
             ->columns(static::transactionColumns())
+            ->recordClasses(fn (Transaksi $record): string => 'transaction-record transaction-record--'.static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
             ->defaultSort('tanggal', 'desc')
             ->recordUrl(null)
             ->recordAction('edit')
@@ -92,7 +93,7 @@ class TransaksiResource extends Resource
             Action::make('edit')
                 ->label('Ubah')
                 ->icon('heroicon-o-pencil-square')
-                ->color('warning')
+                ->color('info')
                 ->modalHeading('Ubah transaksi')
                 ->modalSubmitActionLabel('Simpan')
                 ->form(Transaksi::form())
@@ -105,6 +106,7 @@ class TransaksiResource extends Resource
                 ->action(fn (Transaksi $record, array $data): Transaksi => app(TransaksiService::class)->ubah(auth()->user(), $record, $data)),
 
             DeleteAction::make()
+                ->color('danger')
                 ->hidden(fn ($record): bool => auth()->user()->isAdmin()
                     || filled($record->audit_saldo_dompet_detail_id)
                     || $record->user_id !== auth()->id()
