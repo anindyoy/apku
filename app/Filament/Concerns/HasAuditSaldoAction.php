@@ -273,6 +273,7 @@ trait HasAuditSaldoAction
         }
 
         return SumberDana::query()
+            ->aktif()
             ->when($dompetTerpilih !== null, fn($query) => $query->whereKey($dompetTerpilih->id))
             ->get()
             ->filter(fn(SumberDana $dompet): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($dompet))

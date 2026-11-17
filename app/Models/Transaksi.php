@@ -324,6 +324,7 @@ class Transaksi extends Model
     public static function opsiSumberDanaYangDapatDikelola(): array
     {
         return OpsiSelectCache::ingat('sumber_dana', fn (): array => static::batasiSumberDanaYangDapatDikelola(SumberDana::query())
+            ->aktif()
             ->pluck('nama_dompet', 'id')
             ->all(), auth()->id(), 'dapat-dikelola');
     }
@@ -337,6 +338,7 @@ class Transaksi extends Model
     public static function opsiSumberDanaSumberTransfer(): array
     {
         return OpsiSelectCache::ingat('sumber_dana', fn (): array => SumberDana::query()
+            ->aktif()
             ->pluck('nama_dompet', 'id')
             ->all(), auth()->id(), 'aktif');
     }
@@ -350,6 +352,7 @@ class Transaksi extends Model
     public static function opsiBukuKasDefault(): array
     {
         return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::query()
+            ->aktif()
             ->urutanTabungan()
             ->pluck('nama_buku', 'id')
             ->all(), auth()->id());
@@ -361,6 +364,7 @@ class Transaksi extends Model
 
         return OpsiSelectCache::ingat('buku-kas', fn (): array => BukuKas::withoutGlobalScopes()
             ->where('user_id', $userId)
+            ->aktif()
             ->urutanTabungan()
             ->pluck('nama_buku', 'id')
             ->all(), $userId, 'milik-sendiri');
@@ -372,6 +376,7 @@ class Transaksi extends Model
             $opsiBukuKas = static::opsiBukuKasYangDapatDikelola();
             $idBukuKasMilikSendiri = BukuKas::query()
                 ->where('user_id', auth()->id())
+                ->aktif()
                 ->whereKey(array_keys($opsiBukuKas))
                 ->pluck('id')
                 ->all();
@@ -383,6 +388,7 @@ class Transaksi extends Model
     public static function opsiBukuKasYangDapatDikelola(): array
     {
         return OpsiSelectCache::ingat('buku-kas', fn (): array => static::batasiBukuKasYangDapatDikelola(BukuKas::query())
+            ->aktif()
             ->urutanTabungan()
             ->pluck('nama_buku', 'id')
             ->all(), auth()->id(), 'dapat-dikelola');

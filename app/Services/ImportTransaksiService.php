@@ -55,10 +55,12 @@ class ImportTransaksiService
     {
         $sumberDana = SumberDana::query()
             ->where('user_id', $user->id)
+            ->aktif()
             ->pluck('nama_dompet')
             ->all();
         $bukuKas = BukuKas::query()
             ->where('user_id', $user->id)
+            ->aktif()
             ->urutanTabungan()
             ->get(['id', 'nama_buku']);
         $kategoriPemasukan = Kategori::withoutGlobalScopes()
@@ -773,12 +775,14 @@ class ImportTransaksiService
     {
         if (blank(trim((string) $nama))) {
             $hasil = BukuKas::withoutGlobalScopes()->where('user_id', $user->id)
+                ->where('is_active', true)
                 ->where('is_default', true)->get();
 
             return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPada($hasil->first()) ? $hasil->first() : null;
         }
 
         $hasil = BukuKas::withoutGlobalScopes()->where('user_id', $user->id)
+            ->where('is_active', true)
             ->whereRaw('LOWER(nama_buku) = ?', [mb_strtolower(trim((string) $nama))])->get();
 
         return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPada($hasil->first()) ? $hasil->first() : null;
@@ -788,12 +792,14 @@ class ImportTransaksiService
     {
         if (blank(trim((string) $nama))) {
             $hasil = SumberDana::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
+                ->where('is_active', true)
                 ->where('is_default', true)->get();
 
             return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;
         }
 
         $hasil = SumberDana::withoutGlobalScopes()->where('user_id', $user->id)->whereNull('deleted_at')
+            ->where('is_active', true)
             ->whereRaw('LOWER(nama_dompet) = ?', [mb_strtolower(trim((string) $nama))])->get();
 
         return $hasil->count() === 1 && $user->dapatMengelolaTransaksiPadaDompet($hasil->first()) ? $hasil->first() : null;

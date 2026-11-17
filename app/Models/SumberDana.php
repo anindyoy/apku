@@ -22,10 +22,15 @@ class SumberDana extends Model
 
     protected $guarded = [];
 
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
     protected function casts(): array
     {
         return [
             'is_default' => 'boolean',
+            'is_active' => 'boolean',
             'jenis' => JenisSumberDana::class,
         ];
     }
@@ -41,6 +46,11 @@ class SumberDana extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeAktif(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
     }
 
     public function transaksi()

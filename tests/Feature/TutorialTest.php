@@ -93,6 +93,8 @@ test('tutorial kuota kas dan sumber dana menjelaskan batas serta masa aktif prem
 
     expect(implode(' ', $topik['kas']['steps']))->toContain('Kas utama selalu berada di urutan pertama')
         ->and(implode(' ', $topik['dompet']['steps']))->toContain('Sumber dana utama selalu berada di urutan pertama');
+    expect(implode(' ', $topik['kas']['steps']))->toContain('menonaktifkan kas non-utama bersaldo Rp0', 'mengaktifkannya kembali')
+        ->and(implode(' ', $topik['dompet']['steps']))->toContain('saldo Rp0 dapat dinonaktifkan', 'diaktifkan kembali');
 
     foreach (['kas', 'dompet'] as $id) {
         expect($topik[$id]['note'])->toContain('maksimal 2', 'sisa slot', 'aksi tambah disembunyikan', 'Setelah Premium berakhir', 'satu kalimat', 'Latar kuning', 'latar merah');
@@ -100,8 +102,10 @@ test('tutorial kuota kas dan sumber dana menjelaskan batas serta masa aktif prem
     }
 
     expect($topik['dompet']['note'])->toContain('minimal dua dan maksimal tiga kolom', 'satu atau dua sumber dana', 'tiga atau lebih');
+    expect($topik['kas']['note'])->toContain('kas nonaktif tidak dihitung dalam kuota', 'tidak diblokir oleh kuota')
+        ->and($topik['dompet']['note'])->toContain('Sumber dana nonaktif tidak memakai slot kuota', 'tidak diblokir oleh kuota');
     expect(implode(' ', $topik['dompet']['steps']))->toContain('nama sumber dana yang sudah dihapus boleh digunakan kembali');
-    expect($topik['kas']['note'])->toContain('Kas bersama tidak dihitung');
+    expect($topik['kas']['note'])->toContain('Kas bersama dan kas nonaktif tidak dihitung');
     $this->get('/tutorial')->assertSuccessful();
 });
 

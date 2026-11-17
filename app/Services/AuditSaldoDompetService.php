@@ -46,18 +46,23 @@ class AuditSaldoDompetService
     ): AuditSaldoDompet
     {
         if ($bukuKas->user_id !== $user->id || ! $user->dapatMengelolaTransaksiPada($bukuKas)) {
-            throw new AuthorizationException('Kas audit tidak dapat dikelola.');
+            throw new AuthorizationException('Kas tidak dapat digunakan untuk Cocokkan Saldo.');
         }
 
         if ($rincian === []) {
-            throw ValidationException::withMessages(['rincian' => 'Minimal satu sumber dana harus diaudit.']);
+            throw ValidationException::withMessages(['rincian' => 'Pilih minimal satu sumber dana untuk Cocokkan Saldo.']);
         }
 
         $proses = function () use ($user, $bukuKas, $tanggal, $catatan, $rincian, $catatPenyesuaian, $sumberDanaWajibDisesuaikan): AuditSaldoDompet {
             $idSumberDana = collect($rincian)->pluck('dompet_id')->map(fn ($id): int => (int) $id);
 
             if ($idSumberDana->duplicates()->isNotEmpty()) {
-                throw ValidationException::withMessages(['rincian' => 'Sumber dana audit tidak boleh duplikat.']);
+                throw ValidationException::withMessages(['rincian' => 'Sumber dana tidak boleh dipilih lebih dari sekali.']);
+            }
+
+            $kasTerkunci = BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
+            if (! $kasTerkunci->is_active || $kasTerkunci->user_id !== $user->id) {
+                throw new AuthorizationException('Kas tidak dapat digunakan untuk Cocokkan Saldo.');
             }
 
             $sumberDana = SumberDana::withoutGlobalScopes()
@@ -72,8 +77,6 @@ class AuditSaldoDompetService
                 throw ValidationException::withMessages(['rincian' => 'Salah satu sumber dana sudah tidak tersedia.']);
             }
 
-            BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
-
             $totalAplikasi = 0;
             $totalRiil = 0;
 
@@ -81,12 +84,12 @@ class AuditSaldoDompetService
                 $record = $sumberDana->get((int) $item['dompet_id']);
 
                 if ($record->user_id !== $user->id || ! $user->dapatMengelolaTransaksiPadaDompet($record)) {
-                    throw new AuthorizationException('Sumber dana audit tidak dapat dikelola.');
+                    throw new AuthorizationException('Sumber dana tidak dapat digunakan untuk Cocokkan Saldo.');
                 }
 
                 if ((int) $record->saldo !== (int) $item['saldo_aplikasi']) {
                     throw ValidationException::withMessages([
-                        'rincian' => "Saldo sumber dana {$record->nama_dompet} telah berubah. Muat ulang data audit.",
+                        'rincian' => "Saldo sumber dana {$record->nama_dompet} telah berubah. Muat ulang data sebelum mencocokkan saldo.",
                     ]);
                 }
 

@@ -37,7 +37,13 @@ class BukuKasService
      */
     public function pindahkanDanHapus(User $user, BukuKas $asal, BukuKas $tujuan, array $pemetaanKategori = []): void
     {
-        if ($asal->user_id !== $user->id || $tujuan->user_id !== $user->id || $asal->is($tujuan)) {
+        if (
+            $asal->user_id !== $user->id
+            || $tujuan->user_id !== $user->id
+            || ! $asal->is_active
+            || ! $tujuan->is_active
+            || $asal->is($tujuan)
+        ) {
             throw new AuthorizationException('Kas tidak dapat dipindahkan.');
         }
 
@@ -64,6 +70,10 @@ class BukuKasService
         $proses = function () use ($asal, $tujuan, $pemetaan): void {
             $asal = BukuKas::withoutGlobalScopes()->whereKey($asal->id)->lockForUpdate()->firstOrFail();
             $tujuan = BukuKas::withoutGlobalScopes()->whereKey($tujuan->id)->lockForUpdate()->firstOrFail();
+
+            if (! $asal->is_active || ! $tujuan->is_active) {
+                throw new AuthorizationException('Kas tidak aktif atau tidak dapat dikelola.');
+            }
 
             foreach ($pemetaan as $idKategori => $pengganti) {
                 Transaksi::withoutGlobalScopes()

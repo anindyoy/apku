@@ -22,10 +22,15 @@ class BukuKas extends Model
 
     protected $guarded = [];
 
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
     protected function casts(): array
     {
         return [
             'is_default' => 'boolean',
+            'is_active' => 'boolean',
             'is_tabungan' => 'boolean',
             'pernah_dikolaborasikan' => 'boolean',
             'goal' => 'integer',
@@ -33,13 +38,19 @@ class BukuKas extends Model
         ];
     }
 
-    /** Scope untuk menempatkan kas utama lebih dulu, lalu mengurutkan kas biasa dan kas tabungan menurut nama. */
+    /** Scope untuk menempatkan kas aktif dan kas utama lebih dulu, lalu mengurutkan tipe serta nama. */
     public function scopeUrutanTabungan(Builder $query): Builder
     {
         return $query->reorder()
+            ->orderByDesc('is_active')
             ->orderByDesc('is_default')
             ->orderBy('is_tabungan')
             ->orderBy('nama_buku');
+    }
+
+    public function scopeAktif(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
     }
 
     /** Mendapatkan kalkulasi progres dan status tabungan. */

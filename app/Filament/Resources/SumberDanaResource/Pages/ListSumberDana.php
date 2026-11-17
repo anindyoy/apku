@@ -55,7 +55,7 @@ class ListSumberDana extends ListRecords
                 ->before(fn () => abort_unless(auth()->user()->dapatMembuatSumberDana(), 403))
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = auth()->id();
-                    $data['is_default'] = ! auth()->user()->sumberDana()->exists();
+                    $data['is_default'] = ! auth()->user()->sumberDana()->aktif()->exists();
 
                     return $data;
                 }),

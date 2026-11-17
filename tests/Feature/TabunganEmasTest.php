@@ -11,6 +11,7 @@ use App\Models\TabunganEmas;
 use App\Models\User;
 use App\Services\HargaEmasService;
 use App\Services\TabunganEmasService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -80,6 +81,19 @@ test('penjualan emas melebihi berat yang dimiliki ditolak tanpa mengubah saldo',
         expect((float) $data['tabungan']->fresh()->berat_gram)->toBe(1.0)
             ->and($data['kas']->fresh()->saldo)->toBe(100000);
     }
+})->group('tabungan-emas', 'transaksi-emas');
+
+test('saldo awal emas ditolak pada kas nonaktif', function () {
+    $data = siapkanAkunTabunganEmas();
+    $data['kas']->update(['is_active' => false]);
+
+    expect(fn () => app(TabunganEmasService::class)->catatSaldoAwal(
+        $data['user'],
+        $data['tabungan'],
+        1,
+        900000,
+    ))->toThrow(AuthorizationException::class)
+        ->and((float) $data['tabungan']->fresh()->berat_gram)->toBe(0.0);
 })->group('tabungan-emas', 'transaksi-emas');
 
 test('editor kas bersama dapat membeli dan menjual emas dengan dompet miliknya', function () {

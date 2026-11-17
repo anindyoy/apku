@@ -21,6 +21,9 @@ use Filament\Tables\Columns\Layout\Grid as TableGrid;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SumberDanaResource extends Resource
 {
@@ -54,6 +57,7 @@ class SumberDanaResource extends Resource
     {
         return $table
             ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->reorder()
+                ->orderByDesc('is_active')
                 ->orderByDesc('is_default')
                 ->orderBy('nama_dompet'))
             ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
@@ -82,6 +86,12 @@ class SumberDanaResource extends Resource
                                     ->badge()
                                     ->getStateUsing(fn (SumberDana $record): string => auth()->user()->dapatMengelolaTransaksiPadaDompet($record) ? 'Aktif' : 'Terbatas')
                                     ->color(fn (string $state): string => $state === 'Aktif' ? 'success' : 'danger'),
+                                TextColumn::make('is_active')
+                                    ->label('Kondisi')
+                                    ->prefix('Kondisi: ')
+                                    ->formatStateUsing(fn (bool $state): string => $state ? 'Aktif' : 'Nonaktif')
+                                    ->badge()
+                                    ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
                                 TextColumn::make('description')->label('Deskripsi')->prefix('Deskripsi: ')->wrap(),
                             ])->space(3),
                         ]),
@@ -89,22 +99,62 @@ class SumberDanaResource extends Resource
             ])
             ->actions([
                 EditAction::make()
-                    ->visible(fn (SumberDana $record): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($record)),
+                    ->visible(fn (SumberDana $record): bool => auth()->user()->dapatMengelolaTransaksiPadaDompet($record))
+                    ->before(fn (SumberDana $record) => abort_unless(auth()->user()->dapatMengelolaTransaksiPadaDompet($record), 403))
+                    ->using(function (SumberDana $record, array $data): SumberDana {
+                        return DB::transaction(function () use ($record, $data): SumberDana {
+                            $sumberDana = SumberDana::withoutGlobalScopes()
+                                ->where('user_id', auth()->id())
+                                ->whereNull('deleted_at')
+                                ->whereKey($record->id)
+                                ->lockForUpdate()
+                                ->firstOrFail();
+
+                            if (! $sumberDana->is_active) {
+                                throw ValidationException::withMessages(['sumber_dana' => 'Sumber dana nonaktif tidak dapat diubah.']);
+                            }
+
+                            $sumberDana->update($data);
+
+                            return $sumberDana;
+                        });
+                    }),
                 Action::make('jadikanDefault')
                     ->label('Jadikan utama')
                     ->icon('heroicon-o-star')
                     ->visible(fn (SumberDana $record): bool => ! $record->is_default && auth()->user()->dapatMengelolaTransaksiPadaDompet($record))
                     ->action(function (SumberDana $record): void {
-                        SumberDana::where('user_id', $record->user_id)->update(['is_default' => false]);
-                        $record->update(['is_default' => true]);
+                        static::jadikanUtama($record);
+                    }),
+                Action::make('nonaktifkan')
+                    ->label('Nonaktifkan')
+                    ->icon('heroicon-o-pause-circle')
+                    ->color('gray')
+                    ->visible(fn (SumberDana $record): bool => $record->is_active
+                        && ! $record->is_default
+                        && $record->user_id === auth()->id()
+                        && (int) $record->saldo === 0
+                        && auth()->user()->sumberDana()->aktif()->count() > 1)
+                    ->action(function (SumberDana $record): void {
+                        static::ubahStatusAktif($record, false);
+                    }),
+                Action::make('aktifkan')
+                    ->label('Aktifkan')
+                    ->icon('heroicon-o-play-circle')
+                    ->color('success')
+                    ->visible(fn (SumberDana $record): bool => ! $record->is_active
+                        && $record->user_id === auth()->id())
+                    ->action(function (SumberDana $record): void {
+                        static::ubahStatusAktif($record, true);
                     }),
                 Action::make('pindahkanDanHapus')
                     ->label('Hapus')
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->visible(fn (SumberDana $record): bool => ! $record->is_default
+                        && $record->is_active
                         && auth()->user()->dapatMengelolaTransaksiPadaDompet($record)
-                        && auth()->user()->sumberDana()->count() > 1)
+                        && auth()->user()->sumberDana()->aktif()->count() > 1)
                     ->form(fn (SumberDana $record): array => [
                         SelectKasDanSumberDana::terapkan(
                             Select::make('dompet_tujuan_id')
@@ -133,6 +183,69 @@ class SumberDanaResource extends Resource
                         );
                     }),
             ]);
+    }
+
+    private static function jadikanUtama(SumberDana $record): void
+    {
+        DB::transaction(function () use ($record): void {
+            $sumberDanaSemua = SumberDana::withoutGlobalScopes()
+                ->where('user_id', auth()->id())
+                ->whereNull('deleted_at')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+            $sumberDana = $sumberDanaSemua->firstWhere('id', $record->id);
+
+            if (! $sumberDana || ! $sumberDana->is_active) {
+                throw ValidationException::withMessages(['sumber_dana' => 'Sumber dana tidak aktif atau tidak dapat dikelola.']);
+            }
+
+            SumberDana::withoutGlobalScopes()
+                ->where('user_id', auth()->id())
+                ->whereNull('deleted_at')
+                ->update(['is_default' => false]);
+            $sumberDana->update(['is_default' => true]);
+        });
+    }
+
+    private static function ubahStatusAktif(SumberDana $record, bool $aktif): void
+    {
+        DB::transaction(function () use ($record, $aktif): void {
+            $sumberDanaSemua = SumberDana::withoutGlobalScopes()
+                ->where('user_id', auth()->id())
+                ->whereNull('deleted_at')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+            $sumberDana = $sumberDanaSemua->firstWhere('id', $record->id);
+
+            if (! $sumberDana) {
+                throw ValidationException::withMessages(['sumber_dana' => 'Sumber dana tidak dapat dikelola.']);
+            }
+
+            if ($aktif) {
+                if ($sumberDana->is_active) {
+                    throw ValidationException::withMessages(['sumber_dana' => 'Sumber dana sudah aktif.']);
+                }
+
+                $sumberDana->update(['is_active' => true]);
+
+                return;
+            }
+
+            $jumlahAktif = $sumberDanaSemua->where('is_active', true)->count();
+
+            if (! $sumberDana->is_active || $sumberDana->is_default || (int) $sumberDana->saldo !== 0 || $jumlahAktif <= 1) {
+                throw ValidationException::withMessages(['sumber_dana' => 'Hanya sumber dana non-utama dengan saldo Rp0 yang dapat dinonaktifkan.']);
+            }
+
+            $sumberDana->update(['is_active' => false]);
+        });
+
+        Notification::make()
+            ->title($aktif ? 'Sumber dana diaktifkan' : 'Sumber dana dinonaktifkan')
+            ->success()
+            ->send();
     }
 
     public static function getPages(): array

@@ -57,7 +57,7 @@ class TabunganEmasResource extends Resource
             SelectKasDanSumberDana::terapkan(
                 Select::make('buku_kas_id')
                     ->label('Kas')
-                    ->options(fn (): array => auth()->user()->buku_kas()->urutanTabungan()->pluck('nama_buku', 'id')->all())
+                    ->options(fn (): array => auth()->user()->buku_kas()->aktif()->urutanTabungan()->pluck('nama_buku', 'id')->all())
                     ->disabled(fn (?TabunganEmas $record): bool => filled($record))
                     ->required()
             ),

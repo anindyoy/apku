@@ -66,6 +66,7 @@ class ListBukuKas extends ListRecords
                 })
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = auth()->id();
+                    $data['is_default'] = ! auth()->user()->buku_kas()->aktif()->exists();
                     // Pilihan ini bukan kolom kas, jadi disimpan sementara sampai kas selesai dibuat.
                     $kategori = (array) ($data['kategori'] ?? []);
                     if (empty($kategori) && (bool) ($data['hubungkan_kategori'] ?? false)) {

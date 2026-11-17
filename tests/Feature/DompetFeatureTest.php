@@ -209,6 +209,24 @@ test('transfer dompet memindahkan saldo tanpa mengubah saldo buku kas', function
         ->and($hasil['masuk']->tipe_transfer)->toBe('dompet');
 });
 
+test('transfer sumber dana ditolak untuk kas nonaktif', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $bukuKas->update(['is_active' => false]);
+
+    expect(fn () => app(TransferDompetService::class)->transfer($user, $cash, $bank, $bukuKas, 10000))
+        ->toThrow(AuthorizationException::class)
+        ->and(Transaksi::where('user_id', $user->id)->count())->toBe(0);
+});
+
+test('sumber dana nonaktif tidak dapat dihapus melalui pemindahan saldo', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet();
+    $bank->update(['is_active' => false]);
+
+    expect(fn () => app(TransferDompetService::class)->pindahkanSaldoDanHapus($user, $bank, $cash, $bukuKas))
+        ->toThrow(AuthorizationException::class)
+        ->and($bank->fresh()->trashed())->toBeFalse();
+});
+
 test('pengguna tanpa masa aktif tetap dapat transfer pada dua dompet gratis', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash, 'bank' => $bank] = buatDataDompet([
         'masa_aktif' => today()->subDay(),

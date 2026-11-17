@@ -74,7 +74,7 @@ class ProsesTrialPremium extends Command
                         $user->update(['type' => 'reguler']);
                     }
 
-                    $terkunci = $user->buku_kas()->count() + $user->sumberDana()->count();
+                    $terkunci = $user->buku_kas()->aktif()->count() + $user->sumberDana()->aktif()->count();
                     $terkunci = max(0, $terkunci - 4);
 
                     $user->notify(new TrialPremiumBerakhir($trial, $terkunci));

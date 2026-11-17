@@ -9,6 +9,7 @@ use App\Models\Dompet;
 use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Livewire;
 
 function buatPenggunaUntukUiDompet(?string $masaAktif = null): array
@@ -132,7 +133,51 @@ test('daftar dompet menggunakan kartu responsif', function () {
         ->and($table->getColumn('is_default')->record($record)->getPrefix())->toBe('Utama: ')
         ->and($table->getColumn('is_default')->record($record)->formatState(true))->toBe('Utama: Ya')
         ->and($table->getColumn('status_akses')->record($record)->getPrefix())->toBe('Status: ')
+        ->and($table->getColumn('is_active')->record($record)->formatState(true))->toBe('Kondisi: Aktif')
         ->and($table->getColumn('description')->record($record)->getPrefix())->toBe('Deskripsi: ');
+});
+
+test('sumber dana bersaldo nol dapat dinonaktifkan dan diaktifkan kembali', function () {
+    ['user' => $user, 'cash' => $cash] = buatPenggunaUntukUiDompet(today()->subDay()->toDateString());
+    $bank = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Bank',
+        'saldo' => 0,
+    ]);
+
+    $component = Livewire::actingAs($user)->test(ListSumberDana::class)
+        ->assertTableActionVisible('nonaktifkan', $bank)
+        ->assertTableActionHidden('nonaktifkan', $cash)
+        ->callTableAction('nonaktifkan', $bank)
+        ->assertHasNoTableActionErrors();
+
+    expect($bank->fresh()->is_active)->toBeFalse()
+        ->and(array_keys(Transaksi::opsiSumberDanaYangDapatDikelola()))->toBe([$cash->id])
+        ->and($user->fresh()->dapatMembuatSumberDana())->toBeTrue();
+
+    $component->assertCanSeeTableRecords([$bank])
+        ->assertTableActionVisible('aktifkan', $bank)
+        ->callTableAction('aktifkan', $bank)
+        ->assertHasNoTableActionErrors();
+
+    expect($bank->fresh()->is_active)->toBeTrue()
+        ->and(array_keys(Transaksi::opsiSumberDanaYangDapatDikelola()))->toBe([$cash->id, $bank->id]);
+});
+
+test('sumber dana nonaktif ditolak oleh layanan pencatatan transaksi', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas] = buatPenggunaUntukUiDompet();
+    $nonaktif = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Rekening Nonaktif',
+        'saldo' => 0,
+        'is_active' => false,
+    ]);
+
+    expect(fn () => app(\App\Services\TransaksiService::class)->buat($user, [
+        'buku_kas_id' => $bukuKas->id,
+        'sumber_dana_id' => $nonaktif->id,
+        'nominal' => 1000,
+    ], 'Pemasukan'))->toThrow(AuthorizationException::class);
 });
 
 test('daftar sumber dana menempatkan sumber dana utama sebelum sumber dana lainnya', function () {

@@ -21,6 +21,11 @@ class TabunganEmasService
         $this->validasiBeratDanNilai($beratGram, $totalModal);
 
         $proses = function () use ($user, $tabungan, $beratGram, $totalModal, $catatan): TransaksiEmas {
+            $bukuKas = BukuKas::withoutGlobalScopes()->whereKey($tabungan->buku_kas_id)->lockForUpdate()->firstOrFail();
+            if ($bukuKas->user_id !== $user->id || ! $bukuKas->is_active) {
+                throw new AuthorizationException('Hanya pemilik kas aktif yang dapat mencatat saldo awal emas.');
+            }
+
             $terkunci = TabunganEmas::query()->whereKey($tabungan->id)->lockForUpdate()->firstOrFail();
             $terkunci->increment('berat_gram', $beratGram);
             $terkunci->increment('total_modal', $totalModal);
@@ -155,7 +160,7 @@ class TabunganEmasService
 
     private function pastikanPemilik(User $user, TabunganEmas $tabungan): void
     {
-        if ($tabungan->bukuKas->user_id !== $user->id) {
+        if ($tabungan->bukuKas->user_id !== $user->id || ! $tabungan->bukuKas->is_active) {
             throw new AuthorizationException('Hanya pemilik kas yang dapat mencatat saldo awal emas.');
         }
     }

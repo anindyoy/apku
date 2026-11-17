@@ -28,8 +28,9 @@ class TransaksiService
         $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
 
         return DB::transaction(function () use ($user, $bukuKas, $sumberDana, $nominal, $deskripsi): Transaksi {
-            BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
-            SumberDana::withoutGlobalScopes()->whereKey($sumberDana->id)->lockForUpdate()->firstOrFail();
+            $bukuKas = BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
+            $sumberDana = SumberDana::withoutGlobalScopes()->whereKey($sumberDana->id)->lockForUpdate()->firstOrFail();
+            $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
             $transaksi = Transaksi::withoutEvents(fn () => Transaksi::create([
                 'user_id' => $user->id,
                 'buku_kas_id' => $bukuKas->id,
@@ -119,6 +120,8 @@ class TransaksiService
             || $bukuKasTujuan->user_id !== $user->id
             || $sumberDanaAsal->user_id !== $user->id
             || $sumberDanaTujuan->user_id !== $user->id
+            || ! $sumberDanaAsal->is_active
+            || ! $sumberDanaTujuan->is_active
             || ! $user->dapatMengelolaTransaksiPada($bukuKasAsal)
             || ! $user->dapatMengelolaTransaksiPada($bukuKasTujuan)
             || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDanaTujuan)
@@ -140,7 +143,12 @@ class TransaksiService
                 ->get()
                 ->keyBy('id');
 
-            if ($bukuKas->count() !== 2 || $sumberDana->count() !== ($sumberDanaAsal->is($sumberDanaTujuan) ? 1 : 2)) {
+            if (
+                $bukuKas->count() !== 2
+                || $sumberDana->count() !== ($sumberDanaAsal->is($sumberDanaTujuan) ? 1 : 2)
+                || $bukuKas->contains(fn (BukuKas $kas): bool => ! $kas->is_active)
+                || $sumberDana->contains(fn (SumberDana $sumber): bool => ! $sumber->is_active)
+            ) {
                 throw new AuthorizationException('Sumber dana atau kas tidak tersedia.');
             }
 
@@ -198,6 +206,7 @@ class TransaksiService
 
         $proses = function () use ($user, $transaksi, $data): Transaksi {
             $terkunci = Transaksi::withoutGlobalScopes()->whereKey($transaksi->id)->lockForUpdate()->firstOrFail();
+            $this->pastikanDapatMengelola($user, $terkunci);
 
             if ($terkunci->transfer_code) {
                 return $this->ubahPasanganTransfer($user, $terkunci, $data);
@@ -209,8 +218,8 @@ class TransaksiService
             $dataBaru = array_merge($terkunci->only([
                 'buku_kas_id', 'sumber_dana_id', 'kategori_id', 'tanggal', 'nominal', 'jenis', 'deskripsi',
             ]), $data);
-            $bukuKasBaru = BukuKas::withoutGlobalScopes()->findOrFail($dataBaru['buku_kas_id']);
-            $sumberDanaBaru = SumberDana::withoutGlobalScopes()->findOrFail($dataBaru['sumber_dana_id']);
+            $bukuKasBaru = BukuKas::withoutGlobalScopes()->whereKey($dataBaru['buku_kas_id'])->lockForUpdate()->firstOrFail();
+            $sumberDanaBaru = SumberDana::withoutGlobalScopes()->whereKey($dataBaru['sumber_dana_id'])->lockForUpdate()->firstOrFail();
 
             $this->pastikanTujuanDapatDikelola($user, $bukuKasBaru, $sumberDanaBaru);
             $dataBaru['kategori_id'] = filled($dataBaru['kategori_id'] ?? null) ? (int) $dataBaru['kategori_id'] : null;
@@ -240,13 +249,14 @@ class TransaksiService
             ]);
         }
 
-        $proses = function () use ($transaksi): bool {
+        $proses = function () use ($user, $transaksi): bool {
             $query = $transaksi->transfer_code
                 ? Transaksi::withoutGlobalScopes()->where('transfer_code', $transaksi->transfer_code)
                 : Transaksi::withoutGlobalScopes()->whereKey($transaksi->id);
             $semua = $query->orderBy('id')->lockForUpdate()->get();
 
             foreach ($semua as $item) {
+                $this->pastikanDapatMengelola($user, $item);
                 $this->balikDampak($item);
             }
 
@@ -368,8 +378,14 @@ class TransaksiService
             throw new AuthorizationException('Hanya pembuat transaksi yang dapat mengubah atau menghapus transaksi ini.');
         }
 
-        $bukuKas = BukuKas::withoutGlobalScopes()->findOrFail($transaksi->buku_kas_id);
-        $sumberDana = SumberDana::withoutGlobalScopes()->withTrashed()->findOrFail($transaksi->sumber_dana_id);
+        $queryKas = BukuKas::withoutGlobalScopes()->whereKey($transaksi->buku_kas_id);
+        $querySumberDana = SumberDana::withoutGlobalScopes()->withTrashed()->whereKey($transaksi->sumber_dana_id);
+        if (DB::transactionLevel() > 0) {
+            $queryKas->lockForUpdate();
+            $querySumberDana->lockForUpdate();
+        }
+        $bukuKas = $queryKas->firstOrFail();
+        $sumberDana = $querySumberDana->firstOrFail();
         $this->pastikanTujuanDapatDikelola($user, $bukuKas, $sumberDana);
     }
 
@@ -378,6 +394,8 @@ class TransaksiService
         if (
             $sumberDana->user_id !== $user->id
             || $sumberDana->trashed()
+            || ! $bukuKas->is_active
+            || ! $sumberDana->is_active
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
             || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDana)
         ) {

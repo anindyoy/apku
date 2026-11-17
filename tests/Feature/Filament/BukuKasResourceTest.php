@@ -4,8 +4,12 @@ use App\Filament\Resources\BukuKasResource;
 use App\Filament\Resources\BukuKasResource\Pages\CreateBukuKas;
 use App\Filament\Resources\BukuKasResource\Pages\EditBukuKas;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
+use App\Models\BukuKas;
+use App\Models\SumberDana;
 use App\Models\TabunganEmas;
+use App\Models\Transaksi;
 use Filament\Actions\ActionGroup;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Livewire;
 
 test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
@@ -22,9 +26,10 @@ test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
     $table = $component->instance()->getTable();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $kas->id);
 
-    expect(array_keys($table->getColumns()))->toBe(['nama_buku', 'tipe_kas', 'akses', 'saldo', 'progres_tabungan', 'created_at', 'updated_at'])
+    expect(array_keys($table->getColumns()))->toBe(['nama_buku', 'tipe_kas', 'is_active', 'akses', 'saldo', 'progres_tabungan', 'created_at', 'updated_at'])
         ->and($table->getContentGrid())->toBe(['default' => 1, 'md' => 2, 'xl' => 3])
         ->and($table->getColumn('nama_buku')->record($record)->getDescriptionBelow())->toBe('Deskripsi: Dana perjalanan keluarga')
+        ->and($table->getColumn('is_active')->record($record)->formatState(true))->toBe('Status: Aktif')
         ->and($table->getColumn('akses')->record($record)->getPrefix())->toBe('Akses: ')
         ->and($table->getColumn('akses')->record($record)->getDescriptionBelow())->toBe('Kepemilikan: Milik saya')
         ->and($table->getColumn('saldo')->record($record)->getPrefix())->toBe('Saldo: Rp ')
@@ -61,6 +66,83 @@ test('daftar kas menempatkan kas utama sebelum kas lainnya', function () {
         ->toBe([$kasUtama->id, $kasBiasa->id, $kasLama->id]);
 })->group('filament', 'buku-kas');
 
+test('kas saldo nol dapat dinonaktifkan setelah mengganti kas utama lalu diaktifkan kembali', function () {
+    $user = createRegularUserWithBukuKas();
+    $kasUtama = $user->buku_kas()->firstOrFail();
+    $kasUtama->update(['saldo' => 0, 'is_default' => true]);
+    $kasLain = BukuKas::factory()->create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Kedua',
+        'saldo' => 0,
+        'is_default' => false,
+    ]);
+
+    $component = Livewire::actingAs($user)->test(ListBukuKas::class)
+        ->assertTableActionHidden('nonaktifkan', $kasUtama)
+        ->assertTableActionVisible('jadikanDefault', $kasLain)
+        ->callTableAction('jadikanDefault', $kasLain)
+        ->assertHasNoTableActionErrors();
+
+    $component = Livewire::actingAs($user)->test(ListBukuKas::class)
+        ->assertTableActionVisible('nonaktifkan', $kasUtama)
+        ->callTableAction('nonaktifkan', $kasUtama)
+        ->assertHasNoTableActionErrors();
+
+    expect($kasUtama->fresh()->is_active)->toBeFalse()
+        ->and($kasUtama->fresh()->is_default)->toBeFalse()
+        ->and(array_keys(Transaksi::opsiBukuKasDefault()))->toBe([$kasLain->id])
+        ->and($user->fresh()->dapatMembuatBukuKas())->toBeTrue();
+
+    $component->assertCanSeeTableRecords([$kasUtama])
+        ->assertTableActionVisible('aktifkan', $kasUtama)
+        ->callTableAction('aktifkan', $kasUtama)
+        ->assertHasNoTableActionErrors();
+
+    expect($kasUtama->fresh()->is_active)->toBeTrue()
+        ->and(array_keys(Transaksi::opsiBukuKasDefault()))->toBe([$kasLain->id, $kasUtama->id]);
+})->group('filament', 'buku-kas');
+
+test('kas dengan saldo atau produk emas tidak dapat dinonaktifkan', function () {
+    $user = createRegularUserWithBukuKas();
+    $kasBersaldo = BukuKas::factory()->create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Bersaldo',
+        'saldo' => 1000,
+        'is_default' => false,
+    ]);
+    $kasEmas = BukuKas::factory()->create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Emas',
+        'saldo' => 0,
+        'is_default' => false,
+    ]);
+    TabunganEmas::factory()->create(['buku_kas_id' => $kasEmas->id]);
+
+    Livewire::actingAs($user)->test(ListBukuKas::class)
+        ->assertTableActionHidden('nonaktifkan', $kasBersaldo)
+        ->assertTableActionHidden('nonaktifkan', $kasEmas);
+})->group('filament', 'buku-kas');
+
+test('kas nonaktif ditolak oleh layanan pencatatan transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+    $kas = BukuKas::factory()->create([
+        'user_id' => $user->id,
+        'nama_buku' => 'Kas Nonaktif',
+        'saldo' => 0,
+        'is_active' => false,
+    ]);
+    $sumberDana = SumberDana::factory()->create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Sumber Dana Aktif',
+    ]);
+
+    expect(fn () => app(\App\Services\TransaksiService::class)->buat($user, [
+        'buku_kas_id' => $kas->id,
+        'sumber_dana_id' => $sumberDana->id,
+        'nominal' => 1000,
+    ], 'Pemasukan'))->toThrow(AuthorizationException::class);
+})->group('filament', 'buku-kas');
+
 test('card kas menyembunyikan informasi emas saat tidak ada produk', function () {
     $user = createRegularUserWithBukuKas();
     // Pastikan fitur tabungan emas aktif namun kas belum memiliki produk emas.
@@ -92,7 +174,7 @@ test('buku kas mengelompokkan aksi baris dalam menu aksi', function () {
         ->and($actions[0])->toBeInstanceOf(ActionGroup::class)
         ->and($actions[0]->getLabel())->toBe('Aksi')
         ->and(array_map(fn ($action) => $action->getName(), $actions[0]->getActions()))->toBe([
-            'edit', 'kolaborator', 'cekNilaiEmas', 'hargaEmasManual', 'delete', 'hapusDanPindahkan',
+            'edit', 'jadikanDefault', 'nonaktifkan', 'aktifkan', 'kolaborator', 'cekNilaiEmas', 'hargaEmasManual', 'delete', 'hapusDanPindahkan',
         ]);
 
     $component->callTableAction('edit', $kas, data: [

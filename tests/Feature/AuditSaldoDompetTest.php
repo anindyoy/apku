@@ -126,6 +126,16 @@ test('audit menolak sumber dana milik pengguna lain', function () {
         ->and(AuditSaldoDompet::count())->toBe(0);
 });
 
+test('audit menolak kas nonaktif', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
+    $bukuKas->update(['is_active' => false]);
+
+    expect(fn () => app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Kas nonaktif', [
+        ['dompet_id' => $tunai->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 500000],
+    ]))->toThrow(AuthorizationException::class)
+        ->and(AuditSaldoDompet::count())->toBe(0);
+});
+
 test('transaksi penyesuaian audit tidak dapat diubah atau dihapus langsung', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai] = buatDataAuditSaldo();
     app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Rekonsiliasi', [

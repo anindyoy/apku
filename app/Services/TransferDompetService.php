@@ -35,6 +35,7 @@ class TransferDompetService
             $sumberDanaAsal->user_id !== $user->id
             || $sumberDanaTujuan->user_id !== $user->id
             || $bukuKas->user_id !== $user->id
+            || ! $sumberDanaAsal->is_active
             || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDanaTujuan)
             || ! $user->dapatMengelolaTransaksiPada($bukuKas)
         ) {
@@ -42,6 +43,7 @@ class TransferDompetService
         }
 
         $prosesTransfer = function () use ($user, $sumberDanaAsal, $sumberDanaTujuan, $bukuKas, $nominal, $tanggal, $deskripsi): array {
+            $kas = BukuKas::withoutGlobalScopes()->whereKey($bukuKas->id)->lockForUpdate()->firstOrFail();
             $sumberDana = SumberDana::withoutGlobalScopes()
                 ->where('user_id', $user->id)
                 ->whereKey([$sumberDanaAsal->id, $sumberDanaTujuan->id])
@@ -53,17 +55,17 @@ class TransferDompetService
             $asal = $sumberDana->get($sumberDanaAsal->id);
             $tujuan = $sumberDana->get($sumberDanaTujuan->id);
 
-            if (! $asal || ! $tujuan) {
-                throw new AuthorizationException('Sumber dana tidak tersedia.');
+            if ($kas->user_id !== $user->id || ! $kas->is_active || ! $asal || ! $tujuan || ! $asal->is_active || ! $tujuan->is_active) {
+                throw new AuthorizationException('Sumber dana atau kas tidak tersedia.');
             }
 
             $kodeTransfer = (string) Str::uuid();
             $waktuTransfer = $tanggal ?: now();
 
-            $transaksi = Transaksi::withoutEvents(function () use ($user, $asal, $tujuan, $bukuKas, $nominal, $waktuTransfer, $deskripsi, $kodeTransfer): array {
+            $transaksi = Transaksi::withoutEvents(function () use ($user, $asal, $tujuan, $kas, $nominal, $waktuTransfer, $deskripsi, $kodeTransfer): array {
                 $data = [
                     'user_id' => $user->id,
-                    'buku_kas_id' => $bukuKas->id,
+                    'buku_kas_id' => $kas->id,
                     'tanggal' => $waktuTransfer,
                     'nominal' => $nominal,
                     'transfer_code' => $kodeTransfer,
@@ -98,18 +100,6 @@ class TransferDompetService
         SumberDana $sumberDanaTujuan,
         BukuKas $bukuKas,
     ): void {
-        if ($user->sumberDana()->count() <= 1) {
-            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana terakhir tidak dapat dihapus.']);
-        }
-
-        if ($sumberDanaAsal->is_default) {
-            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana default tidak dapat dihapus.']);
-        }
-
-        if ($sumberDanaAsal->is($sumberDanaTujuan)) {
-            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana tujuan harus berbeda dari sumber dana yang dihapus.']);
-        }
-
         if (
             $sumberDanaAsal->user_id !== $user->id
             || $sumberDanaTujuan->user_id !== $user->id
@@ -121,9 +111,31 @@ class TransferDompetService
             throw new AuthorizationException('Sumber dana atau kas tidak dapat dikelola.');
         }
 
+        if ($user->sumberDana()->aktif()->count() <= 1) {
+            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana terakhir tidak dapat dihapus.']);
+        }
+
+        if ($sumberDanaAsal->is_default) {
+            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana default tidak dapat dihapus.']);
+        }
+
+        if ($sumberDanaAsal->is($sumberDanaTujuan)) {
+            throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana tujuan harus berbeda dari sumber dana yang dihapus.']);
+        }
+
         $prosesPenghapusan = function () use ($user, $sumberDanaAsal, $sumberDanaTujuan, $bukuKas): void {
+            $kas = BukuKas::withoutGlobalScopes()
+                ->whereKey($bukuKas->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($kas->user_id !== $user->id || ! $kas->is_active) {
+                throw new AuthorizationException('Sumber dana atau kas tidak tersedia.');
+            }
+
             $sumberDana = SumberDana::withoutGlobalScopes()
-                ->whereKey([$sumberDanaAsal->id, $sumberDanaTujuan->id])
+                ->where('user_id', $user->id)
+                ->whereNull('deleted_at')
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
@@ -131,16 +143,23 @@ class TransferDompetService
             $asal = $sumberDana->get($sumberDanaAsal->id);
             $tujuan = $sumberDana->get($sumberDanaTujuan->id);
 
-            if (! $asal || ! $tujuan) {
+            if (
+                ! $asal
+                || ! $tujuan
+                || ! $asal->is_active
+                || ! $tujuan->is_active
+                || $asal->is_default
+                || $sumberDana->where('is_active', true)->count() <= 1
+            ) {
                 throw new AuthorizationException('Sumber dana tidak tersedia.');
             }
 
             $saldo = (int) $asal->saldo;
 
             if ($saldo > 0) {
-                $this->transfer($user, $asal, $tujuan, $bukuKas, $saldo, now(), 'Pemindahan saldo sebelum penghapusan sumber dana');
+                $this->transfer($user, $asal, $tujuan, $kas, $saldo, now(), 'Pemindahan saldo sebelum penghapusan sumber dana');
             } elseif ($saldo < 0) {
-                $this->transfer($user, $tujuan, $asal, $bukuKas, abs($saldo), now(), 'Pemindahan kewajiban sebelum penghapusan sumber dana');
+                $this->transfer($user, $tujuan, $asal, $kas, abs($saldo), now(), 'Pemindahan kewajiban sebelum penghapusan sumber dana');
             }
 
             $asal->refresh();

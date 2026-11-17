@@ -10,28 +10,28 @@ class KuotaAkun
 {
     public static function kas(User $user): Htmlable
     {
-        return self::ringkasan($user, 'kas', $user->buku_kas()->count());
+        return self::ringkasan($user, 'kas', $user->buku_kas()->aktif()->count());
     }
 
     public static function dompet(User $user): Htmlable
     {
         // Teks UI memakai sumber dana; nama method dipertahankan untuk kompatibilitas.
-        return self::ringkasan($user, 'sumber dana', $user->dompet()->count());
+        return self::ringkasan($user, 'sumber dana', $user->dompet()->aktif()->count());
     }
 
     public static function sumberDana(User $user): Htmlable
     {
-        return self::ringkasan($user, 'sumber dana', $user->sumberDana()->count());
+        return self::ringkasan($user, 'sumber dana', $user->sumberDana()->aktif()->count());
     }
 
     public static function teksSumberDana(User $user): string
     {
-        return self::teksRingkasan($user, 'sumber dana', $user->sumberDana()->count());
+        return self::teksRingkasan($user, 'sumber dana', $user->sumberDana()->aktif()->count());
     }
 
     public static function teksKas(User $user): string
     {
-        return self::teksRingkasan($user, 'kas', $user->buku_kas()->count());
+        return self::teksRingkasan($user, 'kas', $user->buku_kas()->aktif()->count());
     }
 
     private static function teksRingkasan(User $user, string $jenis, int $jumlah): string

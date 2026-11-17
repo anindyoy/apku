@@ -98,6 +98,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMengelolaTransaksiPada(BukuKas $bukuKas): bool
     {
+        if (! $bukuKas->is_active) {
+            return false;
+        }
+
         if ($this->isAdmin()) {
             return true;
         }
@@ -211,6 +215,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
         $bukuGratis = BukuKas::withoutGlobalScopes()
             ->where('user_id', $pemilik->id)
+            ->where('is_active', true)
             ->reorder()
             ->orderByDesc('is_default')
             ->orderBy('id')
@@ -223,13 +228,14 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function dapatMembuatBukuKas(): bool
     {
         return $this->isAdmin()
-            || $this->buku_kas()->count() < 2
+            || $this->buku_kas()->aktif()->count() < 2
             || $this->masaAktifBerlaku();
     }
 
     public function idBukuKasTambahanGratis(): ?int
     {
         return $this->buku_kas()
+            ->aktif()
             ->whereKeyNot($this->idBukuKasUtama())
             ->reorder()
             ->orderBy('id')
@@ -239,6 +245,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function idBukuKasUtama(): ?int
     {
         return $this->buku_kas()
+            ->aktif()
             ->reorder()
             ->orderByDesc('is_default')
             ->orderBy('id')
@@ -252,7 +259,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function dapatMengelolaTransaksiPadaSumberDana(SumberDana $sumberDana): bool
     {
-        return $sumberDana->user_id === $this->id
+        return $sumberDana->is_active
+            && $sumberDana->user_id === $this->id
             && ($this->isAdmin()
                 || $sumberDana->id === $this->idDompetUtama()
                 || $sumberDana->id === $this->idDompetTambahanGratis()
@@ -267,7 +275,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function dapatMembuatSumberDana(): bool
     {
         return $this->isAdmin()
-            || $this->sumberDana()->count() < 2
+            || $this->sumberDana()->aktif()->count() < 2
             || $this->masaAktifBerlaku();
     }
 
@@ -279,6 +287,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function idSumberDanaUtama(): ?int
     {
         return $this->sumberDana()
+            ->aktif()
             ->reorder()
             ->orderByDesc('is_default')
             ->orderBy('id')
@@ -293,6 +302,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function idSumberDanaTambahanGratis(): ?int
     {
         return $this->sumberDana()
+            ->aktif()
             ->whereKeyNot($this->idSumberDanaUtama())
             ->reorder()
             ->orderBy('id')
