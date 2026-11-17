@@ -8,7 +8,7 @@ use App\Models\BukuKas;
 use App\Models\SumberDana;
 use App\Models\TabunganEmas;
 use App\Models\Transaksi;
-use Filament\Actions\ActionGroup;
+use App\Services\TransaksiService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Livewire;
 
@@ -47,13 +47,13 @@ test('daftar kas menempatkan kas utama sebelum kas lainnya', function () {
     $user = createRegularUserWithBukuKas();
     $kasLama = $user->buku_kas()->firstOrFail();
     $kasLama->update(['is_default' => false]);
-    $kasBiasa = \App\Models\BukuKas::factory()->create([
+    $kasBiasa = BukuKas::factory()->create([
         'user_id' => $user->id,
         'nama_buku' => 'A Kas Biasa',
         'is_default' => false,
         'is_tabungan' => false,
     ]);
-    $kasUtama = \App\Models\BukuKas::factory()->create([
+    $kasUtama = BukuKas::factory()->create([
         'user_id' => $user->id,
         'nama_buku' => 'Z Kas Tabungan Utama',
         'is_default' => true,
@@ -136,7 +136,7 @@ test('kas nonaktif ditolak oleh layanan pencatatan transaksi', function () {
         'nama_dompet' => 'Sumber Dana Aktif',
     ]);
 
-    expect(fn () => app(\App\Services\TransaksiService::class)->buat($user, [
+    expect(fn () => app(TransaksiService::class)->buat($user, [
         'buku_kas_id' => $kas->id,
         'sumber_dana_id' => $sumberDana->id,
         'nominal' => 1000,
@@ -155,7 +155,7 @@ test('card kas menyembunyikan informasi emas saat tidak ada produk', function ()
         ->toBe('Jumlah transaksi: 0');
 })->group('filament', 'buku-kas');
 
-test('buku kas mengelompokkan aksi baris dalam menu aksi', function () {
+test('card kas menampilkan aksi baris secara langsung tanpa menu aksi', function () {
     $user = createRegularUserWithBukuKas();
     $kas = $user->buku_kas()->first();
 
@@ -170,10 +170,8 @@ test('buku kas mengelompokkan aksi baris dalam menu aksi', function () {
 
     $actions = $component->instance()->getTable()->getRecordActions();
 
-    expect($actions)->toHaveCount(1)
-        ->and($actions[0])->toBeInstanceOf(ActionGroup::class)
-        ->and($actions[0]->getLabel())->toBe('Aksi')
-        ->and(array_map(fn ($action) => $action->getName(), $actions[0]->getActions()))->toBe([
+    expect($actions)->toHaveCount(9)
+        ->and(array_map(fn ($action) => $action->getName(), $actions))->toBe([
             'edit', 'jadikanDefault', 'nonaktifkan', 'aktifkan', 'kolaborator', 'cekNilaiEmas', 'hargaEmasManual', 'delete', 'hapusDanPindahkan',
         ]);
 

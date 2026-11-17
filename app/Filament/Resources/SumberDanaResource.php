@@ -15,13 +15,14 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\Layout\Grid as TableGrid;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -36,6 +37,7 @@ class SumberDanaResource extends Resource
     }
 
     protected static ?string $cluster = Pengaturan::class;
+
     protected static ?string $modelLabel = 'Sumber Dana';
 
     protected static ?string $model = SumberDana::class;
@@ -56,7 +58,7 @@ class SumberDanaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->reorder()
+            ->modifyQueryUsing(fn (Builder $query) => $query->reorder()
                 ->orderByDesc('is_active')
                 ->orderByDesc('is_default')
                 ->orderBy('nama_dompet'))
@@ -170,6 +172,7 @@ class SumberDanaResource extends Resource
                         && auth()->user()->dapatMengelolaTransaksiPadaDompet($record)
                         && auth()->user()->sumberDana()->aktif()->count() > 1)
                     ->modalHeading(fn (SumberDana $record): string => (int) $record->saldo === 0 ? 'Hapus sumber dana' : 'Pindahkan saldo dan hapus sumber dana')
+                    ->modalWidth('md')
                     ->modalDescription(fn (SumberDana $record): string => (int) $record->saldo === 0
                         ? 'Sumber dana ini sudah memiliki saldo Rp0. Anda dapat menghapusnya tanpa memindahkan saldo.'
                         : 'Sumber dana ini masih memiliki saldo. Pilih sumber dana tujuan dan kas pencatatan untuk memindahkan saldo sebelum menghapusnya.')

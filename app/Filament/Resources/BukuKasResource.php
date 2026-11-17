@@ -20,11 +20,11 @@ use App\Services\PengaturanTabunganEmas;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\Action as FilamentAction;
-use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -34,7 +34,7 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -65,7 +65,7 @@ class BukuKasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->urutanTabungan())
+            ->modifyQueryUsing(fn (Builder $query) => $query->urutanTabungan())
             ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
                 // Tables\Columns\TextColumn::make('user_id')
@@ -142,167 +142,166 @@ class BukuKasResource extends Resource
                 //
             ])
             ->actions([
-                ActionGroup::make([
-                    EditAction::make()
-                        ->visible(fn (BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id())
-                        ->before(fn (BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403))
-                        ->mutateRecordDataUsing(function (BukuKas $record, array $data): array {
-                            $opsi = BukuKasFormSchema::opsiKategori($record);
-                            $terpilih = $record->idKategori();
-                            $data['kategori'] = $terpilih;
-                            $data['aktifkan_di_semua_kategori'] = ! empty($opsi) && count(array_intersect(array_keys($opsi), $terpilih)) === count($opsi);
+                EditAction::make()
+                    ->visible(fn (BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id())
+                    ->before(fn (BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403))
+                    ->mutateRecordDataUsing(function (BukuKas $record, array $data): array {
+                        $opsi = BukuKasFormSchema::opsiKategori($record);
+                        $terpilih = $record->idKategori();
+                        $data['kategori'] = $terpilih;
+                        $data['aktifkan_di_semua_kategori'] = ! empty($opsi) && count(array_intersect(array_keys($opsi), $terpilih)) === count($opsi);
 
-                            return $data;
-                        })
-                        ->using(function (BukuKas $record, array $data): BukuKas {
-                            return DB::transaction(function () use ($record, $data): BukuKas {
-                                $kas = BukuKas::withoutGlobalScopes()
-                                    ->where('user_id', auth()->id())
-                                    ->whereKey($record->id)
-                                    ->lockForUpdate()
-                                    ->firstOrFail();
+                        return $data;
+                    })
+                    ->using(function (BukuKas $record, array $data): BukuKas {
+                        return DB::transaction(function () use ($record, $data): BukuKas {
+                            $kas = BukuKas::withoutGlobalScopes()
+                                ->where('user_id', auth()->id())
+                                ->whereKey($record->id)
+                                ->lockForUpdate()
+                                ->firstOrFail();
 
-                                if (! $kas->is_active) {
-                                    throw ValidationException::withMessages(['buku_kas' => 'Kas nonaktif tidak dapat diubah.']);
-                                }
+                            if (! $kas->is_active) {
+                                throw ValidationException::withMessages(['buku_kas' => 'Kas nonaktif tidak dapat diubah.']);
+                            }
 
-                                $kategoriDipilih = array_key_exists('kategori', $data) ? (array) $data['kategori'] : null;
-                                unset($data['kategori'], $data['aktifkan_di_semua_kategori'], $data['hubungkan_kategori']);
-                                $kas->update($data);
+                            $kategoriDipilih = array_key_exists('kategori', $data) ? (array) $data['kategori'] : null;
+                            unset($data['kategori'], $data['aktifkan_di_semua_kategori'], $data['hubungkan_kategori']);
+                            $kas->update($data);
 
-                                if ($kategoriDipilih !== null) {
-                                    app(KategoriService::class)->sinkronkanKasDenganKategori(auth()->user(), $kas, $kategoriDipilih);
-                                }
+                            if ($kategoriDipilih !== null) {
+                                app(KategoriService::class)->sinkronkanKasDenganKategori(auth()->user(), $kas, $kategoriDipilih);
+                            }
 
-                                return $kas;
-                            });
-                        }),
+                            return $kas;
+                        });
+                    }),
 
-                    FilamentAction::make('jadikanDefault')
-                        ->label('Jadikan kas utama')
-                        ->icon('heroicon-o-star')
-                        ->visible(fn (BukuKas $record): bool => $record->is_active
-                            && ! $record->is_default
-                            && $record->user_id === auth()->id())
-                        ->action(function (BukuKas $record): void {
-                            static::jadikanKasUtama($record);
-                        }),
+                FilamentAction::make('jadikanDefault')
+                    ->label('Jadikan kas utama')
+                    ->icon('heroicon-o-star')
+                    ->visible(fn (BukuKas $record): bool => $record->is_active
+                        && ! $record->is_default
+                        && $record->user_id === auth()->id())
+                    ->action(function (BukuKas $record): void {
+                        static::jadikanKasUtama($record);
+                    }),
 
-                    FilamentAction::make('nonaktifkan')
-                        ->label('Nonaktifkan')
-                        ->icon('heroicon-o-pause-circle')
-                        ->color('gray')
-                        ->visible(fn (BukuKas $record): bool => $record->is_active
-                            && ! $record->is_default
-                            && $record->user_id === auth()->id()
-                            && (int) $record->saldo === 0
-                            && ! $record->tabunganEmas()->exists()
-                            && auth()->user()->buku_kas()->aktif()->count() > 1)
-                        ->action(function (BukuKas $record): void {
-                            static::ubahStatusAktif($record, false);
-                        }),
+                FilamentAction::make('nonaktifkan')
+                    ->label('Nonaktifkan')
+                    ->icon('heroicon-o-pause-circle')
+                    ->color('gray')
+                    ->visible(fn (BukuKas $record): bool => $record->is_active
+                        && ! $record->is_default
+                        && $record->user_id === auth()->id()
+                        && (int) $record->saldo === 0
+                        && ! $record->tabunganEmas()->exists()
+                        && auth()->user()->buku_kas()->aktif()->count() > 1)
+                    ->action(function (BukuKas $record): void {
+                        static::ubahStatusAktif($record, false);
+                    }),
 
-                    FilamentAction::make('aktifkan')
-                        ->label('Aktifkan')
-                        ->icon('heroicon-o-play-circle')
-                        ->color('success')
-                        ->visible(fn (BukuKas $record): bool => ! $record->is_active
-                            && $record->user_id === auth()->id())
-                        ->action(function (BukuKas $record): void {
-                            static::ubahStatusAktif($record, true);
-                        }),
+                FilamentAction::make('aktifkan')
+                    ->label('Aktifkan')
+                    ->icon('heroicon-o-play-circle')
+                    ->color('success')
+                    ->visible(fn (BukuKas $record): bool => ! $record->is_active
+                        && $record->user_id === auth()->id())
+                    ->action(function (BukuKas $record): void {
+                        static::ubahStatusAktif($record, true);
+                    }),
 
-                    FilamentAction::make('kolaborator')
-                        ->label('Kolaborator Kas')
-                        ->icon('heroicon-o-user-group')
-                        ->url(fn (): string => ShareBukuResource::getUrl())
-                        ->visible(fn (BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id()),
+                FilamentAction::make('kolaborator')
+                    ->label('Kolaborator Kas')
+                    ->icon('heroicon-o-user-group')
+                    ->url(fn (): string => ShareBukuResource::getUrl())
+                    ->visible(fn (BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id()),
 
-                    FilamentAction::make('cekNilaiEmas')
-                        ->label('Cek Nilai Emas')
-                        ->icon('heroicon-o-calculator')
-                        ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
-                            && $record->is_active
-                            && $record->tabunganEmas()->where('berat_gram', '>', 0)->exists())
-                        ->modalHeading(fn (BukuKas $record): string => 'Nilai emas pada '.$record->nama_buku)
-                        ->modalSubmitAction(false)
-                        ->modalCancelActionLabel('Tutup')
-                        ->modalContent(fn (BukuKas $record) => view('filament.valuasi-emas', ['record' => $record])),
+                FilamentAction::make('cekNilaiEmas')
+                    ->label('Cek Nilai Emas')
+                    ->icon('heroicon-o-calculator')
+                    ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
+                        && $record->is_active
+                        && $record->tabunganEmas()->where('berat_gram', '>', 0)->exists())
+                    ->modalHeading(fn (BukuKas $record): string => 'Nilai emas pada '.$record->nama_buku)
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->modalContent(fn (BukuKas $record) => view('filament.valuasi-emas', ['record' => $record])),
 
-                    FilamentAction::make('hargaEmasManual')
-                        ->label('Harga Emas Manual')
-                        ->icon('heroicon-o-pencil-square')
-                        ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
-                            && $record->is_active
-                            && $record->tabunganEmas()->exists()
-                            && auth()->user()->dapatMengelolaTransaksiPada($record))
-                        ->form([
-                            KomponenNominal::terapkan(
-                                TextInput::make('harga_per_gram')
-                                    ->label('Harga buyback per gram')
-                                    ->minValue(1)
-                                    ->required()
-                                    ->placeholder('Contoh: 1.150.000')
-                            ),
-                        ])
-                        ->action(fn (BukuKas $record, array $data) => app(HargaEmasService::class)->simpanManual(
-                            $record,
+                FilamentAction::make('hargaEmasManual')
+                    ->label('Harga Emas Manual')
+                    ->icon('heroicon-o-pencil-square')
+                    ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
+                        && $record->is_active
+                        && $record->tabunganEmas()->exists()
+                        && auth()->user()->dapatMengelolaTransaksiPada($record))
+                    ->form([
+                        KomponenNominal::terapkan(
+                            TextInput::make('harga_per_gram')
+                                ->label('Harga buyback per gram')
+                                ->minValue(1)
+                                ->required()
+                                ->placeholder('Contoh: 1.150.000')
+                        ),
+                    ])
+                    ->action(fn (BukuKas $record, array $data) => app(HargaEmasService::class)->simpanManual(
+                        $record,
+                        auth()->user(),
+                        (int) $data['harga_per_gram'],
+                    ))
+                    ->successNotificationTitle('Harga emas manual berhasil disimpan untuk kas ini'),
+
+                DeleteAction::make()
+                    ->visible(fn (BukuKas $record): bool => $record->is_active
+                        && $record->user_id === auth()->id()
+                        && ! $record->transaksi()->exists()
+                        && ! $record->tabunganEmas()->exists())
+                    ->before(fn (BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403)),
+
+                Action::make('hapusDanPindahkan')
+                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()
+                        && $record->is_active
+                        && ($record->transaksi()->exists() || $record->tabunganEmas()->exists()))
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->label('Hapus')
+                    ->modalHeading('Pindahkan transaksi dan hapus kas')
+                    ->modalWidth('md')
+                    ->modalDescription(fn (BukuKas $record): string => "Kas {$record->nama_buku} masih memiliki transaksi. Pilih kas tujuan sebelum menghapusnya.")
+                    ->modalSubmitActionLabel('Pindahkan dan hapus')
+                    ->form(fn (BukuKas $record): array => [
+                        SelectKasDanSumberDana::terapkan(
+                            Select::make('buku_kas_id')
+                                ->label('Kas tujuan')
+                                ->options(fn (): array => array_filter(
+                                    Transaksi::opsiBukuKasMilikSendiri($record->user_id),
+                                    fn ($id): bool => (int) $id !== (int) $record->id,
+                                    ARRAY_FILTER_USE_KEY,
+                                ))
+                                ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
+                                ->live()
+                                ->rules([
+                                    Rule::exists('buku_kas', 'id')
+                                        ->where('user_id', $record->user_id)
+                                        ->whereNot('id', $record->id),
+                                ])
+                                ->required()
+                        ),
+
+                        Section::make('Kategori transaksi')
+                            ->description('Kategori berikut belum terhubung ke kas tujuan. Pilih kategori penggantinya di kas tujuan, atau biarkan kosong agar transaksinya menjadi tanpa kategori.')
+                            ->schema(fn (Get $get): array => static::fieldPemetaanKategori($record, $get('buku_kas_id')))
+                            ->visible(fn (Get $get): bool => static::fieldPemetaanKategori($record, $get('buku_kas_id')) !== []),
+                    ])
+                    ->action(function (BukuKas $record, array $data): void {
+                        app(BukuKasService::class)->pindahkanDanHapus(
                             auth()->user(),
-                            (int) $data['harga_per_gram'],
-                        ))
-                        ->successNotificationTitle('Harga emas manual berhasil disimpan untuk kas ini'),
-
-                    DeleteAction::make()
-                        ->visible(fn (BukuKas $record): bool => $record->is_active
-                            && $record->user_id === auth()->id()
-                            && ! $record->transaksi()->exists()
-                            && ! $record->tabunganEmas()->exists())
-                        ->before(fn (BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403)),
-
-                    Action::make('hapusDanPindahkan')
-                        ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()
-                            && $record->is_active
-                            && ($record->transaksi()->exists() || $record->tabunganEmas()->exists()))
-                        ->color('danger')
-                        ->icon('heroicon-o-trash')
-                        ->label('Hapus')
-                        ->modalHeading('Pindahkan transaksi dan hapus kas')
-                        ->modalDescription(fn (BukuKas $record): string => "Kas {$record->nama_buku} masih memiliki transaksi. Pilih kas tujuan sebelum menghapusnya.")
-                        ->modalSubmitActionLabel('Pindahkan dan hapus')
-                        ->form(fn (BukuKas $record): array => [
-                            SelectKasDanSumberDana::terapkan(
-                                Select::make('buku_kas_id')
-                                    ->label('Kas tujuan')
-                                    ->options(fn (): array => array_filter(
-                                        Transaksi::opsiBukuKasMilikSendiri($record->user_id),
-                                        fn ($id): bool => (int) $id !== (int) $record->id,
-                                        ARRAY_FILTER_USE_KEY,
-                                    ))
-                                    ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
-                                    ->live()
-                                    ->rules([
-                                        Rule::exists('buku_kas', 'id')
-                                            ->where('user_id', $record->user_id)
-                                            ->whereNot('id', $record->id),
-                                    ])
-                                    ->required()
-                            ),
-
-                            Section::make('Kategori transaksi')
-                                ->description('Kategori berikut belum terhubung ke kas tujuan. Pilih kategori penggantinya di kas tujuan, atau biarkan kosong agar transaksinya menjadi tanpa kategori.')
-                                ->schema(fn (Get $get): array => static::fieldPemetaanKategori($record, $get('buku_kas_id')))
-                                ->visible(fn (Get $get): bool => static::fieldPemetaanKategori($record, $get('buku_kas_id')) !== []),
-                        ])
-                        ->action(function (BukuKas $record, array $data): void {
-                            app(BukuKasService::class)->pindahkanDanHapus(
-                                auth()->user(),
-                                $record,
-                                BukuKas::query()->where('user_id', $record->user_id)->findOrFail($data['buku_kas_id']),
-                                $data['pemetaan_kategori'] ?? [],
-                            );
-                        })
-                        ->successNotificationTitle('Transaksi dipindahkan dan kas berhasil dihapus'),
-                ])->label('Aksi'),
+                            $record,
+                            BukuKas::query()->where('user_id', $record->user_id)->findOrFail($data['buku_kas_id']),
+                            $data['pemetaan_kategori'] ?? [],
+                        );
+                    })
+                    ->successNotificationTitle('Transaksi dipindahkan dan kas berhasil dihapus'),
             ])
             ->bulkActions([
                 // Tables\Actions\BulkActionGroup::make([
