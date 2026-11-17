@@ -59,6 +59,7 @@ class UtangPiutangDetail extends Model
     {
         $data['utang_piutang_id'] = $record;
         $data['tipe'] = $tipe;
+        $data['nominal'] = KomponenNominal::bersihkanKeInteger($data['nominal']);
 
         self::create($data);
         $text = $tipe == 'tambah' ? 'Berhasil tambah piutang' : 'Berhasil bayar piutang';

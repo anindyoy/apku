@@ -94,7 +94,7 @@ test('user bisa menambah nominal piutang pada halaman detail', function () {
     Livewire::actingAs($user)
         ->test(PiutangDetail::class, ['record' => $piutang->code])
         ->callTableAction('tambah', data: [
-            'nominal' => 50000,
+            'nominal' => '50.000',
             'deskripsi' => 'Tambah nominal piutang',
             'created_at' => now()->format('Y-m-d H:i:s'),
         ])
@@ -115,7 +115,7 @@ test('user bisa mencatat pembayaran piutang pada halaman detail', function () {
     Livewire::actingAs($user)
         ->test(PiutangDetail::class, ['record' => $piutang->code])
         ->callTableAction('kurang', data: [
-            'nominal' => 40000,
+            'nominal' => '40.000',
             'deskripsi' => 'Bayar sebagian',
             'created_at' => now()->format('Y-m-d H:i:s'),
         ])

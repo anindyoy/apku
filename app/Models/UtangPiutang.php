@@ -164,13 +164,13 @@ class UtangPiutang extends Model
                     $data = $action->getRawData();
                     UtangPiutangDetail::create([
                         'utang_piutang_id' => $record->id,
-                        'nominal' => $data['nominal'],
+                        'nominal' => KomponenNominal::bersihkanKeInteger($data['nominal']),
                         'tipe' => 'tambah',
                         'deskripsi' => $data['deskripsi'] ?? '',
                         'created_at' => $record->created_at,
                     ]);
                 })
-                ->modalWidth('small'), // Filament v5 uses string
+                ->modalWidth('md'),
         ];
     }
 

@@ -69,7 +69,7 @@ class PiutangDetail extends Page implements HasTable
                     'nominal' => $utang_detail->nominal,
                     'deskripsi' => $parent->deskripsi,
                 ])
-                ->modalWidth('sm')
+                ->modalWidth('md')
                 ->form(UtangPiutang::formSchema())
                 ->action(function ($data) use ($utang_detail, $parent): void {
                     DB::transaction(function () use ($data, $utang_detail, $parent) {
@@ -79,7 +79,7 @@ class PiutangDetail extends Page implements HasTable
                         $parent->deskripsi = $data['deskripsi'];
                         $parent->save();
 
-                        $utang_detail->nominal = $data['nominal'];
+                        $utang_detail->nominal = KomponenNominal::bersihkanKeInteger($data['nominal']);
                         $utang_detail->created_at = $data['created_at'];
                         $utang_detail->save();
 
@@ -133,7 +133,7 @@ class PiutangDetail extends Page implements HasTable
                         fn ($data) => ModelsUtangPiutangDetail::action($data, $parent->id, 'tambah')
                     )
                     ->icon('heroicon-o-plus-circle')
-                    ->modalWidth('sm')
+                    ->modalWidth('md')
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
 
@@ -145,7 +145,7 @@ class PiutangDetail extends Page implements HasTable
                     )
                     ->color('success')
                     ->icon('heroicon-o-minus-circle')
-                    ->modalWidth('sm')
+                    ->modalWidth('md')
                     ->model(ModelsUtangPiutangDetail::class)
                     ->form(ModelsUtangPiutangDetail::form()),
             ])
@@ -172,7 +172,7 @@ class PiutangDetail extends Page implements HasTable
                         'nominal' => $record->nominal,
                         'deskripsi' => $record->deskripsi,
                     ])
-                    ->modalWidth('sm')
+                    ->modalWidth('md')
                     ->form([
                         KomponenNominal::terapkan(
                             TextInput::make('nominal')
@@ -191,7 +191,7 @@ class PiutangDetail extends Page implements HasTable
                         Textarea::make('deskripsi'),
                     ])
                     ->action(function ($record, $data) {
-                        $record->nominal = $data['nominal'];
+                        $record->nominal = KomponenNominal::bersihkanKeInteger($data['nominal']);
                         $record->created_at = $data['created_at'];
                         $record->deskripsi = $data['deskripsi'];
                         $record->save();

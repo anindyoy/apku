@@ -116,7 +116,7 @@ test('user bisa membuat utang atau piutang dari halaman daftar', function (strin
         ->test($page)
         ->callAction('create', data: [
             'kepada' => 'Pihak baru',
-            'nominal' => 75000,
+            'nominal' => '75.000',
             'created_at' => now()->format('Y-m-d H:i:s'),
             'deskripsi' => 'Catatan awal',
         ])
@@ -147,6 +147,27 @@ test('user bisa mencatat pembayaran utang pada halaman detail', function () {
         ->test(UtangDetail::class, ['record' => $utang->code])
         ->callTableAction('kurang', data: [
             'nominal' => 40000,
+            'deskripsi' => 'Bayar sebagian',
+            'created_at' => now()->format('Y-m-d H:i:s'),
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $this->assertDatabaseHas('utang_piutang_detail', [
+        'utang_piutang_id' => $utang->id,
+        'nominal' => 40000,
+        'tipe' => 'kurang',
+        'deskripsi' => 'Bayar sebagian',
+    ]);
+})->group('utang');
+
+test('user bisa mencatat pembayaran utang dengan nominal bersih ribuan', function () {
+    $user = User::notAdmin()->inRandomOrder()->first();
+    $utang = createUtangTestData($user, 'Siti Aminah', 100000);
+
+    Livewire::actingAs($user)
+        ->test(UtangDetail::class, ['record' => $utang->code])
+        ->callTableAction('kurang', data: [
+            'nominal' => '40.000',
             'deskripsi' => 'Bayar sebagian',
             'created_at' => now()->format('Y-m-d H:i:s'),
         ])

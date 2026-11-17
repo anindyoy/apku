@@ -84,7 +84,7 @@ class UtangDetail extends Page implements HasTable
                     'nominal' => $utang_detail->nominal,
                     'deskripsi' => $utang->deskripsi,
                 ])
-                ->modalWidth('small') // Filament v5 uses string
+                ->modalWidth('md')
                 ->form(UtangPiutang::formSchema())
                 ->action(function ($data) use ($utang_detail, $utang): void {
                     DB::transaction(function () use ($data, $utang_detail, $utang) {
@@ -94,7 +94,7 @@ class UtangDetail extends Page implements HasTable
                         $utang->deskripsi = $data['deskripsi'];
                         $utang->save();
 
-                        $utang_detail->nominal = $data['nominal'];
+                        $utang_detail->nominal = \App\Filament\Forms\KomponenNominal::bersihkanKeInteger($data['nominal']);
                         $utang_detail->created_at = $data['created_at'];
                         $utang_detail->save();
 
@@ -154,6 +154,7 @@ class UtangDetail extends Page implements HasTable
             ->headerActions([
                 Action::make('tambah')
                     ->label('Tambah Piutang')
+                    ->modalWidth('md')
                     ->hidden(auth()->user()->isAdmin())
                     ->action(
                         fn ($data) => ModelsUtangPiutangDetail::action($data, $utang->id, 'tambah')
@@ -164,6 +165,7 @@ class UtangDetail extends Page implements HasTable
 
                 Action::make('kurang')
                     ->label('Piutang dibayar')
+                    ->modalWidth('md')
                     ->hidden(auth()->user()->isAdmin())
                     ->action(
                         fn ($data) => ModelsUtangPiutangDetail::action($data, $utang->id, 'kurang')
@@ -191,6 +193,7 @@ class UtangDetail extends Page implements HasTable
                             .(ucfirst($record->tipe) == 'tambah' ? 'Ditambah' : 'Dibayar')
                     )
                     ->icon('heroicon-o-pencil')
+                    ->modalWidth('md')
                     ->fillForm(fn ($record): array => [
                         'created_at' => $record->created_at,
                         'nominal' => $record->nominal,
@@ -214,7 +217,7 @@ class UtangDetail extends Page implements HasTable
                         Textarea::make('deskripsi'),
                     ])
                     ->action(function ($record, $data) {
-                        $record->nominal = $data['nominal'];
+                        $record->nominal = KomponenNominal::bersihkanKeInteger($data['nominal']);
                         $record->created_at = $data['created_at'];
                         $record->deskripsi = $data['deskripsi'];
                         $record->save();
