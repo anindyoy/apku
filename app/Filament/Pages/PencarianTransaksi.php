@@ -42,7 +42,7 @@ class PencarianTransaksi extends Page implements HasTable
         return $table
             ->query(function (): Builder {
                 $query = Transaksi::query()->with([
-                    'buku_kas:id,user_id,nama_buku,pernah_dikolaborasikan',
+                    'buku_kas:id,user_id,nama_buku,is_active,is_default,pernah_dikolaborasikan',
                     'kategori:id,nama',
                     'asal_buku_tabungan:id,nama_buku',
                     'tujuan_buku_tabungan:id,nama_buku',
@@ -166,10 +166,15 @@ class PencarianTransaksi extends Page implements HasTable
 
     private function dapatMengelola(Transaksi $transaksi): bool
     {
-        return ! auth()->user()->isAdmin()
+        $user = auth()->user();
+
+        return $user !== null
+            && ! $user->isAdmin()
             && blank($transaksi->audit_saldo_dompet_detail_id)
-            && $transaksi->user_id === auth()->id()
-            && auth()->user()->dapatMengelolaTransaksiPada($transaksi->buku_kas)
-            && auth()->user()->dapatMengelolaTransaksiPadaDompet($transaksi->dompet);
+            && $transaksi->user_id === $user->id
+            && $transaksi->buku_kas !== null
+            && $user->dapatMengelolaTransaksiPada($transaksi->buku_kas)
+            && $transaksi->dompet !== null
+            && $user->dapatMengelolaTransaksiPadaDompet($transaksi->dompet);
     }
 }

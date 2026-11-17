@@ -28,6 +28,8 @@
     <x-filament::section collapsible collapsed compact icon="heroicon-o-funnel" class="-mb-2" data-testid="filter-transaksi-section">
         <x-slot name="heading">Filter transaksi</x-slot>
 
+        <div class="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Periode transaksi</div>
+
         {{-- Desktop (lg): 1 baris [Periode] [Sumber Dana] [Kas] [Reset]. Layar sempit: Periode penuh, Sumber Dana & Kas 2 kolom, Reset penuh. --}}
         <div class="grid grid-cols-2 items-center gap-2 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto]">
 
@@ -42,7 +44,7 @@
                 <div class="flex h-9 min-w-0 flex-1 items-center overflow-visible rounded-lg border border-gray-400 bg-gray-100 shadow-sm dark:border-white/10 dark:bg-white/5 lg:flex-none">
                     <x-filament::icon icon="heroicon-m-calendar-days" class="ml-2.5 h-4 w-4 shrink-0 text-gray-700 dark:text-gray-400" />
 
-                    <div x-data="{ open: false }" class="relative h-full min-w-0 flex-1 lg:w-32 lg:flex-none">
+                    <div x-data="{ open: false }" class="relative h-full w-36">
                         <button type="button" aria-label="Bulan" aria-haspopup="menu" :aria-expanded="open.toString()" @click="open = !open" @keydown.escape="open = false" class="flex h-full w-full items-center justify-between border-0 bg-transparent py-0 pl-2 pr-2 text-sm font-semibold text-gray-950 focus:outline-none dark:text-white">
                             <span class="truncate">{{ $bulanOptions[$filterMonth] ?? 'Bulan' }}</span>
                             <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="h-4 w-4 shrink-0 text-gray-600 dark:text-gray-300" />
@@ -56,7 +58,7 @@
 
                     <span class="h-4 w-px shrink-0 bg-gray-400 dark:bg-white/20"></span>
 
-                    <div x-data="{ open: false }" class="relative h-full w-[4.75rem] shrink-0">
+                    <div x-data="{ open: false }" class="relative h-full w-24">
                         <button type="button" aria-label="Tahun" aria-haspopup="menu" :aria-expanded="open.toString()" @click="open = !open" @keydown.escape="open = false" class="flex h-full w-full items-center justify-between border-0 bg-transparent py-0 pl-2.5 pr-2 text-sm font-semibold text-gray-950 focus:outline-none dark:text-white">
                             <span>{{ $filterYear }}</span>
                             <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="h-4 w-4 shrink-0 text-gray-600 dark:text-gray-300" />
@@ -82,7 +84,7 @@
                 <div x-data="{ open: false }" class="relative h-full min-w-0 flex-1">
                     <button id="sumber-dana-filter" type="button" aria-label="Sumber Dana" aria-haspopup="menu" :aria-expanded="open.toString()" @click="open = !open" @keydown.escape="open = false" class="flex h-full w-full items-center justify-between border-0 bg-transparent py-0 pl-2 pr-2 text-left text-sm font-semibold text-gray-950 focus:outline-none dark:text-white">
                         <span class="truncate">{{ filled($filterDompet) ? ($dompetOptions[$filterDompet] ?? 'Sumber Dana') : 'Semua Sumber Dana' }}</span>
-                        <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="ml-1 h-4 w-4 shrink-0 text-gray-600 dark:text-gray-300" />
+                        <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="ml-2 h-5 w-5 shrink-0 text-gray-600 dark:text-gray-300" />
                     </button>
                     <div x-cloak x-show="open" @click.outside="open = false" role="menu" aria-label="Pilih sumber dana" class="absolute left-0 top-full z-50 mt-1 max-h-60 min-w-full overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
                         <a role="menuitem" aria-current="{{ blank($filterDompet) ? 'true' : 'false' }}" href="{{ $filterUrl($filterBukuKas ?? '', '') }}" class="block whitespace-nowrap px-3 py-1.5 text-sm {{ blank($filterDompet) ? 'bg-teal-700 text-white dark:bg-teal-700' : 'text-gray-900 hover:bg-teal-700 hover:text-white dark:text-gray-100 dark:hover:bg-teal-600' }}">Semua Sumber Dana</a>
@@ -99,7 +101,7 @@
                 <div x-data="{ open: false }" class="relative h-full min-w-0 flex-1">
                     <button id="buku-kas-filter" type="button" aria-label="Kas" aria-haspopup="menu" :aria-expanded="open.toString()" @click="open = !open" @keydown.escape="open = false" class="flex h-full w-full items-center justify-between border-0 bg-transparent py-0 pl-2 pr-2 text-left text-sm font-semibold text-gray-950 focus:outline-none dark:text-white">
                         <span class="truncate">{{ filled($filterBukuKas) ? ($bukuKasOptions[$filterBukuKas] ?? 'Kas') : 'Semua Kas' }}</span>
-                        <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="ml-1 h-4 w-4 shrink-0 text-gray-600 dark:text-gray-300" />
+                        <x-filament::icon icon="heroicon-o-chevron-down" data-testid="transaction-select-chevron" class="ml-2 h-5 w-5 shrink-0 text-gray-600 dark:text-gray-300" />
                     </button>
                     <div x-cloak x-show="open" @click.outside="open = false" role="menu" aria-label="Pilih kas" class="absolute right-0 top-full z-50 mt-1 max-h-60 min-w-full overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800 lg:left-0 lg:right-auto">
                         <a role="menuitem" aria-current="{{ blank($filterBukuKas) ? 'true' : 'false' }}" href="{{ $filterUrl('') }}" class="block whitespace-nowrap px-3 py-1.5 text-sm {{ blank($filterBukuKas) ? 'bg-teal-700 text-white dark:bg-teal-700' : 'text-gray-900 hover:bg-teal-700 hover:text-white dark:text-gray-100 dark:hover:bg-teal-600' }}">Semua Kas</a>
