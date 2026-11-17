@@ -105,6 +105,17 @@ class BukuKasResource extends Resource
                         ->prefix('Saldo: Rp ')
                         ->numeric()
                         ->sortable()
+                        ->color(function (int $state): string {
+                            if ($state > 0) {
+                                return 'success';
+                            }
+
+                            if ($state < 0) {
+                                return 'danger';
+                            }
+
+                            return 'gray';
+                        })
                         ->counts(['transaksi', 'tabunganEmas'])
                         ->description(fn (BukuKas $record): string => 'Jumlah transaksi: '.number_format($record->transaksi_count, 0, ',', '.')
                             .(app(PengaturanTabunganEmas::class)->aktif() && $record->tabungan_emas_count > 0

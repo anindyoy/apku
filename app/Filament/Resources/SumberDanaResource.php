@@ -71,7 +71,17 @@ class SumberDanaResource extends Resource
                                 TextColumn::make('saldo')
                                     ->prefix('Saldo: Rp ')
                                     ->numeric()
-                                    ->color(fn (int $state): string => $state < 0 ? 'danger' : 'gray'),
+                                    ->color(function (int $state): string {
+                                        if ($state > 0) {
+                                            return 'success';
+                                        }
+
+                                        if ($state < 0) {
+                                            return 'danger';
+                                        }
+
+                                        return 'gray';
+                                    }),
                             ])->space(3),
                             Stack::make([
                                 TextColumn::make('is_default')
@@ -92,12 +102,12 @@ class SumberDanaResource extends Resource
                                     ->formatStateUsing(fn (bool $state): string => $state ? 'Aktif' : 'Nonaktif')
                                     ->badge()
                                     ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
-                                TextColumn::make('description')
-                                    ->label('Deskripsi')
-                                    ->prefix('Deskripsi: ')
-                                    ->wrap()
-                                    ->columnSpanFull(),
                             ])->space(3),
+                            TextColumn::make('description')
+                                ->label('Deskripsi')
+                                ->prefix('Deskripsi: ')
+                                ->wrap()
+                                ->columnSpanFull(),
                         ]),
                 ])->space(3),
             ])
