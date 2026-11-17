@@ -379,6 +379,24 @@ test('action transfer mengizinkan saldo keluar dari dompet terbatas', function (
         ->and($cash->fresh()->saldo)->toBe(120000);
 });
 
+test('action hapus dompet dengan saldo nol hanya menghapus tanpa form tambahan', function () {
+    ['user' => $user, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+    $bank = Dompet::create([
+        'user_id' => $user->id,
+        'nama_dompet' => 'Bank Nol',
+        'saldo' => 0,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListDompet::class)
+        ->assertTableActionVisible('pindahkanDanHapus', $bank)
+        ->callTableAction('pindahkanDanHapus', $bank)
+        ->assertHasNoTableActionErrors();
+
+    expect(Dompet::withTrashed()->findOrFail($bank->id)->trashed())->toBeTrue()
+        ->and($cash->fresh()->saldo)->toBe(100000);
+});
+
 test('action hapus dompet memindahkan saldo dan melakukan soft delete', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
     $bank = Dompet::create([

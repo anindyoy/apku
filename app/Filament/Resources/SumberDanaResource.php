@@ -92,7 +92,11 @@ class SumberDanaResource extends Resource
                                     ->formatStateUsing(fn (bool $state): string => $state ? 'Aktif' : 'Nonaktif')
                                     ->badge()
                                     ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
-                                TextColumn::make('description')->label('Deskripsi')->prefix('Deskripsi: ')->wrap(),
+                                TextColumn::make('description')
+                                    ->label('Deskripsi')
+                                    ->prefix('Deskripsi: ')
+                                    ->wrap()
+                                    ->columnSpanFull(),
                             ])->space(3),
                         ]),
                 ])->space(3),
@@ -155,7 +159,11 @@ class SumberDanaResource extends Resource
                         && $record->is_active
                         && auth()->user()->dapatMengelolaTransaksiPadaDompet($record)
                         && auth()->user()->sumberDana()->aktif()->count() > 1)
-                    ->form(fn (SumberDana $record): array => [
+                    ->modalHeading(fn (SumberDana $record): string => (int) $record->saldo === 0 ? 'Hapus sumber dana' : 'Pindahkan saldo dan hapus sumber dana')
+                    ->modalDescription(fn (SumberDana $record): string => (int) $record->saldo === 0
+                        ? 'Sumber dana ini sudah memiliki saldo Rp0. Anda dapat menghapusnya tanpa memindahkan saldo.'
+                        : 'Sumber dana ini masih memiliki saldo. Pilih sumber dana tujuan dan kas pencatatan untuk memindahkan saldo sebelum menghapusnya.')
+                    ->form(fn (SumberDana $record): array => (int) $record->saldo === 0 ? [] : [
                         SelectKasDanSumberDana::terapkan(
                             Select::make('dompet_tujuan_id')
                                 ->label('Sumber dana tujuan')
@@ -174,7 +182,13 @@ class SumberDanaResource extends Resource
                                 ->required()
                         ),
                     ])
-                    ->action(function (SumberDana $record, array $data): void {
+                    ->action(function (SumberDana $record, array $data = []): void {
+                        if ((int) $record->saldo === 0) {
+                            app(TransferDompetService::class)->hapusTanpaTransfer(auth()->user(), $record);
+
+                            return;
+                        }
+
                         app(TransferDompetService::class)->pindahkanSaldoDanHapus(
                             auth()->user(),
                             $record,

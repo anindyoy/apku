@@ -94,6 +94,30 @@ class TransferDompetService
         return DB::transactionLevel() > 0 ? $prosesTransfer() : DB::transaction($prosesTransfer);
     }
 
+    public function hapusTanpaTransfer(User $user, SumberDana $sumberDana): void
+    {
+        if (
+            $sumberDana->user_id !== $user->id
+            || ! $user->dapatMengelolaTransaksiPadaDompet($sumberDana)
+        ) {
+            throw new AuthorizationException('Sumber dana tidak dapat dikelola.');
+        }
+
+        if ($user->sumberDana()->aktif()->count() <= 1) {
+            throw ValidationException::withMessages(['sumber_dana' => 'Sumber dana terakhir tidak dapat dihapus.']);
+        }
+
+        if ($sumberDana->is_default) {
+            throw ValidationException::withMessages(['sumber_dana' => 'Sumber dana default tidak dapat dihapus.']);
+        }
+
+        if ((int) $sumberDana->saldo !== 0) {
+            throw ValidationException::withMessages(['sumber_dana' => 'Sumber dana dengan saldo tidak dapat dihapus tanpa transfer.']);
+        }
+
+        $sumberDana->delete();
+    }
+
     public function pindahkanSaldoDanHapus(
         User $user,
         SumberDana $sumberDanaAsal,
@@ -121,6 +145,12 @@ class TransferDompetService
 
         if ($sumberDanaAsal->is($sumberDanaTujuan)) {
             throw ValidationException::withMessages(['sumber_dana_tujuan_id' => 'Sumber dana tujuan harus berbeda dari sumber dana yang dihapus.']);
+        }
+
+        if ((int) $sumberDanaAsal->saldo === 0) {
+            $this->hapusTanpaTransfer($user, $sumberDanaAsal);
+
+            return;
         }
 
         $prosesPenghapusan = function () use ($user, $sumberDanaAsal, $sumberDanaTujuan, $bukuKas): void {
