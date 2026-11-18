@@ -16,6 +16,13 @@ test('cache dashboard bertahan tiga puluh menit dan terpisah per pengguna', func
     $database->shouldReceive('transactionLevel')->andReturn(0);
     DB::swap($database);
     Cache::flush();
+    // Hindari tercampurnya version key antar proses/shard pada cache non-array.
+    $reflection = new ReflectionClass(DashboardCache::class);
+    foreach ($reflection->getConstant('DEPENDENCIES') as $tables) {
+        foreach ($tables as $table) {
+            Cache::forget('dashboard:version:'.$table);
+        }
+    }
     $calls = 0;
     $load = function () use (&$calls) {
         return ++$calls;
