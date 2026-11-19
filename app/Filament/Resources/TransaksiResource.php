@@ -145,6 +145,10 @@ class TransaksiResource extends Resource
         return ViewColumn::make('ringkasan_mobile')
             ->label('Transaksi')
             ->view('filament.tables.columns.transaksi-mobile')
+            ->viewData(fn ($livewire): array => [
+                'filterKasAktif' => filled($livewire->filterBukuKas ?? $livewire->tableFilters['buku_kas_id']['value'] ?? null),
+                'filterSumberDanaAktif' => filled($livewire->filterDompet ?? $livewire->tableFilters['dompet_id']['value'] ?? null),
+            ])
             ->hiddenFrom('md');
     }
 

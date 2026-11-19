@@ -226,6 +226,32 @@ test('filter buku kas - filterBukuKas hanya tampilkan transaksi dari buku kas te
 })
     ->group('filament', 'transaksi', 'filter-buku-kas');
 
+test('filter kas menyembunyikan transfer sumber dana dari hasil', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+
+    $transaksiBiasa = Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Pemasukan',
+        'tanggal' => now(),
+    ]);
+    $transferSumberDana = Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Transfer Pemasukan',
+        'tipe_transfer' => 'dompet',
+        'tanggal' => now(),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id])
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$transaksiBiasa])
+        ->assertCanNotSeeTableRecords([$transferSumberDana]);
+})
+    ->group('filament', 'transaksi', 'filter-buku-kas');
+
 test('filter buku kas - filterBukuKas kosong tampilkan semua transaksi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas1 = $user->buku_kas()->first();

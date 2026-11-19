@@ -165,7 +165,11 @@ class ListTransaksis extends ListRecords
         }
 
         if ($query && ! empty($this->filterBukuKas)) {
-            $query->where('buku_kas_id', $this->filterBukuKas);
+            $query->where('buku_kas_id', $this->filterBukuKas)
+                ->where(function (Builder $query): void {
+                    $query->whereNull('tipe_transfer')
+                        ->orWhere('tipe_transfer', '!=', 'dompet');
+                });
         }
 
         if ($query && ! empty($this->filterDompet)) {

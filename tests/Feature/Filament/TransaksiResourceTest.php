@@ -86,15 +86,61 @@ test('ringkasan mobile menampilkan deskripsi dan saldo akhir saat filter kas akt
     ]);
 
     $html = Livewire::actingAs($user)
-        ->test(ListTransaksis::class, [
-            'filterBukuKas' => (string) $bukuKas->id,
-        ])
+        ->withQueryParams(['filter_buku_kas' => (string) $bukuKas->id])
+        ->test(ListTransaksis::class)
         ->assertSuccessful()
         ->html();
 
     expect($html)
         ->toContain('Deskripsi: Setoran awal')
-        ->toContain('Saldo kas:');
+        ->toContain('Saldo Kas');
+})
+    ->group('filament', 'transaksi', 'mobile-saldo-deskripsi');
+
+test('ringkasan mobile menampilkan saldo akhir saat filter kas berasal dari URL', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+
+    Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Pemasukan',
+        'nominal' => 75000,
+        'tanggal' => now(),
+    ]);
+
+    $html = Livewire::actingAs($user)
+        ->withQueryParams(['filter_buku_kas' => (string) $bukuKas->id])
+        ->test(ListTransaksis::class)
+        ->assertSuccessful()
+        ->html();
+
+    expect($html)
+        ->toContain('Saldo Kas')
+        ->toContain('Rp 75.000');
+})
+    ->group('filament', 'transaksi', 'mobile-saldo-deskripsi');
+
+test('ringkasan mobile tidak menampilkan saldo kas untuk transfer sumber dana', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+
+    Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Transfer Pemasukan',
+        'tipe_transfer' => 'dompet',
+        'nominal' => 25000,
+        'tanggal' => now(),
+    ]);
+
+    $html = Livewire::actingAs($user)
+        ->withQueryParams(['filter_buku_kas' => (string) $bukuKas->id])
+        ->test(ListTransaksis::class)
+        ->assertSuccessful()
+        ->html();
+
+    expect($html)->not->toContain('Saldo Kas');
 })
     ->group('filament', 'transaksi', 'mobile-saldo-deskripsi');
 
@@ -220,13 +266,18 @@ test('daftar transaksi mobile menampilkan ringkasan tanpa kolom desktop', functi
         ->assertCanSeeTableRecords([$transaksi])
         ->html();
 
+    $bukuKas = $user->buku_kas()->firstOrFail();
+    $sumberDana = $user->sumberDana()->firstOrFail();
+
     expect($html)
         ->toContain('data-transaksi-mobile')
         ->toContain('data-tone="success"')
-        ->toContain('transaction-mobile-amount')
+        ->toContain('transaction-mobile-summary')
         ->toContain('Rp 123.456')
-        ->toContain('Kas: '.$user->buku_kas()->firstOrFail()->nama_buku)
-        ->toContain('Sumber Dana: '.$user->sumberDana()->firstOrFail()->nama_dompet)
+        ->toContain('Kas:')
+        ->toContain($bukuKas->nama_buku)
+        ->toContain('Sumber Dana:')
+        ->toContain($sumberDana->nama_dompet)
         ->toContain('fi-ta-table-stacked-on-mobile');
 
     expect(Livewire::actingAs($user)->test(ListTransaksis::class)->instance()->getTable()->getRecordAction($transaksi))
