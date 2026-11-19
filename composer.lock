@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a4f81541bd810dc36b4e26ae26afa51",
+    "content-hash": "cff0a442ea19d7415a20e79e40899cf0",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -720,6 +720,79 @@
                 "source": "https://github.com/DASPRiD/Enum/tree/1.0.7"
             },
             "time": "2025-09-16T12:23:56+00:00"
+        },
+        {
+            "name": "devletes/filament-chrono-picker",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/devletes/filament-chrono-picker.git",
+                "reference": "3c97823fd038b9f65e9221c56fe89a6a2295299b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/devletes/filament-chrono-picker/zipball/3c97823fd038b9f65e9221c56fe89a6a2295299b",
+                "reference": "3c97823fd038b9f65e9221c56fe89a6a2295299b",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.18",
+                "orchestra/testbench": "^10.0 || ^11.0",
+                "phpunit/phpunit": "^11.0 || ^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Devletes\\ChronoPicker\\ChronoPickerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "legacy/aliases.php"
+                ],
+                "psr-4": {
+                    "Devletes\\ChronoPicker\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Devletes",
+                    "email": "packages@devletes.com"
+                }
+            ],
+            "description": "The ultimate date and time picker for Filament: time, date, month, year and range pickers with a clock face, calendar grids and Filament's own look.",
+            "homepage": "https://github.com/devletes/filament-chrono-picker",
+            "keywords": [
+                "alpine",
+                "clock",
+                "date-picker",
+                "date-range-picker",
+                "date-time-picker",
+                "dial",
+                "filament",
+                "filament-plugin",
+                "form-component",
+                "laravel",
+                "livewire",
+                "month-picker",
+                "time-picker",
+                "year-picker"
+            ],
+            "support": {
+                "issues": "https://github.com/devletes/filament-chrono-picker/issues",
+                "source": "https://github.com/devletes/filament-chrono-picker"
+            },
+            "time": "2026-11-13T20:42:40+00:00"
         },
         {
             "name": "dflydev/dot-access-data",

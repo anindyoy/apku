@@ -1,11 +1,11 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-Btgf0JPi.css",
+    "file": "assets/app--aWo-QcJ.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/filament-toolbar.css": {
-    "file": "assets/filament-toolbar-DLn9pfmU.css",
+    "file": "assets/filament-toolbar-BhlUIC30.css",
     "src": "resources/css/filament-toolbar.css",
     "isEntry": true
   },
@@ -13,12 +13,6 @@
     "file": "assets/app-z-Rg4TxU.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
-  },
-  "resources/js/date-picker-month-nav.js": {
-    "file": "assets/date-picker-month-nav-7ukmHjuV.js",
-    "name": "date-picker-month-nav",
-    "src": "resources/js/date-picker-month-nav.js",
     "isEntry": true
   }
 }

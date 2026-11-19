@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
+        "devletes/filament-chrono-picker": "^1.1",
         "dompdf/dompdf": "^3.1",
         "dutchcodingcompany/filament-developer-logins": "^2.1",
         "filament/filament": "^5.0",
