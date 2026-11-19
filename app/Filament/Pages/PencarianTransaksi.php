@@ -41,14 +41,14 @@ class PencarianTransaksi extends Page implements HasTable
     {
         return $table
             ->query(function (): Builder {
-                $query = Transaksi::query()->with([
+                $query = TransaksiResource::queryDenganSaldo(Transaksi::query()->with([
                     'buku_kas:id,user_id,nama_buku,is_active,is_default,pernah_dikolaborasikan',
                     'kategori:id,nama',
                     'asal_buku_tabungan:id,nama_buku',
                     'tujuan_buku_tabungan:id,nama_buku',
                     'user:id,name',
                     'dompet' => fn ($query) => $query->withTrashed(),
-                ]);
+                ]));
 
                 return filled($this->getTableSearch())
                     ? $query

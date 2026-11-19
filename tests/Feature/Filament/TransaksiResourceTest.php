@@ -72,6 +72,32 @@ test('transfer sumber dana tidak menampilkan atribut kas pada daftar transaksi',
 })
     ->group('filament', 'transaksi', 'transfer-sumber-dana-kas');
 
+test('ringkasan mobile menampilkan deskripsi dan saldo akhir saat filter kas aktif', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+
+    Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Pemasukan',
+        'nominal' => 50000,
+        'deskripsi' => 'Setoran awal',
+        'tanggal' => now(),
+    ]);
+
+    $html = Livewire::actingAs($user)
+        ->test(ListTransaksis::class, [
+            'filterBukuKas' => (string) $bukuKas->id,
+        ])
+        ->assertSuccessful()
+        ->html();
+
+    expect($html)
+        ->toContain('Deskripsi: Setoran awal')
+        ->toContain('Saldo kas:');
+})
+    ->group('filament', 'transaksi', 'mobile-saldo-deskripsi');
+
 test('warna record transaksi dibedakan berdasarkan tipe transaksi', function () {
     expect(TransaksiResource::getWarnaTipeTransaksi('Pemasukan'))->toBe('success')
         ->and(TransaksiResource::getWarnaTipeTransaksi('Pengeluaran'))->toBe('danger')
