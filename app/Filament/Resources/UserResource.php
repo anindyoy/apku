@@ -13,7 +13,7 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -50,8 +50,8 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->placeholder('contoh@email.com'),
-                DateTimePicker::make('email_verified_at'),
-                DateTimePicker::make('masa_aktif'),
+                DatePicker::make('email_verified_at'),
+                DatePicker::make('masa_aktif'),
                 TextInput::make('password')
                     ->password()
                     ->required()

@@ -8,6 +8,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/filament-toolbar.css',
                 'resources/js/app.js',
+                'resources/js/date-picker-month-nav.js',
             ],
             refresh: true,
         }),

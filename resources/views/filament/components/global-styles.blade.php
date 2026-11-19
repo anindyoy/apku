@@ -1,1 +1,1 @@
-@vite('resources/css/filament-toolbar.css')
+@vite(['resources/css/filament-toolbar.css', 'resources/js/date-picker-month-nav.js'])

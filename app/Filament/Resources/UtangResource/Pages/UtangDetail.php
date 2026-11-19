@@ -11,7 +11,7 @@ use App\Models\UtangPiutangDetail as ModelsUtangPiutangDetail;
 use Filament\Actions\Action;
 use Filament\Actions\Action as ActionsAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -207,7 +207,7 @@ class UtangDetail extends Page implements HasTable
                                 ->placeholder('Contoh: 500.000')
                         ),
 
-                        DateTimePicker::make('created_at')
+                        DatePicker::make('created_at')
                             ->default(now())
                             ->maxDate(now())
                             ->label('Tanggal')

@@ -10,7 +10,7 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 // use Filament\Support\Enums\MaxWidth; // Removed for Filament v5
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -125,7 +125,7 @@ class UtangPiutang extends Model
                     ->placeholder('Contoh: 50.000')
             ),
 
-            DateTimePicker::make('created_at')
+            DatePicker::make('created_at')
                 ->default(now())
                 ->maxDate(now())
                 ->label('Tanggal')
@@ -136,7 +136,7 @@ class UtangPiutang extends Model
                 ->dehydrated(false)
                 ->live(),
 
-            DateTimePicker::make('tempo')
+            DatePicker::make('tempo')
                 ->minDate(now()->addDay())
                 ->required()
                 ->native(false)
