@@ -181,7 +181,8 @@ class TransaksiResource extends Resource
             TextColumn::make('buku_kas.nama_buku')
                 ->visibleFrom('md')
                 ->label('Kas')
-                ->description(fn (Transaksi $record): string => 'Sumber dana: '.$record->labelDompetUntuk(auth()->user()))
+                ->formatStateUsing(fn ($state, Transaksi $record): ?string => $record->tipe_transfer === 'dompet' ? null : $record->buku_kas?->nama_buku)
+                ->description(fn (Transaksi $record): ?string => $record->tipe_transfer === 'dompet' ? null : 'Sumber dana: '.$record->labelDompetUntuk(auth()->user()))
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('kategori')

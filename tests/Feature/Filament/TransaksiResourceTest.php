@@ -47,6 +47,31 @@ test('kolom kategori transaksi selalu diawali huruf kapital', function () {
 })
     ->group('filament', 'transaksi', 'kategori-kapital');
 
+test('transfer sumber dana tidak menampilkan atribut kas pada daftar transaksi', function () {
+    $user = createRegularUserWithBukuKas();
+    $bukuKas = $user->buku_kas()->firstOrFail();
+    $kasTransfer = Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Transfer Pemasukan',
+        'tipe_transfer' => 'dompet',
+        'tanggal' => now(),
+    ]);
+    $kasBiasa = Transaksi::factory()->create([
+        'user_id' => $user->id,
+        'buku_kas_id' => $bukuKas->id,
+        'jenis' => 'Pemasukan',
+        'tanggal' => now(),
+    ]);
+
+    $kolomKas = TransaksiResource::transactionColumns()[3];
+    $callback = (new ReflectionClass($kolomKas))->getProperty('formatStateUsing')->getValue($kolomKas);
+
+    expect($callback($bukuKas->nama_buku, $kasTransfer))->toBeNull()
+        ->and($callback($bukuKas->nama_buku, $kasBiasa))->toBe($bukuKas->nama_buku);
+})
+    ->group('filament', 'transaksi', 'transfer-sumber-dana-kas');
+
 test('warna record transaksi dibedakan berdasarkan tipe transaksi', function () {
     expect(TransaksiResource::getWarnaTipeTransaksi('Pemasukan'))->toBe('success')
         ->and(TransaksiResource::getWarnaTipeTransaksi('Pengeluaran'))->toBe('danger')
