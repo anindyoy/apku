@@ -419,6 +419,25 @@ test('action hapus dompet memindahkan saldo dan melakukan soft delete', function
         ->and($cash->fresh()->is_default)->toBeTrue();
 });
 
+test('transfer kas menolak kas asal dan tujuan yang sama', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
+
+    Livewire::actingAs($user)
+        ->test(ListTransaksis::class, ['filterBukuKas' => (string) $bukuKas->id])
+        ->callAction('Tambah transaksi', data: [
+            'jenis_form' => 'transfer_kas',
+            'buku_kas_id' => $bukuKas->id,
+            'buku_kas_id_tujuan' => $bukuKas->id,
+            'dompet_id' => $cash->id,
+            'dompet_id_tujuan' => $cash->id,
+            'tanggal' => now(),
+            'nominal' => 25000,
+        ])
+        ->assertHasActionErrors(['buku_kas_id_tujuan' => 'different']);
+
+    expect(Transaksi::count())->toBe(0);
+});
+
 test('transfer buku kas dengan dompet sama menjaga saldo bersih dompet', function () {
     ['user' => $user, 'bukuKas' => $bukuKas, 'cash' => $cash] = buatPenggunaUntukUiDompet();
     $bukuKasTujuan = BukuKas::create([
@@ -437,7 +456,6 @@ test('transfer buku kas dengan dompet sama menjaga saldo bersih dompet', functio
             'dompet_id_tujuan' => $cash->id,
             'tanggal' => now(),
             'nominal' => 25000,
-            'deskripsi' => 'Transfer buku dengan dompet sama',
         ])
         ->assertHasNoActionErrors();
 

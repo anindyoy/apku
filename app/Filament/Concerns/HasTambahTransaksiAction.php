@@ -434,6 +434,9 @@ trait HasTambahTransaksiAction
                                     fn ($id): bool => (int) $id !== (int) $get('buku_kas_id'),
                                     ARRAY_FILTER_USE_KEY,
                                 )))
+                            ->different(fn (Get $get): string => $get('jenis_form') === 'transfer_kas'
+                                ? 'buku_kas_id'
+                                : 'buku_kas_id_tidak_digunakan')
                             ->required()
                             ->visible(fn (Get $get): bool => $get('jenis_form') === 'transfer_kas'),
                         $this->selectDompetDenganOpsiTambah(
