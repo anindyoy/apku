@@ -6,21 +6,21 @@
 <div
     x-data="{ open: false }"
     @keydown.escape.window="open = false"
-    class="mb-4 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 shadow-sm [&:is(.dark_*)]:border-yellow-900 [&:is(.dark_*)]:bg-yellow-950/30 [&:is(.dark_*)]:text-yellow-100"
+    class="mb-4 rounded-xl !border-yellow-300 !bg-yellow-50 p-3 text-sm !text-yellow-800 shadow-sm [&:is(.dark_*)]:!border-yellow-400 [&:is(.dark_*)]:!bg-yellow-100 [&:is(.dark_*)]:!text-yellow-900"
     role="status" aria-live="polite"
 >
     <div class="flex flex-wrap items-center justify-between gap-3">
         <p class="flex items-center gap-2 font-medium leading-relaxed">
             <x-filament::icon
                 :icon="$pemeriksaanSaldo['seimbang'] ? 'heroicon-o-check-circle' : 'heroicon-o-exclamation-triangle'"
-                class="size-4 flex-shrink-0 text-yellow-600 [&:is(.dark_*)]:text-yellow-400"
+                class="size-4 flex-shrink-0 !text-yellow-600 [&:is(.dark_*)]:!text-yellow-700"
             />
             <span>{{ $pemeriksaanSaldo['seimbang'] ? 'Saldo kas dan sumber dana seimbang.' : 'Total saldo kas dan sumber dana tidak cocok.' }}</span>
         </p>
         <button
             type="button"
             @click="open = true"
-            class="inline-flex items-center gap-1 rounded-lg border border-yellow-300 bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-700 shadow-sm transition hover:bg-yellow-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 [&:is(.dark_*)]:border-yellow-800 [&:is(.dark_*)]:bg-yellow-900/40 [&:is(.dark_*)]:text-yellow-200 [&:is(.dark_*)]:hover:bg-yellow-900/60"
+            class="inline-flex items-center gap-1 rounded-lg !border-yellow-400 !bg-yellow-200 px-2.5 py-1 text-xs font-medium !text-yellow-800 shadow-sm transition hover:!bg-yellow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 [&:is(.dark_*)]:!border-yellow-500 [&:is(.dark_*)]:!bg-yellow-300 [&:is(.dark_*)]:!text-yellow-900 [&:is(.dark_*)]:hover:!bg-yellow-400"
             aria-haspopup="dialog"
             :aria-expanded="open"
         >
