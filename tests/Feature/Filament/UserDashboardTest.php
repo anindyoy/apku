@@ -283,7 +283,9 @@ test('dashboard user menghubungkan tombol kartu dengan panel konten', function (
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
     $cards = $xpath->query('//section[@data-section]');
-    expect($cards->length)->toBe(4);
+    expect($cards->length)->toBe(5)
+        ->and(array_map(fn ($card) => $card->getAttribute('data-section'), iterator_to_array($cards)))
+        ->toBe(['kas', 'dompet', 'utang-piutang', 'transaksi', 'langganan']);
     foreach ($cards as $card) {
         $key = $card->getAttribute('data-section');
         $button = $xpath->query('.//button[@id="dashboard-toggle-'.$key.'"]', $card)->item(0);
