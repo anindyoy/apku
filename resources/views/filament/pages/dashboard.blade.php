@@ -227,6 +227,11 @@
                         @endif
                         <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $totalSaldo, 0, ',', '.') }}</p>
                         <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">{{ $caption }}</p>
+                        @if ($manageUrl)
+                            <div class="dashboard-actions mt-3">
+                                <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.$itemLabel">Kelola</x-filament::button>
+                            </div>
+                        @endif
                         <div
                             @if ($hasSearch)
                                 x-data="{
@@ -382,7 +387,7 @@
                             <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">Trial Premium: {{ ($data['trial']['sisa'] ?? 0) === 0 ? 'berakhir hari ini' : ($data['trial']['sisa'] ?? 0).' hari tersisa' }} sampai {{ $data['trial']['berakhir'] ?? '-' }}.</p>
                         @endif
                                 @endif
-                                @if ($manageUrl)
+                                @if ($manageUrl && ! in_array($itemKey, ['kas', 'dompet'], true))
                                     <div class="dashboard-footer mt-3 border-t border-[color:var(--dash-line)] pt-3">
                                         <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.$itemLabel">Kelola</x-filament::button>
                                     </div>
