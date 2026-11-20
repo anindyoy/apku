@@ -51,7 +51,7 @@
                     </button>
                 </div>
             @endif
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-[18px]">
+            <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-12 lg:gap-[18px]">
             @forelse ($sections as $section)
                 @php
                     $key = $section['key'];
@@ -62,7 +62,7 @@
                     wire:key="dashboard-{{ $key }}"
                     data-section="{{ $key }}"
                     @class([
-                        'dashboard-card min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white [--accent:#f59e0b] [&:is(.dark_*)]:border-gray-800 [&:is(.dark_*)]:bg-gray-900 [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2',
+                        'dashboard-card self-start min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white [--accent:#f59e0b] [&:is(.dark_*)]:border-gray-800 [&:is(.dark_*)]:bg-gray-900 [&_.fi-ta-header-cell]:!py-2 sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2 sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2',
                         'lg:col-span-6' => in_array($key, ['kas', 'dompet', 'utang-piutang', 'langganan'], true),
                         'lg:col-span-12' => $key === 'transaksi',
                     ])
@@ -82,7 +82,8 @@
                                 {{ $section['label'] }}
                             </span>
                             <span class="grid size-[30px] shrink-0 place-items-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 [&:is(.dark_*)]:border-slate-700 [&:is(.dark_*)]:bg-slate-800/70 [&:is(.dark_*)]:text-slate-400">
-                                <x-filament::icon icon="heroicon-o-chevron-down" class="size-4 transition-transform" x-bind:class="open['{{ $key }}'] ? 'rotate-180' : ''" aria-hidden="true" />
+                                <x-filament::icon icon="heroicon-o-chevron-down" class="dashboard-toggle-icon size-4 transition-transform" x-show="! open['{{ $key }}']" x-cloak aria-hidden="true" />
+                                <x-filament::icon icon="heroicon-o-chevron-up" class="dashboard-toggle-icon size-4 transition-transform" x-show="open['{{ $key }}']" x-cloak aria-hidden="true" />
                             </span>
                         </button>
                     </h2>

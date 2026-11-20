@@ -217,8 +217,8 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     $cardDompet = $xpath->query('//section[@data-section="dompet"]')->item(0);
     expect($cardKas->getAttribute('class'))->toContain('dashboard-card');
     expect($cardDompet->getAttribute('class'))->toContain('dashboard-card');
-    expect($xpath->query('//button[@id="dashboard-toggle-kas"]//*[local-name()="svg"]')->length)->toBe(2);
-    expect($xpath->query('//button[@id="dashboard-toggle-dompet"]//*[local-name()="svg"]')->length)->toBe(2);
+    expect($xpath->query('//button[@id="dashboard-toggle-kas"]//*[contains(@class,"dashboard-toggle-icon")][local-name()="svg"]')->length)->toBe(2);
+    expect($xpath->query('//button[@id="dashboard-toggle-dompet"]//*[contains(@class,"dashboard-toggle-icon")][local-name()="svg"]')->length)->toBe(2);
     foreach (['kas' => 'Rp 100.000', 'dompet' => 'Rp 80.000'] as $key => $total) {
         $card = $key === 'kas' ? $cardKas : $cardDompet;
         $feature = $xpath->query('.//*[@data-dashboard-item="'.$key.'"]', $card)->item(0);
