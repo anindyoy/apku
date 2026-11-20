@@ -225,13 +225,17 @@
                         @if ($pemeriksaanSaldo && ! $pemeriksaanSaldo['seimbang'])
                             <p class="mb-1 text-xs font-semibold text-amber-800 [&:is(.dark_*)]:text-amber-200">Bagian dari total yang tidak cocok. <a class="underline underline-offset-2" href="{{ \App\Filament\Resources\AuditSaldoDompetResource::getUrl() }}">Cocokkan Saldo</a></p>
                         @endif
-                        <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $totalSaldo, 0, ',', '.') }}</p>
-                        <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">{{ $caption }}</p>
-                        @if ($manageUrl)
-                            <div class="dashboard-actions mt-3">
-                                <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.$itemLabel">Kelola</x-filament::button>
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $totalSaldo, 0, ',', '.') }}</p>
+                                <p class="dashboard-caption mt-1 text-xs leading-normal text-[color:var(--dash-muted)]">{{ $caption }}</p>
                             </div>
-                        @endif
+                            @if ($manageUrl)
+                                <div class="dashboard-actions flex-shrink-0">
+                                    <x-filament::button tag="a" :href="$manageUrl" color="gray" icon="heroicon-o-cog-6-tooth" :aria-label="'Kelola '.$itemLabel">Kelola</x-filament::button>
+                                </div>
+                            @endif
+                        </div>
                         <div
                             @if ($hasSearch)
                                 x-data="{
