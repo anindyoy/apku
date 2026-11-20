@@ -20,7 +20,7 @@
         <button
             type="button"
             @click="open = true"
-            class="inline-flex items-center gap-1 rounded-lg border border-yellow-300 bg-white px-2.5 py-1 text-xs font-medium text-yellow-700 shadow-sm transition hover:bg-yellow-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 [&:is(.dark_*)]:border-yellow-800 [&:is(.dark_*)]:bg-yellow-900/40 [&:is(.dark_*)]:text-yellow-200 [&:is(.dark_*)]:hover:bg-yellow-900/60"
+            class="inline-flex items-center gap-1 rounded-lg border border-yellow-300 bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-700 shadow-sm transition hover:bg-yellow-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 [&:is(.dark_*)]:border-yellow-800 [&:is(.dark_*)]:bg-yellow-900/40 [&:is(.dark_*)]:text-yellow-200 [&:is(.dark_*)]:hover:bg-yellow-900/60"
             aria-haspopup="dialog"
             :aria-expanded="open"
         >
