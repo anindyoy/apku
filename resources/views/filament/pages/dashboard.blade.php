@@ -164,15 +164,7 @@
                     </div>
                     <div id="dashboard-content-{{ $key }}" x-show="open['{{ $key }}']" x-cloak class="px-4 pb-4 md:px-5 md:pb-5">
                     @if ($pemeriksaanSaldo)
-                        <div @class([
-                            'mb-4 rounded-lg border p-3 text-sm',
-                            'border-emerald-300 bg-emerald-50 text-emerald-900 [&:is(.dark_*)]:border-emerald-800 [&:is(.dark_*)]:bg-emerald-950/40 [&:is(.dark_*)]:text-emerald-200' => $pemeriksaanSaldo['seimbang'],
-                            'border-amber-300 bg-amber-50 text-amber-950 [&:is(.dark_*)]:border-amber-800 [&:is(.dark_*)]:bg-amber-950/40 [&:is(.dark_*)]:text-amber-100' => ! $pemeriksaanSaldo['seimbang'],
-                        ]) role="status" aria-live="polite">
-                            <p class="font-semibold">{{ $pemeriksaanSaldo['seimbang'] ? 'Saldo kas dan sumber dana seimbang' : 'Total saldo kas dan sumber dana tidak cocok' }}</p>
-                            <p class="mt-1">Total {{ $pemeriksaanSaldo['cakupan_kas'] }}: Rp {{ number_format($pemeriksaanSaldo['saldo_kas'], 0, ',', '.') }} · Total sumber dana: Rp {{ number_format($pemeriksaanSaldo['saldo_sumber_dana'], 0, ',', '.') }}.</p>
-                            <p class="mt-1">{{ $pemeriksaanSaldo['seimbang'] ? 'Selisih Rp 0.' : 'Selisih '.($pemeriksaanSaldo['selisih'] > 0 ? 'lebih pada kas' : 'lebih pada sumber dana').': Rp '.number_format(abs($pemeriksaanSaldo['selisih']), 0, ',', '.').'.' }} Pemeriksaan total tidak memastikan setiap akun cocok; periksa tiap sumber dana melalui <a class="font-semibold underline underline-offset-2" href="{{ \App\Filament\Resources\AuditSaldoDompetResource::getUrl() }}">Cocokkan Saldo</a>.</p>
-                        </div>
+                        @include('filament.components.dashboard-saldo-modal', ['pemeriksaanSaldo' => $pemeriksaanSaldo, 'key' => $key])
                     @endif
                     <div @class(['grid gap-5', 'sm:grid-cols-2' => count($items) > 1])>
                         @foreach ($items as $itemKey)

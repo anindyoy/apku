@@ -50,15 +50,16 @@ test('dashboard menampilkan selisih dan tautan cocokkan saldo hanya saat fitur a
 
     Livewire::actingAs($user)->test(Dashboard::class)
         ->assertSuccessful()
-        ->assertSeeText('Total saldo kas dan sumber dana tidak cocok')
-        ->assertSeeText('Tidak cocok')
+        ->assertSeeText('Total saldo kas dan sumber dana tidak cocok.')
+        ->assertSeeText('Selengkapnya')
+        ->assertSeeText('Detail Pemeriksaan Saldo')
         ->assertSeeText('Selisih lebih pada kas: Rp 50.000.')
         ->assertSeeText('Cocokkan Saldo');
 
     $user->forceFill(['pemeriksaan_saldo_aktif' => false])->save();
     Livewire::actingAs($user->fresh())->test(Dashboard::class)
         ->assertSuccessful()
-        ->assertDontSeeText('Total saldo kas dan sumber dana tidak cocok');
+        ->assertDontSeeText('Total saldo kas dan sumber dana tidak cocok.');
 });
 
 test('dashboard mengikuti cakupan kas tabungan pada pemeriksaan', function () {
@@ -72,6 +73,8 @@ test('dashboard mengikuti cakupan kas tabungan pada pemeriksaan', function () {
 
     Livewire::actingAs($user)->test(Dashboard::class)
         ->assertSuccessful()
-        ->assertSeeText('Saldo kas dan sumber dana seimbang')
+        ->assertSeeText('Saldo kas dan sumber dana seimbang.')
+        ->assertSeeText('Selengkapnya')
+        ->assertSeeText('Detail Pemeriksaan Saldo')
         ->assertSeeText('Total kas biasa: Rp 100.000');
 });
