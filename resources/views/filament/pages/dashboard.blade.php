@@ -215,9 +215,6 @@
                             $searchNotFound = $itemKey === 'kas' ? 'Kas tidak ditemukan.' : 'Sumber dana tidak ditemukan.';
                         @endphp
                         <p class="dashboard-eyebrow mb-1 text-[.7rem] font-semibold uppercase tracking-[.08em] text-[color:var(--dash-muted)]">{{ $eyebrow }}</p>
-                        @if ($pemeriksaanSaldo && ! $pemeriksaanSaldo['seimbang'])
-                            <p class="mb-1 text-xs font-semibold text-amber-800 [&:is(.dark_*)]:text-amber-200">Bagian dari total yang tidak cocok. <a class="underline underline-offset-2" href="{{ \App\Filament\Resources\AuditSaldoDompetResource::getUrl() }}">Cocokkan Saldo</a></p>
-                        @endif
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
                                 <p class="dashboard-amount text-[clamp(1.25rem,2vw,1.75rem)] leading-[1.25] font-[750] tracking-[-.04em] tabular-nums [overflow-wrap:anywhere]">Rp {{ number_format((float) $totalSaldo, 0, ',', '.') }}</p>
