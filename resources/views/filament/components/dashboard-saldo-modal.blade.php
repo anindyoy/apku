@@ -6,18 +6,21 @@
 <div
     x-data="{ open: false }"
     @keydown.escape.window="open = false"
-    class="mb-4 rounded-lg border p-3 text-sm"
-    @class([
-        'border-emerald-300 bg-emerald-50 text-emerald-900 [&:is(.dark_*)]:border-emerald-800 [&:is(.dark_*)]:bg-emerald-950/40 [&:is(.dark_*)]:text-emerald-200' => $pemeriksaanSaldo['seimbang'],
-        'border-amber-300 bg-amber-50 text-amber-950 [&:is(.dark_*)]:border-amber-800 [&:is(.dark_*)]:bg-amber-950/40 [&:is(.dark_*)]:text-amber-100' => ! $pemeriksaanSaldo['seimbang'],
-    ])
+    class="mb-4 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 shadow-sm [&:is(.dark_*)]:border-yellow-900 [&:is(.dark_*)]:bg-yellow-950/30 [&:is(.dark_*)]:text-yellow-100"
     role="status" aria-live="polite"
 >
-    <div class="flex flex-wrap items-center justify-between gap-2">
-        <p class="font-semibold">
-            {{ $pemeriksaanSaldo['seimbang'] ? 'Saldo kas dan sumber dana seimbang.' : 'Total saldo kas dan sumber dana tidak cocok.' }}
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <p class="flex items-center gap-2 font-medium leading-relaxed">
+            <x-filament::icon icon="heroicon-o-exclamation-triangle" class="size-4 flex-shrink-0 text-yellow-600 [&:is(.dark_*)]:text-yellow-400" />
+            <span>Total saldo kas dan sumber dana tidak cocok.</span>
         </p>
-        <button type="button" @click="open = true" class="text-xs font-semibold underline underline-offset-2 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current" aria-haspopup="dialog" :aria-expanded="open">
+        <button
+            type="button"
+            @click="open = true"
+            class="inline-flex items-center gap-1 rounded-lg border border-yellow-300 bg-white px-2.5 py-1 text-xs font-medium text-yellow-700 shadow-sm transition hover:bg-yellow-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 [&:is(.dark_*)]:border-yellow-800 [&:is(.dark_*)]:bg-yellow-900/40 [&:is(.dark_*)]:text-yellow-200 [&:is(.dark_*)]:hover:bg-yellow-900/60"
+            aria-haspopup="dialog"
+            :aria-expanded="open"
+        >
             Selengkapnya
         </button>
     </div>
