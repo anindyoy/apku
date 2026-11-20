@@ -5,6 +5,7 @@ use App\Filament\Pages\Dashboard;
 use App\Models\BukuKas;
 use App\Models\SumberDana;
 use App\Models\User;
+use App\Models\UtangPiutang;
 use App\Services\PemeriksaanKeseimbanganSaldo;
 use Livewire\Livewire;
 
@@ -37,6 +38,9 @@ test('pemeriksaan menjumlahkan kas milik sendiri dan sumber dana satu kali', fun
     expect(app(PemeriksaanKeseimbanganSaldo::class)->ringkasan($user))->toBe([
         'saldo_kas' => 150000,
         'saldo_sumber_dana' => 150000,
+        'total_utang' => 0,
+        'total_piutang' => 0,
+        'harapan_sumber_dana' => 150000,
         'selisih' => 0,
         'seimbang' => true,
         'cakupan_kas' => 'kas biasa',
@@ -53,7 +57,10 @@ test('dashboard menampilkan selisih dan tautan cocokkan saldo hanya saat fitur a
         ->assertSeeText('Total saldo kas dan sumber dana tidak cocok.')
         ->assertSeeText('Selengkapnya')
         ->assertSeeText('Detail Pemeriksaan Saldo')
-        ->assertSeeText('Selisih lebih pada kas: Rp 50.000.')
+        ->assertSeeText('Sumber dana yang diharapkan')
+        ->assertSeeText('Rp 200.000')
+        ->assertSeeText('Sumber dana aktual')
+        ->assertSeeText('Rp 150.000')
         ->assertSeeText('Cocokkan Saldo');
 
     $user->forceFill(['pemeriksaan_saldo_aktif' => false])->save();
@@ -76,5 +83,29 @@ test('dashboard mengikuti cakupan kas tabungan pada pemeriksaan', function () {
         ->assertSeeText('Saldo kas dan sumber dana seimbang.')
         ->assertSeeText('Selengkapnya')
         ->assertSeeText('Detail Pemeriksaan Saldo')
-        ->assertSeeText('Total kas biasa: Rp 100.000');
+        ->assertSeeText('Total kas biasa')
+        ->assertSeeText('Rp 100.000');
+});
+
+test('pemeriksaan memasukkan utang dan piutang ke rumus pencocokan saldo', function () {
+    $user = User::factory()->create(['hitung_tabungan_di_total' => false]);
+    BukuKas::factory()->create(['user_id' => $user->id, 'saldo' => 100000, 'is_tabungan' => false]);
+    SumberDana::factory()->create(['user_id' => $user->id, 'saldo' => 130000]);
+
+    $utang = UtangPiutang::factory()->create(['user_id' => $user->id, 'tipe' => 'utang']);
+    $utang->utang_piutang_detail()->create(['tipe' => 'tambah', 'nominal' => 50000]);
+
+    $piutang = UtangPiutang::factory()->create(['user_id' => $user->id, 'tipe' => 'piutang']);
+    $piutang->utang_piutang_detail()->create(['tipe' => 'tambah', 'nominal' => 20000]);
+
+    expect(app(PemeriksaanKeseimbanganSaldo::class)->ringkasan($user))->toMatchArray([
+        'saldo_kas' => 100000,
+        'saldo_sumber_dana' => 130000,
+        'total_utang' => 50000,
+        'total_piutang' => 20000,
+        'harapan_sumber_dana' => 130000,
+        'selisih' => 0,
+        'seimbang' => true,
+        'cakupan_kas' => 'kas biasa',
+    ]);
 });

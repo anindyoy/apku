@@ -11,8 +11,11 @@
 >
     <div class="flex flex-wrap items-center justify-between gap-3">
         <p class="flex items-center gap-2 font-medium leading-relaxed">
-            <x-filament::icon icon="heroicon-o-exclamation-triangle" class="size-4 flex-shrink-0 text-yellow-600 [&:is(.dark_*)]:text-yellow-400" />
-            <span>Total saldo kas dan sumber dana tidak cocok.</span>
+            <x-filament::icon
+                :icon="$pemeriksaanSaldo['seimbang'] ? 'heroicon-o-check-circle' : 'heroicon-o-exclamation-triangle'"
+                class="size-4 flex-shrink-0 text-yellow-600 [&:is(.dark_*)]:text-yellow-400"
+            />
+            <span>{{ $pemeriksaanSaldo['seimbang'] ? 'Saldo kas dan sumber dana seimbang.' : 'Total saldo kas dan sumber dana tidak cocok.' }}</span>
         </p>
         <button
             type="button"
@@ -60,10 +63,38 @@
                 </button>
             </div>
             <div class="space-y-3 p-4 text-sm text-gray-600 dark:text-gray-300">
-                <p>Total {{ $pemeriksaanSaldo['cakupan_kas'] }}: <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($pemeriksaanSaldo['saldo_kas'], 0, ',', '.') }}</span></p>
-                <p>Total sumber dana: <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($pemeriksaanSaldo['saldo_sumber_dana'], 0, ',', '.') }}</span></p>
-                <p>{{ $pemeriksaanSaldo['seimbang'] ? 'Selisih Rp 0.' : 'Selisih '.($pemeriksaanSaldo['selisih'] > 0 ? 'lebih pada kas' : 'lebih pada sumber dana').': Rp '.number_format(abs($pemeriksaanSaldo['selisih']), 0, ',', '.').'.' }}</p>
-                <p>Pemeriksaan total tidak memastikan setiap akun cocok. Periksa tiap sumber dana melalui halaman <a class="font-semibold underline underline-offset-2" href="{{ \App\Filament\Resources\AuditSaldoDompetResource::getUrl() }}">Cocokkan Saldo</a>.</p>
+                <p class="rounded-md bg-gray-50 p-3 text-xs leading-relaxed text-gray-600 dark:bg-gray-700/50 dark:text-gray-300">
+                    Sumber dana dihitung dari total kas ditambah total utang dikurangi total piutang.
+                </p>
+
+                <div class="grid gap-2">
+                    <div class="flex justify-between border-b border-dashed border-gray-200 pb-2 dark:border-gray-700">
+                        <span>Total {{ $pemeriksaanSaldo['cakupan_kas'] }}</span>
+                        <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($pemeriksaanSaldo['saldo_kas'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-dashed border-gray-200 pb-2 dark:border-gray-700">
+                        <span>Total utang</span>
+                        <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($pemeriksaanSaldo['total_utang'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-dashed border-gray-200 pb-2 dark:border-gray-700">
+                        <span>Total piutang</span>
+                        <span class="font-medium text-gray-900 dark:text-white">Rp {{ number_format($pemeriksaanSaldo['total_piutang'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+                        <span class="font-medium">Sumber dana yang diharapkan</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">Rp {{ number_format($pemeriksaanSaldo['harapan_sumber_dana'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+                        <span class="font-medium">Sumber dana aktual</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">Rp {{ number_format($pemeriksaanSaldo['saldo_sumber_dana'], 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between pt-1">
+                        <span class="font-medium">Selisih</span>
+                        <span class="font-semibold {{ $pemeriksaanSaldo['seimbang'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">Rp {{ number_format(abs($pemeriksaanSaldo['selisih']), 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <p class="text-xs leading-relaxed">Pemeriksaan total tidak memastikan setiap akun cocok. Periksa tiap sumber dana melalui halaman <a class="font-semibold underline underline-offset-2" href="{{ \App\Filament\Resources\AuditSaldoDompetResource::getUrl() }}">Cocokkan Saldo</a>.</p>
             </div>
             <div class="flex items-center justify-end rounded-b border-t border-gray-200 p-4 dark:border-gray-700">
                 <x-filament::button type="button" @click="open = false" color="gray">Tutup</x-filament::button>

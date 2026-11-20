@@ -19,7 +19,7 @@ class DashboardCache
         // Trial memengaruhi status langganan pada dashboard user dan statistik admin.
         'langganan' => ['users', 'langganans', 'trial_premium'],
         'settings' => ['users'],
-        'pemeriksaan-saldo' => ['buku_kas', 'sumber_dana', 'users'],
+        'pemeriksaan-saldo' => ['buku_kas', 'sumber_dana', 'utang_piutang', 'utang_piutang_detail', 'users'],
         'transaksi' => ['transaksi', 'users', 'buku_kas', 'sumber_dana', 'kategori', 'share_buku'],
         'admin' => ['users', 'langganans', 'trial_premium'],
     ];
