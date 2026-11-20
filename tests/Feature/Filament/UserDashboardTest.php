@@ -77,7 +77,7 @@ test('dashboard user menghitung sisa utang piutang dan tiga pembaruan terakhir',
     }
 });
 
-test('dashboard user mempertahankan bagian lain saat satu bagian tab gabungan disembunyikan', function () {
+test('dashboard user mempertahankan bagian lain saat satu bagian disembunyikan', function () {
     $user = User::factory()->create();
     $page = Livewire::actingAs($user)->test(Dashboard::class);
     $sections = $page->instance()->sections();
@@ -91,7 +91,7 @@ test('dashboard user mempertahankan bagian lain saat satu bagian tab gabungan di
     $page->call('saveSettings', $sections)->assertHasNoErrors();
 
     expect(array_column($page->instance()->visibleTabs(), null, 'key'))->toMatchArray([
-        'kas-dompet' => ['key' => 'kas-dompet', 'label' => 'Kas & Sumber Dana', 'sections' => ['kas']],
+        'kas' => ['key' => 'kas', 'label' => 'Kas', 'sections' => ['kas']],
         'utang-piutang' => ['key' => 'utang-piutang', 'label' => 'Utang & Piutang', 'sections' => ['utang']],
     ]);
 });
@@ -112,7 +112,8 @@ test('dashboard user menyimpan toggle dan urutan per akun melalui pengaturan', f
     expect($fresh->instance()->sections())->toBe($sections);
     $html = $fresh->html();
     expect($html)->not->toContain('wire:key="dashboard-transaksi"')
-        ->and(strpos($html, 'wire:key="dashboard-langganan"'))->toBeLessThan(strpos($html, 'wire:key="dashboard-kas-dompet"'));
+        ->and(strpos($html, 'wire:key="dashboard-langganan"'))->toBeLessThan(strpos($html, 'wire:key="dashboard-kas"'));
+
     $hidden = array_map(fn ($section) => [...$section, 'visible' => false], $sections);
     $fresh->call('saveSettings', $hidden)->assertHasNoErrors();
     expect($fresh->html())->not->toContain('id="dashboard-toggle-')
@@ -157,10 +158,12 @@ test('dashboard user memakai kartu responsif dengan panel buka tutup', function 
     $grid = $xpath->query('//div[contains(@class,"dashboard-cards")]')->item(0);
     expect($grid)->not->toBeNull();
     $sections = $xpath->query('.//section[@data-section]', $grid);
-    expect($sections->length)->toBe(4);
-    expect($sections->item(0)->getAttribute('data-section'))->toBe('kas-dompet')
-        ->and($sections->item(2)->getAttribute('data-section'))->toBe('transaksi')
-        ->and($sections->item(3)->getAttribute('data-section'))->toBe('langganan');
+    expect($sections->length)->toBe(5);
+    expect($sections->item(0)->getAttribute('data-section'))->toBe('kas')
+        ->and($sections->item(1)->getAttribute('data-section'))->toBe('dompet')
+        ->and($sections->item(2)->getAttribute('data-section'))->toBe('utang-piutang')
+        ->and($sections->item(3)->getAttribute('data-section'))->toBe('transaksi')
+        ->and($sections->item(4)->getAttribute('data-section'))->toBe('langganan');
     expect($sections->item(0)->getAttribute('class'))
         ->toContain('lg:col-span-6')
         ->and($sections->item(1)->getAttribute('class'))
@@ -170,7 +173,7 @@ test('dashboard user memakai kartu responsif dengan panel buka tutup', function 
     expect($table->getAttribute('class'))->toContain('lg:col-span-12')
         ->and($membership->getAttribute('class'))->toContain('lg:col-span-6');
     expect($table->getAttribute('class'))->toContain( '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
-    expect($xpath->query('.//button[starts-with(@id,"dashboard-toggle-")]', $grid)->length)->toBe(4);
+    expect($xpath->query('.//button[starts-with(@id,"dashboard-toggle-")]', $grid)->length)->toBe(5);
     foreach ($xpath->query('.//section[@data-section]', $grid) as $card) {
         $key = $card->getAttribute('data-section');
         $button = $xpath->query('.//button[@id="dashboard-toggle-'.$key.'"]', $card)->item(0);
@@ -183,14 +186,14 @@ test('dashboard user memakai kartu responsif dengan panel buka tutup', function 
         const assert = require('node:assert/strict');
         const initialize = new Function('window', 'return (' + process.argv[1] + ')');
         const mobile = initialize({matchMedia: () => ({matches: false})});
-        assert.deepEqual(mobile.open, {'kas-dompet': false, 'utang-piutang': false, 'transaksi': false, 'langganan': false});
+        assert.deepEqual(mobile.open, {'kas': false, 'dompet': false, 'utang-piutang': false, 'transaksi': false, 'langganan': false});
         assert.equal(mobile.anyOpen, false);
         mobile.toggleAll();
-        assert.deepEqual(Object.values(mobile.open), [true, true, true, true]);
+        assert.deepEqual(Object.values(mobile.open), [true, true, true, true, true]);
         mobile.toggleAll();
-        assert.deepEqual(Object.values(mobile.open), [false, false, false, false]);
+        assert.deepEqual(Object.values(mobile.open), [false, false, false, false, false]);
         const desktop = initialize({matchMedia: () => ({matches: true})});
-        assert.deepEqual(desktop.open, {'kas-dompet': false, 'utang-piutang': false, 'transaksi': false, 'langganan': false});
+        assert.deepEqual(desktop.open, {'kas': false, 'dompet': false, 'utang-piutang': false, 'transaksi': false, 'langganan': false});
         assert.equal(desktop.anyOpen, false);
         JS;
     $process = new \Symfony\Component\Process\Process(['node', '-e', $script, $grid->getAttribute('x-data')], base_path());
@@ -210,10 +213,14 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);
-    $card = $xpath->query('//section[@data-section="kas-dompet"]')->item(0);
-    expect($card->getAttribute('class'))->toContain('dashboard-card');
-    expect($xpath->query('//button[@id="dashboard-toggle-kas-dompet"]//*[local-name()="svg"]')->length)->toBe(2);
+    $cardKas = $xpath->query('//section[@data-section="kas"]')->item(0);
+    $cardDompet = $xpath->query('//section[@data-section="dompet"]')->item(0);
+    expect($cardKas->getAttribute('class'))->toContain('dashboard-card');
+    expect($cardDompet->getAttribute('class'))->toContain('dashboard-card');
+    expect($xpath->query('//button[@id="dashboard-toggle-kas"]//*[local-name()="svg"]')->length)->toBe(2);
+    expect($xpath->query('//button[@id="dashboard-toggle-dompet"]//*[local-name()="svg"]')->length)->toBe(2);
     foreach (['kas' => 'Rp 100.000', 'dompet' => 'Rp 80.000'] as $key => $total) {
+        $card = $key === 'kas' ? $cardKas : $cardDompet;
         $feature = $xpath->query('.//*[@data-dashboard-item="'.$key.'"]', $card)->item(0);
         expect($feature)->not->toBeNull();
         expect(trim($xpath->query('.//p[contains(@class,"dashboard-amount")]', $feature)->item(0)->textContent))->toBe($total);
@@ -427,15 +434,15 @@ test('dashboard user tombol kelola menuju resource setiap kartu selain transaksi
         expect($links->item(0)->getAttribute('href'))->toBe($resource::getUrl('index'));
     }
     $resources = [
-        'kas' => BukuKasResource::class,
-        'dompet' => DompetResource::class,
-        'utang' => UtangResource::class,
-        'piutang' => PiutangResource::class,
+        'kas' => ['section' => 'kas', 'resource' => BukuKasResource::class],
+        'dompet' => ['section' => 'dompet', 'resource' => DompetResource::class],
+        'utang' => ['section' => 'utang-piutang', 'resource' => UtangResource::class],
+        'piutang' => ['section' => 'utang-piutang', 'resource' => PiutangResource::class],
     ];
-    foreach ($resources as $key => $resource) {
-        $links = $xpath->query('//section[@data-section="kas-dompet" or @data-section="utang-piutang"]//*[@data-dashboard-item="'.$key.'"]//a[normalize-space(.)="Kelola"]');
+    foreach ($resources as $key => $config) {
+        $links = $xpath->query('//section[@data-section="'.$config['section'].'"]//*[@data-dashboard-item="'.$key.'"]//a[normalize-space(.)="Kelola"]');
         expect($links->length)->toBe(1);
-        expect($links->item(0)->getAttribute('href'))->toBe($resource::getUrl('index'));
+        expect($links->item(0)->getAttribute('href'))->toBe($config['resource']::getUrl('index'));
     }
     expect($xpath->query('//section[@data-section="transaksi"]//a[normalize-space(.)="Kelola"]')->length)->toBe(0);
 });

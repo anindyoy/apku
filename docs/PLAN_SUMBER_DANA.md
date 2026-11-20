@@ -91,7 +91,7 @@ Validasi di sisi server wajib menolak atau mengabaikan data pecahan untuk jenis 
 | Dompet | Sumber dana |
 | Dompet utama / default | Sumber dana utama / default |
 | Transfer dompet / pemindahan saldo antar-dompet | Transfer antar-sumber dana |
-| Kas & Dompet (tab dashboard) | Kas & Sumber Dana |
+| Kas & Dompet (tab dashboard) | Kas, Sumber Dana (kartu terpisah) |
 | Jumlah Dompet (tabel langganan) | Jumlah Sumber Dana |
 | Dompet tidak aktif (penanda) | Sumber dana tidak aktif |
 | Halaman Dompet dan menu Setting Dompet | Halaman dan menu Sumber Dana |
@@ -108,7 +108,7 @@ Validasi di sisi server wajib menolak atau mengabaikan data pecahan untuk jenis 
 | Import | Kolom referensi pada template XLSX, nilai kosong memakai sumber dana default |
 | Pencarian global dan filter | Label dan filter sumber dana |
 | Laporan | Filter sumber dana (tanpa filter jenis) |
-| Dashboard | Tab "Kas & Sumber Dana", kartu saldo, penanda status |
+| Dashboard | Kartu "Kas" dan "Sumber Dana" terpisah, kartu saldo, penanda status |
 | Audit saldo | Form, riwayat, tombol "Audit saldo" dan "Riwayat audit", penghitung hanya untuk Tunai |
 | Kolaborasi dan halaman publik | Editor memakai sumber dana miliknya sendiri; nama dan jenis disamarkan untuk anggota lain; halaman publik tetap tidak menampilkannya |
 | Kuota dan langganan | Pesan kuota, panel slot, tabel perbandingan Reguler vs Premium |

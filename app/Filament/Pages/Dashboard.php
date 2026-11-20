@@ -48,7 +48,8 @@ class Dashboard extends BaseDashboard implements HasTable
 
     private const SECTION_GROUPS = [
         'transaksi' => ['label' => '5 transaksi terakhir', 'sections' => ['transaksi']],
-        'kas-dompet' => ['label' => 'Kas & Sumber Dana', 'sections' => ['kas', 'dompet']],
+        'kas' => ['label' => 'Kas', 'sections' => ['kas']],
+        'dompet' => ['label' => 'Sumber Dana', 'sections' => ['dompet']],
         'utang-piutang' => ['label' => 'Utang & Piutang', 'sections' => ['utang', 'piutang']],
         'langganan' => ['label' => 'Masa aktif langganan', 'sections' => ['langganan']],
     ];

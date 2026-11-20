@@ -82,7 +82,7 @@ Catatan: saran untuk "goal sudah tercapai" adalah menyembunyikan peringatan dead
    - Field goal dan deadline tampil hanya jika Kas Tabungan dipilih (`live()`).
    - Akun Reguler: radio dinonaktifkan dengan keterangan fitur Premium.
 4. **Daftar Kas**: kartu menampilkan badge tipe, bar progres + persentase (jika goal ada), dan informasi status. Pakai Tailwind dan komponen Flowbite, tanpa CSS custom.
-5. **Dashboard** (tab Kas & Sumber Dana): kas tampil dengan urutan yang sama; kas tabungan menampilkan progres dan status ringkas.
+5. **Dashboard**: kartu Kas dan Sumber Dana ditampilkan terpisah; kas tampil dengan urutan yang sama; kas tabungan menampilkan progres dan status ringkas.
 6. **Setting total saldo**: toggle **Hitung saldo kas tabungan di total saldo** pada tombol **Pengaturan tampilan** halaman Kas, menyimpan ke `users.hitung_tabungan_di_total`. Memengaruhi total saldo di Dashboard (dan total lain yang menjumlahkan saldo kas, hasil telusuran). Perubahan membatalkan cache terkait.
 7. **Cache**: simpan data mentah (saldo, goal, deadline) di cache, hitung `status` dan `sisaHari` saat render, atau sertakan tanggal hari ini pada kunci cache. Tambahkan invalidasi saat `is_tabungan`, `goal`, atau `tanggal_goal` berubah, dan saat setting total saldo berubah.
 8. **Seeder demo**: tambahkan beberapa kas tabungan (belum tercapai, mendekati deadline, terlewat, tercapai). Seeder dikecualikan dari testing.

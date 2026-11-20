@@ -24,12 +24,12 @@ Menambahkan pemeriksaan otomatis yang memberi tahu pengguna apakah total saldo k
 
 ## Tampilan Dashboard
 
-- Tampilkan indikator ringkas ketika pemeriksaan aktif pada tab **Kas & Sumber Dana**, mencakup total saldo kas, total saldo sumber dana, selisih, dan status.
+- Tampilkan indikator ringkas ketika pemeriksaan aktif pada kartu **Kas**, mencakup total saldo kas, total saldo sumber dana, selisih, dan status.
 - Jika total sama, tampilkan status **Seimbang**. Jika berbeda, tampilkan status **Ada selisih** beserta jumlah selisih.
-- Pada bagian/tab **Kas** dan **Sumber Dana**, beri penanda yang mudah ditemukan bahwa total belum cocok. Sediakan tautan menuju halaman Cocokkan Saldo untuk investigasi.
+- Sediakan tautan menuju halaman Cocokkan Saldo untuk investigasi.
 - Pastikan tampilan responsif dan terbaca pada tema terang/gelap serta layar sempit. Jangan mengandalkan warna saja untuk menyampaikan status.
 - Bila salah satu sisi belum memiliki data, tampilkan totalnya sebagai nol dan tetap jelaskan perbandingannya; jangan menyembunyikan ketidakcocokan.
-- Hormati pengaturan personalisasi Dashboard: status pemeriksaan muncul pada area gabungan **Kas & Sumber Dana** jika kedua ringkasan tersedia. Perilaku jika pengguna menyembunyikan salah satu panel perlu ditetapkan konsisten, misalnya tetap menampilkan ringkasan status di area gabungan selama fitur aktif.
+- Hormati pengaturan personalisasi Dashboard: status pemeriksaan muncul pada kartu **Kas** selama fitur aktif, meskipun kartu **Sumber Dana** disembunyikan.
 
 ## Alur saat terdapat selisih
 
