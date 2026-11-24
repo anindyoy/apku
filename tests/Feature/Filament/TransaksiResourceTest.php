@@ -64,13 +64,38 @@ test('transfer sumber dana tidak menampilkan atribut kas pada daftar transaksi',
         'tanggal' => now(),
     ]);
 
-    $kolomKas = TransaksiResource::transactionColumns()[3];
+    $kolomKas = collect(TransaksiResource::transactionColumns())
+        ->first(fn ($kolom): bool => $kolom->getName() === 'buku_kas.nama_buku');
     $callback = (new ReflectionClass($kolomKas))->getProperty('formatStateUsing')->getValue($kolomKas);
 
     expect($callback($bukuKas->nama_buku, $kasTransfer))->toBeNull()
         ->and($callback($bukuKas->nama_buku, $kasBiasa))->toBe($bukuKas->nama_buku);
 })
     ->group('filament', 'transaksi', 'transfer-sumber-dana-kas');
+
+test('transfer sumber dana menampilkan sumber dana tujuan pada kolom desktop dan menyembunyikannya untuk transfer kas', function () {
+    $namaTujuan = 'Sumber Dana Tujuan Uji';
+    $transferSumberDana = new Transaksi([
+        'jenis' => 'Transfer Pemasukan',
+        'tipe_transfer' => 'dompet',
+    ]);
+    $transferKas = new Transaksi([
+        'jenis' => 'Transfer Pemasukan',
+        'tipe_transfer' => 'buku_kas',
+    ]);
+
+    $kolomTujuan = collect(TransaksiResource::transactionColumns())
+        ->first(fn ($kolom): bool => $kolom->getName() === 'sumberDanaTujuan.nama_dompet');
+    $callback = (new ReflectionClass($kolomTujuan))->getProperty('formatStateUsing')->getValue($kolomTujuan);
+
+    expect($kolomTujuan)->not->toBeNull()
+        ->and($kolomTujuan->getName())->toBe('sumberDanaTujuan.nama_dompet')
+        ->and($kolomTujuan->getLabel())->toBe('Sumber dana tujuan')
+        ->and($callback($namaTujuan, $transferSumberDana))->toBe($namaTujuan)
+        ->and($callback($namaTujuan, $transferKas))->toBeNull();
+})
+    ->group('filament', 'transaksi', 'transfer-sumber-dana-tujuan');
+
 
 test('ringkasan mobile menampilkan deskripsi dan saldo akhir saat filter kas aktif', function () {
     $user = createRegularUserWithBukuKas();

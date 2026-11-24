@@ -46,7 +46,7 @@ test('dashboard user menampilkan saldo milik sendiri dan lima transaksi terbaru 
         ->assertCanNotSeeTableRecords($records->skip(5)->push($foreign));
     expect($page->instance()->getTableRecords())->toHaveCount(5);
     expect(array_keys($page->instance()->getTable()->getColumns()))
-        ->toBe(['ringkasan_mobile', 'jenis', 'tanggal', 'buku_kas.nama_buku', 'kategori', 'nominal']);
+        ->toBe(['ringkasan_mobile', 'jenis', 'tanggal', 'sumberDanaTujuan.nama_dompet', 'buku_kas.nama_buku', 'kategori', 'nominal']);
     expect($page->html())->toContain('fi-ta-table-stacked-on-mobile', 'data-transaksi-mobile', 'filament-toolbar');
     expect($page->html())->toContain('transaction-record--success');
     Livewire::withQueryParams(['filter_month' => '09', 'filter_year' => '2026'])

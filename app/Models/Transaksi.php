@@ -73,6 +73,11 @@ class Transaksi extends Model
         return $this->belongsTo(SumberDana::class, 'sumber_dana_id')->withTrashed();
     }
 
+    public function sumberDanaTujuan()
+    {
+        return $this->belongsTo(SumberDana::class, 'sumber_dana_id_tujuan')->withTrashed();
+    }
+
     // Alias kompatibilitas untuk sisa referensi refactor Dompet ke Sumber Dana.
     public function dompet()
     {

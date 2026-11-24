@@ -48,6 +48,7 @@ class PencarianTransaksi extends Page implements HasTable
                     'tujuan_buku_tabungan:id,nama_buku',
                     'user:id,name',
                     'dompet' => fn ($query) => $query->withTrashed(),
+                    'sumberDanaTujuan' => fn ($query) => $query->withTrashed(),
                 ]));
 
                 return filled($this->getTableSearch())

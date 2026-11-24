@@ -47,7 +47,7 @@
         "page": "Transaksi",
         "category": "Pencatatan",
         "title": "Mencatat pemasukan dan pengeluaran",
-        "intro": "Catat uang masuk dan keluar dengan kas, sumber dana, serta kategori yang sesuai. Pada layar desktop, baca tabel dari kolom Tipe (ikon jenis transaksi), Tanggal, Kas, Kategori, lalu Nominal. Susunan ini juga berlaku pada Pencarian Transaksi dan transaksi terbaru di Dashboard; ringkasan Transaksi digunakan pada layar kecil.",
+        "intro": "Catat uang masuk dan keluar dengan kas, sumber dana, serta kategori yang sesuai. Pada layar desktop, baca tabel dari kolom Tipe (ikon jenis transaksi), Tanggal, Sumber dana tujuan (hanya terisi untuk transfer sumber dana), Kas, Kategori, lalu Nominal. Susunan ini berlaku pada daftar Transaksi dan transaksi terbaru di Dashboard. Pencarian Transaksi menampilkan Tipe, Tanggal, Kas, Kategori, lalu Nominal. Ringkasan Transaksi digunakan pada layar kecil.",
         "steps": [
             "Buka Transaksi atau gunakan Tambah pada dashboard, lalu buka Tambah transaksi.",
             "Form dimulai dengan jenis Pengeluaran terpilih. Pilih Pengeluaran, Pemasukan, transfer kas, atau transfer sumber dana sesuai kebutuhan. Pilihan jenis transaksi tersusun grid dua kolom pada semua ukuran layar, termasuk mobile, tanpa perlu menggeser ke samping. Form transaksi tersusun satu kolom pada layar sempit dan dua kolom pada layar lebar. Tunggu formulir selesai menyesuaikan jenis transaksi.",
