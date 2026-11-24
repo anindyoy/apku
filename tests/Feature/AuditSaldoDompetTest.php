@@ -258,7 +258,22 @@ test('audit dapat menyimpan snapshot tanpa membuat transaksi penyesuaian', funct
     expect($audit->detail)->toHaveCount(1)
         ->and($audit->detail->first()->selisih)->toBe(-50000)
         ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(0)
-        ->and($tunai->fresh()->saldo)->toBe(500000);
+        ->and($tunai->fresh()->saldo)->toBe(450000)
+        ->and($bukuKas->fresh()->saldo)->toBe(1000000);
+});
+test('saldo sumber dana mengikuti saldo riil apa pun status saklar pencatatan', function () {
+    ['user' => $user, 'bukuKas' => $bukuKas, 'tunai' => $tunai, 'bank' => $bank] = buatDataAuditSaldo();
+
+    $audit = app(AuditSaldoDompetService::class)->simpan($user, $bukuKas, now(), 'Saklar mati', [
+        ['dompet_id' => $tunai->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 450000],
+        ['dompet_id' => $bank->id, 'saldo_aplikasi' => 500000, 'saldo_riil' => 600000, 'catatan' => 'Bunga bank'],
+    ], false);
+
+    expect($audit->detail)->toHaveCount(2)
+        ->and($tunai->fresh()->saldo)->toBe(450000)
+        ->and($bank->fresh()->saldo)->toBe(600000)
+        ->and($bukuKas->fresh()->saldo)->toBe(1000000)
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(0);
 });
 
 test('form audit menampilkan semua sumber dana pada kas terpilih termasuk tanpa transaksi', function () {
@@ -400,8 +415,9 @@ test('hitung kas tetap menyesuaikan saldo aplikasi saat saklar transaksi dimatik
 
     expect(AuditSaldoDompet::firstOrFail()->detail->firstOrFail()->saldo_riil)->toBe(200000)
         ->and($tunai->fresh()->saldo)->toBe(200000)
-        ->and($bank->fresh()->saldo)->toBe(500000)
-        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(1);
+        ->and($bank->fresh()->saldo)->toBe(400000)
+        ->and($bukuKas->fresh()->saldo)->toBe(1000000)
+        ->and(Transaksi::whereNotNull('audit_saldo_dompet_detail_id')->count())->toBe(0);
 });
 
 test('hitung kas aktif memakai preferensi tersimpan jika nilai toggle tidak terkirim', function () {

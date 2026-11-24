@@ -42,7 +42,6 @@ class AuditSaldoDompetService
         ?string $catatan,
         array $rincian,
         bool $catatPenyesuaian = true,
-        array $sumberDanaWajibDisesuaikan = [],
     ): AuditSaldoDompet
     {
         if ($bukuKas->user_id !== $user->id || ! $user->dapatMengelolaTransaksiPada($bukuKas)) {
@@ -53,7 +52,7 @@ class AuditSaldoDompetService
             throw ValidationException::withMessages(['rincian' => 'Pilih minimal satu sumber dana untuk Cocokkan Saldo.']);
         }
 
-        $proses = function () use ($user, $bukuKas, $tanggal, $catatan, $rincian, $catatPenyesuaian, $sumberDanaWajibDisesuaikan): AuditSaldoDompet {
+        $proses = function () use ($user, $bukuKas, $tanggal, $catatan, $rincian, $catatPenyesuaian): AuditSaldoDompet {
             $idSumberDana = collect($rincian)->pluck('dompet_id')->map(fn ($id): int => (int) $id);
 
             if ($idSumberDana->duplicates()->isNotEmpty()) {
@@ -136,10 +135,16 @@ class AuditSaldoDompetService
 
                 $selisihAkhir = $saldoRiilAkhir - (int) $record->saldo;
 
-                if ($selisihAkhir === 0 || (! $catatPenyesuaian && ! in_array($record->id, $sumberDanaWajibDisesuaikan, true))) {
+                // Saklar mati atau tanpa selisih: saldo sumber dana langsung disesuaikan tanpa transaksi penyesuaian.
+                if ($selisihAkhir === 0 || ! $catatPenyesuaian) {
+                    if ($saldoRiilAkhir !== (int) $record->saldo) {
+                        $record->forceFill(['saldo' => $saldoRiilAkhir])->saveQuietly();
+                    }
+
                     continue;
                 }
 
+                // Saklar aktif: selisih diterapkan ke saldo lewat transaksi penyesuaian pada kas.
                 $jenis = $selisihAkhir > 0 ? 'Pemasukan' : 'Pengeluaran';
                 $transaksi = app(TransaksiService::class)->buat($user, [
                     'buku_kas_id' => $bukuKas->id,

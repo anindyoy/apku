@@ -206,13 +206,6 @@ trait HasAuditSaldoAction
                     return $item;
                 }, $data['rincian']);
 
-                $sumberDanaHitungKas = collect($data['rincian'])
-                    ->filter(fn(array $item): bool => (bool) ($item['tampilkan_hitung_uang_kas'] ?? false)
-                        && $this->dompetMendukungHitungUang((int) ($item['dompet_id'] ?? 0)))
-                    ->pluck('dompet_id')
-                    ->map(fn($id): int => (int) $id)
-                    ->all();
-
                 app(AuditSaldoDompetService::class)->simpan(
                     auth()->user(),
                     BukuKas::findOrFail($data['buku_kas_id'] ?? $this->kasDefaultAudit($record)),
@@ -220,7 +213,6 @@ trait HasAuditSaldoAction
                     $data['catatan'],
                     $data['rincian'],
                     (bool) ($data['catat_penyesuaian'] ?? true),
-                    $sumberDanaHitungKas,
                 );
 
                 Notification::make()
