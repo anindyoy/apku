@@ -6,6 +6,7 @@ use App\Filament\Resources\BukuKasResource\Pages\EditBukuKas;
 use App\Filament\Resources\BukuKasResource\Pages\ListBukuKas;
 use App\Models\BukuKas;
 use App\Models\SumberDana;
+use App\Models\ShareBuku;
 use App\Models\TabunganEmas;
 use App\Models\Transaksi;
 use App\Services\TransaksiService;
@@ -64,6 +65,34 @@ test('daftar kas menempatkan kas utama sebelum kas lainnya', function () {
 
     expect($component->instance()->getTableRecords()->pluck('id')->all())
         ->toBe([$kasUtama->id, $kasBiasa->id, $kasLama->id]);
+})->group('filament', 'buku-kas');
+
+test('daftar kas menempatkan seluruh kas milik sendiri sebelum kas kolaborasi', function () {
+    $pemilik = createRegularUserWithBukuKas();
+    $pengguna = createRegularUserWithBukuKas();
+    $kasSendiri = $pengguna->buku_kas()->firstOrFail();
+    $kasSendiri->update(['is_default' => false, 'nama_buku' => 'Z Kas Sendiri']);
+    $kasSendiriTabungan = BukuKas::factory()->create([
+        'user_id' => $pengguna->id,
+        'nama_buku' => 'A Kas Sendiri Tabungan',
+        'is_default' => false,
+        'is_tabungan' => true,
+    ]);
+    $kasKolaborasi = $pemilik->buku_kas()->firstOrFail();
+
+    ShareBuku::create([
+        'buku_kas_id' => $kasKolaborasi->id,
+        'user_id' => $pengguna->id,
+        'invited_by_user_id' => $pemilik->id,
+        'privilege' => 'editor',
+        'berlaku_mulai' => now()->subMinute(),
+    ]);
+
+    $component = Livewire::actingAs($pengguna)->test(ListBukuKas::class)->assertSuccessful();
+
+    // Kas biasa milik sendiri, kas tabungan milik sendiri, lalu kas kolaborasi (yang merupakan kas utama pemilik).
+    expect($component->instance()->getTableRecords()->pluck('id')->all())
+        ->toBe([$kasSendiri->id, $kasSendiriTabungan->id, $kasKolaborasi->id]);
 })->group('filament', 'buku-kas');
 
 test('kas saldo nol dapat dinonaktifkan setelah mengganti kas utama lalu diaktifkan kembali', function () {

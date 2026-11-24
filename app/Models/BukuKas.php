@@ -42,10 +42,30 @@ class BukuKas extends Model
     public function scopeUrutanTabungan(Builder $query): Builder
     {
         return $query->reorder()
-            ->orderByDesc('is_active')
-            ->orderByDesc('is_default')
-            ->orderBy('is_tabungan')
-            ->orderBy('nama_buku');
+            ->orderByDesc($query->qualifyColumn('is_active'))
+            ->orderByDesc($query->qualifyColumn('is_default'))
+            ->orderBy($query->qualifyColumn('is_tabungan'))
+            ->orderBy($query->qualifyColumn('nama_buku'));
+    }
+
+    /**
+     * Scope daftar kas: seluruh kas milik sendiri lebih dulu, lalu kas kolaborasi,
+     * dengan urutan tabungan berlaku di dalam masing-masing kelompok.
+     */
+    public function scopeUrutanListKas(Builder $query, ?int $userId = null): Builder
+    {
+        $userId ??= auth()->id() ?? 0;
+
+        return $query->reorder()
+            ->orderByRaw(
+                'CASE WHEN '.$query->qualifyColumn('user_id').' = ? THEN 0 ELSE 1 END',
+                [$userId],
+            )
+            ->orderByDesc($query->qualifyColumn('is_active'))
+            ->orderByDesc($query->qualifyColumn('is_default'))
+            ->orderBy($query->qualifyColumn('is_tabungan'))
+            ->orderBy($query->qualifyColumn('nama_buku'))
+            ->orderBy($query->qualifyColumn('id'));
     }
 
     public function scopeAktif(Builder $query): Builder

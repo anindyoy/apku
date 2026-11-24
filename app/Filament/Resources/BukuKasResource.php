@@ -65,7 +65,7 @@ class BukuKasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->urutanTabungan())
+            ->modifyQueryUsing(fn (Builder $query) => $query->urutanListKas())
             ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
                 // Tables\Columns\TextColumn::make('user_id')
