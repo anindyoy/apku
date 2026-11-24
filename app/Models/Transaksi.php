@@ -73,6 +73,11 @@ class Transaksi extends Model
         return $this->belongsTo(SumberDana::class, 'sumber_dana_id')->withTrashed();
     }
 
+    public function pasanganTransfer()
+    {
+        return $this->hasMany(self::class, 'transfer_code', 'transfer_code');
+    }
+
     public function sumberDanaTujuan()
     {
         return $this->belongsTo(SumberDana::class, 'sumber_dana_id_tujuan')->withTrashed();

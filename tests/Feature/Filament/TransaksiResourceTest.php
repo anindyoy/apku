@@ -66,36 +66,69 @@ test('transfer sumber dana tidak menampilkan atribut kas pada daftar transaksi',
 
     $kolomKas = collect(TransaksiResource::transactionColumns())
         ->first(fn ($kolom): bool => $kolom->getName() === 'buku_kas.nama_buku');
-    $callback = (new ReflectionClass($kolomKas))->getProperty('formatStateUsing')->getValue($kolomKas);
+    $callback = (new ReflectionClass($kolomKas))->getProperty('getStateUsing')->getValue($kolomKas);
 
-    expect($callback($bukuKas->nama_buku, $kasTransfer))->toBeNull()
-        ->and($callback($bukuKas->nama_buku, $kasBiasa))->toBe($bukuKas->nama_buku);
+    expect($callback($kasTransfer))->toBe('—')
+        ->and($callback($kasBiasa))->toBe($bukuKas->nama_buku);
 })
     ->group('filament', 'transaksi', 'transfer-sumber-dana-kas');
 
-test('transfer sumber dana menampilkan sumber dana tujuan pada kolom desktop dan menyembunyikannya untuk transfer kas', function () {
-    $namaTujuan = 'Sumber Dana Tujuan Uji';
-    $transferSumberDana = new Transaksi([
-        'jenis' => 'Transfer Pemasukan',
-        'tipe_transfer' => 'dompet',
-    ]);
-    $transferKas = new Transaksi([
-        'jenis' => 'Transfer Pemasukan',
-        'tipe_transfer' => 'buku_kas',
-    ]);
+test('daftar transaksi menyatukan pasangan transfer dan mempertahankan sisi filter tujuan', function () {
+    $user = createRegularUserWithBukuKas();
+    $kas = $user->buku_kas()->firstOrFail();
+    $tujuan = \App\Models\SumberDana::factory()->create(['user_id' => $user->id]);
+    $records = [];
+    foreach (['buku_kas', 'dompet'] as $tipe) {
+        $keluar = Transaksi::factory()->create([
+            'user_id' => $user->id, 'buku_kas_id' => $kas->id,
+            'jenis' => 'Transfer Pengeluaran', 'tipe_transfer' => $tipe,
+            'transfer_code' => 'gabung-'.$tipe, 'tanggal' => now(),
+        ]);
+        $masuk = Transaksi::factory()->create([
+            'user_id' => $user->id, 'buku_kas_id' => $kas->id,
+            'sumber_dana_id' => $tujuan->id,
+            'jenis' => 'Transfer Pemasukan', 'tipe_transfer' => $tipe,
+            'transfer_code' => $keluar->transfer_code, 'tanggal' => now(),
+        ]);
+        $records[] = [$keluar, $masuk];
+    }
 
-    $kolomTujuan = collect(TransaksiResource::transactionColumns())
-        ->first(fn ($kolom): bool => $kolom->getName() === 'sumberDanaTujuan.nama_dompet');
-    $callback = (new ReflectionClass($kolomTujuan))->getProperty('formatStateUsing')->getValue($kolomTujuan);
+    $page = Livewire::actingAs($user)->test(ListTransaksis::class);
+    foreach ($records as [$keluar, $masuk]) {
+        $page->assertCanSeeTableRecords([$keluar])->assertCanNotSeeTableRecords([$masuk]);
+    }
+    expect($page->instance()->getTableRecords()->total())->toBe(2);
 
-    expect($kolomTujuan)->not->toBeNull()
-        ->and($kolomTujuan->getName())->toBe('sumberDanaTujuan.nama_dompet')
-        ->and($kolomTujuan->getLabel())->toBe('Sumber dana tujuan')
-        ->and($callback($namaTujuan, $transferSumberDana))->toBe($namaTujuan)
-        ->and($callback($namaTujuan, $transferKas))->toBeNull();
-})
-    ->group('filament', 'transaksi', 'transfer-sumber-dana-tujuan');
+    $filtered = Livewire::actingAs($user)
+        ->withQueryParams(['filter_dompet' => (string) $tujuan->id])
+        ->test(ListTransaksis::class);
+    foreach ($records as [$keluar, $masuk]) {
+        $filtered->assertCanSeeTableRecords([$masuk])->assertCanNotSeeTableRecords([$keluar]);
+    }
+});
 
+test('rincian desktop transfer menampilkan arah asal ke tujuan', function () {
+    $user = createRegularUserWithBukuKas();
+    $this->actingAs($user);
+    $asal = new \App\Models\BukuKas(['nama_buku' => 'Kas Utama']);
+    $tujuan = new \App\Models\BukuKas(['nama_buku' => 'Kas Hiburan']);
+    $keluar = new Transaksi(['jenis' => 'Transfer Pengeluaran', 'tipe_transfer' => 'buku_kas']);
+    $keluar->setRelation('buku_kas', $asal)->setRelation('tujuan_buku_tabungan', $tujuan);
+    $masuk = new Transaksi(['jenis' => 'Transfer Pemasukan', 'tipe_transfer' => 'buku_kas']);
+    $masuk->setRelation('buku_kas', $tujuan)->setRelation('asal_buku_tabungan', $asal);
+
+    expect(TransaksiResource::rincianDesktop($keluar))->toBe('Kas Utama → Kas Hiburan')
+        ->and(TransaksiResource::rincianDesktop($masuk))->toBe('Kas Utama → Kas Hiburan');
+
+    $keluar->tipe_transfer = $masuk->tipe_transfer = 'dompet';
+    $keluar->transfer_code = $masuk->transfer_code = 'uji';
+    $keluar->setRelation('sumberDana', new \App\Models\SumberDana(['user_id' => $user->id, 'nama_dompet' => 'Mandiri']));
+    $masuk->setRelation('sumberDana', new \App\Models\SumberDana(['user_id' => $user->id, 'nama_dompet' => 'BCA']));
+    foreach ([$keluar, $masuk] as $record) {
+        $record->setRelation('pasanganTransfer', collect([$keluar, $masuk]));
+        expect(TransaksiResource::rincianDesktop($record))->toBe('Mandiri → BCA');
+    }
+});
 
 test('ringkasan mobile menampilkan deskripsi dan saldo akhir saat filter kas aktif', function () {
     $user = createRegularUserWithBukuKas();
@@ -252,7 +285,7 @@ test('tabel transaksi merangkum pencatat dan dompet pada deskripsi kolom', funct
 
     expect($html)
         ->not->toContain('Dicatat oleh:')
-        ->toContain('Sumber dana: '.$transaksi->labelDompetUntuk($user));
+        ->toContain($transaksi->labelSumberDanaUntuk($user));
 })
     ->group('filament', 'transaksi', 'ringkasan-kolom');
 
@@ -330,9 +363,8 @@ test('header transaksi mengikuti visibilitas responsif isi kolom', function () {
             continue;
         }
         $labels[] = $label;
-        expect($header->getAttribute('class'))->toContain($label === 'Transaksi' ? 'md:fi-hidden' : 'md:fi-visible');
     }
-    expect($labels)->toBe(['Transaksi', 'Tipe', 'Tanggal', 'Kas', 'Kategori', 'Nominal']);
+    expect($labels)->toBe(['Transaksi', 'Tipe', 'Tanggal', 'Kas', 'Sumber dana', 'Kategori / rincian', 'Nominal']);
 
     $script = <<<'JS'
     import assert from 'node:assert/strict';

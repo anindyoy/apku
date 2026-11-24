@@ -176,6 +176,21 @@ class ListTransaksis extends ListRecords
             $query->where('sumber_dana_id', $this->filterDompet);
         }
 
+        if ($query) {
+            $transferKeluar = (clone $query)
+                ->select('transaksi.transfer_code')
+                ->where('jenis', 'Transfer Pengeluaran')
+                ->whereNotNull('transfer_code')
+                ->where('transfer_code', '!=', '');
+
+            $query->where(function (Builder $query) use ($transferKeluar): void {
+                $query->where('jenis', '!=', 'Transfer Pemasukan')
+                    ->orWhereNull('transfer_code')
+                    ->orWhere('transfer_code', '')
+                    ->orWhereNotIn('transfer_code', $transferKeluar);
+            })->with(['pasanganTransfer.sumberDana']);
+        }
+
         return $query;
     }
 

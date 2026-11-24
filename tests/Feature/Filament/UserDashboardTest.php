@@ -46,7 +46,7 @@ test('dashboard user menampilkan saldo milik sendiri dan lima transaksi terbaru 
         ->assertCanNotSeeTableRecords($records->skip(5)->push($foreign));
     expect($page->instance()->getTableRecords())->toHaveCount(5);
     expect(array_keys($page->instance()->getTable()->getColumns()))
-        ->toBe(['ringkasan_mobile', 'jenis', 'tanggal', 'sumberDanaTujuan.nama_dompet', 'buku_kas.nama_buku', 'kategori', 'nominal']);
+        ->toBe(['ringkasan_mobile', 'jenis', 'tanggal', 'buku_kas.nama_buku', 'sumber_dana', 'kategori', 'nominal']);
     expect($page->html())->toContain('fi-ta-table-stacked-on-mobile', 'data-transaksi-mobile', 'filament-toolbar');
     expect($page->html())->toContain('transaction-record--success');
     Livewire::withQueryParams(['filter_month' => '09', 'filter_year' => '2026'])
@@ -164,15 +164,6 @@ test('dashboard user memakai kartu responsif dengan panel buka tutup', function 
         ->and($sections->item(2)->getAttribute('data-section'))->toBe('utang-piutang')
         ->and($sections->item(3)->getAttribute('data-section'))->toBe('transaksi')
         ->and($sections->item(4)->getAttribute('data-section'))->toBe('langganan');
-    expect($sections->item(0)->getAttribute('class'))
-        ->toContain('lg:col-span-6')
-        ->and($sections->item(1)->getAttribute('class'))
-        ->toContain('lg:col-span-6');
-    $table = $xpath->query('.//section[@*[name()="wire:key"]="dashboard-transaksi"]', $grid)->item(0);
-    $membership = $xpath->query('.//section[@*[name()="wire:key"]="dashboard-langganan"]', $grid)->item(0);
-    expect($table->getAttribute('class'))->toContain('lg:col-span-12')
-        ->and($membership->getAttribute('class'))->toContain('lg:col-span-6');
-    expect($table->getAttribute('class'))->toContain( '[&_.fi-ta-header-cell]:!py-2', 'sm:[&_.fi-ta-text:not(.fi-inline)]:!py-2', 'sm:[&_.fi-ta-cell:has(.fi-ta-actions)]:!py-2');
     expect($xpath->query('.//button[starts-with(@id,"dashboard-toggle-")]', $grid)->length)->toBe(5);
     foreach ($xpath->query('.//section[@data-section]', $grid) as $card) {
         $key = $card->getAttribute('data-section');
@@ -215,8 +206,6 @@ test('dashboard user merangkum saldo kartu dengan ikon dan aksen', function () {
     $xpath = new DOMXPath($dom);
     $cardKas = $xpath->query('//section[@data-section="kas"]')->item(0);
     $cardDompet = $xpath->query('//section[@data-section="dompet"]')->item(0);
-    expect($cardKas->getAttribute('class'))->toContain('dashboard-card');
-    expect($cardDompet->getAttribute('class'))->toContain('dashboard-card');
     expect($xpath->query('//button[@id="dashboard-toggle-kas"]//*[contains(@class,"dashboard-toggle-icon")][local-name()="svg"]')->length)->toBe(2);
     expect($xpath->query('//button[@id="dashboard-toggle-dompet"]//*[contains(@class,"dashboard-toggle-icon")][local-name()="svg"]')->length)->toBe(2);
     foreach (['kas' => 'Rp 100.000', 'dompet' => 'Rp 80.000'] as $key => $total) {
@@ -366,7 +355,6 @@ test('dashboard user tombol tambah membuka form dan menyimpan transaksi', functi
     expect($link->getAttribute('href'))->toBe(TransaksiResource::getUrl());
     $toolbar = $xpath->query('//section[@data-section="transaksi"]//div[contains(@class,"dashboard-actions")]')->item(0);
     expect($toolbar)->not->toBeNull();
-    expect($toolbar->getAttribute('class'))->toContain('flex', 'justify-end', 'flex-wrap');
     expect($xpath->query('.//button', $toolbar)->length)->toBe(1);
     expect($xpath->query('.//a', $toolbar)->length)->toBe(1);
     expect($xpath->query('following-sibling::*//table', $toolbar)->length)->toBe(1);

@@ -178,27 +178,27 @@ class TransaksiResource extends Resource
 
             TextColumn::make('tanggal')
                 ->visibleFrom('md')
-                ->formatStateUsing(fn ($state) => date('d M Y, H:i', strtotime($state)))
+                ->formatStateUsing(fn ($state) => new \Illuminate\Support\HtmlString(e(date('d M Y', strtotime($state))).'<br>'.e(date('H:i', strtotime($state)))))
+                ->wrap()
                 ->description(fn (Transaksi $record): ?string => static::keteranganPencatat($record))
-                ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
-
-            TextColumn::make('sumberDanaTujuan.nama_dompet')
-                ->visibleFrom('md')
-                ->label('Sumber dana tujuan')
-                ->formatStateUsing(fn ($state, Transaksi $record): ?string => $record->tipe_transfer === 'dompet' ? $state : null)
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('buku_kas.nama_buku')
                 ->visibleFrom('md')
                 ->label('Kas')
-                ->formatStateUsing(fn ($state, Transaksi $record): ?string => $record->tipe_transfer === 'dompet' ? null : $record->buku_kas?->nama_buku)
-                ->description(fn (Transaksi $record): ?string => $record->tipe_transfer === 'dompet' ? null : 'Sumber dana: '.$record->labelDompetUntuk(auth()->user()))
+                ->getStateUsing(fn (Transaksi $record): string => str_starts_with($record->jenis, 'Transfer') ? '—' : ($record->buku_kas?->nama_buku ?? '—'))
+                ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
+
+            TextColumn::make('sumber_dana')
+                ->visibleFrom('md')
+                ->label('Sumber dana')
+                ->getStateUsing(fn (Transaksi $record): string => $record->tipe_transfer === 'dompet' ? '—' : $record->labelSumberDanaUntuk(auth()->user()))
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer)),
 
             TextColumn::make('kategori')
                 ->visibleFrom('md')
-                ->label('Kategori')
-                ->getStateUsing(fn (Transaksi $record) => static::getKategoriLabel($record) ?? 'Tanpa kategori')
+                ->label('Kategori / rincian')
+                ->getStateUsing(fn (Transaksi $record) => static::rincianDesktop($record))
                 ->searchable(query: function (Builder $query, string $search): Builder {
                     return $query
                         ->where('deskripsi', 'like', "%{$search}%");
@@ -212,8 +212,8 @@ class TransaksiResource extends Resource
 
             TextColumn::make('nominal')
                 ->visibleFrom('md')
-                ->numeric()
-                ->prefix('Rp ')
+                ->alignEnd()
+                ->formatStateUsing(fn ($state, Transaksi $record): string => match ($record->jenis) { 'Pemasukan' => '+ ', 'Pengeluaran' => '− ', default => '' }.'Rp '.number_format((float) $state, 0, ',', '.'))
                 ->color(fn (Transaksi $record): string => static::getWarnaTipeTransaksi($record->jenis, $record->tipe_transfer))
                 ->description(function (Transaksi $record, $livewire): ?string {
                     $saldo = [];
@@ -229,6 +229,26 @@ class TransaksiResource extends Resource
                     return filled($saldo) ? implode(' · ', $saldo) : null;
                 }),
         ];
+    }
+
+    public static function rincianDesktop(Transaksi $record): string
+    {
+        if (! str_starts_with($record->jenis, 'Transfer')) {
+            return static::getKategoriLabel($record) ?? 'Tanpa kategori';
+        }
+
+        if ($record->tipe_transfer === 'dompet') {
+            $pasangan = $record->transfer_code ? $record->pasanganTransfer : collect([$record]);
+            $asal = $pasangan->firstWhere('jenis', 'Transfer Pengeluaran');
+            $tujuan = $pasangan->firstWhere('jenis', 'Transfer Pemasukan');
+
+            return ($asal?->labelSumberDanaUntuk(auth()->user()) ?? '—').' → '.($tujuan?->labelSumberDanaUntuk(auth()->user()) ?? '—');
+        }
+
+        $asal = $record->jenis === 'Transfer Pengeluaran' ? $record->buku_kas : $record->asal_buku_tabungan;
+        $tujuan = $record->jenis === 'Transfer Pemasukan' ? $record->buku_kas : $record->tujuan_buku_tabungan;
+
+        return ($asal?->nama_buku ?? '—').' → '.($tujuan?->nama_buku ?? '—');
     }
 
     public static function getWarnaTipeTransaksi(string $jenis, ?string $tipeTransfer = null): string

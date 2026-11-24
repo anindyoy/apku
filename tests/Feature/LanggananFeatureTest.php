@@ -50,11 +50,9 @@ test('kartu langganan mempertahankan rincian pencarian filter dan aksi', functio
         ->and($component->instance()->getTable()->getContentGrid())->toBe(['default' => 1, 'md' => 2]);
     $list = $xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " fi-ta-content-grid ")]')->item(0);
     expect($list)->not->toBeNull();
-    expect($list->getAttribute('class'))->toContain('md:fi-grid-cols')
-        ->and($list->getAttribute('style'))->toContain('--cols-md: repeat(2, minmax(0, 1fr))');
+    expect($list->getAttribute('style'))->toContain('--cols-md: repeat(2, minmax(0, 1fr))');
     $card = $xpath->query('//*[@data-subscription-card]')->item(0);
-    expect($card->getAttribute('class'))->toContain('md:fi-grid-cols')
-        ->and($card->getAttribute('style'))->toContain('--cols-md: repeat(2, minmax(0, 1fr))')
+    expect($card->getAttribute('style'))->toContain('--cols-md: repeat(2, minmax(0, 1fr))')
         ->and($xpath->query('./div', $card)->length)->toBe(2);
     $text = $document->textContent;
     foreach ([

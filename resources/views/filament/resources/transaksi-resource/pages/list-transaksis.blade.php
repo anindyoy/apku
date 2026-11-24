@@ -25,7 +25,7 @@
             ]);
 @endphp
 
-    <x-filament::section collapsible collapsed compact icon="heroicon-o-funnel" class="-mb-2" data-testid="filter-transaksi-section">
+    <x-filament::section collapsible collapsed compact icon="heroicon-o-funnel" data-testid="filter-transaksi-section">
         <x-slot name="heading">Filter transaksi</x-slot>
 
         <div class="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Periode transaksi</div>
@@ -120,3 +120,22 @@
             </a>
         </div>
     </x-filament::section>
+
+    <ul aria-label="Keterangan jenis transaksi" data-testid="legenda-transaksi" class="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs font-medium">
+        <li class="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
+            <x-filament::icon icon="heroicon-o-arrow-up-on-square" class="h-4 w-4" />
+            <span>Pengeluaran</span>
+        </li>
+        <li class="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
+            <x-filament::icon icon="heroicon-o-arrow-down-on-square" class="h-4 w-4" />
+            <span>Pemasukan</span>
+        </li>
+        <li class="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400">
+            <x-filament::icon icon="heroicon-o-arrow-path-rounded-square" class="h-4 w-4" />
+            <span>Transfer antar kas</span>
+        </li>
+        <li class="inline-flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
+            <x-filament::icon icon="heroicon-o-arrows-right-left" class="h-4 w-4" />
+            <span>Transfer antar sumber dana</span>
+        </li>
+    </ul>

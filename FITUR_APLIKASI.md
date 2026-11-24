@@ -28,6 +28,7 @@ Aturan bisnis dan pemrosesan data aplikasi.
 ### 3. Pengelolaan transaksi
 
 - Mencatat pemasukan dan pengeluaran.
+- Legenda di atas tabel Transaksi menjelaskan ikon dan warna: Pengeluaran merah, Pemasukan hijau, Transfer antar kas biru, dan Transfer antar sumber dana kuning. Legenda mendukung mode terang/gelap dan membungkus pada layar sempit.
 - Form transaksi menyediakan pembuatan kategori langsung dari pilihan Kategori untuk semua pengguna non-admin; kategori otomatis terhubung ke kas yang dipilih dan tipe awal mengikuti jenis transaksi.
 - Pengguna Premium aktif dapat membuat kas dan sumber dana dari pilihan pada form transaksi. Kas baru dimulai dengan saldo nol dan seluruh kategori milik pemilik kas otomatis dihubungkan; sumber dana baru dimulai dengan saldo nol. Opsi ini tetap mematuhi kuota akun dan validasi nama unik.
 - Transaksi baru memengaruhi saldo secara default. Transfer kas hanya memengaruhi saldo kas asal dan tujuan, sedangkan sumber dana pencatatannya tidak berubah; pengecualian tanpa dampak saldo tersedia untuk import riwayat.
@@ -37,8 +38,9 @@ Aturan bisnis dan pemrosesan data aplikasi.
 - Tombol aksi transaksi tampil berbentuk pil dengan latar dan garis tepi berwarna sesuai aksi: peringatan kuning, Ubah biru, dan Hapus merah; garis tipis memisahkan setiap baris.
 - Saldo per baris pada daftar transaksi mengikuti saldo kas dan sumber dana tersimpan serta dampak transaksi menurut tanggal; penghapusan transaksi di tengah riwayat memperbarui saldo baris berikutnya, termasuk saat daftar difilter.
 - Filter periode, kas yang dapat diakses pengguna, dan sumber dana pada daftar transaksi berada dalam panel Filter transaksi yang tertutup saat halaman pertama dibuka dan dapat dibuka sesuai kebutuhan. URL daftar transaksi dengan ID filter kas atau sumber dana yang tidak dapat diakses dialihkan ke `/admin/transaksi` tanpa filter.
-- Pada layar desktop, header dan isi tabel Transaksi serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Sumber dana tujuan, Kas, Kategori, dan Nominal; kolom Sumber dana tujuan hanya terisi untuk transfer sumber dana. Header dan isi tabel Pencarian Transaksi sejajar: Tipe, Tanggal, Kas, Kategori, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.
+- Pada layar desktop, header dan isi tabel Transaksi serta transaksi terbaru di Dashboard sejajar: Tipe, Tanggal, Kas, Sumber dana, Kategori / rincian, dan Nominal. Transfer menampilkan asal → tujuan pada rincian dan tanda — pada Kas; transfer sumber dana juga menampilkan — pada Sumber dana. Nominal pemasukan bertanda +, pengeluaran −, dan transfer tanpa tanda. Header dan isi tabel Pencarian Transaksi sejajar: Tipe, Tanggal, Kas, Kategori, dan Nominal. Kolom ringkasan Transaksi hanya tampil di layar kecil.
 - Pada layar mobile, daftar Transaksi, hasil Pencarian Transaksi, dan lima transaksi terbaru di Dashboard menampilkan jenis, nominal, kategori, tanggal, deskripsi, kas, dan sumber dana secara ringkas tanpa perlu menggeser tabel; atribut kas disembunyikan untuk transfer sumber dana. Jika filter kas atau sumber dana aktif, ringkasan mobile juga menampilkan saldo akhir untuk filter yang dipilih. Rincian lain tersedia melalui aksi Ubah jika hak akses memungkinkan.
+- Daftar Transaksi menyatukan pasangan transfer kas dan sumber dana berdasarkan transfer_code menjadi satu baris, di desktop maupun mobile. Baris keluar menjadi wakil; jika filter hanya cocok dengan sisi masuk, sisi masuk tetap tampil. Pencatatan saldo tetap memakai dua transaksi terpisah; Dashboard dan Pencarian Transaksi tidak digabungkan.
 - Transfer saldo antar-kas.
 - Pemindahan saldo antar-sumber dana.
 - Import massal transaksi pemasukan dan pengeluaran melalui file CSV atau XLSX.
