@@ -95,6 +95,54 @@ test('daftar kas menempatkan seluruh kas milik sendiri sebelum kas kolaborasi', 
         ->toBe([$kasSendiri->id, $kasSendiriTabungan->id, $kasKolaborasi->id]);
 })->group('filament', 'buku-kas');
 
+test('daftar kas dapat difilter menurut kepemilikan kas', function () {
+    $pemilik = createRegularUserWithBukuKas();
+    $pengguna = createRegularUserWithBukuKas();
+    $kasSendiri = $pengguna->buku_kas()->firstOrFail();
+    $kasSendiriTabungan = BukuKas::factory()->create([
+        'user_id' => $pengguna->id,
+        'nama_buku' => 'Kas Sendiri Tabungan',
+        'is_default' => false,
+        'is_tabungan' => true,
+    ]);
+    $kasKolaborasi = $pemilik->buku_kas()->firstOrFail();
+
+    ShareBuku::create([
+        'buku_kas_id' => $kasKolaborasi->id,
+        'user_id' => $pengguna->id,
+        'invited_by_user_id' => $pemilik->id,
+        'privilege' => 'editor',
+        'berlaku_mulai' => now()->subMinute(),
+    ]);
+
+    $component = Livewire::actingAs($pengguna)->test(ListBukuKas::class)->assertSuccessful();
+    $filter = $component->instance()->getTable()->getFilters()['kepemilikan'] ?? null;
+
+    expect($filter)->not->toBeNull()
+        ->and($filter->getLabel())->toBe('Kepemilikan kas')
+        ->and($filter->getOptions())->toBe([
+            'milik' => 'Milik sendiri',
+            'kolaborasi' => 'Kas kolaborasi',
+        ]);
+
+    // Tanpa filter: kas milik sendiri dan kas kolaborasi tampil.
+    $component->assertCanSeeTableRecords([$kasSendiri, $kasSendiriTabungan, $kasKolaborasi]);
+
+    // Filter milik sendiri: hanya kas milik pengguna.
+    Livewire::actingAs($pengguna)->test(ListBukuKas::class, [
+        'tableFilters' => ['kepemilikan' => ['value' => 'milik']],
+    ])->assertSuccessful()
+        ->assertCanSeeTableRecords([$kasSendiri, $kasSendiriTabungan])
+        ->assertCanNotSeeTableRecords([$kasKolaborasi]);
+
+    // Filter kas kolaborasi: hanya kas milik pengguna lain.
+    Livewire::actingAs($pengguna)->test(ListBukuKas::class, [
+        'tableFilters' => ['kepemilikan' => ['value' => 'kolaborasi']],
+    ])->assertSuccessful()
+        ->assertCanSeeTableRecords([$kasKolaborasi])
+        ->assertCanNotSeeTableRecords([$kasSendiri, $kasSendiriTabungan]);
+})->group('filament', 'buku-kas');
+
 test('kas saldo nol dapat dinonaktifkan setelah mengganti kas utama lalu diaktifkan kembali', function () {
     $user = createRegularUserWithBukuKas();
     $kasUtama = $user->buku_kas()->firstOrFail();

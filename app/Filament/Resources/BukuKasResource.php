@@ -30,6 +30,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -139,7 +140,19 @@ class BukuKasResource extends Resource
                 ])->space(3),
             ])
             ->filters([
-                //
+                SelectFilter::make('kepemilikan')
+                    ->label('Kepemilikan kas')
+                    ->options([
+                        'milik' => 'Milik sendiri',
+                        'kolaborasi' => 'Kas kolaborasi',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'milik' => $query->where($query->qualifyColumn('user_id'), auth()->id()),
+                            'kolaborasi' => $query->where($query->qualifyColumn('user_id'), '!=', auth()->id()),
+                            default => $query,
+                        };
+                    }),
             ])
             ->actions([
                 EditAction::make()
