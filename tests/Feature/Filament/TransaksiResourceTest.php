@@ -47,6 +47,17 @@ test('kolom kategori transaksi selalu diawali huruf kapital', function () {
 })
     ->group('filament', 'transaksi', 'kategori-kapital');
 
+test('kolom sumber dana menampilkan tanda hubung untuk kedua arah transfer kas', function () {
+    $kolom = collect(TransaksiResource::transactionColumns())
+        ->first(fn ($kolom): bool => $kolom->getName() === 'sumber_dana');
+    $callback = (new ReflectionClass($kolom))->getProperty('getStateUsing')->getValue($kolom);
+
+    foreach (['Transfer Pengeluaran', 'Transfer Pemasukan'] as $jenis) {
+        expect($callback(new Transaksi(['jenis' => $jenis, 'tipe_transfer' => 'buku_kas'])))->toBe('—');
+        expect($callback(new Transaksi(['jenis' => $jenis, 'tipe_transfer' => 'dompet'])))->toBe('—');
+    }
+});
+
 test('transfer sumber dana tidak menampilkan atribut kas pada daftar transaksi', function () {
     $user = createRegularUserWithBukuKas();
     $bukuKas = $user->buku_kas()->firstOrFail();
