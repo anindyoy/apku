@@ -85,7 +85,7 @@ test('form ubah transfer menampilkan kas dan dompet yang dapat dipilih serta men
 
     Livewire::actingAs($user)
         ->test(ListTransaksis::class)
-        ->mountTableAction('edit', $pasangan['masuk'])
+        ->mountTableAction('edit', $pasangan['keluar'])
         ->assertSchemaStateSet([
             'buku_kas_id' => $kasAsal->id,
             'buku_kas_id_tujuan' => $kasTujuan->id,
@@ -99,11 +99,11 @@ test('form ubah transfer menampilkan kas dan dompet yang dapat dipilih serta men
             && ! $field->isOptionDisabled($dompetKedua->id, $dompetKedua->nama_dompet)
             && $field->isOptionDisabled($dompetTerbatas->id, $dompetTerbatas->nama_dompet))
         ->unmountTableAction()
-        ->callTableAction('edit', $pasangan['masuk'], data: [
+        ->callTableAction('edit', $pasangan['keluar'], data: [
             'buku_kas_id' => $kasTujuan->id,
             'buku_kas_id_tujuan' => $kasAsal->id,
             'dompet_id' => $dompetKedua->id,
-            'tanggal' => $pasangan['masuk']->tanggal,
+            'tanggal' => $pasangan['keluar']->tanggal,
             'nominal' => 15000,
         ])
         ->assertHasNoTableActionErrors();

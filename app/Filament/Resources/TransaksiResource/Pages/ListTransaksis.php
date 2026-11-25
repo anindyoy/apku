@@ -188,7 +188,12 @@ class ListTransaksis extends ListRecords
                     ->orWhereNull('transfer_code')
                     ->orWhere('transfer_code', '')
                     ->orWhereNotIn('transfer_code', $transferKeluar);
-            })->with(['pasanganTransfer.sumberDana']);
+            })->with([
+                'pasanganTransfer.sumberDana',
+                'pasanganTransfer.buku_kas',
+                'pasanganTransfer.asal_buku_tabungan',
+                'pasanganTransfer.tujuan_buku_tabungan',
+            ]);
         }
 
         return $query;
