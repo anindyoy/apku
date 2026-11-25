@@ -27,12 +27,15 @@ test('tabel kas memadatkan kolom dan tetap mencari deskripsi', function () {
     $table = $component->instance()->getTable();
     $record = $component->instance()->getTableRecords()->firstWhere('id', $kas->id);
 
-    expect(array_keys($table->getColumns()))->toBe(['nama_buku', 'tipe_kas', 'is_active', 'akses', 'saldo', 'progres_tabungan', 'created_at', 'updated_at'])
+    expect(array_keys($table->getColumns()))->toBe(['nama_buku', 'badges', 'saldo', 'progres_tabungan', 'created_at', 'updated_at'])
         ->and($table->getContentGrid())->toBe(['default' => 1, 'md' => 2, 'xl' => 3])
         ->and($table->getColumn('nama_buku')->record($record)->getDescriptionBelow())->toBe('Deskripsi: Dana perjalanan keluarga')
-        ->and($table->getColumn('is_active')->record($record)->formatState(true))->toBe('Status: Aktif')
-        ->and($table->getColumn('akses')->record($record)->getPrefix())->toBe('Akses: ')
-        ->and($table->getColumn('akses')->record($record)->getDescriptionBelow())->toBe('Kepemilikan: Milik saya')
+        ->and($table->getColumn('badges')->record($record)->getDescriptionBelow())->toBe('Kepemilikan: Milik saya')
+        ->and($table->getColumn('badges')->record($record)->getState())->toBe([
+            'Kas Biasa',
+            'Status: Aktif',
+            'Akses: Owner',
+        ])
         ->and($table->getColumn('saldo')->record($record)->getPrefix())->toBe('Saldo: Rp ')
         ->and($table->getColumn('saldo')->record($record)->getDescriptionBelow())->toBe('Jumlah transaksi: 0 · Produk emas: 2')
         ->and($table->getColumn('created_at')->isToggledHiddenByDefault())->toBeTrue()
@@ -141,6 +144,15 @@ test('daftar kas dapat difilter menurut kepemilikan kas', function () {
     ])->assertSuccessful()
         ->assertCanSeeTableRecords([$kasKolaborasi])
         ->assertCanNotSeeTableRecords([$kasSendiri, $kasSendiriTabungan]);
+
+    // Deskripsi kepemilikan kas kolaborasi menampilkan nama pemilik kas.
+    $recordKolaborasi = $component->instance()->getTableRecords()->firstWhere('id', $kasKolaborasi->id);
+    $deskripsiKolaborasi = $component->instance()->getTable()->getColumn('badges')->record($recordKolaborasi)->getDescriptionBelow();
+
+    expect($deskripsiKolaborasi)->toBe('Kepemilikan: '.$pemilik->name)
+        ->and($component->instance()->getTable()->getColumn('badges')
+            ->record($component->instance()->getTableRecords()->firstWhere('id', $kasSendiri->id))
+            ->getDescriptionBelow())->toBe('Kepemilikan: Milik saya');
 })->group('filament', 'buku-kas');
 
 test('kas saldo nol dapat dinonaktifkan setelah mengganti kas utama lalu diaktifkan kembali', function () {

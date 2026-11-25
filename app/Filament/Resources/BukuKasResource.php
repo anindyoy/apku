@@ -66,61 +66,52 @@ class BukuKasResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->urutanListKas())
+            ->modifyQueryUsing(fn(Builder $query) => $query->with('user:id,name')->urutanListKas())
             ->contentGrid(['default' => 1, 'md' => 2, 'xl' => 3])
             ->columns([
-                // Tables\Columns\TextColumn::make('user_id')
-                //     ->numeric()
-                //     ->sortable(),
-
                 Stack::make([
                     TextColumn::make('nama_buku')
                         ->label('Kas')
                         ->searchable(['nama_buku', 'description'])
-                        ->description(fn (BukuKas $record): ?string => filled($record->description) ? 'Deskripsi: '.$record->description : null)
+                        ->description(fn(BukuKas $record): ?string => filled($record->description)
+                            ? 'Deskripsi: ' . $record->description
+                            : null)
                         ->weight('bold')
                         ->size('lg')
                         ->wrap(),
 
-                    TextColumn::make('tipe_kas')
+                    // Tipe + status + akses digabung jadi satu baris badge
+                    TextColumn::make('badges')
+                        ->label('Info')
                         ->badge()
-                        ->state(fn (BukuKas $record): string => $record->is_tabungan ? 'Kas Tabungan' : 'Kas Biasa')
-                        ->color(fn (BukuKas $record): string => $record->is_tabungan ? 'primary' : 'gray'),
-
-                    TextColumn::make('is_active')
-                        ->label('Status')
-                        ->prefix('Status: ')
-                        ->formatStateUsing(fn (bool $state): string => $state ? 'Aktif' : 'Nonaktif')
-                        ->badge()
-                        ->color(fn (bool $state): string => $state ? 'success' : 'gray'),
-
-                    TextColumn::make('akses')
-                        ->badge()
-                        ->prefix('Akses: ')
-                        ->state(fn (BukuKas $record): string => ucfirst(auth()->user()->hakAksesPada($record) ?? 'Tidak ada'))
-                        ->description(fn (BukuKas $record): string => $record->user_id === auth()->id()
+                        ->state(fn(BukuKas $record): array => [
+                            $record->is_tabungan ? 'Kas Tabungan' : 'Kas Biasa',
+                            'Status: ' . ($record->is_active ? 'Aktif' : 'Nonaktif'),
+                            'Akses: ' . ucfirst(auth()->user()->hakAksesPada($record) ?? 'Tidak ada'),
+                        ])
+                        ->color(fn(string $state): string => match (true) {
+                            $state === 'Kas Tabungan'            => 'warning',
+                            $state === 'Status: Aktif'           => 'success',
+                            str_starts_with($state, 'Akses:')    => 'primary',
+                            default                              => 'gray',
+                        })
+                        ->description(fn(BukuKas $record): string => $record->user_id === auth()->id()
                             ? 'Kepemilikan: Milik saya'
-                            : 'Kepemilikan: Dibagikan kepada saya'),
+                            : 'Kepemilikan: '.($record->user?->name ?? 'Tidak diketahui')),
 
                     TextColumn::make('saldo')
                         ->prefix('Saldo: Rp ')
                         ->numeric()
                         ->sortable()
-                        ->color(function (int $state): string {
-                            if ($state > 0) {
-                                return 'success';
-                            }
-
-                            if ($state < 0) {
-                                return 'danger';
-                            }
-
-                            return 'gray';
+                        ->color(fn(int $state): string => match (true) {
+                            $state > 0 => 'success',
+                            $state < 0 => 'danger',
+                            default    => 'gray',
                         })
                         ->counts(['transaksi', 'tabunganEmas'])
-                        ->description(fn (BukuKas $record): string => 'Jumlah transaksi: '.number_format($record->transaksi_count, 0, ',', '.')
-                            .(app(PengaturanTabunganEmas::class)->aktif() && $record->tabungan_emas_count > 0
-                                ? ' · Produk emas: '.number_format($record->tabungan_emas_count, 0, ',', '.')
+                        ->description(fn(BukuKas $record): string => 'Jumlah transaksi: ' . number_format($record->transaksi_count, 0, ',', '.')
+                            . (app(PengaturanTabunganEmas::class)->aktif() && $record->tabungan_emas_count > 0
+                                ? ' · Produk emas: ' . number_format($record->tabungan_emas_count, 0, ',', '.')
                                 : '')),
 
                     ViewColumn::make('progres_tabungan')
@@ -137,7 +128,7 @@ class BukuKasResource extends Resource
                         ->dateTime()
                         ->sortable()
                         ->toggleable(),
-                ])->space(3),
+                ])->space(1), // sebelumnya 3, ini yang paling banyak memangkas tinggi kartu
             ])
             ->filters([
                 SelectFilter::make('kepemilikan')
@@ -156,8 +147,8 @@ class BukuKasResource extends Resource
             ])
             ->actions([
                 EditAction::make()
-                    ->visible(fn (BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id())
-                    ->before(fn (BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403))
+                    ->visible(fn(BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id())
+                    ->before(fn(BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403))
                     ->mutateRecordDataUsing(function (BukuKas $record, array $data): array {
                         $opsi = BukuKasFormSchema::opsiKategori($record);
                         $terpilih = $record->idKategori();
@@ -193,7 +184,7 @@ class BukuKasResource extends Resource
                 FilamentAction::make('jadikanDefault')
                     ->label('Jadikan kas utama')
                     ->icon('heroicon-o-star')
-                    ->visible(fn (BukuKas $record): bool => $record->is_active
+                    ->visible(fn(BukuKas $record): bool => $record->is_active
                         && ! $record->is_default
                         && $record->user_id === auth()->id())
                     ->action(function (BukuKas $record): void {
@@ -204,7 +195,7 @@ class BukuKasResource extends Resource
                     ->label('Nonaktifkan')
                     ->icon('heroicon-o-pause-circle')
                     ->color('gray')
-                    ->visible(fn (BukuKas $record): bool => $record->is_active
+                    ->visible(fn(BukuKas $record): bool => $record->is_active
                         && ! $record->is_default
                         && $record->user_id === auth()->id()
                         && (int) $record->saldo === 0
@@ -218,7 +209,7 @@ class BukuKasResource extends Resource
                     ->label('Aktifkan')
                     ->icon('heroicon-o-play-circle')
                     ->color('success')
-                    ->visible(fn (BukuKas $record): bool => ! $record->is_active
+                    ->visible(fn(BukuKas $record): bool => ! $record->is_active
                         && $record->user_id === auth()->id())
                     ->action(function (BukuKas $record): void {
                         static::ubahStatusAktif($record, true);
@@ -227,24 +218,24 @@ class BukuKasResource extends Resource
                 FilamentAction::make('kolaborator')
                     ->label('Kolaborator Kas')
                     ->icon('heroicon-o-user-group')
-                    ->url(fn (): string => ShareBukuResource::getUrl())
-                    ->visible(fn (BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id()),
+                    ->url(fn(): string => ShareBukuResource::getUrl())
+                    ->visible(fn(BukuKas $record): bool => $record->is_active && $record->user_id === auth()->id()),
 
                 FilamentAction::make('cekNilaiEmas')
                     ->label('Cek Nilai Emas')
                     ->icon('heroicon-o-calculator')
-                    ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
+                    ->visible(fn(BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
                         && $record->is_active
                         && $record->tabunganEmas()->where('berat_gram', '>', 0)->exists())
-                    ->modalHeading(fn (BukuKas $record): string => 'Nilai emas pada '.$record->nama_buku)
+                    ->modalHeading(fn(BukuKas $record): string => 'Nilai emas pada ' . $record->nama_buku)
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Tutup')
-                    ->modalContent(fn (BukuKas $record) => view('filament.valuasi-emas', ['record' => $record])),
+                    ->modalContent(fn(BukuKas $record) => view('filament.valuasi-emas', ['record' => $record])),
 
                 FilamentAction::make('hargaEmasManual')
                     ->label('Harga Emas Manual')
                     ->icon('heroicon-o-pencil-square')
-                    ->visible(fn (BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
+                    ->visible(fn(BukuKas $record): bool => app(PengaturanTabunganEmas::class)->aktif()
                         && $record->is_active
                         && $record->tabunganEmas()->exists()
                         && auth()->user()->dapatMengelolaTransaksiPada($record))
@@ -257,7 +248,7 @@ class BukuKasResource extends Resource
                                 ->placeholder('Contoh: 1.150.000')
                         ),
                     ])
-                    ->action(fn (BukuKas $record, array $data) => app(HargaEmasService::class)->simpanManual(
+                    ->action(fn(BukuKas $record, array $data) => app(HargaEmasService::class)->simpanManual(
                         $record,
                         auth()->user(),
                         (int) $data['harga_per_gram'],
@@ -265,14 +256,14 @@ class BukuKasResource extends Resource
                     ->successNotificationTitle('Harga emas manual berhasil disimpan untuk kas ini'),
 
                 DeleteAction::make()
-                    ->visible(fn (BukuKas $record): bool => $record->is_active
+                    ->visible(fn(BukuKas $record): bool => $record->is_active
                         && $record->user_id === auth()->id()
                         && ! $record->transaksi()->exists()
                         && ! $record->tabunganEmas()->exists())
-                    ->before(fn (BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403)),
+                    ->before(fn(BukuKas $record) => abort_unless($record->is_active && $record->user_id === auth()->id(), 403)),
 
                 Action::make('hapusDanPindahkan')
-                    ->visible(fn (BukuKas $record): bool => $record->user_id === auth()->id()
+                    ->visible(fn(BukuKas $record): bool => $record->user_id === auth()->id()
                         && $record->is_active
                         && ($record->transaksi()->exists() || $record->tabunganEmas()->exists()))
                     ->color('danger')
@@ -280,15 +271,15 @@ class BukuKasResource extends Resource
                     ->label('Hapus')
                     ->modalHeading('Pindahkan transaksi dan hapus kas')
                     ->modalWidth('md')
-                    ->modalDescription(fn (BukuKas $record): string => "Kas {$record->nama_buku} masih memiliki transaksi. Pilih kas tujuan sebelum menghapusnya.")
+                    ->modalDescription(fn(BukuKas $record): string => "Kas {$record->nama_buku} masih memiliki transaksi. Pilih kas tujuan sebelum menghapusnya.")
                     ->modalSubmitActionLabel('Pindahkan dan hapus')
-                    ->form(fn (BukuKas $record): array => [
+                    ->form(fn(BukuKas $record): array => [
                         SelectKasDanSumberDana::terapkan(
                             Select::make('buku_kas_id')
                                 ->label('Kas tujuan')
-                                ->options(fn (): array => array_filter(
+                                ->options(fn(): array => array_filter(
                                     Transaksi::opsiBukuKasMilikSendiri($record->user_id),
-                                    fn ($id): bool => (int) $id !== (int) $record->id,
+                                    fn($id): bool => (int) $id !== (int) $record->id,
                                     ARRAY_FILTER_USE_KEY,
                                 ))
                                 ->helperText('Semua transaksi, saldo rupiah, dan tabungan emas akan digabungkan ke kas tujuan.')
@@ -303,8 +294,8 @@ class BukuKasResource extends Resource
 
                         Section::make('Kategori transaksi')
                             ->description('Kategori berikut belum terhubung ke kas tujuan. Pilih kategori penggantinya di kas tujuan, atau biarkan kosong agar transaksinya menjadi tanpa kategori.')
-                            ->schema(fn (Get $get): array => static::fieldPemetaanKategori($record, $get('buku_kas_id')))
-                            ->visible(fn (Get $get): bool => static::fieldPemetaanKategori($record, $get('buku_kas_id')) !== []),
+                            ->schema(fn(Get $get): array => static::fieldPemetaanKategori($record, $get('buku_kas_id')))
+                            ->visible(fn(Get $get): bool => static::fieldPemetaanKategori($record, $get('buku_kas_id')) !== []),
                     ])
                     ->action(function (BukuKas $record, array $data): void {
                         app(BukuKasService::class)->pindahkanDanHapus(
@@ -338,14 +329,14 @@ class BukuKasResource extends Resource
             return [];
         }
 
-        $opsi = OpsiSelectCache::ingat('kategori', fn (): array => $tujuan->kategori()->withoutGlobalScopes()
+        $opsi = OpsiSelectCache::ingat('kategori', fn(): array => $tujuan->kategori()->withoutGlobalScopes()
             ->orderBy('nama')
             ->get()
-            ->mapWithKeys(fn (Kategori $kategori): array => [$kategori->id => $kategori->nama.' ('.$kategori->tipe.')'])
+            ->mapWithKeys(fn(Kategori $kategori): array => [$kategori->id => $kategori->nama . ' (' . $kategori->tipe . ')'])
             ->all(), $tujuan->id, 'dengan-tipe');
 
         return collect(app(BukuKasService::class)->kategoriPerluDipetakan($asal, $tujuan))
-            ->map(fn (string $nama, int $id): Select => Select::make('pemetaan_kategori.'.$id)
+            ->map(fn(string $nama, int $id): Select => Select::make('pemetaan_kategori.' . $id)
                 ->label($nama)
                 ->placeholder('Kosongkan kategori')
                 ->options($opsi))
