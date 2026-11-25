@@ -185,7 +185,7 @@ test('transaksi delete - transfer pemasukan mengurangi saldo dan hapus related',
     Livewire::actingAs($user)
         ->test(\App\Filament\Resources\TransaksiResource\Pages\ListTransaksis::class)
         ->assertSuccessful()
-        ->callTableAction('delete', $transaksiIn);
+        ->callTableAction('delete', $transaksiOut);
 
     // After deleting Transfer Pemasukan:
     // - bukuKasTujuan saldo should decrease by 40000 (line 161)
