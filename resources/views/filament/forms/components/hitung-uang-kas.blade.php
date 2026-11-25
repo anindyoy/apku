@@ -91,18 +91,19 @@
             >
                 @foreach ($daftarNominal as $kunci => $nominal)
                     <div @class([
-                        'grid grid-cols-[minmax(0,1fr)_auto_minmax(4rem,auto)] items-center gap-2 rounded-lg px-2 py-2 sm:px-3' => $kelompok === 'Uang Kertas',
-                        'grid grid-cols-[minmax(0,1fr)_auto_minmax(4rem,auto)] items-center gap-2 px-2 py-2 sm:px-3' => $kelompok === 'Uang Logam',
+                        'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 rounded-lg px-2 py-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(4rem,auto)] sm:gap-y-0 sm:px-3' => $kelompok === 'Uang Kertas',
+                        'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 px-2 py-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(4rem,auto)] sm:gap-y-0 sm:px-3' => $kelompok === 'Uang Logam',
                         'border border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/50 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800' => $kelompok === 'Uang Kertas',
                     ])>
                         <div class="min-w-0 text-sm font-semibold text-slate-800 dark:text-gray-100">
                             Rp {{ number_format($nominal, 0, ',', '.') }}
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="min-w-16 text-right text-xs text-slate-600 dark:text-gray-400 sm:col-start-3 sm:row-start-1" x-text="formatRupiah(subtotal(@js($kunci), {{ $nominal }}))"></div>
+                        <div class="col-span-2 flex items-center gap-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:gap-1">
                             <button
                                 type="button"
                                 aria-label="Kurangi satu pecahan Rp {{ number_format($nominal, 0, ',', '.') }}"
-                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-lg leading-none text-slate-700 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:active:bg-gray-700"
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-lg leading-none text-slate-700 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:active:bg-gray-700 sm:h-8 sm:w-8"
                                 x-on:click="ubah(@js($kunci), -1)"
                             >−</button>
                             <input
@@ -113,18 +114,17 @@
                                 inputmode="numeric"
                                 placeholder="0"
                                 aria-label="Jumlah pecahan Rp {{ number_format($nominal, 0, ',', '.') }}"
-                                class="h-9 w-12 rounded-lg border border-slate-300 bg-white px-1 text-center text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
+                                class="h-10 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 text-center text-base text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 sm:h-9 sm:w-12 sm:flex-none sm:px-1 sm:text-sm"
                                 x-model.number="pecahan[@js($kunci)]"
                                 wire:model="{{ $getStatePath() }}.{{ $kunci }}"
                             >
                             <button
                                 type="button"
                                 aria-label="Tambah satu pecahan Rp {{ number_format($nominal, 0, ',', '.') }}"
-                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-lg leading-none text-slate-700 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:active:bg-gray-700"
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-lg leading-none text-slate-700 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:active:bg-gray-700 sm:h-8 sm:w-8"
                                 x-on:click="ubah(@js($kunci), 1)"
                             >+</button>
                         </div>
-                        <div class="min-w-16 text-right text-xs text-slate-600 dark:text-gray-400" x-text="formatRupiah(subtotal(@js($kunci), {{ $nominal }}))"></div>
                     </div>
                 @endforeach
             </div>
