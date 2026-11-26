@@ -111,7 +111,7 @@ class UtangDetail extends Page implements HasTable
                 ->action(function () {
                     $tipe = $this->parent->tipe;
                     $this->parent->delete();
-                    redirect(url('/admin/'.$tipe.'s'));
+                    redirect(url('/app/'.$tipe.'s'));
                     Notification::make()
                         ->title('Berhasil menghapus data')
                         ->success()

@@ -41,7 +41,7 @@ test('tamu beli paket aktif diarahkan ke registrasi dengan session terisi', func
     bersihkanDataBeliPaket();
     $paket = PaketLangganan::factory()->create(['is_active' => true]);
 
-    $registrasiUrl = filament()->getRegistrationUrl() ?? route('filament.admin.auth.register');
+    $registrasiUrl = filament()->getRegistrationUrl() ?? route('filament.app.auth.register');
 
     $this->get(route('beli-paket', $paket))
         ->assertRedirect($registrasiUrl)

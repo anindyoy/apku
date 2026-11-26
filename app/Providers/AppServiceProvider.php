@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         App::setLocale('id');
 
         // Arahkan tamu yang membuka halaman non-Filament ke login admin karena tidak ada route login bawaan.
-        Authenticate::redirectUsing(fn (Request $request): ?string => route('filament.admin.auth.login'));
+        Authenticate::redirectUsing(fn (Request $request): ?string => route('filament.app.auth.login'));
 
         DB::listen(DashboardCache::invalidateWrite(...));
 

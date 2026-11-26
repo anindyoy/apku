@@ -45,6 +45,6 @@ class BeliPaketController extends Controller
         // Tamu: ingat pilihan di session lalu arahkan ke registrasi.
         $request->session()->put(self::SESSION_KEY, $paketAktif->id);
 
-        return redirect()->to(filament()->getRegistrationUrl() ?? route('filament.admin.auth.register'));
+        return redirect()->to(filament()->getRegistrationUrl() ?? route('filament.app.auth.register'));
     }
 }

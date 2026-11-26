@@ -69,13 +69,13 @@ class PembayaranDitolakNotification extends Notification implements ShouldQueue
             ->view('emails.pembayaran-ditolak', [
                 'order' => $this->langganan,
                 'user' => $notifiable,
-                'url' => url('/admin/langganans'),
+                'url' => url('/app/langganans'),
                 'urlWa' => $urlWa,
             ])
             ->text('emails.pembayaran-ditolak-text', [
                 'order' => $this->langganan,
                 'user' => $notifiable,
-                'url' => url('/admin/langganans'),
+                'url' => url('/app/langganans'),
                 'urlWa' => $urlWa,
             ]);
     }

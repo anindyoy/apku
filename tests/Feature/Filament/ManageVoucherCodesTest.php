@@ -24,8 +24,8 @@ test('kelola kode voucher tersedia dari voucher tanpa resource terpisah', functi
     expect($embedded->getComponent())->toBe(CodesRelationManager::class)
         ->and($embedded->getData()['ownerRecord']->id)->toBe($voucher->id);
 
-    expect(Route::has('filament.admin.resources.voucher-codes.index'))->toBeFalse()
-        ->and(Route::has('filament.admin.resources.vouchers.codes'))->toBeFalse();
+    expect(Route::has('filament.app.resources.voucher-codes.index'))->toBeFalse()
+        ->and(Route::has('filament.app.resources.vouchers.codes'))->toBeFalse();
 });
 
 test('kelola kode voucher menambah kode lewat form di atas tabel dan mengedit lewat modal', function () {

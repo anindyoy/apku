@@ -12,8 +12,8 @@ it('menampilkan landing page publik dengan navigasi utama dan ringkasan fitur', 
 
     expect($html)->toContain('Catat uangmu.', 'Transaksi lengkap', 'Reguler', 'Premium aktif');
     expect($html)->toContain(asset('logo-options/apku-dompet-wordmark.svg'));
-    expect($html)->toContain(route('filament.admin.auth.login'));
-    expect($html)->toContain(route('filament.admin.auth.register'));
+    expect($html)->toContain(route('filament.app.auth.login'));
+    expect($html)->toContain(route('filament.app.auth.register'));
     expect($html)->toContain(route('tutorial'));
     expect($html)->toContain('aria-label="Buka menu navigasi"', 'Pilihan akun', 'Daftar gratis');
 });

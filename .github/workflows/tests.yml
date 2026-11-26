@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main, develop, refactor/sumber-dana]
+    branches: [main, develop, refactor/sumber-dana, feature/ganti-url-admin-ke-app]
   pull_request:
     branches: [main, develop]
 

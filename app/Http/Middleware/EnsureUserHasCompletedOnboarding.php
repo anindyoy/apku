@@ -42,8 +42,8 @@ class EnsureUserHasCompletedOnboarding
             && ! $user->isAdmin()
             && (! $user instanceof MustVerifyEmail || $user->hasVerifiedEmail())
             && (! $user->buku_kas()->exists() || ! $user->dompet()->exists())
-            && ! $request->routeIs('filament.admin.pages.onboarding')
-            && ! $request->routeIs('filament.admin.auth.*')
+            && ! $request->routeIs('filament.app.pages.onboarding')
+            && ! $request->routeIs('filament.app.auth.*')
         ) {
             return redirect(Onboarding::getUrl());
         }

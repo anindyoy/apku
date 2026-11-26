@@ -52,8 +52,8 @@ class UtangPiutang extends Model
                 ->icon('heroicon-o-magnifying-glass')
                 ->url(
                     fn (?Model $record): string => $record->tipe == 'utang'
-                        ? url('/admin/utangs/'.$record->code.'/detail')
-                        : url('/admin/piutangs/'.$record->code.'/detail')
+                        ? url('/app/utangs/'.$record->code.'/detail')
+                        : url('/app/piutangs/'.$record->code.'/detail')
                 ),
 
             DeleteAction::make()

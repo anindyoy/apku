@@ -37,8 +37,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('app')
+            ->path('app')
             ->brandName('APKu')
             // Logo di atas menu sidebar memakai wordmark dompet yang sama dengan landing page.
             ->brandLogo(asset('logo-options/apku-dompet-wordmark.svg'))

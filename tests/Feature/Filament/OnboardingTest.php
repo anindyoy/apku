@@ -178,10 +178,10 @@ test('pengguna belum verifikasi email diarahkan ke prompt verifikasi tanpa redir
 
     $response = $this->actingAs($user)->get('/admin');
 
-    $response->assertRedirect(route('filament.admin.auth.email-verification.prompt'));
+    $response->assertRedirect(route('filament.app.auth.email-verification.prompt'));
 
     // Memastikan saat mengakses prompt verifikasi email tidak dilempar kembali ke onboarding.
-    $promptResponse = $this->actingAs($user)->get(route('filament.admin.auth.email-verification.prompt'));
+    $promptResponse = $this->actingAs($user)->get(route('filament.app.auth.email-verification.prompt'));
     $promptResponse->assertSuccessful();
 });
 
@@ -190,7 +190,7 @@ test('pengguna belum verifikasi email yang mengakses onboarding diarahkan ke pro
 
     $response = $this->actingAs($user)->get(Onboarding::getUrl());
 
-    $response->assertRedirect(route('filament.admin.auth.email-verification.prompt'));
+    $response->assertRedirect(route('filament.app.auth.email-verification.prompt'));
 });
 
 test('pengguna diarahkan ke onboarding setelah email terverifikasi', function () {

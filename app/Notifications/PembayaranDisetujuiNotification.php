@@ -64,12 +64,12 @@ class PembayaranDisetujuiNotification extends Notification implements ShouldQueu
             ->view('emails.pembayaran-disetujui', [
                 'order' => $this->langganan,
                 'user' => $notifiable,
-                'url' => url('/admin'),
+                'url' => url('/app'),
             ])
             ->text('emails.pembayaran-disetujui-text', [
                 'order' => $this->langganan,
                 'user' => $notifiable,
-                'url' => url('/admin'),
+                'url' => url('/app'),
             ]);
     }
 

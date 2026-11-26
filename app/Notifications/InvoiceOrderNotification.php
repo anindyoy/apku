@@ -49,12 +49,12 @@ class InvoiceOrderNotification extends Notification implements ShouldQueue
             ->view('emails.invoice-order', [
                 'order' => $this->langganan,
                 'user' => $notifiable,
-                'url' => url('/admin/langganans'),
+                'url' => url('/app/langganans'),
             ])
             ->text('emails.invoice-order-text', [
                 'order' => $this->langganan,
                 'user' => $notifiable,
-                'url' => url('/admin/langganans'),
+                'url' => url('/app/langganans'),
             ]);
     }
 

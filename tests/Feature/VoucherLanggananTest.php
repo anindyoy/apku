@@ -73,8 +73,8 @@ test('resource voucher dan kode voucher hanya dapat diakses admin', function () 
     $user = createRegularUserWithBukuKas();
     $admin = User::factory()->create(['role' => 'admin']);
 
-    $this->actingAs($user)->get(route('filament.admin.resources.vouchers.index'))->assertForbidden();
-    $this->actingAs($admin)->get(route('filament.admin.resources.vouchers.index'))->assertSuccessful();
+    $this->actingAs($user)->get(route('filament.app.resources.vouchers.index'))->assertForbidden();
+    $this->actingAs($admin)->get(route('filament.app.resources.vouchers.index'))->assertSuccessful();
 })->group('voucher');
 
 test('voucher berulang otomatis membuat kode dari label saat disimpan', function () {

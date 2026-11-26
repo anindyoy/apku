@@ -24,7 +24,7 @@ test('landing menampilkan tombol coba premium mengikuti durasi setting', functio
 
     // Tamu diarahkan ke registrasi, login diarahkan ke halaman Langganan.
     $htmlTamu = $this->get('/')->assertOk()->getContent();
-    expect($htmlTamu)->toContain('Coba Premium gratis 14 hari', 'data-coba-premium', route('filament.admin.auth.register'));
+    expect($htmlTamu)->toContain('Coba Premium gratis 14 hari', 'data-coba-premium', route('filament.app.auth.register'));
 
     $pengguna = User::factory()->create(['role' => 'user', 'email_verified_at' => now()]);
     $htmlMasuk = $this->actingAs($pengguna)->get('/')->assertOk()->getContent();

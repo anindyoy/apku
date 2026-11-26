@@ -30,7 +30,7 @@ class TrialPremiumAktif extends Notification implements ShouldQueue
             ->line('Coba gratis Premium APKu Anda sudah aktif dan berlaku sampai '.$berakhir.'.')
             ->line('Selama trial Anda dapat menambah kas dan sumber dana tanpa batas kuota Reguler, mengundang kolaborator kas, serta membuat tautan kas publik.')
             ->line('Catatan: kas dan sumber dana ke-3 dan seterusnya tidak dapat dikelola lagi setelah trial berakhir, tetapi datanya tetap tersimpan.')
-            ->action('Buka Dashboard', url('/admin'));
+            ->action('Buka Dashboard', url('/app'));
     }
 
     public function toDatabase(object $notifiable): array

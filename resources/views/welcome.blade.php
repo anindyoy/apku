@@ -20,8 +20,8 @@
                 <a href="#akun" class="text-sm font-semibold text-slate-600 hover:text-teal-700">Pilihan akun</a>
                 <a href="#harga" class="text-sm font-semibold text-slate-600 hover:text-teal-700">Harga</a>
                 <a href="{{ route('tutorial') }}" class="text-sm font-semibold text-slate-600 hover:text-teal-700">Tutorial</a>
-                <a href="{{ route('filament.admin.auth.login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">Masuk</a>
-                <a href="{{ route('filament.admin.auth.register') }}" class="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800">Daftar gratis</a>
+                <a href="{{ route('filament.app.auth.login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">Masuk</a>
+                <a href="{{ route('filament.app.auth.register') }}" class="rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800">Daftar gratis</a>
             </div>
             <details class="relative sm:hidden">
                 <summary class="cursor-pointer list-none rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600" aria-label="Buka menu navigasi">Menu</summary>
@@ -30,8 +30,8 @@
                     <a href="#akun" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50">Pilihan akun</a>
                     <a href="#harga" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50">Harga</a>
                     <a href="{{ route('tutorial') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-teal-50">Tutorial</a>
-                    <a href="{{ route('filament.admin.auth.login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">Masuk</a>
-                    <a href="{{ route('filament.admin.auth.register') }}" class="rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-800">Daftar gratis</a>
+                    <a href="{{ route('filament.app.auth.login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">Masuk</a>
+                    <a href="{{ route('filament.app.auth.register') }}" class="rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-800">Daftar gratis</a>
                 </div>
             </details>
         </nav>
@@ -45,7 +45,7 @@
                     <p class="mt-6 max-w-xl text-lg leading-relaxed text-teal-50">APKu menyatukan catatan transaksi, kas, sumber dana, utang-piutang, dan laporan. Lihat kondisi keuanganmu tanpa
                         berpindah-pindah catatan.</p>
                     <div class="mt-9 flex flex-wrap gap-3">
-                        <a href="{{ route('filament.admin.auth.register') }}" class="rounded-xl bg-amber-300 px-6 py-3.5 font-bold text-teal-950 shadow-lg hover:bg-amber-200">Mulai gratis <span
+                        <a href="{{ route('filament.app.auth.register') }}" class="rounded-xl bg-amber-300 px-6 py-3.5 font-bold text-teal-950 shadow-lg hover:bg-amber-200">Mulai gratis <span
                                 aria-hidden="true">→</span></a>
                         <a href="{{ route('tutorial') }}" class="rounded-xl border border-white/40 px-6 py-3.5 font-semibold text-white hover:bg-white/10">Lihat cara penggunaan</a>
                     </div>
@@ -121,7 +121,7 @@
                         </ul>
                         @if ($trialAktif ?? true)
                             <div class="mt-7 flex flex-wrap items-center gap-3">
-                                <a href="{{ auth()->check() ? \App\Filament\Resources\LanggananResource::getUrl('index') : route('filament.admin.auth.register') }}"
+                                <a href="{{ auth()->check() ? \App\Filament\Resources\LanggananResource::getUrl('index') : route('filament.app.auth.register') }}"
                                     data-coba-premium class="rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">Coba Premium gratis {{ $trialDurasi ?? 30 }} hari</a>
                             </div>
                             <p class="mt-3 text-xs leading-relaxed text-slate-500">
@@ -278,7 +278,7 @@
             <div class="rounded-3xl bg-teal-900 px-7 py-12 text-center text-white sm:px-12">
                 <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Siap merapikan catatan keuangan?</h2>
                 <p class="mx-auto mt-4 max-w-xl text-teal-100">Buat akun, atur kas dan sumber dana pertama, lalu mulai catat transaksi sehari-hari.</p>
-                <div class="mt-8 flex flex-wrap justify-center gap-3"><a href="{{ route('filament.admin.auth.register') }}"
+                <div class="mt-8 flex flex-wrap justify-center gap-3"><a href="{{ route('filament.app.auth.register') }}"
                         class="rounded-xl bg-amber-300 px-6 py-3 font-bold text-teal-950 hover:bg-amber-200">Buat akun gratis</a><a href="{{ route('tutorial') }}"
                         class="rounded-xl border border-white/40 px-6 py-3 font-semibold text-white hover:bg-white/10">Lihat tutorial</a></div>
             </div>
@@ -287,7 +287,7 @@
     <footer class="border-t border-slate-200 bg-white">
         <div class="mx-auto flex max-w-7xl flex-col justify-between gap-4 px-5 py-8 text-sm text-slate-600 sm:flex-row sm:items-center sm:px-8"><span>© {{ date('Y') }} APKu. Catat dan pantau
                 keuangan pribadi.</span>
-            <div class="flex gap-5"><a href="{{ route('tutorial') }}" class="hover:text-teal-700">Tutorial</a><a href="{{ route('filament.admin.auth.login') }}"
+            <div class="flex gap-5"><a href="{{ route('tutorial') }}" class="hover:text-teal-700">Tutorial</a><a href="{{ route('filament.app.auth.login') }}"
                     class="hover:text-teal-700">Masuk</a></div>
         </div>
     </footer>

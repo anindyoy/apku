@@ -96,9 +96,9 @@ class KirimNotifTelegramPembayaran implements ShouldQueue
         // Jika route Filament belum terdaftar (misal konteks antrean), pakai URL admin.
         try {
             // Nama route Filament memakai segmen resources.
-            $dasar = route('filament.admin.resources.langganans.index');
+            $dasar = route('filament.app.resources.langganans.index');
         } catch (\Throwable) {
-            $dasar = rtrim((string) config('app.url'), '/').'/admin/langganans';
+            $dasar = rtrim((string) config('app.url'), '/').'/app/langganans';
         }
 
         return $dasar.'?status='.StatusLangganan::MenungguVerifikasi->value;

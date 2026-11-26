@@ -217,17 +217,17 @@ test('pengelolaan paket dan metode pembayaran hanya dapat diakses admin', functi
     $admin = User::factory()->create(['role' => 'admin']);
 
     $this->actingAs($user)
-        ->get(route('filament.admin.resources.paket-langganans.index'))
+        ->get(route('filament.app.resources.paket-langganans.index'))
         ->assertForbidden();
     $this->actingAs($user)
-        ->get(route('filament.admin.resources.metode-pembayarans.index'))
+        ->get(route('filament.app.resources.metode-pembayarans.index'))
         ->assertForbidden();
 
     $this->actingAs($admin)
-        ->get(route('filament.admin.resources.paket-langganans.index'))
+        ->get(route('filament.app.resources.paket-langganans.index'))
         ->assertSuccessful();
     $this->actingAs($admin)
-        ->get(route('filament.admin.resources.metode-pembayarans.index'))
+        ->get(route('filament.app.resources.metode-pembayarans.index'))
         ->assertSuccessful();
 })->group('langganan');
 
@@ -236,10 +236,10 @@ test('user dapat membuka halaman order sedangkan admin tidak dapat membuat order
     $admin = User::factory()->create(['role' => 'admin']);
 
     $this->actingAs($user)
-        ->get(route('filament.admin.resources.langganans.create'))
+        ->get(route('filament.app.resources.langganans.create'))
         ->assertSuccessful();
     $this->actingAs($admin)
-        ->get(route('filament.admin.resources.langganans.create'))
+        ->get(route('filament.app.resources.langganans.create'))
         ->assertForbidden();
 })->group('langganan');
 
@@ -308,7 +308,7 @@ test('invoice hanya dapat dibuka pemilik atau admin dengan header privat', funct
     $url = route('langganan.invoice', $order);
 
     // Tamu tanpa login diarahkan ke login admin dan tidak melihat isi invoice.
-    $this->get($url)->assertRedirectToRoute('filament.admin.auth.login');
+    $this->get($url)->assertRedirectToRoute('filament.app.auth.login');
 
     $this->actingAs($userLain)->get($url)->assertForbidden();
 

@@ -36,7 +36,7 @@ class TrialPremiumPengingat extends Notification implements ShouldQueue
             ->greeting('Halo '.$notifiable->name.',')
             ->line($pesan)
             ->line('Setelah trial berakhir, kas dan sumber dana ke-3 dan seterusnya hanya dapat dilihat, tidak dapat diubah, sampai Anda berlangganan.')
-            ->action('Lihat Paket Langganan', url('/admin/langganans'));
+            ->action('Lihat Paket Langganan', url('/app/langganans'));
     }
 
     public function toDatabase(object $notifiable): array

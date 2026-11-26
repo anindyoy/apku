@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/tutorial', TutorialController::class)->name('tutorial');
 
-Route::permanentRedirect('/admin/audit-saldo-dompet', '/admin/cocokkan-saldo');
-Route::permanentRedirect('/admin/riwayat-pencocokan', '/admin/cocokkan-saldo');
+Route::permanentRedirect('/admin/audit-saldo-dompet', '/app/cocokkan-saldo');
+Route::permanentRedirect('/admin/riwayat-pencocokan', '/app/cocokkan-saldo');
 
 Route::get('/beli/{paket}', BeliPaketController::class)
     ->whereNumber('paket')
@@ -32,7 +32,7 @@ if (app()->environment('local')) {
     // Rute preview tampilan email verifikasi khusus di lingkungan lokal.
     Route::get('/preview-email-verifikasi', function () {
         $user = \App\Models\User::first() ?? new \App\Models\User(['name' => 'Budi Santoso']);
-        $url = url('/admin/email-verification/verify/1/sample-hash?expires=' . now()->addHour()->timestamp);
+        $url = url('/app/email-verification/verify/1/sample-hash?expires=' . now()->addHour()->timestamp);
 
         return view('emails.verifikasi-email', [
             'url' => $url,
