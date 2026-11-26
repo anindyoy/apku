@@ -1,8 +1,15 @@
 # Rencana: Ganti Semua URL `/admin` Menjadi `/app`
 
-Dokumen ini menjelaskan langkah-langkah yang harus dilakukan untuk memindahkan seluruh URL panel aplikasi dari prefiks `/admin` menjadi `/app` (contoh: `/admin` menjadi `/app`, `/admin/transaksi` menjadi `/app/transaksi`).
+Dokumen ini menjelaskan langkah-langkah untuk memindahkan seluruh URL panel aplikasi dari prefiks `/admin` menjadi `/app` (contoh: `/admin` menjadi `/app`, `/admin/transaksi` menjadi `/app/transaksi`).
 
-Dokumen ini adalah **rencana**. Implementasi belum dilakukan pada pekerjaan yang menghasilkan dokumen ini.
+**Status: SELESAI DIIMPLEMENTASIKAN.** Seluruh langkah pada dokumen ini telah dikerjakan pada branch `feature/ganti-url-admin-ke-app` dan tervalidasi oleh CI (workflow `Tests`, semua shard lulus). Ringkasan hasil:
+
+- `AdminPanelProvider` memakai `->id('app')` dan `->path('app')`; seluruh nama route menjadi `filament.app.*`.
+- Semua URL hard-coded `/admin` pada kode, view, email, notifikasi, dan job Telegram telah diganti ke `/app`.
+- Redirect permanen `/admin`, `/admin/{any}`, dan dua slug lama pencocokan saldo sudah aktif di `routes/web.php`.
+- Ekspektasi test yang memakai URL `/admin` atau `getPanel('admin')` telah diselaraskan; test regresi baru `tests/Feature/Filament/UrlPanelAppTest.php` menjaga perilaku ini.
+- `FITUR_APLIKASI.md` sudah memakai `/app`; `resources/content/tutorial.json` tidak berubah karena tidak memuat URL `/admin` (kemunculan kata admin di sana merujuk peran).
+- Catatan deploy: jalankan `php artisan route:clear` atau `php artisan optimize:clear` setelah deploy.
 
 ## 1. Tujuan dan Ruang Lingkup
 
