@@ -207,7 +207,7 @@ Jangan jalankan `queue:listen` persisten di shared hosting, pakai `queue:work --
 ## 9. Verifikasi pasca-deploy
 
 1. Buka `https://apku.invishar.com` > harus redirect HTTPS, tidak 500/403.
-2. Buka `/admin` > login admin > cek dashboard Filament.
+2. Buka `/app` > login admin > cek dashboard Filament. Tautan lama `/admin` dialihkan otomatis ke `/app`.
 3. Cek aset: tidak ada 404 di `public/build/`; jika putih, rebuild lokal dan re-upload `public/build/`.
 4. Cek upload: coba upload/import file kecil > pastikan `storage/app/public` ter-link ke `public/storage`.
 5. Cek log jika error: `storage/logs/laravel.log` via File Manager/Terminal.

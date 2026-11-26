@@ -113,7 +113,7 @@ Validasi di sisi server wajib menolak atau mengabaikan data pecahan untuk jenis 
 | Kolaborasi dan halaman publik | Editor memakai sumber dana miliknya sendiri; nama dan jenis disamarkan untuk anggota lain; halaman publik tetap tidak menampilkannya |
 | Kuota dan langganan | Pesan kuota, panel slot, tabel perbandingan Reguler vs Premium |
 | Cache | Daftar dengan cache tiga hari: ganti kunci dan pastikan invalidasi |
-| Setting dan route | Menu Setting, URL `/admin/pengaturan/...`, breadcrumb |
+| Setting dan route | Menu Setting, URL `/app/pengaturan/...`, breadcrumb |
 | Policy dan service | Rename kelas, relasi, dan hak akses |
 | Konten dan data | `tutorial.json`, seeder, factory, `FITUR_APLIKASI.md` |
 

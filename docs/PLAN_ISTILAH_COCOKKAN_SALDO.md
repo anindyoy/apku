@@ -114,7 +114,8 @@ Sudah diputuskan: slug dan nama route diganti ke istilah baru, dengan redirect p
 
 ```php
 // Redirect permanen dari slug lama agar tautan atau bookmark lama tetap berfungsi.
-Route::permanentRedirect('/admin/audit-saldo-dompet', '/admin/riwayat-pencocokan');
+// Sesuaikan prefiks panel dengan path yang berlaku saat ini (saat ini /app).
+Route::permanentRedirect('/app/audit-saldo-dompet', '/app/riwayat-pencocokan');
 ```
 
 - Pastikan redirect tidak melewati middleware yang membuat tamu terlempar ke login tanpa kembali ke tujuan baru. Bila redirect diletakkan di luar grup Filament, uji perilaku untuk pengguna login maupun tamu.
