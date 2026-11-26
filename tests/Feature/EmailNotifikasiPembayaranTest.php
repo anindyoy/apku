@@ -106,14 +106,14 @@ test('invoice email memuat snapshot paket voucher detail pembayaran dan format n
         ->and($html)->toContain('PT APKu Solusi')
         ->and($html)->toContain('Rp 90.000') // 100.000 - 10.000
         ->and($html)->toContain('DISKON10')
-        ->and($html)->toContain(url('/admin/langganans'));
+        ->and($html)->toContain(url('/app/langganans'));
 
     // Verifikasi isi Plain Text
     expect($text)->toContain($order->kode_order)
         ->and($text)->toContain('Paket Premium 3 Bulan')
         ->and($text)->toContain('9876543210')
         ->and($text)->toContain('Rp 90.000')
-        ->and($text)->toContain(url('/admin/langganans'));
+        ->and($text)->toContain(url('/app/langganans'));
 });
 
 test('setujui pembayaran mengantrekan PembayaranDisetujuiNotification dan setujui ulang tidak dobel', function () {
@@ -156,11 +156,11 @@ test('setujui pembayaran mengantrekan PembayaranDisetujuiNotification dan setuju
     expect($html)->toContain($hasil->kode_order)
         ->and($html)->toContain('Premium Tahunan')
         ->and($html)->toContain('Rp 250.000')
-        ->and($html)->toContain(url('/admin'));
+        ->and($html)->toContain(url('/app'));
 
     expect($text)->toContain($hasil->kode_order)
         ->and($text)->toContain('Premium Tahunan')
-        ->and($text)->toContain(url('/admin'));
+        ->and($text)->toContain(url('/app'));
 
     // Setujui ulang order yang sudah disetujui tidak mengirim notifikasi kedua
     Notification::fake();
@@ -212,7 +212,7 @@ test('tolak pembayaran mengantrekan PembayaranDitolakNotification beserta alasan
     expect($html)->toContain($hasil->kode_order)
         ->and($html)->toContain($alasan)
         ->and($html)->toContain('https://wa.me/6281234567890')
-        ->and($html)->toContain(url('/admin/langganans'));
+        ->and($html)->toContain(url('/app/langganans'));
 
     expect($text)->toContain($hasil->kode_order)
         ->and($text)->toContain($alasan)

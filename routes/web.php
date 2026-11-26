@@ -12,6 +12,10 @@ Route::get('/tutorial', TutorialController::class)->name('tutorial');
 Route::permanentRedirect('/admin/audit-saldo-dompet', '/app/cocokkan-saldo');
 Route::permanentRedirect('/admin/riwayat-pencocokan', '/app/cocokkan-saldo');
 
+// Redirect kompatibilitas dari prefiks URL lama /admin agar tautan, bookmark, dan email lama tetap berfungsi.
+Route::permanentRedirect('/admin', '/app');
+Route::permanentRedirect('/admin/{any}', '/app/{any}')->where('any', '.*');
+
 Route::get('/beli/{paket}', BeliPaketController::class)
     ->whereNumber('paket')
     ->middleware('throttle:60,1')

@@ -21,7 +21,7 @@ test('aksi daftar utang piutang menampilkan ikon beserta label teks', function (
             expect($action->isLabelHidden())->toBeFalse()
                 ->and($action->getLabel())->toBe('Detail')
                 ->and($action->getIcon())->toBe('heroicon-o-magnifying-glass')
-                ->and($action->getUrl())->toBe(url('/admin/'.$tipe.'s/'.$record->code.'/detail'));
+                ->and($action->getUrl())->toBe(url('/app/'.$tipe.'s/'.$record->code.'/detail'));
 
             return true;
         }, $record)

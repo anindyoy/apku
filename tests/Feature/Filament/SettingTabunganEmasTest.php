@@ -107,7 +107,7 @@ test('fitur tabungan emas nonaktif menyembunyikan navigasi dan memblokir akses r
     $user->forceFill(['tabungan_emas_aktif' => false])->save();
 
     $this->actingAs($user);
-    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    Filament::setCurrentPanel(Filament::getPanel('app'));
     Filament::bootCurrentPanel();
 
     expect(TabunganEmasResource::canAccess())->toBeFalse()
@@ -125,7 +125,7 @@ test('fitur tabungan emas aktif mengizinkan akses dan menampilkan navigasi untuk
     $user->forceFill(['tabungan_emas_aktif' => true])->save();
 
     $this->actingAs($user);
-    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    Filament::setCurrentPanel(Filament::getPanel('app'));
     Filament::bootCurrentPanel();
 
     expect(TabunganEmasResource::canAccess())->toBeTrue()

@@ -9,7 +9,7 @@ test('setting menampilkan submenu sesuai peran dan menyederhanakan navbar', func
     $user = createRegularUserWithBukuKas();
     $user->update(['role' => $role]);
     $this->actingAs($user);
-    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    Filament::setCurrentPanel(Filament::getPanel('app'));
     Filament::bootCurrentPanel();
 
     $menus = app(Pengaturan::class)->getCachedSubNavigation();
@@ -28,7 +28,7 @@ test('setting menampilkan submenu sesuai peran dan menyederhanakan navbar', func
     $this->get(Pengaturan::getUrl())->assertRedirect($menus->first()->getUrl());
 
     foreach ($menus as $menu) {
-        expect(parse_url($menu->getUrl(), PHP_URL_PATH))->toStartWith('/admin/pengaturan/');
+        expect(parse_url($menu->getUrl(), PHP_URL_PATH))->toStartWith('/app/pengaturan/');
         $response = $this->get($menu->getUrl())->assertSuccessful();
         $document = new DOMDocument;
         @$document->loadHTML($response->getContent());

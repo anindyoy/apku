@@ -11,7 +11,7 @@ test('email verifikasi pendaftaran memiliki subjek, sapaan nama pengguna, dan to
         'email' => 'budi@example.com',
     ]);
 
-    $url = 'https://apku.test/admin/email-verification/verify/1/test-hash';
+    $url = 'https://apku.test/app/email-verification/verify/1/test-hash';
 
     $notification = new FilamentVerifyEmail;
     $notification->url = $url;
@@ -32,7 +32,7 @@ test('email verifikasi me-render template HTML dengan logo aplikasi dan styling 
         'email' => 'siti@example.com',
     ]);
 
-    $url = 'https://apku.test/admin/email-verification/verify/2/token-verifikasi';
+    $url = 'https://apku.test/app/email-verification/verify/2/token-verifikasi';
 
     $notification = new FilamentVerifyEmail;
     $notification->url = $url;
@@ -61,7 +61,7 @@ test('email verifikasi menyediakan versi teks polos alternatif', function () {
         'email' => 'ahmad@example.com',
     ]);
 
-    $url = 'https://apku.test/admin/email-verification/verify/3/hash-plain';
+    $url = 'https://apku.test/app/email-verification/verify/3/hash-plain';
 
     $textView = view('emails.verifikasi-email-text', [
         'url' => $url,
@@ -86,6 +86,6 @@ test('model User mengirim notifikasi verifikasi email menggunakan panel Filament
     $user->sendEmailVerificationNotification();
 
     Notification::assertSentTo($user, FilamentVerifyEmail::class, function (FilamentVerifyEmail $notification) use ($user) {
-        return str_contains($notification->url, 'admin/email-verification/verify/' . $user->id);
+        return str_contains($notification->url, 'app/email-verification/verify/' . $user->id);
     });
 });

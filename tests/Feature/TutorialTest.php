@@ -149,7 +149,7 @@ it('tutorial kontekstual mengikuti URL aktif dan perubahan navigasi panel', func
     import assert from 'node:assert/strict';
     import { readFileSync } from 'node:fs';
     const base = 'https://apku.test/tutorial';
-    const panel = 'https://apku.test/admin';
+    const panel = 'https://apku.test/app';
     const link = { dataset: { tutorialUrl: base, panelUrl: panel }, href: base };
     const events = {};
     globalThis.window = { location: { href: `${panel}/dompet` } };
@@ -201,7 +201,7 @@ it('tutorial kontekstual mengikuti URL aktif dan perubahan navigasi panel', func
 it('tutorial tersedia sebagai tombol tanda tanya di sisi kanan topbar panel', function (bool $admin) {
     $user = $admin ? User::query()->admin()->firstOrFail() : User::query()->notAdmin()->firstOrFail();
     $this->actingAs($user);
-    Filament::setCurrentPanel(Filament::getPanel('admin'));
+    Filament::setCurrentPanel(Filament::getPanel('app'));
     Filament::bootCurrentPanel();
 
     $html = Livewire::test(Topbar::class)->assertSuccessful()->html();
@@ -214,7 +214,7 @@ it('tutorial tersedia sebagai tombol tanda tanya di sisi kanan topbar panel', fu
     expect($buttons->item(0)->getAttribute('href'))->toBe(route('tutorial'));
     expect($buttons->item(0)->getAttribute('target'))->toBe('_blank');
     expect($buttons->item(0)->getAttribute('data-tutorial-url'))->toBe(route('tutorial'));
-    expect($buttons->item(0)->getAttribute('data-panel-url'))->toBe(Filament::getPanel('admin')->getUrl());
+    expect($buttons->item(0)->getAttribute('data-panel-url'))->toBe(Filament::getPanel('app')->getUrl());
     expect($xpath->query('//script[@type="module" and @src="'.asset('js/tutorial-context.js').'"]'))->toHaveCount(1);
     expect(explode(' ', $buttons->item(0)->getAttribute('rel')))->toContain('noopener', 'noreferrer');
     expect($buttons->item(0)->getAttribute('aria-label'))->toBe('Tutorial Penggunaan');
@@ -351,10 +351,10 @@ it('tutorial menolak pencarian yang bukan string atau terlalu panjang', function
 });
 
 it('tutorial dapat ditemukan dari login dan navigasi panel', function () {
-    $response = $this->get('/admin/login')->assertOk();
+    $response = $this->get('/app/login')->assertOk();
     expect($response->getContent())->toContain('href="'.route('tutorial').'"');
 
-    $item = collect(Filament::getPanel('admin')->getNavigationItems())
+    $item = collect(Filament::getPanel('app')->getNavigationItems())
         ->first(fn ($item) => $item->getLabel() === 'Tutorial Penggunaan');
     expect($item)->not->toBeNull();
     expect($item->getUrl())->toBe(route('tutorial'));

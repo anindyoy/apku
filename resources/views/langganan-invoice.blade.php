@@ -12,7 +12,7 @@
 <body class="bg-slate-100 font-sans text-slate-900 antialiased">
     <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3" data-invoice-toolbar>
-            <a href="{{ url('/admin/langganans') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Kembali ke langganan</a>
+            <a href="{{ url('/app/langganans') }}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Kembali ke langganan</a>
             <button type="button" onclick="window.print()" class="rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800">Cetak / Simpan PDF</button>
         </div>
 

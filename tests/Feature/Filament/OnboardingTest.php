@@ -11,7 +11,7 @@ test('pengguna baru diarahkan ke halaman onboarding', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
 
     $this->actingAs($user)
-        ->get('/admin')
+        ->get('/app')
         ->assertRedirect(Onboarding::getUrl());
 });
 
@@ -118,7 +118,7 @@ test('middleware memperbaiki akun yang hanya memiliki buku kas', function () {
         'is_default' => false,
     ]);
 
-    $this->actingAs($user)->followingRedirects()->get('/admin')->assertSuccessful();
+    $this->actingAs($user)->followingRedirects()->get('/app')->assertSuccessful();
 
     $bukuKas = $user->buku_kas()->firstOrFail();
     $dompet = $user->dompet()->firstOrFail();
@@ -138,7 +138,7 @@ test('middleware memperbaiki akun yang hanya memiliki dompet', function () {
         'is_default' => false,
     ]);
 
-    $this->actingAs($user)->followingRedirects()->get('/admin')->assertSuccessful();
+    $this->actingAs($user)->followingRedirects()->get('/app')->assertSuccessful();
 
     $bukuKas = $user->buku_kas()->firstOrFail();
     $dompet = $user->dompet()->firstOrFail();
@@ -176,7 +176,7 @@ test('service default memulihkan dompet cash yang terhapus', function () {
 test('pengguna belum verifikasi email diarahkan ke prompt verifikasi tanpa redirect loop ke onboarding', function () {
     $user = User::factory()->unverified()->create();
 
-    $response = $this->actingAs($user)->get('/admin');
+    $response = $this->actingAs($user)->get('/app');
 
     $response->assertRedirect(route('filament.app.auth.email-verification.prompt'));
 
@@ -198,7 +198,7 @@ test('pengguna diarahkan ke onboarding setelah email terverifikasi', function ()
 
     $user->markEmailAsVerified();
 
-    $response = $this->actingAs($user)->get('/admin');
+    $response = $this->actingAs($user)->get('/app');
 
     $response->assertRedirect(Onboarding::getUrl());
 });

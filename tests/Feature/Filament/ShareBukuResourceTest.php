@@ -87,9 +87,9 @@ test('share buku resource menggunakan url kolaborator kas', function () {
     $user = createRegularUserWithBukuKas();
     $url = ShareBukuResource::getUrl();
 
-    expect(parse_url($url, PHP_URL_PATH))->toBe('/admin/pengaturan/kolaborator-kas');
+    expect(parse_url($url, PHP_URL_PATH))->toBe('/app/pengaturan/kolaborator-kas');
     $this->actingAs($user)->get($url)->assertOk();
-    $this->get('/admin/kolaborator-buku')->assertNotFound();
+    $this->get('/app/kolaborator-buku')->assertNotFound();
 })->group('filament', 'share-buku');
 
 // ==================== SHARE BUKU RESOURCE ====================

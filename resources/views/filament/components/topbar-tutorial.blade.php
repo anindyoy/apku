@@ -10,7 +10,7 @@
         tooltip="Tutorial Penggunaan"
         data-testid="topbar-tutorial"
         :data-tutorial-url="route('tutorial')"
-        :data-panel-url="\Filament\Facades\Filament::getPanel('admin')->getUrl()"
+        :data-panel-url="\Filament\Facades\Filament::getPanel('app')->getUrl()"
     />
     @once
         <script type="module" src="{{ asset('js/tutorial-context.js') }}"></script>

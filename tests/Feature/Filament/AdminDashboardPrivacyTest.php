@@ -23,7 +23,7 @@ test('dashboard admin menjadi halaman utama dan menampilkan data agregat', funct
     Langganan::factory()->create(['status' => StatusLangganan::MenungguVerifikasi]);
 
     $this->actingAs($admin)
-        ->get('/admin')
+        ->get('/app')
         ->assertSuccessful();
 
     Livewire::actingAs($admin)
