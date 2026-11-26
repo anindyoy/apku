@@ -16,7 +16,7 @@ describe('url panel app', function () {
     it('memakai nama route filament.app dan tidak lagi filament.admin', function () {
         expect(Route::has('filament.app.auth.login'))->toBeTrue()
             ->and(Route::has('filament.app.pages.dashboard'))->toBeTrue()
-            ->and(Route::has('filament.app.resources.transaksis.index'))->toBeTrue()
+            ->and(Route::has('filament.app.resources.transaksi.index'))->toBeTrue()
             ->and(Route::has('filament.admin.auth.login'))->toBeFalse()
             ->and(Route::has('filament.admin.pages.dashboard'))->toBeFalse();
     });
